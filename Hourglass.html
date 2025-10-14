@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hourglass — Time Flow Simulation</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --panel:#121820;
+    --ink:#dbe7ff;
+    --accent:#74c0fc;
+    --accent2:#51cf66;
+    --glass:#1c2330;
+    --sand:#ffd17a;     /* base sand color */
+    --sand2:#ffecb3;    /* highlight */
+    --wire:#2a3342;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    color:var(--ink); background:linear-gradient(180deg,#0a0d12 0%, #0e141c 60%, #0a0d12 100%);
+    display:flex; justify-content:center; padding:16px;
+  }
+  .app{
+    width:min(980px,100%); background:linear-gradient(180deg,var(--panel),#0f141c);
+    border:1px solid #1e2734; border-radius:16px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 24px rgba(255,255,255,.02);
+  }
+  .header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding-bottom:10px; border-bottom:1px solid #1c2432; margin-bottom:14px;
+  }
+  .header h1{font-size:18px; font-weight:700; margin:0; letter-spacing:.3px}
+  .controls{
+    /* --- DEBUG FIX: Changed to flexbox for mobile responsiveness --- */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .btn{
+    appearance:none; border:none; border-radius:10px; padding:10px 14px; font-weight:700; letter-spacing:.2px;
+    color:#061018; background:linear-gradient(180deg,var(--accent),#4dabf7);
+    cursor:pointer; box-shadow:0 6px 16px rgba(116,192,252,.3);
+  }
+  .btn:disabled{opacity:.5; cursor:not-allowed; filter:grayscale(.2)}
+  .btn.secondary{
+    background:linear-gradient(180deg,#8892a6,#6b7487); color:#0c1118; box-shadow:none;
+  }
+  .btn.warning{
+    background:linear-gradient(180deg,#ff8787,#fa5252); color:#061018; box-shadow:0 6px 16px rgba(250,82,82,.25);
+  }
+  .knob, .toggle{
+    background:#0e151f; border:1px solid #1f2a3a; border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px;
+  }
+  .knob input[type="range"]{width:160px}
+  .knob label, .toggle label{font-size:12px; color:#9fb4d3}
+  .knob select {
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    background-color: transparent; border: none; padding: 0 1em 0 0; margin: 0;
+    width: 100%; font-family: inherit; font-size: inherit; cursor: inherit; line-height: inherit;
+    color: var(--ink); font-weight: 700;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239fb4d3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 0.1em top 50%; background-size: 1.1em;
+    min-width: 50px;
+  }
+  .knob select:focus { outline: none; }
+  .toggle input{transform:scale(1.1)}
+  .canvas-wrap{
+    display:grid; grid-template-columns: 1fr 320px; gap:16px;
+  }
+  @media (max-width: 900px){ .canvas-wrap{ grid-template-columns: 1fr; } }
+  
+  /* --- DEBUG FIX: Added media query for better controls on small screens --- */
+  @media (max-width: 768px) {
+    .header {
+      justify-content: center;
+      text-align: center;
+    }
+    .controls {
+      justify-content: center;
+    }
+    .knob input[type="range"] {
+      width: 120px;
+    }
+  }
+
+
+  /* Panel for time readout */
+  .side{
+    background:#0e151f; border:1px solid #1f2a3a; border-radius:14px; padding:12px;
+  }
+  .row{display:flex; justify-content:space-between; align-items:center; margin:6px 0}
+  .row span{color:#9fb4d3; font-size:12px}
+  .value{font-variant-numeric:tabular-nums; font-weight:700}
+
+  canvas{
+    width:100%;
+    height: auto;
+    aspect-ratio: 900 / 540;
+    display:block; background:
+      radial-gradient(1200px 420px at 50% -300px, rgba(116,192,252,.12), transparent 60%),
+      radial-gradient(900px 600px at 50% 120%, rgba(81,207,102,.08), transparent 65%),
+      linear-gradient(180deg,#0b1018,#0b1018);
+    border:1px solid #1f2a3a; border-radius:14px;
+    box-shadow:inset 0 0 60px rgba(0,0,0,.5), 0 10px 40px rgba(0,0,0,.25);
+  }
+
+  .footer{
+    margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; color:#8ea7c6;
+    border-top:1px solid #1c2432; padding-top:10px; font-size:12px;
+  }
+  .link{color:var(--accent); text-decoration:none}
+  .chip{padding:5px 8px; border-radius:999px; border:1px solid #1f2a3a; background:#0e151f; font-weight:600; color:#a9bfdc}
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Hourglass time simulation">
+    <div class="header">
+      <h1>Hourglass — Time Flow Simulation</h1>
+      <div class="controls" role="toolbar" aria-label="Simulation controls">
+        <button class="btn" id="playPauseBtn" aria-pressed="false">▶ Play</button>
+        <button class="btn secondary" id="resetBtn">⟲ Reset</button>
+        <button class="btn" id="flipBtn" title="Flip hourglass">↕ Flip</button>
+        <div class="knob" title="Simulation speed">
+          <label for="speedSel">Speed</label>
+          <select id="speedSel" aria-label="Playback speed">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.5">1.5×</option>
+            <option value="2">2×</option>
+            <option value="3">3×</option>
+          </select>
+        </div>
+        <div class="knob" title="Duration of one full pour">
+          <label for="durRange">Duration</label>
+          <input id="durRange" type="range" min="10" max="600" step="1" value="60" />
+          <span id="durLabel" class="value" aria-live="polite">60 s</span>
+        </div>
+        <div class="toggle" title="Automatically flip when finished">
+          <input type="checkbox" id="autoFlip" />
+          <label for="autoFlip">Auto-flip</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="glass" width="900" height="540" aria-label="Animated hourglass"></canvas>
+      <aside class="side">
+        <div class="row"><span>State</span><div class="value" id="stateLabel">Paused</div></div>
+        <div class="row"><span>Direction</span><div class="value" id="dirLabel">Top → Bottom</div></div>
+        <div class="row"><span>Elapsed</span><div class="value" id="elapsedLabel">0.0 s</div></div>
+        <div class="row"><span>Remaining</span><div class="value" id="remainingLabel">60.0 s</div></div>
+        <div class="row"><span>Progress</span><div class="value" id="progressLabel">0%</div></div>
+        <hr style="border:none;border-top:1px solid #1f2a3a; margin:10px 0">
+        <p style="margin:8px 0 4px; color:#9fb4d3; line-height:1.4">
+          This is a geometric simulation: sand drains through a narrow neck; the top volume shrinks linearly with time; the bottom pile grows as a cone. The stream jitters slightly to feel alive.
+        </p>
+        <p style="margin:8px 0; color:#9fb4d3">
+          Tip: Flip mid-pour to watch the piles morph in place.
+        </p>
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+          <span class="chip">No libraries</span>
+          <span class="chip">Canvas + math</span>
+          <span class="chip">Accessible</span>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <span>Made with basic trigonometry and too much curiosity.</span>
+      <span>Keyboard: <strong>Space</strong> Play/Pause · <strong>F</strong> Flip · <strong>R</strong> Reset</span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('glass');
+  const ctx = canvas.getContext('2d');
+
+  // Controls
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const flipBtn = document.getElementById('flipBtn');
+  const speedSel = document.getElementById('speedSel');
+  const durRange = document.getElementById('durRange');
+  const durLabel = document.getElementById('durLabel');
+  const autoFlip = document.getElementById('autoFlip');
+
+  // Readouts
+  const stateLabel = document.getElementById('stateLabel');
+  const dirLabel = document.getElementById('dirLabel');
+  const elapsedLabel = document.getElementById('elapsedLabel');
+  const remainingLabel = document.getElementById('remainingLabel');
+  const progressLabel = document.getElementById('progressLabel');
+
+  // Geometry of the hourglass (in canvas coordinates)
+  const W = canvas.width, H = canvas.height;
+  const cx = W * 0.5;
+  const topY = H * 0.10;
+  const bottomY = H * 0.90;
+  const neckY = H * 0.50;
+  const rimW = W * 0.30;      // top/bottom width
+  const waistW = W * 0.04;    // neck width
+  const glassInset = 16;      // outline thickness
+
+  // Simulation state
+  let duration = +durRange.value; // seconds
+  let running = false;
+  let dir = 1;    // 1 => top→bottom, -1 => bottom→top (flipped)
+  let elapsed = 0; // seconds into the current pour
+  let lastTs = 0;
+
+  // Stream particles (visual sprinkles)
+  const particles = [];
+  function spawnParticle() {
+    const x = cx + (Math.random()-0.5) * waistW * 0.5;
+    const y = neckY + (Math.random()-0.5) * 4;
+    const vy = 120 + Math.random()*60; // px/s
+    const life = 0.4 + Math.random()*0.4;
+    particles.push({x,y,vy,life,age:0});
+  }
+
+  function resetParticles() { particles.length = 0; }
+
+  function setDuration(sec){
+    duration = Math.max(1, sec|0);
+    durLabel.textContent = duration + " s";
+    // Adjust remaining label immediately
+    const p = Math.min(1, Math.max(0, elapsed/duration));
+    remainingLabel.textContent = (duration - elapsed).toFixed(1) + " s";
+    progressLabel.textContent = Math.round(100*p) + "%";
+  }
+
+  // Linear interpolation helpers for the hourglass outline
+  function widthAt(y){
+    if (y <= neckY){
+      const t = (y - topY) / (neckY - topY);
+      return rimW*(1-t) + waistW*t;
+    }
+    const t = (y - neckY) / (bottomY - neckY);
+    return waistW*(1-t) + rimW*t;
+  }
+
+  function innerLeftX(y){ return cx - widthAt(y)*0.5; }
+  function innerRightX(y){ return cx + widthAt(y)*0.5; }
+
+  // Draw the glass outline
+  function drawOutline(){
+    ctx.save();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#2d3b51';
+    ctx.fillStyle = 'rgba(30,40,56,0.35)';
+    ctx.shadowColor = 'rgba(116,192,252,0.15)';
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.moveTo(innerLeftX(topY), topY); ctx.lineTo(innerRightX(topY), topY);
+    ctx.moveTo(innerLeftX(topY), topY); ctx.lineTo(innerLeftX(neckY), neckY);
+    ctx.moveTo(innerRightX(topY), topY); ctx.lineTo(innerRightX(neckY), neckY);
+    ctx.moveTo(innerLeftX(neckY), neckY); ctx.lineTo(innerLeftX(bottomY), bottomY);
+    ctx.moveTo(innerRightX(neckY), neckY); ctx.lineTo(innerRightX(bottomY), bottomY);
+    ctx.moveTo(innerLeftX(bottomY), bottomY); ctx.lineTo(innerRightX(bottomY), bottomY);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.moveTo(innerLeftX(neckY), neckY); ctx.lineTo(innerRightX(neckY), neckY);
+    ctx.strokeStyle = '#3c4b65'; ctx.lineWidth = 2;
+    ctx.stroke();
+    const grad = ctx.createRadialGradient(cx, neckY, 4, cx, neckY, 120);
+    grad.addColorStop(0, 'rgba(116,192,252,.15)');
+    grad.addColorStop(1, 'rgba(116,192,252,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, neckY, 140, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function sandFill(colorMain, colorHi){
+    const g = ctx.createLinearGradient(0, topY, 0, bottomY);
+    g.addColorStop(0, colorHi);
+    g.addColorStop(1, colorMain);
+    return g;
+  }
+  
+  function drawTopSand(level){ // level = fraction of sand remaining, 0..1
+    if (level <= 0.001) return;
+    const sandSurfaceY = topY + (neckY - topY) * (1 - level);
+    ctx.save();
+    ctx.fillStyle = sandFill('rgba(255,209,122,0.95)', 'rgba(255,236,179,0.95)');
+    ctx.beginPath();
+    ctx.moveTo(innerLeftX(sandSurfaceY), sandSurfaceY);
+    ctx.lineTo(innerLeftX(neckY), neckY);
+    ctx.lineTo(innerRightX(neckY), neckY);
+    ctx.lineTo(innerRightX(sandSurfaceY), sandSurfaceY);
+    ctx.closePath();
+    ctx.fill();
+    if (level > 0.05) {
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(innerLeftX(sandSurfaceY)+8, sandSurfaceY+4);
+      ctx.lineTo(innerRightX(sandSurfaceY)-8, sandSurfaceY+4);
+      ctx.lineTo(innerRightX(sandSurfaceY)-16, sandSurfaceY+10);
+      ctx.lineTo(innerLeftX(sandSurfaceY)+16, sandSurfaceY+10);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawBottomSand(level){ // level = fraction of chamber filled, 0..1
+    if (level <= 0.001) return;
+    const pileSurfaceY = bottomY - (bottomY - neckY) * level;
+    ctx.save();
+    ctx.fillStyle = sandFill('rgba(255,209,122,0.98)', 'rgba(255,236,179,0.98)');
+    ctx.beginPath();
+    ctx.moveTo(innerLeftX(pileSurfaceY), pileSurfaceY);
+    ctx.lineTo(innerLeftX(bottomY), bottomY);
+    ctx.lineTo(innerRightX(bottomY), bottomY);
+    ctx.lineTo(innerRightX(pileSurfaceY), pileSurfaceY);
+    const moundApexY = pileSurfaceY - (bottomY - neckY) * Math.sin(level * Math.PI) * 0.1;
+    ctx.quadraticCurveTo(cx, moundApexY, innerLeftX(pileSurfaceY), pileSurfaceY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    const shadowWidth = (innerRightX(pileSurfaceY) - innerLeftX(pileSurfaceY)) * 0.4;
+    ctx.ellipse(cx, pileSurfaceY+2, shadowWidth, 8, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawStream(alpha, pileTopY){
+    if (alpha <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = 0.8*alpha;
+    const streamW = Math.max(2, waistW * 0.35 + Math.sin(Date.now()/200)*0.6);
+    const grad = ctx.createLinearGradient(cx, neckY-40, cx, neckY+40);
+    grad.addColorStop(0, 'rgba(255,236,179,0.0)');
+    grad.addColorStop(0.25, 'rgba(255,236,179,0.35)');
+    grad.addColorStop(1, 'rgba(255,209,122,0.85)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(cx - streamW*0.5, neckY - 2);
+    ctx.lineTo(cx + streamW*0.5, neckY - 2);
+    ctx.lineTo(cx + streamW*0.2, pileTopY);
+    ctx.lineTo(cx - streamW*0.2, pileTopY);
+    ctx.closePath();
+    ctx.fill();
+    for (let i=0;i<2;i++) spawnParticle();
+    for (let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.age += dt;
+      p.y += p.vy * dt;
+      const lifeLeft = Math.max(0, p.life - p.age);
+      ctx.globalAlpha = Math.min(0.9, lifeLeft / p.life) * 0.8;
+      ctx.fillStyle = 'rgba(255,230,160,1)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.2, 0, Math.PI*2);
+      ctx.fill();
+      if (p.age >= p.life || p.y > pileTopY) particles.splice(i,1);
+    }
+    ctx.restore();
+  }
+
+  // Main render loop
+  let dt = 0;
+  function render(ts){
+    if (!lastTs) lastTs = ts;
+    dt = Math.min(0.05, (ts - lastTs)/1000);
+    lastTs = ts;
+
+    if (running){
+      const speed = parseFloat(speedSel.value) || 1;
+      elapsed += dt * speed;
+
+      if (elapsed >= duration){
+        elapsed = duration; // Clamp value
+        if (autoFlip.checked){
+          flip();
+        } else {
+          pause();
+        }
+      }
+    }
+
+    const t = Math.min(1, Math.max(0, elapsed / duration));
+    
+    // --- DEBUG FIX: Simplified sand fraction calculation ---
+    // The amount of sand in the top bulb is always what's left (1 - progress).
+    // The amount in the bottom is always the progress. This simplifies the logic
+    // and makes the flip calculation straightforward. The `dir` variable is
+    // now only for the text display.
+    const topFrac = 1 - t;
+    const bottomFrac = t;
+
+    ctx.clearRect(0,0,W,H);
+    const vign = ctx.createRadialGradient(cx, H*0.5, H*0.15, cx, H*0.5, H*0.8);
+    vign.addColorStop(0, 'rgba(0,0,0,0)');
+    vign.addColorStop(1, 'rgba(0,0,0,0.25)');
+    ctx.fillStyle = vign;
+    ctx.fillRect(0,0,W,H);
+
+    drawOutline();
+    drawTopSand(topFrac);
+    drawBottomSand(bottomFrac);
+
+    const pileSurfaceY = bottomY - (bottomY - neckY) * bottomFrac;
+    const streaming = (running && topFrac > 0.001) ? 1 : 0;
+    drawStream(streaming, pileSurfaceY);
+
+    const remaining = Math.max(0, duration - elapsed);
+    stateLabel.textContent = running ? "Running" : (elapsed >= duration ? "Finished" : "Paused");
+    dirLabel.textContent = dir === 1 ? "Top → Bottom" : "Bottom → Top";
+    elapsedLabel.textContent = elapsed.toFixed(1) + " s";
+    remainingLabel.textContent = remaining.toFixed(1) + " s";
+    progressLabel.textContent = Math.round((elapsed/duration)*100) + "%";
+
+    requestAnimationFrame(render);
+  }
+
+  function play(){
+    if (elapsed >= duration) {
+      pause();
+      return;
+    }
+    running = true;
+    lastTs = performance.now(); // Reset timestamp to avoid a jump
+    stateLabel.textContent = "Running";
+    playPauseBtn.textContent = "⏸ Pause";
+    playPauseBtn.setAttribute('aria-pressed','true');
+  }
+  function pause(){
+    running = false;
+    stateLabel.textContent = "Paused";
+    playPauseBtn.textContent = "▶ Play";
+    playPauseBtn.setAttribute('aria-pressed','false');
+  }
+  function togglePlay(){
+    running ? pause() : play();
+  }
+  function reset(){
+    elapsed = 0;
+    dir = 1;
+    pause();
+    resetParticles();
+  }
+
+  function flip(){
+    // --- DEBUG FIX: Restored correct elapsed time calculation on flip ---
+    // The simplified logic was incorrect. When flipped, the amount of sand that was
+    // in the bottom now becomes the new source in the top. We must recalculate `elapsed`
+    // to represent this new state, otherwise the animation runs backward.
+    const t = elapsed / duration;
+    elapsed = duration * (1 - t);
+
+    dir *= -1;
+    resetParticles();
+    
+    // If running, reset timestamp to prevent a large time jump in the next frame.
+    if (running) {
+        lastTs = performance.now();
+    }
+  }
+
+  playPauseBtn.addEventListener('click', togglePlay);
+  resetBtn.addEventListener('click', reset);
+  flipBtn.addEventListener('click', flip);
+  speedSel.addEventListener('change', () => {});
+  durRange.addEventListener('input', (e) => setDuration(parseInt(e.target.value,10)));
+
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.code === 'Space'){ e.preventDefault(); togglePlay(); }
+    else if (e.key === 'f' || e.key === 'F'){ flip(); }
+    else if (e.key === 'r' || e.key === 'R'){ reset(); }
+  });
+
+  setDuration(duration);
+  requestAnimationFrame(render);
+})();
+</script>
+</body>
+</html>
+

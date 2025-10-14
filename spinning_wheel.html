@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Custom Spinning Wheel</title>
+  <style>
+    :root{ --bg:#0f1724; --card:#0b1220; --muted:#cbd5e1; --accent:#60a5fa }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:linear-gradient(180deg,#071029 0%, #071a2b 100%);color:var(--muted);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .wrap{max-width:980px;width:100%;display:grid;grid-template-columns:1fr 360px;gap:20px}
+    .card{background:rgba(255,255,255,0.03);padding:18px;border-radius:14px;box-shadow:0 6px 18px rgba(2,6,23,0.6);}
+    /* ensure canvas never shrinks below a usable size */
+    .wheel-container{display:flex;justify-content:center;align-items:center;padding:8px}
+    canvas{display:block;border-radius:50%;background:transparent;max-width:100%;height:auto}
+    h1{margin:0 0 10px 0;font-size:18px}
+    textarea{width:100%;height:120px;background:transparent;color:var(--muted);border:1px dashed rgba(255,255,255,0.06);padding:8px;border-radius:8px}
+    .controls{display:flex;gap:8px;margin-top:10px}
+    button{background:var(--accent);border:none;padding:10px 12px;border-radius:8px;color:#001;cursor:pointer;font-weight:600}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .small{font-size:13px;color:rgba(255,255,255,0.75);margin-top:8px}
+    .center{display:flex;flex-direction:column;align-items:center}
+    .selected{margin-top:12px;font-weight:700;font-size:18px;color:#fff}
+    .footer{margin-top:12px;font-size:13px;color:rgba(255,255,255,0.6)}
+    @media (max-width:880px){.wrap{grid-template-columns:1fr}.card.right{order:-1}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card center">
+      <h1>Spinning Wheel</h1>
+      <div class="wheel-container" style="width:100%">
+        <canvas id="wheel" style="width:420px;height:420px;" aria-label="Spinning wheel"></canvas>
+      </div>
+
+      <div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:12px">
+        <button id="spin">Spin</button>
+        <button id="fastSpin" class="secondary" style="margin-left:8px">Fast spin</button>
+        <button id="randomize" class="secondary" style="margin-left:8px">Random labels</button>
+      </div>
+      <div class="selected" id="result">Ready</div>
+      <div class="footer">Tip: edit labels on the right, separated by commas. Save this file locally to keep it.</div>
+    </div>
+
+    <div class="card right">
+      <h1>Edit labels</h1>
+      <textarea id="labelsInput" placeholder="Example: Prize A, Prize B, Lose a turn, Free spin">Prize A, Prize B, Prize C, Prize D</textarea>
+      <div class="small">You can type labels separated by commas, or one-per-line. Empty items are ignored.</div>
+      <div class="controls">
+        <button id="update">Update wheel</button>
+        <button id="addLabel" class="secondary">Add single</button>
+        <button id="download" class="secondary">Download HTML</button>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <input id="singleLabel" placeholder="New label" style="flex:1;padding:8px;border-radius:8px;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:var(--muted)" />
+      </div>
+      <div class="small">You can also use the Randomize button on the left to create demo labels.</div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('wheel');
+  const ctx = canvas.getContext('2d');
+  let labels = ['Prize A','Prize B','Prize C','Prize D'];
+  let rotation = 0; // radians
+  let isSpinning = false;
+  const resultEl = document.getElementById('result');
+
+  function parseLabels(text){
+    if(!text) return [];
+    // FIX: Corrected regex to split by newline (\n) or comma.
+    return text.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  // Robust high-DPI scaling: reset transform and then scale
+  function scaleCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const cssW = Math.max(100, Math.round(rect.width));
+    const cssH = Math.max(100, Math.round(rect.height));
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    // Reset any transforms then scale so drawing commands use CSS pixels
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(dpr, dpr);
+    // Now clear using CSS units
+    ctx.clearRect(0,0,cssW,cssH);
+  }
+
+  function drawWheel(){
+    // use CSS coordinates (because ctx is scaled to device pixel ratio)
+    const rect = canvas.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    const cx = w/2;
+    const cy = h/2;
+    const radius = Math.min(w,h)/2 - 16;
+    const n = Math.max(1, labels.length);
+    const arc = Math.PI*2 / n;
+
+    // clear
+    ctx.clearRect(0,0,w,h);
+
+    for(let i=0;i<n;i++){
+      const start = -Math.PI/2 + i*arc + rotation;
+      const end = start + arc;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,radius,start,end,false);
+      ctx.closePath();
+      ctx.fillStyle = `hsl(${(i*360/n).toFixed(1)},65%,55%)`;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.lineWidth = 2; ctx.stroke();
+
+      // labels
+      ctx.save();
+      ctx.translate(cx,cy);
+      const ang = start + arc/2;
+      ctx.rotate(ang + Math.PI/2);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const fontSize = Math.max(12, Math.round(radius * 0.08));
+      ctx.font = `bold ${fontSize}px system-ui, -apple-system, Roboto`;
+      const tx = 0; const ty = -radius * 0.62;
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      wrapAndFillText(ctx, labels[i], tx, ty, radius*0.5, fontSize + 4);
+      ctx.restore();
+    }
+
+    // center circle
+    ctx.beginPath(); ctx.arc(cx,cy,Math.max(36, radius*0.11),0,Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fill();
+    ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.stroke();
+
+    // pointer
+    const ptrSize = Math.max(12, Math.round(radius*0.06));
+    const topY = cy - radius;
+    ctx.beginPath();
+    ctx.moveTo(cx - ptrSize, topY - 6);
+    ctx.lineTo(cx + ptrSize, topY - 6);
+    ctx.lineTo(cx, topY + ptrSize + 6);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.6)'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  function wrapAndFillText(ctx, text, x, y, maxWidth, lineHeight){
+    const words = text.split(' ');
+    let line = '';
+    const lines = [];
+    for(let n=0;n<words.length;n++){
+      const testLine = line ? (line + ' ' + words[n]) : words[n];
+      if(ctx.measureText(testLine).width > maxWidth && line){ lines.push(line); line = words[n]; }
+      else { line = testLine; }
+    }
+    if(line) lines.push(line);
+    if(lines.length > 3){
+      let joined = text;
+      while(ctx.measureText(joined + '...').width > maxWidth && joined.length>0) joined = joined.slice(0,-1);
+      lines.length = 0; lines.push(joined + '...');
+    }
+    for(let i=0;i<lines.length;i++){
+      ctx.fillText(lines[i], x, y + (i - (lines.length-1)/2) * lineHeight);
+    }
+  }
+
+  function updateFromInput(){
+    const raw = document.getElementById('labelsInput').value;
+    // FIX: Removed the buggy and redundant .replace() call.
+    const parsed = parseLabels(raw);
+    labels = parsed.length ? parsed : ['(empty)'];
+    drawWheel();
+  }
+
+  function spin(fullSpins=6, duration=5200){
+    if(isSpinning) return;
+    if(labels.length === 0) return;
+    isSpinning = true; resultEl.textContent = 'Spinning...';
+    const n = labels.length; const arc = 2*Math.PI / n;
+    const targetIndex = Math.floor(Math.random()*n);
+    const middlePos = (targetIndex + 0.5) * arc;
+    const currentPos = ((-rotation) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+    const x = (currentPos - middlePos + 2*Math.PI) % (2*Math.PI);
+    const targetRotation = rotation + x + fullSpins * 2*Math.PI;
+    const start = performance.now(); const from = rotation; const to = targetRotation;
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    function frame(now){
+      const t = Math.min(1, (now - start) / duration);
+      rotation = from + (to - from) * ease(t);
+      drawWheel();
+      if(t < 1) requestAnimationFrame(frame);
+      else { isSpinning = false; const pos = ((-rotation) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI); const idx = Math.floor(pos / arc) % n; resultEl.textContent = labels[idx] || '(none)'; }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // UI
+  document.getElementById('update').addEventListener('click', updateFromInput);
+  document.getElementById('spin').addEventListener('click', ()=>spin(6,5200));
+  document.getElementById('fastSpin').addEventListener('click', ()=>spin(3,2600));
+  document.getElementById('randomize').addEventListener('click', ()=>{
+    labels = []; const rnd = ['Win 10', 'Lose', 'Try again', 'Bonus', 'Skip', 'Swap', 'Small Prize','Big Prize']; const n = Math.floor(4 + Math.random()*9);
+    for(let i=0;i<n;i++) labels.push(rnd[Math.floor(Math.random()*rnd.length)] + (Math.random()>0.6? '':' ' + (i+1)));
+    document.getElementById('labelsInput').value = labels.join(', ');
+    drawWheel();
+  });
+  document.getElementById('addLabel').addEventListener('click', ()=>{ const v = document.getElementById('singleLabel').value.trim(); if(v){ labels.push(v); document.getElementById('labelsInput').value = labels.join(', '); document.getElementById('singleLabel').value=''; drawWheel(); } });
+  document.getElementById('download').addEventListener('click', ()=>{ const html = '<!doctype html>' + '\n' + document.documentElement.outerHTML; const blob = new Blob([html], {type: 'text/html'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'spinning-wheel.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+
+  // initialization
+  document.getElementById('labelsInput').value = labels.join(', ');
+  // initial scale
+  scaleCanvas();
+  // draw after a tiny delay to ensure layout settled
+  requestAnimationFrame(drawWheel);
+
+  // responsive handling
+  let resizeTimer;
+  window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ scaleCanvas(); drawWheel(); }, 80); });
+
+})();
+</script>
+</body>
+</html>

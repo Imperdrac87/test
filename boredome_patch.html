@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calm Lab — Mini Anxiety Relief Lab</title>
+<style>
+  :root{
+    --bg:#0f1720;
+    --panel:#0b1220;
+    --accent:#5eead4;
+    --accent-dark:#04856f;
+    --soft:#f8f1e7;
+    --muted:#9aa6b2;
+    --glass: rgba(255,255,255,0.03);
+    --card:#0d1621;
+    --radius:14px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background: linear-gradient(180deg,var(--bg),#071019 120%);
+    color:var(--soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .shell{
+    width:980px;
+    max-width:95vw;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+    border-radius:16px;
+    padding:20px;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    display:grid;
+    grid-template-columns: 1fr 360px;
+    gap:18px;
+    align-items:start;
+  }
+
+  header{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+  }
+  header h1{margin:0;font-size:1.25rem;letter-spacing:0.4px}
+  header p{margin:0;color:var(--muted);font-size:0.9rem}
+
+  /* Main left: visual */
+  .visual {
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:26px;
+    min-height:360px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  /* breathing circle */
+  .breath-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+  }
+  .circle{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(circle at 30% 30%, rgba(94,234,212,0.16), rgba(94,234,212,0.04));
+    box-shadow: 0 8px 30px rgba(94,234,212,0.05), inset 0 -6px 30px rgba(0,0,0,0.3);
+    position:relative;
+    transition: transform 700ms cubic-bezier(.2,.9,.25,1), box-shadow 400ms;
+    will-change: transform;
+  }
+  .circle .inner{
+    width:68%;
+    height:68%;
+    border-radius:50%;
+    background:rgba(255,255,255,0.02);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--soft);
+    font-weight:600;
+    font-size:1.1rem;
+  }
+
+  /* controls panel */
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    border-radius:12px;
+    padding:16px;
+    min-height:360px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  button, .control {
+    border:0;
+    background:var(--glass);
+    color:var(--soft);
+    padding:10px 14px;
+    border-radius:10px;
+    min-height:44px;
+    font-weight:600;
+    cursor:pointer;
+    outline:none;
+  }
+  button:focus, .control:focus{box-shadow:0 0 0 3px rgba(94,234,212,0.12)}
+  .primary{
+    background: linear-gradient(180deg,var(--accent),var(--accent-dark));
+    color:#012;
+    border-radius:12px;
+  }
+  .muted{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
+  .row{display:flex;gap:8px;align-items:center}
+  .sliders{display:flex;flex-direction:column;gap:8px}
+
+  .tabs{display:flex;gap:8px;margin-top:6px}
+  .tab{flex:1;padding:8px;border-radius:10px;background:transparent;color:var(--muted);text-align:center}
+  .tab.active{background:rgba(94,234,212,0.06);color:var(--soft);font-weight:700}
+
+  .tab-panel{
+    margin-top:12px;background:rgba(255,255,255,0.01);padding:12px;border-radius:10px;color:var(--soft)
+  }
+  .prompt{font-size:0.95rem;color:var(--soft);margin-bottom:8px}
+
+  /* grounding list */
+  .ground-list{display:grid;gap:8px}
+  .ground-item{display:flex;gap:8px;align-items:center}
+  .ground-item input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--soft)}
+  .small{font-size:0.85rem;color:var(--muted)}
+
+  /* boredom */
+  .boredom-card{display:flex;flex-direction:column;gap:8px}
+  .boredom-prompt{min-height:60px;display:flex;align-items:center;justify-content:center;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);text-align:center;font-weight:600}
+
+  /* journal */
+  textarea, input[type="text"]{
+    width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--soft);min-height:70px;resize:vertical
+  }
+  .footer{grid-column:1/-1;margin-top:6px;color:var(--muted);font-size:0.85rem;display:flex;justify-content:space-between;align-items:center}
+  .kbd{background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:6px;font-weight:700;color:var(--soft)}
+
+  /* new boredom UI bits */
+  .boredom-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .dur-btn{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);cursor:pointer}
+  .dur-btn.active{background:rgba(94,234,212,0.06);color:var(--soft);font-weight:700}
+  .category-select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--soft)}
+  .timer-large{font-weight:800;font-size:1.1rem;text-align:center}
+  .progress{height:8px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-dark));border-radius:8px;transition:width 250ms linear}
+
+  .history-list{max-height:120px;overflow:auto;padding:6px;border-radius:8px;background:rgba(255,255,255,0.01);font-size:0.85rem}
+  .history-item{display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px dashed rgba(255,255,255,0.02)}
+  .points-badge{background:rgba(94,234,212,0.08);color:var(--accent);padding:4px 8px;border-radius:8px;font-weight:700}
+
+  /* confetti */
+  .confetti-piece{position:fixed;z-index:9999;pointer-events:none;will-change:transform,opacity;opacity:0}
+  @keyframes confettiFall {
+    0%{transform:translateY(-10vh) rotate(0deg); opacity:1}
+    100%{transform:translateY(110vh) rotate(360deg); opacity:0}
+  }
+
+  /* responsive */
+  @media (max-width:880px){
+    .shell{grid-template-columns:1fr; padding:12px}
+    .panel{order:2}
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    .circle{transition:none}
+    .confetti-piece{display:none}
+  }
+
+  /* small tweaks: placeholders contrast >= 3:1 */
+  ::placeholder{color:rgba(255,255,255,0.35)}
+</style>
+</head>
+<body>
+  <main class="shell" role="main" aria-label="Calm Lab application">
+    <header>
+      <div>
+        <h1>Calm Lab</h1>
+        <p class="small">Quick tools for anxiety and boredom — breathe, ground, act.</p>
+      </div>
+      <div class="small" id="status" aria-live="polite">Ready</div>
+    </header>
+
+    <section class="visual" aria-labelledby="breath-title">
+      <div class="breath-wrap" role="region" aria-labelledby="breath-title">
+        <div id="breath-title" style="display:none">Breathing Visual</div>
+        <div class="circle" id="breath-visual" role="img" aria-label="Breathing visual. Not animating." tabindex="0">
+          <div class="inner" id="breath-label">Ready</div>
+        </div>
+        <div style="text-align:center;">
+          <div id="countdown" style="font-weight:700;font-size:1.1rem">00:00</div>
+          <div class="small">Follow the circle. Space to start/stop.</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;color:var(--muted);font-size:0.9rem;max-width:480px;line-height:1.35">
+        <strong>Quick tip:</strong> If you feel intense anxiety, try one short cycle: inhale gently, hold briefly, exhale slowly. Repeat until you feel steadier.
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Controls and tools">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="breath-toggle" class="primary">Begin calm</button>
+          <button id="reset-breath" class="muted">Reset</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="ambient-toggle" class="control" aria-pressed="false" title="Toggle ambient audio">🔔 Ambient</button>
+        </div>
+      </div>
+
+      <div class="sliders">
+        <div class="row" style="align-items:center;justify-content:space-between">
+          <label class="small">Inhale <span id="inh-val">4s</span></label>
+          <div>
+            <button class="control" id="inh-dec">−</button>
+            <button class="control" id="inh-inc">+</button>
+          </div>
+        </div>
+        <div class="row" style="align-items:center;justify-content:space-between">
+          <label class="small">Hold <span id="hold-val">2s</span></label>
+          <div>
+            <button class="control" id="hold-dec">−</button>
+            <button class="control" id="hold-inc">+</button>
+          </div>
+        </div>
+        <div class="row" style="align-items:center;justify-content:space-between">
+          <label class="small">Exhale <span id="exh-val">6s</span></label>
+          <div>
+            <button class="control" id="exh-dec">−</button>
+            <button class="control" id="exh-inc">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="tabs" role="tablist" aria-label="Tools">
+          <button class="tab active" role="tab" id="tabbtn-ground" aria-selected="true">Grounding</button>
+          <button class="tab" role="tab" id="tabbtn-boredom" aria-selected="false">Boredom Breaker</button>
+          <button class="tab" role="tab" id="tabbtn-journal" aria-selected="false">Journal</button>
+        </div>
+
+        <div id="tab-ground" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-ground">
+          <div class="prompt">Grounding — name or notice things around you. Type responses and tick them off.</div>
+          <div class="ground-list" id="ground-list" aria-live="polite">
+            <div class="ground-item"><input placeholder="1. Something you can see" id="g1"></div>
+            <div class="ground-item"><input placeholder="2. Something you can touch" id="g2"></div>
+            <div class="ground-item"><input placeholder="3. Something you can hear" id="g3"></div>
+            <div class="ground-item"><input placeholder="4. Something you can smell" id="g4"></div>
+            <div class="ground-item"><input placeholder="5. Something you can taste or imagine tasting" id="g5"></div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="ground-clear" class="control">Clear</button>
+            <button id="ground-done" class="primary">Done ✓</button>
+          </div>
+        </div>
+
+        <div id="tab-boredom" class="tab-panel" role="tabpanel" hidden aria-labelledby="tabbtn-boredom">
+          <div class="boredom-card" aria-live="polite">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                  <select id="b-category" class="category-select" aria-label="Pick a task category">
+                    <option value="any">Any</option>
+                    <option value="creative">Creative</option>
+                    <option value="tidy">Tidy</option>
+                    <option value="move">Move</option>
+                    <option value="reflect">Reflect</option>
+                    <option value="learn">Learn</option>
+                  </select>
+                  <div role="group" aria-label="Duration" style="display:flex;gap:6px">
+                    <button class="dur-btn" data-sec="120">2m</button>
+                    <button class="dur-btn active" data-sec="180">3m</button>
+                    <button class="dur-btn" data-sec="300">5m</button>
+                    <button class="dur-btn" data-sec="600">10m</button>
+                  </div>
+                </div>
+
+                <div class="boredom-prompt" id="boredom-prompt" aria-live="polite">Press “New” to get a tiny mission for 2–5 minutes.</div>
+
+                <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                  <button id="boredom-new" class="control" title="New prompt">New</button>
+                  <button id="boredom-start" class="primary" title="Start or pause task">Start</button>
+                  <button id="boredom-done" class="muted" title="Mark task as done">Done</button>
+                  <button id="boredom-skip" class="control" title="Skip to next suggestion">Skip</button>
+                </div>
+              </div>
+
+              <div style="width:140px;min-width:120px;text-align:center">
+                <div class="timer-large" id="b-timer">03:00</div>
+                <div class="small" style="margin-top:6px">Progress</div>
+                <div class="progress" aria-hidden="false" style="margin-top:6px">
+                  <i id="b-progress" style="width:0%"></i>
+                </div>
+                <div style="margin-top:8px" aria-hidden="false">
+                  <div class="small">Points: <span id="b-points" class="points-badge">0</span></div>
+                  <div class="small" style="margin-top:6px">Streak: <span id="b-streak">0</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <div class="small">History</div>
+              <div id="b-history" class="history-list" aria-live="polite" role="log"></div>
+            </div>
+
+            <div class="small" style="margin-top:6px">When you complete a task, press Done to collect a tiny reward check.</div>
+          </div>
+        </div>
+
+        <div id="tab-journal" class="tab-panel" role="tabpanel" hidden aria-labelledby="tabbtn-journal">
+          <div class="prompt">Short prompt (optional)</div>
+          <input id="prompt-input" type="text" placeholder="A sentence to capture: 'Right now I feel...'">
+          <div class="prompt" style="margin-top:6px">Write anything — free text. Save to keep it locally or download.</div>
+          <textarea id="journal" placeholder="Write a few lines..."></textarea>
+          <div class="row">
+            <button id="save-journal" class="control">Save</button>
+            <button id="download-journal" class="primary">Download</button>
+            <button id="clear-journal" class="muted">Clear</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="footer" aria-hidden="false">
+      <div>Keyboard: <span class="kbd">Space</span> breathe · <span class="kbd">G</span> ground · <span class="kbd">B</span> boredom · <span class="kbd">J</span> journal</div>
+      <div class="small">Local only · respects reduced motion</div>
+    </div>
+  </main>
+
+  <script>
+  // Calm Lab — patched boredom module + improvements.
+  (function(){
+    // ----- UTILITIES -----
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const statusEl = $('#status');
+    function status(s){ statusEl.textContent = s; statusA11y(s); }
+
+    function statusA11y(s){
+      // announce briefly for screen readers
+      statusEl.textContent = s;
+    }
+
+    // ----- STATE -----
+    let state = {
+      running:false,
+      inhale:4,
+      hold:2,
+      exhale:6,
+      cycleSeconds: 12,
+      phase: 'idle',
+      phaseEnd: 0,
+      audioOn:false,
+      audioContext: null,
+      droneOsc: null,
+      boredomTimerId: null,
+      boredomRemaining: 0,
+      boredomDuration: 180,
+      boredomStartedAt: null,
+      boredomPausedAt: null,
+      points: 0,
+      streak: 0,
+      history: []
+    };
+
+    // load saved points/history
+    const POINTS_KEY = 'calm_boredom_points_v1';
+    const HISTORY_KEY = 'calm_boredom_history_v1';
+    try {
+      state.points = parseInt(localStorage.getItem(POINTS_KEY) || '0', 10);
+      state.history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      state.streak = state.history.length ? (state.history[0]?.streak || 0) : 0;
+    } catch(e){ state.points = 0; state.history = []; state.streak = 0; }
+
+    // ----- UI MAP -----
+    const breathToggle = $('#breath-toggle');
+    const breathVisual = $('#breath-visual');
+    const breathLabel = $('#breath-label');
+    const countdown = $('#countdown');
+
+    const inhVal = $('#inh-val'), holdVal = $('#hold-val'), exhVal = $('#exh-val');
+
+    // boredom UI
+    const bPrompt = $('#boredom-prompt');
+    const bNew = $('#boredom-new');
+    const bStart = $('#boredom-start');
+    const bDone = $('#boredom-done');
+    const bSkip = $('#boredom-skip');
+    const bTimer = $('#b-timer');
+    const bProgress = $('#b-progress');
+    const bPoints = $('#b-points');
+    const bHistory = $('#b-history');
+    const bCategory = $('#b-category');
+    const durBtns = Array.from($$('.dur-btn'));
+
+    // ----- BREATHING ENGINE ----- (kept from original)
+    function updateParamDisplays(){
+      inhVal.textContent = state.inhale + 's';
+      holdVal.textContent = state.hold + 's';
+      exhVal.textContent = state.exhale + 's';
+      state.cycleSeconds = state.inhale + state.hold + state.exhale;
+    }
+    updateParamDisplays();
+
+    function ensureAudio(){
+      if(state.audioContext) return;
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        state.audioContext = ctx;
+      } catch(e){
+        console.warn('Audio not available',e);
+      }
+    }
+
+    function chime(){
+      if(!state.audioContext) return;
+      const ctx = state.audioContext;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type='sine';
+      o.frequency.value = 880;
+      g.gain.value = 0;
+      o.connect(g); g.connect(ctx.destination);
+      const now = ctx.currentTime;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.08, now+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, now+0.6);
+      o.start(now); o.stop(now+0.7);
+    }
+
+    // breathing (same tick loop concept)
+    function startBreathing(){
+      if(state.running) return;
+      state.running = true;
+      state.phase = 'inhale';
+      state.phaseEnd = Date.now() + state.inhale*1000;
+      breathToggle.textContent = 'Stop';
+      breathLabel.textContent = 'Inhale';
+      status('Breathing — inhale');
+      if(state.audioOn){ ensureAudio(); chime(); }
+      tickLoop();
+    }
+    function stopBreathing(){
+      state.running = false;
+      state.phase = 'idle';
+      breathToggle.textContent = 'Begin calm';
+      breathLabel.textContent = 'Ready';
+      countdown.textContent = '00:00';
+      breathVisual.style.transform = '';
+      status('Stopped');
+    }
+    function tickLoop(){
+      if(!state.running) return;
+      const now = Date.now();
+      const remaining = Math.max(0, Math.round((state.phaseEnd - now)/1000));
+      countdown.textContent = String(remaining).padStart(2,'0') + 's';
+      if(state.phase === 'inhale'){
+        const elapsed = (state.inhale*1000 - (state.phaseEnd - now));
+        const t = Math.min(1, Math.max(0, elapsed / (state.inhale*1000)));
+        const scale = 1 + t*0.6;
+        breathVisual.style.transform = `scale(${scale})`;
+      } else if(state.phase === 'hold'){
+        breathVisual.style.transform = `scale(1.6)`;
+      } else if(state.phase === 'exhale'){
+        const elapsed = (state.exhale*1000 - (state.phaseEnd - now));
+        const t = Math.min(1, Math.max(0, elapsed / (state.exhale*1000)));
+        const scale = 1.6 - t*0.6;
+        breathVisual.style.transform = `scale(${scale})`;
+      }
+
+      if(now >= state.phaseEnd){
+        if(state.phase === 'inhale'){
+          state.phase = 'hold';
+          state.phaseEnd = now + state.hold*1000;
+          breathLabel.textContent = 'Hold';
+          status('Hold');
+          if(state.audioOn) chime();
+        } else if(state.phase === 'hold'){
+          state.phase = 'exhale';
+          state.phaseEnd = now + state.exhale*1000;
+          breathLabel.textContent = 'Exhale';
+          status('Exhale');
+          if(state.audioOn) chime();
+        } else if(state.phase === 'exhale'){
+          state.phase = 'inhale';
+          state.phaseEnd = now + state.inhale*1000;
+          breathLabel.textContent = 'Inhale';
+          status('Inhale');
+          if(state.audioOn) chime();
+        }
+      }
+      requestAnimationFrame(tickLoop);
+    }
+
+    // ----- PARAM CONTROLS -----
+    $('#reset-breath').addEventListener('click', ()=>{
+      stopBreathing();
+      state.inhale = 4; state.hold=2; state.exhale=6; updateParamDisplays();
+    });
+    $('#inh-inc').addEventListener('click', ()=>{ state.inhale=Math.min(9,state.inhale+1); updateParamDisplays();});
+    $('#inh-dec').addEventListener('click', ()=>{ state.inhale=Math.max(1,state.inhale-1); updateParamDisplays();});
+    $('#hold-inc').addEventListener('click', ()=>{ state.hold=Math.min(9,state.hold+1); updateParamDisplays();});
+    $('#hold-dec').addEventListener('click', ()=>{ state.hold=Math.max(0,state.hold-1); updateParamDisplays();});
+    $('#exh-inc').addEventListener('click', ()=>{ state.exhale=Math.min(12,state.exhale+1); updateParamDisplays();});
+    $('#exh-dec').addEventListener('click', ()=>{ state.exhale=Math.max(1,state.exhale-1); updateParamDisplays();});
+
+    $('#ambient-toggle').addEventListener('click', (e)=>{
+      state.audioOn = !state.audioOn;
+      e.currentTarget.setAttribute('aria-pressed', String(state.audioOn));
+      e.currentTarget.textContent = state.audioOn ? '🔔 Ambient (on)' : '🔔 Ambient';
+      if(state.audioOn){ ensureAudio(); if(state.audioContext && state.audioContext.state === 'suspended') state.audioContext.resume(); }
+    });
+
+    // ----- TAB NAV -----
+    function openTab(name){
+      const tabs = ['ground','boredom','journal'];
+      tabs.forEach(t=>{
+        const btn = document.getElementById('tabbtn-'+t);
+        const panel = document.getElementById('tab-'+t);
+        if(t === name){
+          btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+          panel.hidden = false;
+        } else {
+          btn.classList.remove('active'); btn.setAttribute('aria-selected','false');
+          panel.hidden = true;
+        }
+      });
+    }
+    $('#tabbtn-ground').addEventListener('click', ()=>openTab('ground'));
+    $('#tabbtn-boredom').addEventListener('click', ()=>openTab('boredom'));
+    $('#tabbtn-journal').addEventListener('click', ()=>openTab('journal'));
+
+    // ----- GROUND MODULE -----
+    $('#ground-done').addEventListener('click', ()=>{
+      const values = [1,2,3,4,5].map(i=>document.getElementById('g'+i).value.trim()).filter(Boolean);
+      if(values.length >= 3){
+        status('Grounding complete ✓');
+        breathVisual.setAttribute('aria-label','Grounding done. Good job.');
+        flashCircle();
+      } else {
+        status('Try to complete at least three items.');
+      }
+    });
+    $('#ground-clear').addEventListener('click', ()=>{
+      [1,2,3,4,5].forEach(i=>document.getElementById('g'+i).value='');
+    });
+
+    function flashCircle(){
+      breathVisual.style.transition='transform 180ms';
+      breathVisual.style.transform='scale(1.08)';
+      setTimeout(()=>{ breathVisual.style.transform=''; breathVisual.style.transition='transform 700ms cubic-bezier(.2,.9,.25,1)';},220);
+    }
+
+    // ----- BOREDOM PROMPTS (tagged) -----
+    const boredomPrompts = [
+      {t:"Sketch a tiny spaceship for 3 minutes.", tags:['creative'], min:120},
+      {t:"List 6 tiny things you liked as a kid.", tags:['reflect'], min:120},
+      {t:"Re-arrange one shelf or drawer for 4 minutes.", tags:['tidy'], min:180},
+      {t:"Open a window and describe 3 sounds outside.", tags:['reflect','learn'], min:120},
+      {t:"Write a two-line silly poem.", tags:['creative'], min:120},
+      {t:"Find one object and imagine a backstory for it (2 min).", tags:['creative'], min:120},
+      {t:"Make a quick paper crane (or fold something).", tags:['creative'], min:180},
+      {t:"Set a 3-minute timer and tidy your desk for 3 minutes.", tags:['tidy'], min:180},
+      {t:"Take one photo of something beautiful nearby.", tags:['creative'], min:120},
+      {t:"List 5 foods you could cook in 10 minutes.", tags:['learn'], min:300},
+      {t:"Say hello to a neighbor or send a quick message.", tags:['reflect'], min:120},
+      {t:"Organize your bookmarks for 4 minutes.", tags:['tidy','learn'], min:180},
+      {t:"Do a 2-minute stretch routine.", tags:['move'], min:120},
+      {t:"Find a fact about a country you like and write it down.", tags:['learn'], min:180},
+      {t:"Draw your favorite childhood snack.", tags:['creative'], min:180},
+      {t:"Close your eyes and imagine a comforting place for 2 minutes.", tags:['reflect'], min:120},
+      {t:"Write one thing you’re grateful for today.", tags:['reflect'], min:120},
+      {t:"Build a tiny playlist of 3 songs.", tags:['creative'], min:180},
+      {t:"Find an item and give it a silly name.", tags:['creative'], min:120},
+      {t:"Plan a 15-minute walk route for tomorrow.", tags:['move','planning'], min:120},
+      {t:"Take 5 photos of textures nearby.", tags:['creative'], min:180},
+      {t:"Invent a short handshake and practice it.", tags:['creative','move'], min:120},
+      {t:"Describe your favourite smell in three words.", tags:['reflect'], min:120},
+      {t:"Count backwards slowly from 30.", tags:['reflect'], min:120},
+      {t:"Make a quick list of things you can cook from 5 ingredients.", tags:['learn'], min:180},
+      {t:"Write a brief review of the last thing you watched.", tags:['reflect'], min:180},
+      {t:"Name 3 historical figures you'd meet and why.", tags:['learn','reflect'], min:180},
+      {t:"Swap two items on a shelf to change the vibe.", tags:['tidy'], min:120},
+      {t:"Make a tea/coffee and focus on the sound of pouring.", tags:['reflect'], min:180},
+      {t:"Rearrange one app on your phone for efficiency.", tags:['tidy'], min:120},
+      {t:"Write a two-word story and expand it to a sentence.", tags:['creative'], min:120},
+      {t:"Name five things you could do right now that make you smile.", tags:['reflect'], min:120},
+      {t:"Pick a colour and find five things that colour in the room.", tags:['creative'], min:180},
+      {t:"Close your eyes and imagine a crowded market — describe one stall.", tags:['creative','learn'], min:120},
+      {t:"Set a two-minute timer and breathe with the circle (guided).", tags:['reflect'], min:120},
+      {t:"Write a one-sentence letter to your future self.", tags:['reflect'], min:180},
+      {t:"List three small acts of kindness you could do tomorrow.", tags:['reflect'], min:120}
+    ];
+
+    function pickRandomPrompt(category, durationSec){
+      const cat = (category || 'any');
+      const pool = boredomPrompts.filter(p=>{
+        const okCategory = (cat === 'any') || (p.tags && p.tags.includes(cat));
+        const okDuration = (!p.min) || (p.min <= durationSec + 60); // allow some slack
+        return okCategory && okDuration;
+      });
+      if(pool.length === 0) return "No matching tiny mission — try Any category or a longer duration.";
+      return pool[Math.floor(Math.random()*pool.length)].t;
+    }
+
+    // ----- BOREDOM UI LOGIC -----
+    function setDurationButtons(sec){
+      durBtns.forEach(btn=>{
+        btn.classList.toggle('active', parseInt(btn.dataset.sec,10) === sec);
+      });
+      state.boredomDuration = sec;
+      updateTimerDisplay(sec);
+    }
+
+    function updateTimerDisplay(sec){
+      const mm = Math.floor(sec/60).toString().padStart(2,'0');
+      const ss = (sec%60).toString().padStart(2,'0');
+      bTimer.textContent = `${mm}:${ss}`;
+      const pct = state.boredomDuration ? Math.round(((state.boredomDuration - state.boredomDuration)/state.boredomDuration)*100) : 0;
+      bProgress.style.width = '0%';
+    }
+
+    durBtns.forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const sec = parseInt(e.currentTarget.dataset.sec,10);
+        setDurationButtons(sec);
+        status(`Duration set to ${Math.round(sec/60)} min`);
+      });
+    });
+
+    // initial dur button
+    setDurationButtons(180);
+
+    bNew.addEventListener('click', ()=>{
+      const cat = bCategory.value;
+      const dur = state.boredomDuration;
+      bPrompt.textContent = pickRandomPrompt(cat, dur);
+      status('Tiny mission ready');
+    });
+
+    bSkip.addEventListener('click', ()=>{
+      bNew.click();
+    });
+
+    // timer helpers
+    function formatSeconds(s){
+      const mm = Math.floor(s/60).toString().padStart(2,'0');
+      const ss = (s%60).toString().padStart(2,'0');
+      return `${mm}:${ss}`;
+    }
+
+    function renderPoints(){
+      bPoints.textContent = String(state.points);
+      $('#b-streak').textContent = String(state.streak || 0);
+    }
+    renderPoints();
+
+    function renderHistory(){
+      bHistory.innerHTML = '';
+      state.history.slice(0,20).forEach(item=>{
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        const left = document.createElement('div');
+        left.textContent = `${new Date(item.t).toLocaleString()}: ${item.task}`;
+        const right = document.createElement('div');
+        right.innerHTML = `<span class="points-badge">+${item.points}</span>`;
+        div.appendChild(left); div.appendChild(right);
+        bHistory.appendChild(div);
+      });
+    }
+    renderHistory();
+
+    function saveHistory(){
+      try{
+        localStorage.setItem(POINTS_KEY, String(state.points));
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history.slice(0,200)));
+      }catch(e){}
+    }
+
+    function startBoredom(){
+      if(state.boredomTimerId) return; // already running
+      if(!bPrompt.textContent || bPrompt.textContent.trim().length < 4){
+        // auto generate if empty
+        bNew.click();
+      }
+      state.boredomRemaining = state.boredomDuration;
+      state.boredomStartedAt = Date.now();
+      bStart.textContent = 'Pause';
+      bStart.classList.remove('primary'); bStart.classList.add('muted');
+      status('Micro task running');
+      // start countdown
+      const start = Date.now();
+      const total = state.boredomDuration;
+      updateBProgress(total, total);
+      state.boredomTimerId = setInterval(()=>{
+        state.boredomRemaining--;
+        updateBProgress(total, state.boredomRemaining);
+        if(state.boredomRemaining <= 0){
+          clearInterval(state.boredomTimerId); state.boredomTimerId = null;
+          bStart.textContent = 'Start';
+          bStart.classList.remove('muted'); bStart.classList.add('primary');
+          status('Micro task complete ✓');
+          flashCircle();
+          try{ if(state.audioContext) chime(); }catch(e){}
+        }
+      },1000);
+    }
+
+    function pauseBoredom(){
+      if(state.boredomTimerId){
+        clearInterval(state.boredomTimerId);
+        state.boredomTimerId = null;
+        bStart.textContent = 'Resume';
+        bStart.classList.remove('muted'); bStart.classList.add('primary');
+        status('Paused');
+      }
+    }
+
+    function updateBProgress(total, left){
+      bTimer.textContent = formatSeconds(left);
+      const pct = Math.max(0, Math.round(((total - left) / total) * 100));
+      bProgress.style.width = pct + '%';
+    }
+
+    bStart.addEventListener('click', ()=>{
+      if(state.boredomTimerId) {
+        pauseBoredom();
+      } else {
+        startBoredom();
+      }
+    });
+
+    bDone.addEventListener('click', ()=>{
+      // reward user for completing (if they finished some time, or even if early)
+      // Points scale: 2 min -> 5, 3 min -> 8, 5 min -> 13, 10 min -> 25 (approx fib-ish)
+      const dur = state.boredomDuration;
+      const mapping = {120:5, 180:8, 300:13, 600:25};
+      const pts = mapping[dur] || Math.max(3, Math.round(dur/30));
+      state.points += pts;
+      // streak: increment if last done within 6 hours else reset
+      const now = Date.now();
+      const last = state.history[0]?.t ? new Date(state.history[0].t).getTime() : 0;
+      if(now - last < (6*60*60*1000)) state.streak = (state.streak || 0) + 1;
+      else state.streak = 1;
+      // push history
+      const entry = { t: new Date().toISOString(), task: bPrompt.textContent, points: pts, streak: state.streak };
+      state.history.unshift(entry);
+      // cap history length
+      state.history = state.history.slice(0,200);
+      saveHistory();
+      renderPoints();
+      renderHistory();
+      // stop timer if running
+      if(state.boredomTimerId){ clearInterval(state.boredomTimerId); state.boredomTimerId = null; }
+      bStart.textContent = 'Start'; bStart.classList.remove('muted'); bStart.classList.add('primary');
+      // confetti & chime
+      celebrate();
+      status(`Completed — +${pts} points`);
+      // auto new prompt for next round
+      setTimeout(()=>{ bNew.click(); }, 700);
+    });
+
+    // ----- CONFETTI (lightweight, respects reduced motion) -----
+    function celebrate(){
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const count = 18;
+      for(let i=0;i<count;i++){
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        const size = 6 + Math.random()*10;
+        el.style.width = size + 'px';
+        el.style.height = size*0.6 + 'px';
+        el.style.left = (10 + Math.random()*80) + 'vw';
+        el.style.top = '-10vh';
+        el.style.background = `hsl(${Math.floor(Math.random()*360)} 90% 65%)`;
+        el.style.borderRadius = (Math.random()>0.5? '2px':'50%');
+        el.style.transform = `rotate(${Math.random()*360}deg)`;
+        const dur = 1200 + Math.random()*1600;
+        el.style.animation = `confettiFall ${dur}ms linear forwards`;
+        document.body.appendChild(el);
+        // cleanup
+        setTimeout(()=>{ try{ el.remove(); }catch(e){} }, dur + 200);
+      }
+    }
+
+    // ----- KEYS & ACCESSIBILITY -----
+    window.addEventListener('keydown', (ev)=>{
+      const key = ev.key.toLowerCase();
+      if(key === ' '){
+        ev.preventDefault(); breathToggle.click();
+      } else if(key === 'g'){ ev.preventDefault(); $('#tabbtn-ground').click(); }
+      else if(key === 'b'){ ev.preventDefault(); $('#tabbtn-boredom').click(); }
+      else if(key === 'j'){ ev.preventDefault(); $('#tabbtn-journal').click(); }
+      else if(key === 'n'){ // new prompt quick
+        if(document.activeElement === document.body || document.activeElement === document.documentElement) {
+          ev.preventDefault(); if(!$('#tab-boredom').hidden) bNew.click();
+        }
+      } else if(key === 's'){ // start/stop boredom
+        if(!$('#tab-boredom').hidden){ ev.preventDefault(); bStart.click(); }
+      } else if(key === 'd'){ if(!$('#tab-boredom').hidden){ ev.preventDefault(); bDone.click(); } }
+    });
+
+    // ----- JOURNAL MODULE (unchanged) -----
+    const JOURNAL_KEY = 'calm_lab_journal_v1';
+    function saveJournal(){
+      const prompt = $('#prompt-input').value.trim();
+      const text = $('#journal').value.trim();
+      const entry = { t: new Date().toISOString(), prompt, text};
+      let list = JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
+      list.unshift(entry);
+      localStorage.setItem(JOURNAL_KEY, JSON.stringify(list));
+      status('Saved to local device');
+    }
+    function downloadJournal(){
+      const list = JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
+      const blob = new Blob([list.map(e=>`${e.t}\n${e.prompt}\n${e.text}\n\n---\n`).join('')], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'calm_lab_journal.txt'; document.body.appendChild(a); a.click();
+      a.remove(); URL.revokeObjectURL(url);
+      status('Downloaded journal');
+    }
+    $('#save-journal').addEventListener('click', saveJournal);
+    $('#download-journal').addEventListener('click', downloadJournal);
+    $('#clear-journal').addEventListener('click', ()=>{
+      if(confirm('Clear all saved journal entries? This is local only.')){
+        localStorage.removeItem(JOURNAL_KEY); status('Cleared journal');
+      }
+    });
+
+    // ----- INITIALIZATION -----
+    // pre-populate prompt & history
+    bNew.click();
+    renderHistory();
+    renderPoints();
+    breathToggle.focus();
+    status('Ready — press Space to begin a breathing cycle');
+
+    // make sure category + duration default are consistent
+    setDurationButtons(state.boredomDuration);
+
+    // small helper: set active dur when switching tabs (if user used other UI)
+    $('#tabbtn-boredom').addEventListener('click', ()=> { setTimeout(()=>setDurationButtons(state.boredomDuration),80); });
+
+    // expose a small API for debugging (optional)
+    window._CalmLab = {
+      state,
+      pickRandomPrompt,
+      celebrate
+    };
+  })();
+  </script>
+</body>
+</html>

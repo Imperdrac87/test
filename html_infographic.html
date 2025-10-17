@@ -28,7 +28,7 @@
         .accordion-content {
             display: grid;
             grid-template-rows: 0fr;
-            transition: grid-template-rows 0.5s var(--ease);
+            transition: grid-template-rows calc(0.5s / var(--speed-multiplier)) var(--ease);
         }
         details[open] .accordion-content {
             grid-template-rows: 1fr;
@@ -37,7 +37,7 @@
             overflow: hidden;
         }
         .accordion-icon {
-            transition: transform 0.3s ease;
+            transition: transform calc(0.3s / var(--speed-multiplier)) ease;
         }
         details[open] .accordion-icon {
             transform: rotate(90deg);
@@ -62,7 +62,7 @@
             padding: 0.25rem 0.5rem; border-radius: 9999px;
             font-size: 0.75rem; font-weight: 600; text-align: center;
             opacity: 0; transform: translateY(4px);
-            transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+            transition: opacity calc(0.4s / var(--speed-multiplier)) var(--ease), transform calc(0.4s / var(--speed-multiplier)) var(--ease);
         }
         .anim-label.is-active { opacity: 1; transform: translateY(0); }
         .timeline-track {
@@ -79,7 +79,7 @@
         
         /* --- Concept Animations --- */
         .anim-target {
-            transition: all calc(0.5s * var(--speed-multiplier)) var(--ease);
+            transition: all calc(0.5s / var(--speed-multiplier)) var(--ease);
         }
         .anim-target.is-active {
             transform: scale(1.05);
@@ -89,87 +89,80 @@
         .html-block {
             opacity: 0;
             transform: translateX(-20px);
-            transition: all calc(0.5s * var(--speed-multiplier)) var(--ease);
+            transition: all calc(0.5s / var(--speed-multiplier)) var(--ease);
         }
         .html-block.is-visible {
             opacity: 1;
             transform: translateX(0);
         }
-
-        .bm-layer {
-            transform: scale(0.9);
-            opacity: 0;
-            transition: all calc(0.5s * var(--speed-multiplier)) var(--ease);
-        }
-        .bm-layer.is-visible {
-            transform: scale(1);
-            opacity: 1;
-        }
         
-        /* Positioning Tutorial - MODIFIED */
-        .position-parent, .position-child, .position-sibling-shift {
-            transition: all calc(0.6s * var(--speed-multiplier)) var(--ease);
+        /* Positioning Tutorial - Reworked for clarity */
+        .position-parent, .position-child, .position-sibling {
+            transition: all calc(0.8s / var(--speed-multiplier)) var(--ease); /* Slower transition */
         }
-        .position-parent.is-relative { border-color: #22d3ee; }
-        .position-child.is-lifted { 
+        .position-parent.is-relative { 
+            border-color: #22d3ee; 
+        }
+        .position-child.is-lifted-style {
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+        .position-child.is-taken-from-flow {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -60%) scale(1.1); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); 
-            z-index: 10;
+            transform: translate(-50%, -50%) scale(1.1); /* Keep it centered and lifted */
         }
-        .position-sibling-shift:first-of-type.is-shifted { transform: translateX(50px); }
-        .position-sibling-shift:last-of-type.is-shifted { transform: translateX(-50px); }
-        .position-child.is-moved { 
-            top: 8px; 
+        .position-child.is-moved-to-corner {
+            top: 8px;
             left: calc(100% - 72px);
-            transform: translate(0, 0) scale(1);
+            transform: translate(0, 0) scale(1.1); /* Keep it lifted while moving */
         }
 
         /* Validation Tutorial */
-        .validation-error, .validation-fix, .validation-check { transition: opacity calc(0.4s * var(--speed-multiplier)) var(--ease); }
+        .validation-error, .validation-fix, .validation-check { transition: opacity calc(0.4s / var(--speed-multiplier)) var(--ease); }
         .validation-error.is-highlighted { background-color: rgba(239, 68, 68, 0.3); }
         .validation-check.popped-in { transform: scale(1); opacity: 1; }
 
         /* Roadmap Tutorial */
         .roadmap-phase {
             position: absolute;
-            transition: opacity calc(0.5s * var(--speed-multiplier)) var(--ease);
+            transition: opacity calc(0.5s / var(--speed-multiplier)) var(--ease);
         }
         .react-header, .react-sidebar, .react-main {
-            transition: all calc(0.7s * var(--speed-multiplier)) var(--ease);
+            transition: all calc(0.7s / var(--speed-multiplier)) var(--ease);
             opacity: 0;
         }
         .react-header.is-assembled { transform: translateY(0) !important; opacity: 1; }
         .react-sidebar.is-assembled { transform: translateX(0) !important; opacity: 1; }
         .react-main.is-assembled { transform: scale(1) !important; opacity: 1; }
-        .js-logo { transition: opacity calc(0.4s * var(--speed-multiplier)) var(--ease); }
+        .js-logo { transition: opacity calc(0.4s / var(--speed-multiplier)) var(--ease); }
         .js-logo.is-visible { opacity: 1; }
-        .js-lightbulb { transition: background-color calc(0.4s * var(--speed-multiplier)) var(--ease); }
+        .js-lightbulb { transition: background-color calc(0.4s / var(--speed-multiplier)) var(--ease); }
         .js-lightbulb.is-on { background-color: #facc15; /* yellow-400 */ box-shadow: 0 0 15px #facc15; }
 
         /* Tools Tutorial */
         .tool-window {
             transform: translateY(20px);
             opacity: 0;
-            transition: all calc(0.6s * var(--speed-multiplier)) var(--ease);
+            transition: all calc(0.6s / var(--speed-multiplier)) var(--ease);
         }
         .tool-window.is-visible { transform: translateY(0); opacity: 1; }
         .code-line {
             opacity: 0;
-            transition: opacity calc(0.4s * var(--speed-multiplier)) ease;
+            transition: opacity calc(0.4s / var(--speed-multiplier)) ease;
         }
         .code-line.is-visible { opacity: 1; }
         .browser-content {
             transform: scale(0.95);
-            transition: all calc(0.4s * var(--speed-multiplier)) var(--ease);
+            transition: all calc(0.4s / var(--speed-multiplier)) var(--ease);
         }
         .browser-content.is-updated { transform: scale(1); background-color: #3b82f6; color: white; }
         .devtools-inspector {
             transform: scale(0);
             transform-origin: bottom right;
-            transition: transform calc(0.4s * var(--speed-multiplier)) var(--ease);
+            transition: transform calc(0.4s / var(--speed-multiplier)) var(--ease);
         }
         .devtools-inspector.is-visible { transform: scale(1); }
         
@@ -378,11 +371,10 @@
                             <li><code>position: relative</code> creates a positioning context for its children. It doesn't visually change the element itself but acts as an anchor for absolutely positioned children.</li>
                             <li><code>position: absolute</code> takes an element out of the normal document flow. Other elements will behave as if it's not there. It is then positioned relative to its nearest "positioned" ancestor (one with `relative`, `absolute`, or `fixed`).</li>
                         </ul>
-                        <!-- MODIFIED HTML for Step 5 -->
                         <div class="bg-gray-900/50 rounded-lg p-4 h-48 relative border-2 border-dashed border-gray-700 position-parent flex justify-center items-center gap-4 overflow-hidden">
-                            <div class="position-sibling-shift w-16 h-12 bg-gray-600 rounded flex items-center justify-center text-xs">Sibling</div>
+                            <div class="position-sibling w-16 h-12 bg-gray-600 rounded flex items-center justify-center text-xs">Sibling</div>
                             <div class="position-child w-16 h-12 bg-cyan-400 rounded flex items-center justify-center text-black font-bold">Child</div>
-                            <div class="position-sibling-shift w-16 h-12 bg-gray-600 rounded flex items-center justify-center text-xs">Sibling</div>
+                            <div class="position-sibling w-16 h-12 bg-gray-600 rounded flex items-center justify-center text-xs">Sibling</div>
                         </div>
                         <div class="mt-4 flex items-center gap-4">
                             <div class="flex gap-2" data-controls>
@@ -391,7 +383,7 @@
                                 <button data-restart class="px-3 py-1.5 rounded-md anim-control-btn">Restart</button>
                             </div>
                             <div class="timeline-track flex-grow"><div class="timeline-bar"></div></div>
-                            <span class="anim-label" data-label="Ready">Ready</span>
+                            <span class="anim-label" data-label>Ready">Ready</span>
                         </div>
                     </div>
                 </div>
@@ -498,7 +490,7 @@
                                     <button data-restart class="px-3 py-1.5 rounded-md anim-control-btn">Restart</button>
                                 </div>
                                 <div class="timeline-track flex-grow"><div class="timeline-bar"></div></div>
-                                <span class="anim-label" data-label>Ready</span>
+                                <span class="anim-label" data-label>Ready">Ready</span>
                             </div>
                         </div>
                     </div>
@@ -516,23 +508,20 @@
             this.playBtn = container.querySelector('[data-play]');
             this.pauseBtn = container.querySelector('[data-pause]');
             this.restartBtn = container.querySelector('[data-restart]');
-            this.nextBtn = container.querySelector('[data-next]');
             this.timelineBar = container.querySelector('.timeline-bar');
             this.label = container.querySelector('[data-label]');
 
-            this.animationState = 'idle';
+            this.animationState = 'idle'; // idle, playing, paused
             this.totalDuration = 0;
             this.timeline = [];
             this.rafId = null;
             this.startTime = 0;
-            this.pausedTime = 0;
-            this.currentStep = 0;
+            this.elapsedTime = 0;
 
             this.init();
         }
 
         init() {
-            // This is where you define the sequence of events for each animation.
             switch (this.id) {
                 case 'core-concepts':
                     this.timeline = [
@@ -567,21 +556,32 @@
                     this.timeline = [
                         { time: 500, label: "A CSS rule targets a class...", action: () => this.container.querySelector('.css-selector-text').classList.add('text-cyan-400') },
                         { time: 2000, label: "...finds the matching HTML element...", action: () => this.container.querySelector('.html-target').classList.add('is-active') },
-                        { time: 3500, label: "...and applies the style.", action: () => this.container.querySelector('.html-target').classList.add('bg-blue-600') },
+                        { time: 3500, label: "...and applies the style.", action: () => {
+                            const target = this.container.querySelector('.html-target');
+                            target.classList.remove('bg-gray-600');
+                            target.classList.add('bg-blue-600');
+                        }},
+                        { time: 4500, label: "Complete.", action: () => {} } // Buffer added
                     ];
                     break;
-                // MODIFIED JAVASCRIPT for Step 5
                 case 'position':
-                    this.timeline = [
-                        { time: 1000, label: "Parent becomes 'relative' anchor", action: () => this.container.querySelector('.position-parent').classList.add('is-relative') },
-                        { time: 2500, label: "Child becomes absolute, siblings fill space", action: () => {
-                            this.container.querySelector('.position-child').classList.add('is-lifted');
-                            this.container.querySelectorAll('.position-sibling-shift').forEach(el => el.classList.add('is-shifted'));
+                     this.timeline = [
+                        { time: 1000, label: "1. Parent becomes positioning context.", action: () => {
+                            this.container.querySelector('.position-parent').classList.add('is-relative');
                         }},
-                        { time: 4500, label: "Child moves relative to parent", action: () => {
-                             this.container.querySelector('.position-child').classList.add('is-moved');
+                        { time: 2500, label: "2. Child 'lifts' with box-shadow.", action: () => {
+                            this.container.querySelector('.position-child').classList.add('is-lifted-style'); 
                         }},
-                        { time: 6000, label: "Complete.", action: () => {} }
+                        { time: 4000, label: "3. Child taken from flow; siblings shift.", action: () => {
+                            this.container.querySelector('.position-child').classList.add('is-taken-from-flow');
+                        }},
+                        { time: 5500, label: "4. Child moves relative to parent.", action: () => {
+                            this.container.querySelector('.position-child').classList.add('is-moved-to-corner');
+                        }},
+                        { time: 7000, label: "5. Child 'settles' in new position.", action: () => {
+                            this.container.querySelector('.position-child').classList.remove('is-lifted-style');
+                        }},
+                        { time: 8000, label: "Positioning complete.", action: () => {} }
                     ];
                     break;
                 case 'validation':
@@ -634,72 +634,94 @@
             this.playBtn?.addEventListener('click', () => this.play());
             this.pauseBtn?.addEventListener('click', () => this.pause());
             this.restartBtn?.addEventListener('click', () => this.restart());
-            this.nextBtn?.addEventListener('click', () => this.next());
         }
 
-        update(timestamp) {
+        update() {
             if (this.animationState !== 'playing') return;
-            if (!this.startTime) this.startTime = timestamp;
+
             const speed = parseFloat(document.documentElement.style.getPropertyValue('--speed-multiplier')) || 1;
-            const elapsedTime = (performance.now() - this.startTime) + this.pausedTime;
+            const currentElapsedTime = (performance.now() - this.startTime) + this.elapsedTime;
+            const scaledTotalDuration = this.totalDuration / speed;
+
+            const progress = Math.min(currentElapsedTime / scaledTotalDuration, 1);
             
-            const progress = Math.min(elapsedTime / (this.totalDuration / speed), 1);
             if (this.timelineBar) this.timelineBar.style.transform = `scaleX(${progress})`;
 
             this.timeline.forEach(event => {
-                if (elapsedTime >= (event.time / speed) && !event.triggered) {
+                const scaledEventTime = event.time / speed;
+                if (currentElapsedTime >= scaledEventTime && !event.triggered) {
                     event.action();
-                    if(this.label) this.label.textContent = event.label;
-                    if(this.label) this.label.classList.add('is-active');
+                    if(this.label) {
+                        this.label.textContent = event.label;
+                        this.label.classList.add('is-active');
+                    }
                     event.triggered = true;
                 }
             });
 
             if (progress < 1) {
-                this.rafId = requestAnimationFrame((t) => this.update(t));
+                this.rafId = requestAnimationFrame(() => this.update());
             } else {
                 this.animationState = 'idle';
+                this.elapsedTime = 0; // Reset after finishing
             }
         }
         
         play() {
             if (this.animationState === 'playing') return;
+
             if (this.animationState === 'idle') {
                 this.restart();
             }
-            
+
             this.animationState = 'playing';
             this.startTime = performance.now();
-            this.rafId = requestAnimationFrame((t) => this.update(t));
+            this.rafId = requestAnimationFrame(() => this.update());
         }
 
         pause() {
             if (this.animationState !== 'playing') return;
             
             this.animationState = 'paused';
-            this.pausedTime += (performance.now() - this.startTime);
             cancelAnimationFrame(this.rafId);
+            this.elapsedTime += performance.now() - this.startTime;
         }
 
         restart() {
             cancelAnimationFrame(this.rafId);
             this.animationState = 'idle';
-            this.pausedTime = 0;
+            this.elapsedTime = 0;
             this.startTime = 0;
-            this.currentStep = 0;
             
             if (this.timelineBar) this.timelineBar.style.transform = 'scaleX(0)';
-            if (this.label) this.label.textContent = 'Ready';
-            if (this.label) this.label.classList.remove('is-active');
+            if (this.label) {
+                this.label.textContent = 'Ready';
+                this.label.classList.remove('is-active');
+            }
 
             this.timeline.forEach(event => event.triggered = false);
             
-            const classesToRemove = ['is-active', 'is-visible', 'is-relative', 'is-lifted', 'is-shifted', 'is-moved', 'is-highlighted', 'is-hidden', 'is-shown', 'popped-in', 'is-assembled', 'bg-blue-600', 'text-cyan-400', 'text-yellow-400', 'is-on'];
+            const classesToRemove = [
+                'is-active', 'is-visible', 'is-relative', 'is-highlighted', 
+                'is-hidden', 'is-shown', 'popped-in', 'is-assembled', 'bg-blue-600', 
+                'text-cyan-400', 'text-yellow-400', 'is-on', 
+                'is-lifted-style', 'is-taken-from-flow', 'is-moved-to-corner'
+            ];
             this.container.querySelectorAll(classesToRemove.map(c => `.${c}`).join(',')).forEach(el => {
                 el.classList.remove(...classesToRemove);
             });
             
-            this.nextBtn?.removeAttribute('disabled');
+             // SPECIFIC RESETS
+             const htmlTarget = this.container.querySelector('.html-target');
+             if (htmlTarget) {
+                htmlTarget.classList.remove('bg-blue-600');
+                htmlTarget.classList.add('bg-gray-600');
+             }
+
+             const childPos = this.container.querySelector('.position-child');
+             if (childPos) {
+                childPos.style.position = '';
+             }
         }
     }
 

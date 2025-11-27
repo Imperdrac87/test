@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Temple of Sigma · Overdrive – Probability Distributions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-dark: #050608;
+      --glass-panel: rgba(20, 24, 35, 0.98);
+      --glass-panel-soft: rgba(18, 22, 32, 0.98);
+
+      --neon-blue: #00e0ff;
+      --neon-gold: #ffd666;
+      --neon-green: #4ade80;
+      --neon-red: #f87171;
+
+      --border-subtle: rgba(255,255,255,0.09);
+      --text-main: #f9fafb;
+      --text-dim: #cbd5f5;
+
+      --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-display);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--text-main);
+      background: radial-gradient(circle at top, #1f2937 0%, #050608 55%, #020308 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .orbital-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(0,243,255,0.12), transparent 60%),
+        radial-gradient(circle at 80% 30%, rgba(188,19,254,0.14), transparent 60%),
+        radial-gradient(circle at 50% 90%, rgba(255,215,0,0.06), transparent 60%);
+      mix-blend-mode: screen;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 1.5rem;
+      padding: 1.5rem 1.75rem;
+      border-radius: 1.4rem;
+      border: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, rgba(10, 12, 18, 0.97), rgba(3, 6, 11, 0.98));
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(15, 23, 42, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      transition: transform 0.1s ease-in-out;
+    }
+
+    main.shake {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.4); border-color: rgba(250, 204, 21, 0.4); }
+      50% { box-shadow: 0 0 15px 2px rgba(250, 204, 21, 0.2); border-color: rgba(250, 204, 21, 0.9); }
+      100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.4); border-color: rgba(250, 204, 21, 0.4); }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.1rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f9fafb;
+      text-shadow:
+        0 0 6px rgba(255,255,255,0.4),
+        0 0 14px rgba(59,130,246,0.6);
+    }
+
+    .subtitle {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--neon-gold);
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .hud-block {
+      padding: 0.8rem 0.9rem;
+      border-radius: 0.95rem;
+      border: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top, rgba(30,64,175,0.25), rgba(15,23,42,0.96));
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .hud-block:nth-child(2) {
+      background: radial-gradient(circle at top, rgba(147,51,234,0.25), rgba(15,23,42,0.96));
+    }
+    .hud-block:nth-child(3) {
+      background: radial-gradient(circle at top, rgba(239, 68, 68, 0.25), rgba(15,23,42,0.96));
+    }
+
+    .hud-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+    }
+
+    .hud-value {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    .hud-note {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      opacity: 0.85;
+    }
+
+    .stage-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: rgba(56,189,248,0.18);
+      border: 1px solid rgba(56,189,248,0.5);
+      color: #e0f2fe;
+    }
+
+    .stage-chip span:first-child {
+      font-size: 0.72em;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.9;
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: 1.1rem;
+      align-items: stretch;
+    }
+
+    /* Console / scenario panel */
+    .console {
+      padding: 1rem 1.1rem 0.95rem;
+      border-radius: 1.1rem;
+      background: var(--glass-panel);
+      border: 1px solid var(--border-subtle);
+      min-height: 270px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .sys-label {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #bfdbfe;
+    }
+
+    .scenario-text {
+      margin-top: 0.4rem;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      max-width: 46rem;
+    }
+
+    .scenario-text mark {
+      background: #facc15;
+      color: #111827;
+      border-radius: 0.25rem;
+      padding: 0.05rem 0.25rem;
+    }
+
+    .clue-label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--neon-gold);
+        margin-top: 0.5rem;
+        margin-bottom: -0.2rem;
+        opacity: 0.9;
+    }
+
+    .clue-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+
+    .clue-chip {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      padding: 0.25rem 0.7rem;
+      font-size: 0.8rem;
+      color: #e5e7eb;
+      cursor: pointer;
+      background: rgba(15,23,42,0.96);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease-out;
+    }
+
+    .clue-chip::before {
+      content: "◇";
+      font-size: 0.7rem;
+      opacity: 0.75;
+    }
+
+    .clue-chip.active {
+      color: #ecfdf5;
+      border-color: rgba(74,222,128,0.9);
+      background: rgba(22,163,74,0.2);
+      box-shadow: 0 0 0 1px rgba(21,128,61,0.6);
+    }
+
+    .clue-chip.active::before {
+      content: "◆";
+      color: var(--neon-green);
+      opacity: 1;
+    }
+
+    .mode-note {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 0.2rem;
+      max-width: 42rem;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.7rem;
+    }
+
+    button { font-family: var(--font-display); }
+
+    .btn-main {
+      flex: 1;
+      padding: 0.8rem 0.9rem;
+      border-radius: 0.85rem;
+      border: 1px solid rgba(148,163,184,0.8);
+      background: rgba(15,23,42,0.96);
+      color: #f9fafb;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      justify-content: center;
+      align-items: flex-start;
+      transition: all 0.14s ease-out;
+    }
+
+    .btn-main strong {
+      font-size: 1rem;
+    }
+
+    .btn-main span {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      opacity: 0.85;
+    }
+
+    .btn-main:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(15,23,42,0.8);
+      border-color: rgba(59,130,246,0.9);
+    }
+
+    .btn-main.discrete {
+      border-color: rgba(56,189,248,0.7);
+    }
+    .btn-main.continuous {
+      border-color: rgba(147,51,234,0.7);
+    }
+
+    .btn-main.spell {
+      min-width: 45%;
+    }
+
+    .btn-main.correct {
+      background: rgba(22,163,74,0.26);
+      border-color: rgba(74,222,128,1);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.8);
+    }
+
+    .btn-main.wrong {
+      background: rgba(248,113,113,0.22);
+      border-color: rgba(248,113,113,1);
+      box-shadow: 0 0 0 1px rgba(248,113,113,0.9);
+    }
+
+    .btn-main.inactive {
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+
+    .btn-main:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .btn-ghost {
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.7rem;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.96);
+      color: #e5e7eb;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.14s ease-out;
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      border-color: rgba(59,130,246,0.9);
+      box-shadow: 0 8px 16px rgba(15,23,42,0.8);
+    }
+
+    .btn-ghost:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .btn-ghost.primary {
+      border-color: rgba(250,204,21,0.95);
+      color: #fef9c3;
+      background: radial-gradient(circle at top, rgba(250,204,21,0.22), rgba(30,64,175,0.95));
+    }
+
+    .btn-ghost.reset {
+        border-color: rgba(248,113,113,0.4);
+        color: #fca5a5;
+    }
+    .btn-ghost.reset:hover {
+        border-color: rgba(248,113,113,0.9);
+        box-shadow: 0 8px 16px rgba(220,38,38,0.2);
+    }
+
+    .console-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.65rem;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    /* Feedback / Oracle log */
+    .feedback {
+      padding: 0.9rem 1rem 0.95rem;
+      border-radius: 1.1rem;
+      background: var(--glass-panel-soft);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.9rem;
+      line-height: 1.55;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .feedback-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #bfdbfe;
+    }
+
+    .feedback-body b { color: #f9fafb; }
+
+    .feedback-body .shape {
+      margin-top: 0.3rem;
+      color: var(--text-dim);
+      font-size: 0.84rem;
+    }
+
+    .deep-logic {
+      margin-top: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .deep-logic b { color: var(--neon-gold); }
+
+    .use-block {
+      margin-top: 0.7rem;
+      padding: 0.7rem 0.75rem;
+      border-radius: 0.8rem;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(148,163,184,0.8);
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .use-block-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--neon-gold);
+      margin-bottom: 0.35rem;
+    }
+
+    .use-block b { color: #f9fafb; }
+
+    .hidden { display: none !important; }
+
+    /* Visualiser */
+    .viz-panel {
+      padding: 0.9rem 0.9rem 0.95rem;
+      border-radius: 1.1rem;
+      background: radial-gradient(circle at top, rgba(30,64,175,0.28), rgba(15,23,42,0.98));
+      border: 1px solid rgba(56,189,248,0.65);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-height: 270px;
+    }
+
+    .viz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .viz-title {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #e0f2fe;
+    }
+
+    .viz-mode-tag {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    canvas {
+      width: 100%;
+      height: 185px;
+      border-radius: 0.9rem;
+      background: radial-gradient(circle at top, #020617, #020617);
+      border: 1px solid rgba(148,163,184,0.9);
+    }
+
+    .viz-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    /* Phase 3 Calibration UI (Organic Addition) */
+    .calibration-panel {
+      background: rgba(250, 204, 21, 0.08);
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      border-radius: 0.7rem;
+      padding: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+    
+    .calibration-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--neon-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.1rem;
+    }
+
+    /* REPLACED SLIDER WITH INPUT FIELD */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .input-row label { 
+      min-width: 3rem; 
+      color: var(--neon-gold);
+      font-weight: bold;
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
+    }
+
+    input[type="number"] {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: #fff;
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+    }
+    
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--neon-gold);
+      box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+    }
+    
+    .calib-btn {
+      width: 100%;
+      padding: 0.6rem;
+      background: var(--neon-gold);
+      color: #111827;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .calib-btn:hover:not(:disabled) {
+      background: #fde047;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+    }
+    .calib-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+      background: #9ca3af;
+    }
+
+    /* Lives Visuals */
+    .lives-container {
+      display: flex;
+      gap: 0.25rem;
+      margin-top: 0.2rem;
+    }
+    .life-pip {
+      width: 12px;
+      height: 12px;
+      background: var(--neon-green);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(74,222,128,0.6);
+      transition: all 0.3s ease;
+    }
+    .life-pip.lost {
+      background: #334155;
+      box-shadow: none;
+      transform: scale(0.8);
+    }
+
+    /* Overlays */
+    .stage-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(3,4,7,0.98));
+      backdrop-filter: blur(4px);
+    }
+
+    .stage-card {
+      max-width: 430px;
+      width: 92%;
+      border-radius: 1.25rem;
+      padding: 1.2rem 1.2rem 1.1rem;
+      background: radial-gradient(circle at top, rgba(56,189,248,0.22), rgba(15,23,42,0.98));
+      border: 1px solid rgba(56,189,248,0.8);
+      box-shadow:
+        0 18px 45px rgba(15,23,42,0.9),
+        0 0 40px rgba(8,47,73,0.7);
+      text-align: left;
+    }
+
+    .stage-card h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stage-card p {
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .stage-card ul {
+      text-align: left;
+      margin: 0.8rem 0 0.8rem 1.1rem;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+    }
+
+    .stage-card ul li + li { margin-top: 0.25rem; }
+
+    @media (max-width: 880px) {
+      .layout-grid { grid-template-columns: minmax(0,1fr); }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        margin: 0.75rem;
+        padding: 1rem;
+      }
+      h1 { font-size: 1.7rem; }
+      .hud { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .scenario-text { font-size: 0.96rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orbital-bg"></div>
+  <main id="mainContainer">
+    <header>
+      <h1>Temple of Sigma · Overdrive</h1>
+      <div class="subtitle">Probability Distributions · Oracle Training</div>
+    </header>
+
+    <section class="hud">
+      <!-- Block 1: Protocol -->
+      <div class="hud-block">
+        <div class="hud-label">Protocol</div>
+        <div class="hud-value">
+          <span id="stageLabelText">Analysis</span>
+        </div>
+        <div class="hud-note">
+          <span class="stage-chip">
+            <span>Phase</span>
+            <span id="stageChipText">Scanning</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Block 2: Score & Streak -->
+      <div class="hud-block">
+        <div class="hud-label">Score</div>
+        <div class="hud-value" id="scoreDisplay">0</div>
+        <!-- MERGED: Added streakDisplay here to fix error and save space -->
+        <div class="hud-note">Streak: <span id="streakDisplay">0</span></div>
+      </div>
+
+      <!-- Block 3: Stability (Lives) -->
+      <div class="hud-block">
+        <div class="hud-label">Stability</div>
+        <div class="lives-container" id="livesContainer">
+            <div class="life-pip"></div>
+            <div class="life-pip"></div>
+            <div class="life-pip"></div>
+        </div>
+        <div class="hud-note" id="livesText">Systems Nominal</div>
+      </div>
+
+      <!-- Block 4: Rank -->
+      <div class="hud-block">
+        <div class="hud-label">Rank</div>
+        <div class="hud-value" id="rankDisplay">Acolyte</div>
+        <!-- MERGED: Added streakNote here for flavor text -->
+        <div class="hud-note" id="streakNote">Master the full pipeline.</div>
+      </div>
+    </section>
+
+    <section class="layout-grid">
+      <!-- LEFT: Console -->
+      <section class="console" id="consolePanel">
+        <div class="sys-label" id="sysLabel">SYS.TRIAL #001 // Scenario feed</div>
+        <div class="scenario-text" id="scenarioText">
+          Loading oracle scenario...
+        </div>
+
+        <div class="clue-label">DETECTED PATTERNS // Select matches</div>
+        <div class="clue-row" id="clueRow"></div>
+
+        <div class="mode-note" id="modeNote">
+          Phase 1: Is this <b>discrete</b> (counts) or <b>continuous</b> (measurements)?
+        </div>
+
+        <!-- Stage 1 buttons -->
+        <div class="btn-row" id="stage1Buttons">
+          <button class="btn-main discrete" id="btnDiscrete">
+            <strong>Discrete</strong>
+            <span>Counts of events/things (0,1,2,...)</span>
+          </button>
+          <button class="btn-main continuous" id="btnContinuous">
+            <strong>Continuous</strong>
+            <span>Measurements on a scale (height, time, weight...)</span>
+          </button>
+        </div>
+
+        <!-- Stage 2 buttons -->
+        <div class="btn-row hidden" id="stage2Buttons">
+          <button class="btn-main spell" data-family="binomial">
+            <strong>Binomial</strong>
+            <span>Fixed number of trials, count successes.</span>
+          </button>
+          <button class="btn-main spell" data-family="poisson">
+            <strong>Poisson</strong>
+            <span>Count of rare events per time/space window.</span>
+          </button>
+          <button class="btn-main spell" data-family="geometric">
+            <strong>Geometric</strong>
+            <span>Number of trials until first success.</span>
+          </button>
+          <button class="btn-main spell" data-family="normal">
+            <strong>Normal</strong>
+            <span>Bell curve around a mean, many small effects.</span>
+          </button>
+          <button class="btn-main spell" data-family="exponential">
+            <strong>Exponential</strong>
+            <span>Time until an event with constant rate.</span>
+          </button>
+          <button class="btn-main spell" data-family="uniform">
+            <strong>Uniform</strong>
+            <span>All values equally likely in an interval.</span>
+          </button>
+        </div>
+
+        <div class="console-footer-row">
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn-ghost reset" id="btnReset">Reset System</button>
+            <button class="btn-ghost" id="btnHint">Highlight key cue</button>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-ghost" id="btnNextTrial" disabled>Next trial ▶</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Visualiser -->
+      <section class="viz-panel">
+        <div class="viz-header">
+          <div class="viz-title" id="vizTitle">VISUALIZER // waiting</div>
+          <div class="viz-mode-tag" id="vizModeTag">Shape will react to your chosen model.</div>
+        </div>
+        <canvas id="vizCanvas" width="480" height="185"></canvas>
+
+        <div class="viz-controls">
+          <div id="vizHintText">
+            After choosing the correct family in Stage 2, you will see the probability curve and a shaded region for a simple event.
+          </div>
+          <!-- Phase 3 (Organic Addition - REPLACED SLIDER WITH INPUT) -->
+          <div id="calibrationBlock" class="calibration-panel hidden">
+             <div class="calibration-title">PHASE 3: EXTRACT PARAMETER</div>
+             <div id="calibrationHint" style="font-size:0.85rem; color:#fefce8; opacity:0.9; margin-bottom:0.4rem;">
+               Identify the value in the text.
+             </div>
+             <div class="input-row">
+               <label id="paramLabel">λ</label>
+               <input type="number" id="paramInput" step="0.1" placeholder="?" />
+             </div>
+             <button id="btnCalibrate" class="calib-btn" style="margin-top:0.6rem;">SYNC & UNLOCK</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Oracle log -->
+    <section class="feedback">
+      <div class="feedback-title" id="feedbackTitle">>> Oracle log</div>
+      <div class="feedback-body" id="feedbackBody">
+        Welcome, acolyte. First, master <b>discrete vs continuous</b>. Then the Oracle will ask you to name the distribution family, see its curve, and use it for a simple probability.
+      </div>
+      <div class="deep-logic hidden" id="deepLogicBlock"></div>
+      <div class="use-block hidden" id="useBlock">
+        <div class="use-block-title">USE IT // probability in action</div>
+        <div id="useContent"></div>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <button class="btn-ghost primary" id="btnDeepLogic">Access kernel logic</button>
+      </div>
+    </section>
+
+    <section style="font-size:0.8rem; color:var(--text-dim); text-align:center; margin-top:-0.15rem;">
+      Hint: focus on <b>what is being measured</b> and <b>how</b> – count per window? time until? position anywhere? clustering around an average?
+    </section>
+  </main>
+
+  <!-- Intro overlay -->
+  <div class="stage-overlay" id="introOverlay">
+    <div class="stage-card">
+      <h2>Oracle Training</h2>
+      <p>Goal: climb from <b>Acolyte</b> to <b>Bell-Curve Archmage</b>.</p>
+      <ul>
+        <li><b>Stage 1</b> – Decide if each scenario is <b>discrete</b> (counts) or <b>continuous</b> (measurements).</li>
+        <li><b>Stage 2</b> – Identify the correct distribution family.</li>
+        <li><b>Stage 3 (New)</b> – <b>Extract Data:</b> Find the key parameter in the text (e.g. "3 emails") and input it to generate the graph.</li>
+      </ul>
+      <p>Curves, bars, shaded regions – the whole “scenario → model → probability” pipeline.</p>
+      <button class="btn-ghost primary" id="btnBeginIntro">Begin training ▶</button>
+    </div>
+  </div>
+  
+  <!-- Game Over overlay -->
+  <div class="stage-overlay hidden" id="gameOverOverlay">
+    <div class="stage-card" style="border-color: var(--neon-red);">
+      <h2 style="color: var(--neon-red);">SYSTEM FAILURE</h2>
+      <p>Stability critical. The simulation has de-synced.</p>
+      <ul>
+        <li>Final Score: <b id="finalScoreLoss">0</b></li>
+        <li>Rank Achieved: <b id="finalRankLoss">Acolyte</b></li>
+      </ul>
+      <p>Re-calibrate and try again.</p>
+      <button class="btn-ghost primary" id="btnRetryLoss">Reboot System ▶</button>
+    </div>
+  </div>
+
+  <!-- Victory overlay -->
+  <div class="stage-overlay hidden" id="victoryOverlay">
+    <div class="stage-card" style="border-color: var(--neon-green);">
+      <h2 style="color: var(--neon-green);">ASCENSION COMPLETE</h2>
+      <p>You have reached the rank of <b>Bell-Curve Archmage</b>.</p>
+      <ul>
+        <li>Final Score: <b id="finalScoreWin">250</b></li>
+      </ul>
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+          <button class="btn-ghost" id="btnContinueEndless">Continue (Endless) ▶</button>
+          <button class="btn-ghost primary" id="btnRestartWin">Restart Training ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Scenario database (Original + Calib data) ----------
+    const database = [
+      {
+        id: 1,
+        family: "binomial",
+        type: "discrete",
+        text: "We flip a fair coin 10 times and record how many flips land on Heads.",
+        keywords: ["10 times", "how many", "Heads"],
+        clues: ["Fixed number of trials", "Count successes", "Each trial is success/failure"],
+        teach:
+          "This is <b>Binomial</b>. We have a <b>fixed number of trials</b> (n = 10) and we are <b>counting successes</b> (Heads).",
+        shapeExplain:
+          "Why the hump? There is only 1 way to get 0 Heads (all Tails), but 252 ways to get 5 Heads. This **combinatorial explosion** of 'ways to win' in the middle creates the central peak.",
+        deepLogic:
+          "<b>Mechanism:</b> Each specific sequence of 10 flips has probability (0.5)<sup>10</sup>. The probability of getting k Heads is C(10,k)(0.5)<sup>k</sup>(0.5)<sup>10−k</sup>. Combinatorics heavily favour counts near the middle; that crowding of sequences is what shapes the hump.",
+        useVar: "X",
+        useQuestion: "Let <b>X</b> be the number of Heads in 10 flips. What is P(X ≥ 7)?",
+        useExplain:
+          "On the graph, we highlight the bars for k = 7, 8, 9, 10. Their total probability is about <b>0.17</b>, so there is roughly a <b>17%</b> chance of getting at least 7 Heads out of 10 flips.",
+        viz: { n: 10, p: 0.5, highlight: { mode: "discrete-geq", k0: 7 } },
+        calib: { label: "p (Prob)", step: 0.1, target: 0.5, hint: "Search text for 'fair coin' (50/50 chance)." }
+      },
+      {
+        id: 2,
+        family: "poisson",
+        type: "discrete",
+        text: "A helpdesk gets on average 3 emails per hour. You count how many emails arrive in the next hour.",
+        keywords: ["3 emails per hour", "how many emails", "next hour"],
+        clues: ["Count events in a fixed time window", "Average rate per hour", "Events are independent"],
+        teach:
+          "This is <b>Poisson</b>. We count how many events occur in a fixed time window when we know the <b>average rate</b> per unit time.",
+        shapeExplain:
+          "Why skewed? It follows the **Law of Rare Events**. Low counts are common. High counts are possible but require a perfect storm of random arrivals, making them exponentially rarer.",
+        deepLogic:
+          "<b>Mechanism:</b> If emails arrive independently with rate λ = 3 per hour, then P(X = k) = e<sup>−3</sup> 3<sup>k</sup>/k!. The Poisson naturally has a 'zero wall' at k = 0 and a single main peak near λ, giving a skewed discrete hump.",
+        useVar: "X",
+        useQuestion:
+          "Let <b>X</b> be the number of emails in the next hour. What is P(X ≥ 5) when the rate is λ = 3 per hour?",
+        useExplain:
+          "On the graph, we highlight the bars for k ≥ 5. The total height of those bars is about <b>0.18</b>, so there is roughly an <b>18%</b> chance of getting 5 or more emails in the next hour.",
+        viz: { lambda: 3, highlight: { mode: "discrete-geq", k0: 5 } },
+        calib: { label: "λ (Rate)", step: 1, target: 3, hint: "Find the average number of emails per hour." }
+      },
+      {
+        id: 3,
+        family: "geometric",
+        type: "discrete",
+        text: "You test light bulbs one by one and record how many you test until you find the first defective one. Each bulb has a 30% chance of being defective, independent of the others.",
+        keywords: ["until you find the first defective", "how many you test", "30% chance"],
+        clues: ["Trials until first success", "Repeated yes/no tests", "Independent bulbs"],
+        teach:
+          "This is <b>Geometric</b>. We count how many trials we need until the first 'success' (here, the first defective bulb).",
+        shapeExplain:
+          "Why the decay? Success on the 1st try is most likely. To need 3 trials, you **must** fail the first two. Since failure is a probability < 1, multiplying it repeatedly shrinks the chance every step.",
+        deepLogic:
+          "<b>Mechanism:</b> If each bulb is defective with probability p and tests are independent, P(X = k) = (1−p)<sup>k−1</sup>p. Each extra non-defective bulb multiplies the probability by another (1−p), so the bars decay geometrically.",
+        useVar: "X",
+        useQuestion:
+          "Let <b>X</b> be the number of bulbs you test until the first defective one. For p = 0.3, what is P(X ≤ 3)?",
+        useExplain:
+          "On the graph, we highlight the bars for k = 1, 2, 3. Their total probability is about <b>0.66</b>, so there is roughly a <b>66%</b> chance you find a defective bulb within the first three tests.",
+        viz: { p: 0.3, maxK: 10, highlight: { mode: "discrete-leq", k0: 3 } },
+        calib: { label: "p (Prob)", step: 0.1, target: 0.3, hint: "Find the chance of a bulb being defective (e.g. 0.X)." }
+      },
+      {
+        id: 4,
+        family: "normal",
+        type: "continuous",
+        text: "Scores on a certain aptitude test are roughly bell-shaped around an average of 0, with most scores between −3 and +3.",
+        keywords: ["bell-shaped", "average of 0", "between −3 and +3"],
+        clues: ["Many small effects add up", "Cluster around an average", "Symmetric variation"],
+        teach:
+          "This is <b>Normal</b>. Many small influences add up to a test score that clusters symmetrically around an average.",
+        shapeExplain:
+          "Why the bell? The **Central Limit Theorem**. When you sum up many independent random factors (like genes + diet + luck), they naturally balance out near the average, creating this symmetrical mound.",
+        deepLogic:
+          "<b>Mechanism:</b> Under mild conditions, sums of many small independent effects tend to be approximately Gaussian (a central limit effect).",
+        useVar: "X",
+        useQuestion:
+          "Let <b>X</b> be a test score, with X ~ N(0,1). What is P(−1 ≤ X ≤ 1)?",
+        useExplain:
+          "On the curve, we shade the band between −1 and 1. That central strip captures about <b>68%</b> of the total area.",
+        viz: { sigma: 1, highlight: { mode: "continuous-range", a: -1, b: 1, min: -3, max: 3 } },
+        calib: { label: "σ (SD)", step: 0.1, target: 1.0, hint: "Standard range implies SD=1" }
+      },
+      {
+        id: 5,
+        family: "exponential",
+        type: "continuous",
+        text: "You wait at a bus stop. Buses tend to arrive at an average rate of about one every 2 minutes.",
+        keywords: ["wait at a bus stop", "average rate", "one every 2 minutes"],
+        clues: ["Time until an event", "Events arrive at a roughly constant rate"],
+        teach:
+          "This is <b>Exponential</b>. We model the <b>time until</b> the next event when events arrive at a roughly constant average rate.",
+        shapeExplain:
+          "Why the slide? It models **immediate risk**. The chance of the event happening is constant every moment. So, it's most likely to happen *soon*. Surviving a long time without it happening is increasingly rare.",
+        deepLogic:
+          "<b>Mechanism:</b> If arrivals follow a Poisson process with rate λ (here λ ≈ 0.5 per minute), then the waiting time T has exponential density f(t) = λe<sup>−λt</sup>.",
+        useVar: "T",
+        useQuestion:
+          "Let <b>T</b> be your waiting time in minutes, with rate λ = 0.5. What is P(T > 3)?",
+        useExplain:
+          "On the curve, we shade the area to the right of 3 minutes. That tail area is about <b>0.22</b>.",
+        viz: { lambda: 0.5, highlight: { mode: "continuous-right", a: 3, min: 0, max: 4 } },
+        calib: { label: "λ (Rate)", step: 0.1, target: 0.5, hint: "1 per 2 mins = 0.5 per min" }
+      },
+      {
+        id: 6,
+        family: "uniform",
+        type: "continuous",
+        text: "On a 5-metre wire, a single defect could occur anywhere along its length, with no preference for any position.",
+        keywords: ["anywhere along its length", "no preference", "5-metre wire"],
+        clues: ["All positions equally likely", "Continuous interval"],
+        teach:
+          "This is <b>Continuous Uniform</b>. Any position along the wire is equally likely for the defect.",
+        shapeExplain:
+          "Why flat? **Total Indifference**. No position is favored over another. The probability is spread like an even layer of butter across the entire interval.",
+        deepLogic:
+          "<b>Mechanism:</b> If every sub-interval of the wire of the same length has the same probability of containing the defect, the density must be constant.",
+        useVar: "X",
+        useQuestion:
+          "Let <b>X</b> be the position of the defect in metres along the 5-metre wire. What is P(1 ≤ X ≤ 2)?",
+        useExplain:
+          "On the flat bar, we shade the slice between 1 m and 2 m. That slice is 1 metre wide out of 5, so its probability is exactly <b>0.20</b>.",
+        viz: { min: 0, max: 5, highlight: { mode: "continuous-range", a: 1, b: 2, min: 0, max: 5 } },
+        calib: { label: "Max", min: 2, max: 10, step: 1, target: 5, hint: "Length is 5" }
+      }
+    ];
+
+    // ---------- Game state ----------
+    let stage = 1;
+    let score = 0;
+    let streak = 0;
+    let lives = 3; // Added for game mechanic
+    let stage1Correct = 0;
+    let totalTrials = 0;
+    let hasWon = false;
+
+    let currentCard = null;
+    let trialId = 1;
+    let selectedClues = new Set();
+    let deck = []; // Deck for card shuffling
+
+    // Visualiser state
+    let vizCtx = null;
+    let vizAnimationId = null;
+    let vizFamily = null;
+    let vizParam = null;
+    let scanX = 0;
+
+    // ---------- DOM refs ----------
+    const mainContainer = document.getElementById("mainContainer");
+    const scenarioTextEl = document.getElementById("scenarioText");
+    const sysLabelEl = document.getElementById("sysLabel");
+    const clueRowEl = document.getElementById("clueRow");
+    const modeNoteEl = document.getElementById("modeNote");
+
+    const btnDiscrete = document.getElementById("btnDiscrete");
+    const btnContinuous = document.getElementById("btnContinuous");
+    const stage1Buttons = document.getElementById("stage1Buttons");
+    const stage2Buttons = document.getElementById("stage2Buttons");
+    const spellButtons = stage2Buttons.querySelectorAll(".spell");
+
+    const btnHint = document.getElementById("btnHint");
+    const btnReset = document.getElementById("btnReset");
+    const btnJumpStage2 = document.getElementById("btnJumpStage2");
+    const btnNextTrial = document.getElementById("btnNextTrial");
+
+    const feedbackTitleEl = document.getElementById("feedbackTitle");
+    const feedbackBodyEl = document.getElementById("feedbackBody");
+    const deepLogicBlockEl = document.getElementById("deepLogicBlock");
+    const btnDeepLogic = document.getElementById("btnDeepLogic");
+    const useBlockEl = document.getElementById("useBlock");
+    const useContentEl = document.getElementById("useContent");
+
+    const scoreDisplayEl = document.getElementById("scoreDisplay");
+    const streakDisplayEl = document.getElementById("streakDisplay");
+    const streakNoteEl = document.getElementById("streakNote");
+    const stageLabelTextEl = document.getElementById("stageLabelText");
+    const stageChipTextEl = document.getElementById("stageChipText");
+    const rankDisplayEl = document.getElementById("rankDisplay");
+    const livesContainer = document.getElementById("livesContainer");
+    const livesTextEl = document.getElementById("livesText");
+
+    const vizCanvas = document.getElementById("vizCanvas");
+    const vizTitleEl = document.getElementById("vizTitle");
+    const vizModeTagEl = document.getElementById("vizModeTag");
+    const vizHintTextEl = document.getElementById("vizHintText");
+    
+    // Phase 3 Elements (Input Field instead of Slider)
+    const calibrationBlock = document.getElementById("calibrationBlock");
+    const paramLabelEl = document.getElementById("paramLabel");
+    const paramInputEl = document.getElementById("paramInput"); // Replaced sliderEl
+    const btnCalibrate = document.getElementById("btnCalibrate");
+    const calibrationHintEl = document.getElementById("calibrationHint");
+
+    const introOverlayEl = document.getElementById("introOverlay");
+    const btnBeginIntro = document.getElementById("btnBeginIntro");
+    
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const btnRetryLoss = document.getElementById("btnRetryLoss");
+    const victoryOverlay = document.getElementById("victoryOverlay");
+    const btnContinueEndless = document.getElementById("btnContinueEndless");
+    const btnRestartWin = document.getElementById("btnRestartWin");
+
+    // ---------- Helpers ----------
+    function pickRandomCard() {
+      if (deck.length === 0) {
+          deck = database.map((_,i) => i);
+          // Shuffle
+          for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+          }
+      }
+      const idx = deck.pop();
+      return database[idx];
+    }
+
+    function resetClues() {
+      selectedClues.clear();
+      clueRowEl.innerHTML = "";
+      if (!currentCard || !currentCard.clues) return;
+      currentCard.clues.forEach((clue, idx) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "clue-chip";
+        chip.textContent = clue;
+        chip.dataset.index = idx;
+        chip.addEventListener("click", () => {
+          const i = chip.dataset.index;
+          if (selectedClues.has(i)) {
+            selectedClues.delete(i);
+            chip.classList.remove("active");
+          } else {
+            selectedClues.add(i);
+            chip.classList.add("active");
+          }
+        });
+        clueRowEl.appendChild(chip);
+      });
+    }
+
+    function highlightKeywords(text, keywords) {
+      let result = text;
+      (keywords || []).forEach(kw => {
+        const safeKw = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const re = new RegExp(safeKw, "gi");
+        result = result.replace(re, match => `<mark>${match}</mark>`);
+      });
+      return result;
+    }
+
+    function getCurrentRank() {
+        if (score >= 250) return "Bell-Curve Archmage";
+        if (score >= 140) return "Poisson Paladin";
+        if (score >= 60) return "Junior Oracle";
+        return "Acolyte";
+    }
+
+    function updateHUD() {
+      // SAFEGUARD: Only update if elements exist in DOM
+      if (scoreDisplayEl) scoreDisplayEl.textContent = score;
+      if (streakDisplayEl) streakDisplayEl.textContent = streak;
+      if (rankDisplayEl) rankDisplayEl.textContent = getCurrentRank();
+
+      if (streakNoteEl) {
+          if (streak >= 6) {
+            streakNoteEl.textContent = "Your streak glows. The Oracle is impressed.";
+          } else if (streak >= 3) {
+            streakNoteEl.textContent = "Nice streak building – keep chaining correct calls.";
+          } else if (streak === 0) {
+            streakNoteEl.textContent = "No current streak. Time to start a new one.";
+          } else {
+            streakNoteEl.textContent = "Good, now see how high you can push this streak.";
+          }
+      }
+      
+      // Lives visual
+      if (livesContainer) {
+          const pips = livesContainer.querySelectorAll(".life-pip");
+          pips.forEach((pip, i) => {
+              if (i < lives) pip.classList.remove("lost");
+              else pip.classList.add("lost");
+          });
+      }
+      if (livesTextEl) {
+          if (lives <= 1) livesTextEl.textContent = "CRITICAL WARNING";
+          else livesTextEl.textContent = "Systems Nominal";
+      }
+    }
+    
+    function shakeScreen() {
+        if (mainContainer) {
+            mainContainer.classList.remove("shake");
+            void mainContainer.offsetWidth; // Trigger reflow
+            mainContainer.classList.add("shake");
+        }
+    }
+    
+    function takeDamage() {
+        lives--;
+        shakeScreen();
+        streak = 0;
+        updateHUD();
+        if (lives <= 0) {
+            if(document.getElementById("finalScoreLoss")) document.getElementById("finalScoreLoss").textContent = score;
+            if(document.getElementById("finalRankLoss")) document.getElementById("finalRankLoss").textContent = getCurrentRank();
+            if(gameOverOverlay) gameOverOverlay.classList.remove("hidden");
+        }
+    }
+    
+    function checkWinCondition() {
+        if (score >= 250 && !hasWon) {
+            hasWon = true;
+            if(document.getElementById("finalScoreWin")) document.getElementById("finalScoreWin").textContent = score;
+            if(victoryOverlay) victoryOverlay.classList.remove("hidden");
+        }
+    }
+    
+    function resetGame() {
+        score = 0; streak = 0; lives = 3; trialId = 0;
+        hasWon = false;
+        deck = [];
+        setStage(1);
+        updateHUD();
+        loadNewTrial();
+    }
+
+    function setStage(newStage) {
+      stage = newStage;
+      if (stage === 1) {
+        stageLabelTextEl.textContent = "Stage 1 · Discrete vs Continuous";
+        stageChipTextEl.textContent = "Binary Gate";
+        modeNoteEl.innerHTML =
+          "Stage 1: is this a <b>count of events</b> (discrete) or a <b>measurement</b> (continuous)?";
+        stage1Buttons.classList.remove("hidden");
+        stage2Buttons.classList.add("hidden");
+      } else {
+        stageLabelTextEl.textContent = "Stage 2 · Distribution Family";
+        stageChipTextEl.textContent = "Family Selector";
+        modeNoteEl.innerHTML =
+          "Stage 2: pick the <b>distribution family</b> that naturally fits this situation, then <b>calibrate</b>.";
+        stage1Buttons.classList.add("hidden");
+        stage2Buttons.classList.remove("hidden");
+      }
+    }
+
+    function setButtonsDisabled(container, disabled) {
+      const btns = container.querySelectorAll("button");
+      btns.forEach(btn => {
+        btn.disabled = disabled;
+        btn.classList.remove("correct", "wrong");
+      });
+    }
+
+    function resetFeedback() {
+      feedbackTitleEl.textContent = ">> Oracle log";
+      feedbackBodyEl.innerHTML =
+        "Analyse the scenario, tap cues that stand out, then answer using the controls above.";
+      deepLogicBlockEl.classList.add("hidden");
+      deepLogicBlockEl.innerHTML = "";
+      useBlockEl.classList.add("hidden");
+      useContentEl.innerHTML = "";
+      btnDeepLogic.disabled = false;
+    }
+
+    // ---------- Visualiser core ----------
+    function startVizAnimation() {
+      if (!vizCtx) vizCtx = vizCanvas.getContext("2d");
+      stopVizAnimation();
+      scanX = 0;
+      const width = vizCanvas.width;
+      const animate = () => {
+        drawVizFrame();
+        scanX += 2;
+        if (scanX > width) scanX = 0;
+        vizAnimationId = requestAnimationFrame(animate);
+      };
+      vizAnimationId = requestAnimationFrame(animate);
+    }
+
+    function stopVizAnimation() {
+      if (vizAnimationId) {
+        cancelAnimationFrame(vizAnimationId);
+        vizAnimationId = null;
+      }
+    }
+
+    function drawVizFrame() {
+      if (!vizCtx) return;
+      const ctx = vizCtx;
+      const w = vizCanvas.width;
+      const h = vizCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.save();
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "rgba(148,163,184,0.18)";
+      ctx.lineWidth = 1;
+      const stepX = 40;
+      for (let x = 0; x <= w; x += stepX) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      const stepY = 30;
+      for (let y = 0; y <= h; y += stepY) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      if (!vizFamily || vizFamily === "idle") {
+        ctx.restore();
+        return;
+      }
+
+      if (vizFamily === "error") {
+        drawErrorShape(ctx, w, h);
+      } else {
+        drawDistributionShape(ctx, w, h, vizFamily, vizParam);
+      }
+
+      ctx.strokeStyle = "rgba(226,232,240,0.7)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(scanX, 0);
+      ctx.lineTo(scanX, h);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawErrorShape(ctx, w, h) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(248,113,113,0.8)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2);
+      for (let x = 0; x <= w; x += 8) {
+        const y = h / 2 + (Math.random() - 0.5) * (h / 2);
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(148,163,184,0.7)";
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2);
+      ctx.lineTo(w, h / 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function factorial(n) {
+      let res = 1;
+      for (let i = 2; i <= n; i++) res *= i;
+      return res;
+    }
+
+    function choose(n, k) {
+      if (k < 0 || k > n) return 0;
+      if (k === 0 || k === n) return 1;
+      let res = 1;
+      for (let i = 1; i <= k; i++) {
+        res *= (n - (k - i)) / i;
+      }
+      return res;
+    }
+
+    function drawDistributionShape(ctx, w, h, family, param) {
+      ctx.save();
+      const margin = 30;
+      const plotW = w - 2 * margin;
+      const plotH = h - 2 * margin;
+      const originX = margin;
+      const originY = h - margin;
+      const highlight = param && param.highlight ? param.highlight : null;
+
+      ctx.strokeStyle = "rgba(148,163,184,0.9)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX + plotW, originY);
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(originX, originY - plotH);
+      ctx.stroke();
+
+      const baseFill = "rgba(56,189,248,0.6)";
+      const baseStroke = "rgba(56,189,248,0.95)";
+      const highlightFill = "rgba(250,204,21,0.85)";
+      
+      if (family === "binomial") {
+        const n = (param && param.n) || 10;
+        const p = (param && param.p) || 0.5;
+        const probs = [];
+        let maxP = 0;
+        for (let k = 0; k <= n; k++) {
+          const pk = choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+          probs.push(pk);
+          if (pk > maxP) maxP = pk;
+        }
+        const barW = plotW / (n + 1);
+        probs.forEach((pk, k) => {
+          const x = originX + k * barW + barW * 0.1;
+          const barH = (pk / maxP) * (plotH * 0.9);
+          const y = originY - barH;
+          ctx.fillStyle = baseFill;
+          ctx.beginPath(); ctx.rect(x, y, barW * 0.8, barH); ctx.fill();
+        });
+        if (highlight) {
+          probs.forEach((pk, k) => {
+            let on = false;
+            if (highlight.mode === "discrete-geq" && k >= highlight.k0) on = true;
+            if (highlight.mode === "discrete-leq" && k <= highlight.k0) on = true;
+            if (highlight.mode === "discrete-eq"  && k === highlight.k0) on = true;
+            if (!on) return;
+            const x = originX + k * barW + barW * 0.1;
+            const barH = (pk / maxP) * (plotH * 0.9);
+            const y = originY - barH;
+            ctx.fillStyle = highlightFill;
+            ctx.beginPath(); ctx.rect(x, y, barW * 0.8, barH); ctx.fill();
+          });
+        }
+      } else if (family === "poisson") {
+        const lambda = (param && param.lambda) || 3;
+        const maxK = Math.max(10, Math.ceil(lambda * 3));
+        const probs = [];
+        let maxP = 0;
+        for (let k = 0; k <= maxK; k++) {
+          const pk = Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+          probs.push(pk);
+          if (pk > maxP) maxP = pk;
+        }
+        const barW = plotW / (maxK + 1);
+        probs.forEach((pk, k) => {
+          const x = originX + k * barW + barW * 0.15;
+          const barH = (pk / maxP) * (plotH * 0.9);
+          const y = originY - barH;
+          ctx.fillStyle = baseFill;
+          ctx.beginPath(); ctx.rect(x, y, barW * 0.7, barH); ctx.fill();
+        });
+        if (highlight) {
+          probs.forEach((pk, k) => {
+            let on = false;
+            if (highlight.mode === "discrete-geq" && k >= highlight.k0) on = true;
+            if (highlight.mode === "discrete-leq" && k <= highlight.k0) on = true;
+            if (highlight.mode === "discrete-eq"  && k === highlight.k0) on = true;
+            if (!on) return;
+            const x = originX + k * barW + barW * 0.15;
+            const barH = (pk / maxP) * (plotH * 0.9);
+            const y = originY - barH;
+            ctx.fillStyle = highlightFill;
+            ctx.beginPath(); ctx.rect(x, y, barW * 0.7, barH); ctx.fill();
+          });
+        }
+      } else if (family === "geometric") {
+        const p = (param && param.p) || 0.3;
+        const maxK = (param && param.maxK) || 10;
+        const probs = [];
+        let maxP = 0;
+        for (let k = 1; k <= maxK; k++) {
+          const pk = Math.pow(1 - p, k - 1) * p;
+          probs.push(pk);
+          if (pk > maxP) maxP = pk;
+        }
+        const barW = plotW / maxK;
+        probs.forEach((pk, idx) => {
+          const x = originX + idx * barW + barW * 0.15;
+          const barH = (pk / maxP) * (plotH * 0.9);
+          const y = originY - barH;
+          ctx.fillStyle = baseFill;
+          ctx.beginPath(); ctx.rect(x, y, barW * 0.7, barH); ctx.fill();
+        });
+        if (highlight) {
+          probs.forEach((pk, idx) => {
+            const k = idx + 1;
+            let on = false;
+            if (highlight.mode === "discrete-geq" && k >= highlight.k0) on = true;
+            if (highlight.mode === "discrete-leq" && k <= highlight.k0) on = true;
+            if (highlight.mode === "discrete-eq"  && k === highlight.k0) on = true;
+            if (!on) return;
+            const x = originX + idx * barW + barW * 0.15;
+            const barH = (pk / maxP) * (plotH * 0.9);
+            const y = originY - barH;
+            ctx.fillStyle = highlightFill;
+            ctx.beginPath(); ctx.rect(x, y, barW * 0.7, barH); ctx.fill();
+          });
+        }
+      } else if (family === "normal") {
+        const sigma = (param && param.sigma) || 1;
+        const steps = 200;
+        const domainMin = -3;
+        const domainMax = 3;
+        const maxY = 1 / (Math.sqrt(2 * Math.PI) * sigma);
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const t = domainMin + (domainMax - domainMin) * (i / steps);
+          const yVal = (1 / (Math.sqrt(2 * Math.PI) * sigma)) * Math.exp(-(t * t) / (2 * sigma * sigma));
+          const x = originX + ((t - domainMin) / (domainMax - domainMin)) * plotW;
+          const y = originY - (yVal / maxY) * (plotH * 0.9);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = baseStroke;
+        ctx.stroke();
+        if (highlight && highlight.mode === "continuous-range") {
+          const a = highlight.a;
+          const b = highlight.b;
+          const xA = originX + ((a - domainMin) / (domainMax - domainMin)) * plotW;
+          const xB = originX + ((b - domainMin) / (domainMax - domainMin)) * plotW;
+          ctx.beginPath();
+          ctx.moveTo(xA, originY);
+          const shadeSteps = 140;
+          for (let i = 0; i <= shadeSteps; i++) {
+            const t = a + (b - a) * (i / shadeSteps);
+            const yVal = (1 / (Math.sqrt(2 * Math.PI) * sigma)) * Math.exp(-(t * t) / (2 * sigma * sigma));
+            const x = originX + ((t - domainMin) / (domainMax - domainMin)) * plotW;
+            const y = originY - (yVal / maxY) * (plotH * 0.9);
+            ctx.lineTo(x, y);
+          }
+          ctx.lineTo(xB, originY);
+          ctx.closePath();
+          ctx.fillStyle = highlightFill;
+          ctx.fill();
+        }
+      } else if (family === "exponential") {
+        const lambda = (param && param.lambda) || 1.5;
+        const domainMin = (param && param.min) || 0;
+        const domainMax = (param && param.max) || 4;
+        const maxY = lambda;
+        const steps = 200;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const xVal = domainMin + (domainMax - domainMin) * (i / steps);
+          const yVal = lambda * Math.exp(-lambda * xVal);
+          const x = originX + ((xVal - domainMin) / (domainMax - domainMin)) * plotW;
+          const y = originY - (yVal / maxY) * (plotH * 0.9);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = baseStroke;
+        ctx.stroke();
+        if (highlight && (highlight.mode === "continuous-range" || highlight.mode === "continuous-right")) {
+          let a = highlight.a;
+          let b = highlight.b;
+          if (highlight.mode === "continuous-right") { a = highlight.a; b = domainMax; }
+          a = Math.max(a, domainMin); b = Math.min(b, domainMax);
+          if (b > a) {
+            const xA = originX + ((a - domainMin) / (domainMax - domainMin)) * plotW;
+            const xB = originX + ((b - domainMin) / (domainMax - domainMin)) * plotW;
+            ctx.beginPath();
+            ctx.moveTo(xA, originY);
+            const shadeSteps = 140;
+            for (let i = 0; i <= shadeSteps; i++) {
+              const xVal = a + (b - a) * (i / shadeSteps);
+              const yVal = lambda * Math.exp(-lambda * xVal);
+              const x = originX + ((xVal - domainMin) / (domainMax - domainMin)) * plotW;
+              const y = originY - (yVal / maxY) * (plotH * 0.9);
+              ctx.lineTo(x, y);
+            }
+            ctx.lineTo(xB, originY);
+            ctx.closePath();
+            ctx.fillStyle = highlightFill;
+            ctx.fill();
+          }
+        }
+      } else if (family === "uniform") {
+        const min = (param && param.min) || 0;
+        const max = (param && param.max) || 1;
+        const x0 = originX + plotW * 0.1;
+        const x1 = originX + plotW * 0.9;
+        const barH = plotH * 0.6;
+        const y = originY - barH;
+        ctx.fillStyle = baseFill;
+        ctx.beginPath();
+        ctx.rect(x0, y, x1 - x0, barH);
+        ctx.fill();
+        if (highlight && highlight.mode === "continuous-range") {
+          const a = highlight.a;
+          const b = highlight.b;
+          const domMin = min;
+          const domMax = max;
+          const fracA = (a - domMin) / (domMax - domMin);
+          const fracB = (b - domMin) / (domMax - domMin);
+          const hx0 = x0 + fracA * (x1 - x0);
+          const hx1 = x0 + fracB * (x1 - x0);
+          ctx.fillStyle = highlightFill;
+          ctx.beginPath();
+          ctx.rect(hx0, y, hx1 - hx0, barH);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    function updateInputForFamily(family) {
+      // Show the calibration block (Phase 3 UI)
+      calibrationBlock.classList.remove("hidden");
+      
+      if (currentCard && currentCard.calib) {
+          const c = currentCard.calib;
+          paramLabelEl.textContent = c.label;
+          paramInputEl.min = c.min;
+          paramInputEl.max = c.max;
+          paramInputEl.step = c.step;
+          paramInputEl.value = ""; // clear previous
+          
+          calibrationHintEl.textContent = `Hint: ${c.hint}`;
+      }
+    }
+
+    function setVizFamily(family, param) {
+      vizFamily = family;
+      vizParam = param || null;
+      if (family === "error") {
+        vizTitleEl.textContent = "VISUALIZER // ERROR FIELD";
+        vizModeTagEl.textContent = "The Oracle reports an inconsistent model. Recalibrate.";
+      } else if (!family || family === "idle") {
+        vizTitleEl.textContent = "VISUALIZER // waiting";
+        vizModeTagEl.textContent = "Shape will react to your chosen model.";
+        // If idle, hide Phase 3
+        calibrationBlock.classList.add("hidden");
+      } else {
+        vizTitleEl.textContent = "VISUALIZER // " + family.toUpperCase();
+        vizModeTagEl.textContent = "Sketch of the probability curve.";
+      }
+    }
+    
+    function updateVizFromInput() {
+        if (!vizFamily || vizFamily === "idle") return;
+        const val = parseFloat(paramInputEl.value);
+        if (isNaN(val)) return;
+        
+        if (!vizParam) vizParam = {};
+        
+        if (vizFamily === 'poisson') vizParam.lambda = val;
+        else if (vizFamily === 'exponential') vizParam.lambda = val;
+        else if (vizFamily === 'normal') vizParam.sigma = val;
+        else if (vizFamily === 'binomial') vizParam.p = val;
+        else if (vizFamily === 'geometric') vizParam.p = val;
+        else if (vizFamily === 'uniform') vizParam.max = val;
+        
+        // Hide answer (highlight) while calibrating
+        if (!btnCalibrate.disabled) {
+            vizParam.highlight = null;
+        } else {
+            vizParam.highlight = currentCard.viz.highlight;
+        }
+        
+        drawVizFrame();
+    }
+
+    // ---------- Game flow ----------
+    function loadNewTrial() {
+      currentCard = pickRandomCard();
+      totalTrials += 1;
+      const trialStr = String(trialId).padStart(3, "0");
+      sysLabelEl.textContent = `SYS.TRIAL #${trialStr} // Scenario feed`;
+
+      scenarioTextEl.innerHTML = highlightKeywords(
+        currentCard.text,
+        currentCard.keywords
+      );
+
+      resetClues();
+      setButtonsDisabled(stage1Buttons, false);
+      setButtonsDisabled(stage2Buttons, false);
+      
+      btnNextTrial.disabled = true;
+      btnNextTrial.textContent = "Next trial ▶";
+
+      resetFeedback();
+      setVizFamily("idle");
+      vizHintTextEl.textContent =
+        "After choosing the correct family in Stage 2, you will calibrate the model.";
+      
+      // Reset Phase 3 UI
+      calibrationBlock.classList.add("hidden");
+      btnCalibrate.disabled = false;
+      btnCalibrate.textContent = "SYNC & UNLOCK";
+      btnCalibrate.classList.remove("correct", "wrong");
+      paramInputEl.value = "";
+
+      // Ensure buttons logic is Stage 1
+      setStage(1);
+    }
+
+    function handleStage1Answer(answerType) {
+      if (!currentCard) return;
+      const correct = currentCard.type;
+      setButtonsDisabled(stage1Buttons, true);
+
+      let clueText = "";
+      if (selectedClues.size > 0) {
+        const picked = [...selectedClues].map(i => currentCard.clues[i]).join("; ");
+        clueText = `<br><br><b>Clues you tapped:</b> ${picked}.`;
+      }
+
+      if (answerType === correct) {
+        score += 10;
+        streak += 1;
+        stage1Correct += 1;
+        feedbackTitleEl.textContent = ">> Analysis accurate 🎉";
+        feedbackBodyEl.innerHTML =
+          (correct === "discrete"
+            ? "You correctly identified this as a <b>discrete</b> situation: we are counting events in jumps (0,1,2,...)."
+            : "You correctly identified this as a <b>continuous</b> situation: the outcome can vary smoothly on a scale.")
+          + clueText;
+
+        // Auto advance to Stage 2
+        setTimeout(() => {
+           setStage(2);
+        }, 800);
+        
+      } else {
+        score = Math.max(0, score - 3);
+        streak = 0;
+        takeDamage();
+        feedbackTitleEl.textContent = ">> Calibration needed 🚫";
+        const correctLabel =
+          correct === "discrete" ? "discrete (counts of events)" : "continuous (measurements)";
+        feedbackBodyEl.innerHTML =
+          `This scenario is better viewed as <b>${correctLabel}</b>. Focus on what is actually being recorded: count vs measurement.`
+          + clueText;
+        btnNextTrial.disabled = false;
+        btnNextTrial.textContent = "Try another scenario ▶";
+      }
+
+      updateHUD();
+    }
+
+    function handleStage2Answer(selectedFamily, btn) {
+      if (!currentCard) return;
+      const correctFamily = currentCard.family;
+      const allSpellButtons = stage2Buttons.querySelectorAll(".spell");
+      if (btn.disabled) return;
+
+      if (selectedFamily === correctFamily) {
+        allSpellButtons.forEach(b => {
+          b.disabled = true;
+          if (b.dataset.family === selectedFamily) {
+            b.classList.add("correct");
+          }
+        });
+        score += 20;
+        streak += 1;
+        feedbackTitleEl.textContent = ">> Model Identified ✅";
+
+        // ORGANIC PHASE 3 TRIGGER
+        feedbackBodyEl.innerHTML =
+          `${currentCard.teach}<br><br><b>PHASE 3:</b> The model is correct but needs data. Read the text, find the parameter value (e.g. Mean, Rate), and enter it on the right to unlock the answer.`;
+
+        // Keep deep logic hidden until calibration success
+        deepLogicBlockEl.classList.add("hidden");
+        useBlockEl.classList.add("hidden");
+        btnDeepLogic.disabled = true;
+
+        // Activate visualizer but hide the highlight (answer)
+        const rawViz = { ...currentCard.viz, highlight: null };
+        setVizFamily(correctFamily, rawViz);
+        updateInputForFamily(correctFamily);
+        startVizAnimation();
+
+        vizHintTextEl.textContent =
+          "Input the parameter from the text to visualize the correct graph.";
+
+      } else {
+        btn.classList.add("wrong");
+        btn.disabled = true;
+        score = Math.max(0, score - 5);
+        streak = 0;
+        takeDamage();
+        feedbackTitleEl.textContent = ">> Inconsistent model 🚫";
+
+        const famNice = {
+          binomial: "Binomial: fixed trials, count successes.",
+          poisson: "Poisson: count of events per time/space window.",
+          geometric: "Geometric: number of trials until first success.",
+          normal: "Normal: bell around a mean, many small effects.",
+          exponential: "Exponential: time until an event with constant rate.",
+          uniform: "Uniform: all values equally likely on an interval."
+        };
+
+        feedbackBodyEl.innerHTML =
+          `That family does not match the scenario. Think about the <b>cue words</b> and try again.<br><br><i>Quick reminder:</i> ${
+            famNice[selectedFamily] || ""
+          }`;
+
+        setVizFamily("error");
+        startVizAnimation();
+        useBlockEl.classList.add("hidden");
+        useContentEl.innerHTML = "";
+      }
+
+      updateHUD();
+    }
+    
+    function handleCalibration() {
+       const val = parseFloat(paramInputEl.value);
+       const target = currentCard.calib.target;
+       
+       // Check if input is valid number
+       if (isNaN(val)) return;
+       
+       // Check absolute difference within tolerance
+       if (Math.abs(val - target) <= 0.1) {
+           // Success
+           score += 20;
+           streak += 1;
+           checkWinCondition();
+           
+           btnCalibrate.textContent = "LOCKED // SUCCESS";
+           btnCalibrate.disabled = true;
+           btnCalibrate.classList.add("correct");
+           
+           feedbackTitleEl.textContent = ">> FULL SYNC ACHIEVED 🚀";
+           feedbackBodyEl.innerHTML += "<br><br><b>Parameters Locked.</b> Probability metrics decrypted.";
+           
+           // REVEAL ORIGINAL REWARDS
+           feedbackBodyEl.innerHTML += `<div class="shape">${currentCard.shapeExplain}</div>`;
+           
+           if (currentCard.useVar) {
+               useBlockEl.classList.remove("hidden");
+               useContentEl.innerHTML = `<p>${currentCard.useQuestion}</p><p>${currentCard.useExplain}</p>`;
+           }
+           
+           btnDeepLogic.disabled = false;
+           
+           // Show highlight
+           vizParam.highlight = currentCard.viz.highlight;
+           drawVizFrame();
+           
+           btnNextTrial.disabled = false;
+           btnNextTrial.textContent = "Next trial ▶";
+           
+       } else {
+           score = Math.max(0, score - 5);
+           streak = 0;
+           takeDamage();
+           
+           feedbackTitleEl.textContent = ">> PARAMETER MISMATCH ⚠️";
+           feedbackBodyEl.innerHTML += `<br><span style="color:#f87171">Value ${val} does not match text. Hint: ${currentCard.calib.hint}</span>`;
+           
+           btnCalibrate.classList.add("wrong");
+           setTimeout(()=>btnCalibrate.classList.remove("wrong"), 500);
+       }
+       updateHUD();
+    }
+
+    // ---------- Event wiring ----------
+    btnDiscrete.addEventListener("click", () => handleStage1Answer("discrete"));
+    btnContinuous.addEventListener("click", () => handleStage1Answer("continuous"));
+
+    spellButtons.forEach(btn => {
+      btn.addEventListener("click", () =>
+        handleStage2Answer(btn.dataset.family, btn)
+      );
+    });
+
+    btnNextTrial.addEventListener("click", () => {
+      trialId += 1;
+      loadNewTrial();
+    });
+    
+    // NEW: Calibration
+    btnCalibrate.addEventListener("click", handleCalibration);
+    paramInputEl.addEventListener("input", updateVizFromInput);
+
+    btnHint.addEventListener("click", () => {
+      if (!currentCard) return;
+      const hintClue = currentCard.clues && currentCard.clues[0]
+        ? currentCard.clues[0]
+        : "Focus on whether we are counting events or measuring a quantity.";
+      feedbackTitleEl.textContent = ">> Hint protocol";
+      feedbackBodyEl.innerHTML =
+        `Look for phrases that hint at the <b>structure</b> of the data. For this one, a helpful clue is: <b>${hintClue}</b>.`;
+    });
+    
+    btnReset.addEventListener("click", resetGame);
+
+    btnDeepLogic.addEventListener("click", () => {
+      if (!currentCard) return;
+      deepLogicBlockEl.classList.remove("hidden");
+      deepLogicBlockEl.innerHTML = currentCard.deepLogic;
+      btnDeepLogic.disabled = true;
+    });
+    
+    // Overlay buttons
+    btnBeginIntro.addEventListener("click", () => {
+      introOverlayEl.classList.add("hidden");
+      loadNewTrial();
+      startVizAnimation();
+    });
+    
+    // Skip button
+    if (btnJumpStage2) {
+        btnJumpStage2.addEventListener("click", () => {
+          setStage(2);
+          loadNewTrial();
+        });
+    }
+    
+    btnRetryLoss.addEventListener("click", () => {
+        gameOverOverlay.classList.add("hidden");
+        resetGame();
+    });
+    
+    btnRestartWin.addEventListener("click", () => {
+        victoryOverlay.classList.add("hidden");
+        resetGame();
+    });
+    
+    btnContinueEndless.addEventListener("click", () => {
+        victoryOverlay.classList.add("hidden");
+        loadNewTrial();
+    });
+
+    // ---------- Init ----------
+    window.addEventListener("load", () => {
+      vizCtx = vizCanvas.getContext("2d");
+      setStage(1);
+      updateHUD();
+      setVizFamily("idle");
+      startVizAnimation();
+    });
+  </script>
+</body>
+</html>

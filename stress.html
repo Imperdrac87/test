@@ -1,0 +1,2144 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Calm Mind - Anxiety Relief App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #E8F5E8 0%, #F0F8FF 50%, #FFF0F5 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Floating background particles */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #2E7D32;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #555;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            line-height: 1.4;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .nav-tab {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(12px, 2.5vw, 14px);
+            font-weight: 500;
+            color: #2E7D32;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 80px;
+            text-align: center;
+            touch-action: manipulation;
+        }
+
+        .nav-tab:hover, .nav-tab:focus {
+            background: rgba(46, 125, 50, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            outline: none;
+        }
+
+        .nav-tab.active {
+            background: #2E7D32;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Content sections */
+        .content-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Breathing Exercise */
+        .breathing-container {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .breathing-circle {
+            width: clamp(150px, 40vw, 200px);
+            height: clamp(150px, 40vw, 200px);
+            border: 4px solid #4CAF50;
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.3) 100%);
+        }
+
+        .breathing-circle.inhale {
+            animation: breatheIn 4s ease-in-out infinite;
+        }
+
+        .breathing-circle.exhale {
+            animation: breatheOut 4s ease-in-out infinite;
+        }
+
+        @keyframes breatheIn {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        @keyframes breatheOut {
+            0%, 100% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+        }
+
+        .breathing-text {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            font-weight: 600;
+            color: #2E7D32;
+        }
+
+        .breathing-controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: clamp(14px, 2.5vw, 16px);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            min-width: 100px;
+            touch-action: manipulation;
+        }
+
+        .btn:hover, .btn:focus {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            outline: none;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn.secondary {
+            background: #FF6B6B;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn.secondary:hover, .btn.secondary:focus {
+            background: #FF5252;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Timer */
+        .timer-container {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .timer-display {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 300;
+            color: #2E7D32;
+            margin: 30px 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-presets {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .preset-btn {
+            padding: 10px 16px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 2px solid #4CAF50;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #2E7D32;
+            font-weight: 500;
+            font-size: clamp(12px, 2.5vw, 14px);
+            min-width: 60px;
+            touch-action: manipulation;
+        }
+
+        .preset-btn:hover, .preset-btn:focus {
+            background: #4CAF50;
+            color: white;
+            outline: none;
+        }
+
+        /* Stress Ball */
+        .stress-ball-container {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .stress-ball {
+            width: clamp(120px, 30vw, 150px);
+            height: clamp(120px, 30vw, 150px);
+            background: radial-gradient(circle at 30% 30%, #FFE082, #FFA726, #FF8F00);
+            border-radius: 50%;
+            margin: 30px auto;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 8px 25px rgba(255, 143, 0, 0.3);
+            position: relative;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .stress-ball:active {
+            transform: scale(0.9);
+            box-shadow: 0 4px 15px rgba(255, 143, 0, 0.5);
+        }
+
+        .squeeze-counter {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: #2E7D32;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        /* Progressive Muscle Relaxation */
+        .pmr-container {
+            padding: 10px;
+        }
+
+        .muscle-group {
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 5px solid #4CAF50;
+            touch-action: manipulation;
+        }
+
+        .muscle-group:hover, .muscle-group:focus {
+            background: rgba(76, 175, 80, 0.2);
+            transform: translateX(5px);
+            outline: none;
+        }
+
+        .muscle-group.active {
+            background: rgba(76, 175, 80, 0.3);
+            transform: scale(1.02);
+        }
+
+        .muscle-group h3 {
+            color: #2E7D32;
+            margin-bottom: 8px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+
+        .muscle-group p {
+            color: #555;
+            line-height: 1.6;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+        }
+
+        /* Mini Games */
+        .game-container {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            touch-action: manipulation;
+        }
+
+        .game-card:hover, .game-card:focus {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        .game-card h3 {
+            color: #2E7D32;
+            margin-bottom: 8px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+
+        .game-card p {
+            color: #666;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            line-height: 1.4;
+        }
+
+        /* Color Matching Game */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 280px;
+            margin: 20px auto;
+        }
+
+        .color-tile {
+            aspect-ratio: 1;
+            min-height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            touch-action: manipulation;
+        }
+
+        .color-tile:hover, .color-tile:focus {
+            transform: scale(1.1);
+            border-color: #333;
+            outline: none;
+        }
+
+        .color-tile.matched {
+            opacity: 0.5;
+            transform: scale(0.9);
+        }
+
+        .target-color-display {
+            display: inline-block;
+            width: clamp(30px, 8vw, 40px);
+            height: clamp(30px, 8vw, 40px);
+            border-radius: 50%;
+            border: 3px solid #333;
+            margin: 0 10px;
+            vertical-align: middle;
+            transition: all 0.3s ease;
+        }
+
+        /* Zen Drawing Pad */
+        .drawing-canvas {
+            border: 2px solid #4CAF50;
+            border-radius: 15px;
+            cursor: crosshair;
+            background: white;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+
+        .drawing-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-picker {
+            width: clamp(35px, 8vw, 45px);
+            height: clamp(35px, 8vw, 45px);
+            border-radius: 50%;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            touch-action: manipulation;
+        }
+
+        .color-picker:hover, .color-picker:focus {
+            transform: scale(1.2);
+            outline: none;
+        }
+
+        .color-picker.active {
+            border-color: #333;
+            transform: scale(1.3);
+        }
+
+        /* Memory Pattern Game */
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 180px;
+            margin: 20px auto;
+        }
+
+        .pattern-tile {
+            aspect-ratio: 1;
+            min-height: 50px;
+            background: #E0E0E0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .pattern-tile.active {
+            background: #4CAF50;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .pattern-tile.user-active {
+            background: #2196F3;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Bubble Popping */
+        .bubble-container {
+            position: relative;
+            height: clamp(300px, 50vw, 400px);
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            border-radius: 15px;
+            margin: 20px 0;
+            touch-action: manipulation;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.6));
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            touch-action: manipulation;
+            animation: bubbleFloat linear infinite;
+        }
+
+        @keyframes bubbleFloat {
+            0% {
+                bottom: -60px;
+                opacity: 0;
+                transform: scale(0);
+            }
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                bottom: 100%;
+                opacity: 0;
+                transform: scale(1);
+            }
+        }
+
+        .bubble:hover {
+            animation-play-state: paused;
+            transform: scale(1.2) !important;
+        }
+
+        /* Nature Scene Builder */
+        .scene-builder {
+            position: relative;
+            height: clamp(250px, 40vw, 300px);
+            background: linear-gradient(to bottom, #87CEEB, #98FB98);
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            cursor: pointer;
+            touch-action: manipulation;
+            border: 2px dashed rgba(76, 175, 80, 0.3);
+        }
+
+        .scene-builder.has-elements {
+            border: 2px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .scene-builder::before {
+            content: "Click an element below, then click here to place it";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(46, 125, 50, 0.6);
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            text-align: center;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .scene-builder.has-elements::before {
+            opacity: 0;
+        }
+
+        .nature-element {
+            position: absolute;
+            transition: all 0.3s ease;
+            cursor: move;
+            font-size: clamp(20px, 5vw, 24px);
+            user-select: none;
+            touch-action: none;
+            padding: 4px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nature-element:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .nature-element.dragging {
+            z-index: 1000;
+            transform: scale(1.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .element-palette {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .element-btn {
+            padding: 8px 12px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 2px solid #4CAF50;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(16px, 4vw, 20px);
+            min-width: 50px;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        .element-btn:hover, .element-btn:focus {
+            background: #4CAF50;
+            color: white;
+            outline: none;
+            transform: scale(1.1);
+        }
+
+        .element-btn.selected {
+            background: #4CAF50;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .element-btn::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: #FF6B6B;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .element-btn.selected::after {
+            opacity: 1;
+        }
+
+        /* Game sections */
+        .game-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+        }
+
+        .game-section h3 {
+            color: #2E7D32;
+            margin-bottom: 15px;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+
+        .game-section p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .game-stats {
+            text-align: center;
+            margin: 15px 0;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .game-stats > div {
+            margin: 5px 0;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        /* Success animations */
+        @keyframes success {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: #4CAF50; }
+            100% { transform: scale(1); }
+        }
+
+        .success-animation {
+            animation: success 0.6s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Calm pulsing effect */
+        @keyframes calmPulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .calm-pulse {
+            animation: calmPulse 3s ease-in-out infinite;
+        }
+
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+
+            .nav-tabs {
+                gap: 5px;
+            }
+
+            .nav-tab {
+                padding: 10px 12px;
+                font-size: 12px;
+                min-width: 70px;
+            }
+
+            .content-section {
+                padding: 15px 10px;
+            }
+
+            .breathing-controls,
+            .timer-presets {
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-width: 80px;
+            }
+
+            .game-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .drawing-canvas {
+                width: 100%;
+                height: 200px;
+            }
+
+            .color-grid {
+                max-width: 240px;
+                gap: 6px;
+            }
+
+            .pattern-grid {
+                max-width: 150px;
+                gap: 6px;
+            }
+        }
+
+        /* Desktop specific styles */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+
+            .content-section {
+                padding: 40px 30px;
+            }
+
+            .game-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .breathing-container,
+            .timer-container,
+            .stress-ball-container {
+                padding: 40px 20px;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .btn, .nav-tab, .preset-btn, .element-btn {
+                border: none;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        /* Instructions text */
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .instructions p {
+            margin: 5px 0;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            line-height: 1.5;
+        }
+
+        .instructions strong {
+            color: #2E7D32;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles background -->
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌸 Calm Mind</h1>
+            <p>Your personal anxiety relief companion with soothing exercises and mindful games</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('breathing')" tabindex="0">🫁 Breathing</button>
+            <button class="nav-tab" onclick="showSection('meditation')" tabindex="0">🧘 Meditation</button>
+            <button class="nav-tab" onclick="showSection('stress-ball')" tabindex="0">⚽ Stress Ball</button>
+            <button class="nav-tab" onclick="showSection('muscle-relaxation')" tabindex="0">💪 Muscle Relaxation</button>
+            <button class="nav-tab" onclick="showSection('mini-games')" tabindex="0">🎮 Mini Games</button>
+        </div>
+
+        <!-- Breathing Exercise Section -->
+        <div id="breathing" class="content-section active">
+            <div class="breathing-container">
+                <h2>Guided Breathing Exercise</h2>
+                <p>Follow the circle's rhythm to calm your mind and reduce anxiety</p>
+                
+                <div class="breathing-circle" id="breathingCircle">
+                    <div class="breathing-text" id="breathingText">Ready</div>
+                </div>
+                
+                <div class="breathing-controls">
+                    <button class="btn" id="startBreathing" onclick="startBreathing()" tabindex="0">Start Breathing</button>
+                    <button class="btn" id="stopBreathing" onclick="stopBreathing()" disabled tabindex="0">Stop</button>
+                </div>
+                
+                <div class="instructions">
+                    <p><strong>Instructions:</strong></p>
+                    <p>• Inhale slowly as the circle expands</p>
+                    <p>• Exhale gently as the circle contracts</p>
+                    <p>• Focus only on your breath and the movement</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meditation Timer Section -->
+        <div id="meditation" class="content-section">
+            <div class="timer-container">
+                <h2>Meditation Timer</h2>
+                <p>Set a timer for your mindfulness practice</p>
+                
+                <div class="timer-display" id="timerDisplay">05:00</div>
+                
+                <div class="timer-presets">
+                    <button class="preset-btn" onclick="setTimer(300)" tabindex="0">5 min</button>
+                    <button class="preset-btn" onclick="setTimer(600)" tabindex="0">10 min</button>
+                    <button class="preset-btn" onclick="setTimer(900)" tabindex="0">15 min</button>
+                    <button class="preset-btn" onclick="setTimer(1200)" tabindex="0">20 min</button>
+                </div>
+                
+                <div class="breathing-controls">
+                    <button class="btn" id="startTimer" onclick="startTimer()" tabindex="0">Start</button>
+                    <button class="btn" id="pauseTimer" onclick="pauseTimer()" disabled tabindex="0">Pause</button>
+                    <button class="btn" id="resetTimer" onclick="resetTimer()" tabindex="0">Reset</button>
+                </div>
+                
+                <div class="instructions">
+                    <p><strong>Meditation Tips:</strong></p>
+                    <p>• Find a comfortable, quiet space</p>
+                    <p>• Focus on your breath or a simple mantra</p>
+                    <p>• When your mind wanders, gently return to your focus</p>
+                    <p>• Start with shorter sessions and gradually increase</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stress Ball Section -->
+        <div id="stress-ball" class="content-section">
+            <div class="stress-ball-container">
+                <h2>Virtual Stress Ball</h2>
+                <p>Click and hold to squeeze away your stress</p>
+                
+                <div class="stress-ball" id="stressBall" 
+                     onmousedown="squeezeBall()" 
+                     onmouseup="releaseBall()" 
+                     ontouchstart="squeezeBall(event)" 
+                     ontouchend="releaseBall(event)"
+                     tabindex="0"
+                     onkeydown="handleStressBallKey(event)"></div>
+                
+                <div class="squeeze-counter">
+                    Squeezes: <span id="squeezeCount">0</span>
+                </div>
+                
+                <div class="instructions">
+                    <p><strong>How to use:</strong></p>
+                    <p>• Click and hold the ball to squeeze it</p>
+                    <p>• Release to let it return to normal</p>
+                    <p>• Focus on the physical sensation of squeezing</p>
+                    <p>• Use this when feeling overwhelmed or tense</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progressive Muscle Relaxation Section -->
+        <div id="muscle-relaxation" class="content-section">
+            <div class="pmr-container">
+                <h2>Progressive Muscle Relaxation</h2>
+                <p>Click on each muscle group for guided relaxation instructions</p>
+                
+                <div class="muscle-group" onclick="toggleMuscleGroup(this, 'face')" tabindex="0" onkeydown="handleMuscleGroupKey(event, this, 'face')">
+                    <h3>🧠 Face & Head</h3>
+                    <p>Tense your facial muscles, scrunch your forehead, close your eyes tightly. Hold for 5 seconds, then release and feel the relaxation.</p>
+                </div>
+                
+                <div class="muscle-group" onclick="toggleMuscleGroup(this, 'shoulders')" tabindex="0" onkeydown="handleMuscleGroupKey(event, this, 'shoulders')">
+                    <h3>🤷 Shoulders & Neck</h3>
+                    <p>Raise your shoulders up to your ears, tense your neck muscles. Hold for 5 seconds, then let them drop and relax completely.</p>
+                </div>
+                
+                <div class="muscle-group" onclick="toggleMuscleGroup(this, 'arms')" tabindex="0" onkeydown="handleMuscleGroupKey(event, this, 'arms')">
+                    <h3>💪 Arms & Hands</h3>
+                    <p>Make fists and tense your arm muscles from hands to shoulders. Hold tightly for 5 seconds, then release and let your arms go limp.</p>
+                </div>
+                
+                <div class="muscle-group" onclick="toggleMuscleGroup(this, 'chest')" tabindex="0" onkeydown="handleMuscleGroupKey(event, this, 'chest')">
+                    <h3>🫁 Chest & Back</h3>
+                    <p>Take a deep breath and tense your chest and back muscles. Hold for 5 seconds, then exhale and let all tension melt away.</p>
+                </div>
+                
+                <div class="muscle-group" onclick="toggleMuscleGroup(this, 'stomach')" tabindex="0" onkeydown="handleMuscleGroupKey(event, this, 'stomach')">
+                    <h3>🤰 Stomach</h3>
+                    <p>Tighten your abdominal muscles as if preparing for a punch. Hold for 5 seconds, then release and breathe naturally.</p>
+                </div>
+                
+                <div class="muscle-group" onclick="toggleMuscleGroup(this, 'legs')" tabindex="0" onkeydown="handleMuscleGroupKey(event, this, 'legs')">
+                    <h3>🦵 Legs & Feet</h3>
+                    <p>Tense your leg muscles from thighs to toes, point your feet. Hold for 5 seconds, then release and feel the heaviness of relaxation.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini Games Section -->
+        <div id="mini-games" class="content-section">
+            <div class="game-container">
+                <h2>Mindful Mini Games</h2>
+                <p>Engage in these calming activities to redirect anxious thoughts</p>
+                
+                <div class="game-grid">
+                    <div class="game-card" onclick="showGame('color-matching')" tabindex="0" onkeydown="handleGameCardKey(event, 'color-matching')">
+                        <h3>🎨 Color Matching</h3>
+                        <p>Match colors to create harmony and focus your mind</p>
+                    </div>
+                    
+                    <div class="game-card" onclick="showGame('zen-drawing')" tabindex="0" onkeydown="handleGameCardKey(event, 'zen-drawing')">
+                        <h3>✏️ Zen Drawing</h3>
+                        <p>Draw freely to express yourself and find inner peace</p>
+                    </div>
+                    
+                    <div class="game-card" onclick="showGame('memory-pattern')" tabindex="0" onkeydown="handleGameCardKey(event, 'memory-pattern')">
+                        <h3>🧩 Memory Pattern</h3>
+                        <p>Follow patterns to improve focus and mindfulness</p>
+                    </div>
+                    
+                    <div class="game-card" onclick="showGame('bubble-popping')" tabindex="0" onkeydown="handleGameCardKey(event, 'bubble-popping')">
+                        <h3>🫧 Bubble Popping</h3>
+                        <p>Pop bubbles for instant stress relief and joy</p>
+                    </div>
+                    
+                    <div class="game-card" onclick="showGame('nature-scene')" tabindex="0" onkeydown="handleGameCardKey(event, 'nature-scene')">
+                        <h3>🌳 Nature Scene</h3>
+                        <p>Build peaceful nature scenes to calm your mind</p>
+                    </div>
+                </div>
+                
+                <!-- Color Matching Game -->
+                <div id="color-matching-game" class="game-section" style="display: none;">
+                    <h3>Color Matching Therapy</h3>
+                    <p>Click tiles to match the target color</p>
+                    <div class="game-stats">
+                        <div>Target Color: <span id="targetColor" class="target-color-display"></span></div>
+                        <div>Score: <span id="colorScore">0</span></div>
+                    </div>
+                    <div class="color-grid" id="colorGrid"></div>
+                    <div class="game-controls">
+                        <button class="btn" onclick="newColorGame()" tabindex="0">New Game</button>
+                    </div>
+                </div>
+                
+                <!-- Zen Drawing Game -->
+                <div id="zen-drawing-game" class="game-section" style="display: none;">
+                    <h3>Zen Drawing Pad</h3>
+                    <p>Let your creativity flow freely</p>
+                    <canvas id="drawingCanvas" class="drawing-canvas" width="400" height="300"></canvas>
+                    <div class="drawing-controls">
+                        <div class="color-picker active" style="background: #000;" onclick="setDrawColor('#000')" tabindex="0" onkeydown="handleColorPickerKey(event, '#000')"></div>
+                        <div class="color-picker" style="background: #4CAF50;" onclick="setDrawColor('#4CAF50')" tabindex="0" onkeydown="handleColorPickerKey(event, '#4CAF50')"></div>
+                        <div class="color-picker" style="background: #2196F3;" onclick="setDrawColor('#2196F3')" tabindex="0" onkeydown="handleColorPickerKey(event, '#2196F3')"></div>
+                        <div class="color-picker" style="background: #FF9800;" onclick="setDrawColor('#FF9800')" tabindex="0" onkeydown="handleColorPickerKey(event, '#FF9800')"></div>
+                        <div class="color-picker" style="background: #E91E63;" onclick="setDrawColor('#E91E63')" tabindex="0" onkeydown="handleColorPickerKey(event, '#E91E63')"></div>
+                        <div class="color-picker" style="background: #9C27B0;" onclick="setDrawColor('#9C27B0')" tabindex="0" onkeydown="handleColorPickerKey(event, '#9C27B0')"></div>
+                    </div>
+                    <div class="game-controls">
+                        <button class="btn" onclick="clearCanvas()" tabindex="0">Clear Canvas</button>
+                    </div>
+                </div>
+                
+                <!-- Memory Pattern Game -->
+                <div id="memory-pattern-game" class="game-section" style="display: none;">
+                    <h3>Memory Pattern Game</h3>
+                    <p>Watch the pattern, then repeat it by clicking the tiles in the same order</p>
+                    <div class="game-stats">
+                        <div>Level: <span id="patternLevel">1</span></div>
+                        <div>Status: <span id="patternStatus">Ready</span></div>
+                        <div>Pattern Length: <span id="patternLength">3</span></div>
+                    </div>
+                    <div class="pattern-grid" id="patternGrid"></div>
+                    <div class="game-controls">
+                        <button class="btn" onclick="startPatternGame()" tabindex="0">Start Game</button>
+                        <button class="btn secondary" onclick="resetPatternGame()" tabindex="0">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Bubble Popping Game -->
+                <div id="bubble-popping-game" class="game-section" style="display: none;">
+                    <h3>Bubble Popping Therapy</h3>
+                    <p>Pop the bubbles to release stress</p>
+                    <div class="game-stats">
+                        <div>Bubbles Popped: <span id="bubbleScore">0</span></div>
+                    </div>
+                    <div class="bubble-container" id="bubbleContainer"></div>
+                    <div class="game-controls">
+                        <button class="btn" onclick="toggleBubbles()" tabindex="0" id="bubbleToggleBtn">Start Bubbles</button>
+                        <button class="btn secondary" onclick="resetBubbleGame()" tabindex="0">Reset Score</button>
+                    </div>
+                </div>
+                
+                <!-- Nature Scene Builder -->
+                <div id="nature-scene-game" class="game-section" style="display: none;">
+                    <h3>Nature Scene Builder</h3>
+                    <p>Select elements below, then click in the scene to place them. Drag elements to move them around.</p>
+                    <div class="scene-builder" id="sceneBuilder" onclick="placeElement(event)"></div>
+                    <div class="element-palette">
+                        <button class="element-btn" onclick="selectElement('🌳')" tabindex="0" onkeydown="handleElementBtnKey(event, '🌳')" data-element="🌳">🌳</button>
+                        <button class="element-btn" onclick="selectElement('🌸')" tabindex="0" onkeydown="handleElementBtnKey(event, '🌸')" data-element="🌸">🌸</button>
+                        <button class="element-btn" onclick="selectElement('🦋')" tabindex="0" onkeydown="handleElementBtnKey(event, '🦋')" data-element="🦋">🦋</button>
+                        <button class="element-btn" onclick="selectElement('🌞')" tabindex="0" onkeydown="handleElementBtnKey(event, '🌞')" data-element="🌞">🌞</button>
+                        <button class="element-btn" onclick="selectElement('☁️')" tabindex="0" onkeydown="handleElementBtnKey(event, '☁️')" data-element="☁️">☁️</button>
+                        <button class="element-btn" onclick="selectElement('🏔️')" tabindex="0" onkeydown="handleElementBtnKey(event, '🏔️')" data-element="🏔️">🏔️</button>
+                        <button class="element-btn" onclick="selectElement('🌊')" tabindex="0" onkeydown="handleElementBtnKey(event, '🌊')" data-element="🌊">🌊</button>
+                        <button class="element-btn" onclick="selectElement('🌺')" tabindex="0" onkeydown="handleElementBtnKey(event, '🌺')" data-element="🌺">🌺</button>
+                    </div>
+                    <div class="game-controls">
+                        <button class="btn secondary" onclick="clearScene()" tabindex="0">Clear Scene</button>
+                        <button class="btn" onclick="saveScene()" tabindex="0">Save Scene</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let breathingInterval;
+        let breathingActive = false;
+        let timerInterval;
+        let timerActive = false;
+        let currentTime = 300; // 5 minutes default
+        let squeezeCount = 0;
+        let currentDrawColor = '#000';
+        let isDrawing = false;
+        let lastDrawPoint = null;
+        let bubbleInterval;
+        let bubblesActive = false;
+        let bubbleScore = 0;
+        let selectedElement = null;
+        let colorGameColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+        let targetColorIndex = 0;
+        let colorScore = 0;
+        let patternSequence = [];
+        let userSequence = [];
+        let patternLevel = 1;
+        let showingPattern = false;
+        let patternGameActive = false;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingParticles();
+            initializeDrawingCanvas();
+            initializeColorGame();
+            initializePatternGame();
+            setupMobileOptimizations();
+        });
+
+        // Mobile optimizations
+        function setupMobileOptimizations() {
+            if (isMobile) {
+                // Prevent zoom on double tap
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', function (event) {
+                    const now = (new Date()).getTime();
+                    if (now - lastTouchEnd <= 300) {
+                        event.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+
+                // Adjust canvas size for mobile
+                const canvas = document.getElementById('drawingCanvas');
+                if (canvas) {
+                    canvas.width = Math.min(window.innerWidth - 40, 350);
+                    canvas.height = Math.min(window.innerHeight * 0.3, 250);
+                }
+            }
+        }
+
+        // Create floating background particles
+        function createFloatingParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = isMobile ? 10 : 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 10 + 5) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Stop any active timers/intervals when switching sections
+            stopBreathing();
+            pauseTimer();
+            stopBubbles();
+        }
+
+        // Breathing Exercise Functions
+        function startBreathing() {
+            if (breathingActive) return;
+            
+            breathingActive = true;
+            document.getElementById('startBreathing').disabled = true;
+            document.getElementById('stopBreathing').disabled = false;
+            
+            const circle = document.getElementById('breathingCircle');
+            const text = document.getElementById('breathingText');
+            
+            let phase = 'inhale';
+            
+            function breathingCycle() {
+                if (!breathingActive) return;
+                
+                switch(phase) {
+                    case 'inhale':
+                        text.textContent = 'Breathe In';
+                        circle.className = 'breathing-circle inhale';
+                        setTimeout(() => {
+                            if (breathingActive) {
+                                phase = 'hold1';
+                                breathingCycle();
+                            }
+                        }, 4000);
+                        break;
+                    case 'hold1':
+                        text.textContent = 'Hold';
+                        setTimeout(() => {
+                            if (breathingActive) {
+                                phase = 'exhale';
+                                breathingCycle();
+                            }
+                        }, 1000);
+                        break;
+                    case 'exhale':
+                        text.textContent = 'Breathe Out';
+                        circle.className = 'breathing-circle exhale';
+                        setTimeout(() => {
+                            if (breathingActive) {
+                                phase = 'hold2';
+                                breathingCycle();
+                            }
+                        }, 4000);
+                        break;
+                    case 'hold2':
+                        text.textContent = 'Hold';
+                        setTimeout(() => {
+                            if (breathingActive) {
+                                phase = 'inhale';
+                                breathingCycle();
+                            }
+                        }, 1000);
+                        break;
+                }
+            }
+            
+            breathingCycle();
+        }
+
+        function stopBreathing() {
+            breathingActive = false;
+            document.getElementById('startBreathing').disabled = false;
+            document.getElementById('stopBreathing').disabled = true;
+            document.getElementById('breathingCircle').className = 'breathing-circle';
+            document.getElementById('breathingText').textContent = 'Ready';
+        }
+
+        // Meditation Timer Functions
+        function setTimer(seconds) {
+            if (!timerActive) {
+                currentTime = seconds;
+                updateTimerDisplay();
+            }
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(currentTime / 60);
+            const seconds = currentTime % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (timerActive) return;
+            
+            timerActive = true;
+            document.getElementById('startTimer').disabled = true;
+            document.getElementById('pauseTimer').disabled = false;
+            
+            timerInterval = setInterval(() => {
+                currentTime--;
+                updateTimerDisplay();
+                
+                if (currentTime <= 0) {
+                    pauseTimer();
+                    showNotification('🧘 Meditation session complete! Well done!');
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            timerActive = false;
+            clearInterval(timerInterval);
+            document.getElementById('startTimer').disabled = false;
+            document.getElementById('pauseTimer').disabled = true;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            currentTime = 300;
+            updateTimerDisplay();
+        }
+
+        // Stress Ball Functions
+        function squeezeBall(event) {
+            if (event) event.preventDefault();
+            const ball = document.getElementById('stressBall');
+            ball.style.transform = 'scale(0.8)';
+            squeezeCount++;
+            document.getElementById('squeezeCount').textContent = squeezeCount;
+        }
+
+        function releaseBall(event) {
+            if (event) event.preventDefault();
+            const ball = document.getElementById('stressBall');
+            ball.style.transform = 'scale(1)';
+        }
+
+        function handleStressBallKey(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                squeezeBall();
+                setTimeout(releaseBall, 200);
+            }
+        }
+
+        // Progressive Muscle Relaxation
+        function toggleMuscleGroup(element, group) {
+            // Remove active class from all groups
+            const groups = document.querySelectorAll('.muscle-group');
+            groups.forEach(g => g.classList.remove('active'));
+            
+            // Add active class to clicked group
+            element.classList.add('active');
+            
+            // Add calm pulse effect
+            element.classList.add('calm-pulse');
+            setTimeout(() => {
+                element.classList.remove('calm-pulse');
+            }, 3000);
+        }
+
+        function handleMuscleGroupKey(event, element, group) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleMuscleGroup(element, group);
+            }
+        }
+
+        // Mini Games Functions
+        function showGame(gameId) {
+            // Hide all games
+            const games = document.querySelectorAll('.game-section');
+            games.forEach(game => game.style.display = 'none');
+            
+            // Show selected game
+            const gameElement = document.getElementById(gameId + '-game');
+            if (gameElement) {
+                gameElement.style.display = 'block';
+                gameElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Initialize specific games
+            setTimeout(() => {
+                if (gameId === 'bubble-popping') {
+                    bubbleScore = 0;
+                    document.getElementById('bubbleScore').textContent = bubbleScore;
+                    document.getElementById('bubbleToggleBtn').textContent = 'Start Bubbles';
+                } else if (gameId === 'color-matching') {
+                    colorScore = 0;
+                    document.getElementById('colorScore').textContent = colorScore;
+                    newColorGame();
+                } else if (gameId === 'memory-pattern') {
+                    resetPatternGame();
+                } else if (gameId === 'zen-drawing') {
+                    const canvas = document.getElementById('drawingCanvas');
+                    if (canvas && canvas.getContext) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                }
+            }, 100);
+        }
+
+        function handleGameCardKey(event, gameId) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                showGame(gameId);
+            }
+        }
+
+        // Color Matching Game - FIXED VERSION
+        function initializeColorGame() {
+            newColorGame();
+        }
+
+        function newColorGame() {
+            const grid = document.getElementById('colorGrid');
+            const targetColor = document.getElementById('targetColor');
+            
+            if (!grid || !targetColor) return;
+            
+            // Select random target color
+            targetColorIndex = Math.floor(Math.random() * colorGameColors.length);
+            const selectedColor = colorGameColors[targetColorIndex];
+            targetColor.style.backgroundColor = selectedColor;
+            
+            // Create grid
+            grid.innerHTML = '';
+            const tiles = [];
+            
+            // Create 16 tiles with random colors
+            for (let i = 0; i < 16; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'color-tile';
+                tile.tabIndex = 0;
+                
+                // Assign random color
+                const randomColorIndex = Math.floor(Math.random() * colorGameColors.length);
+                const tileColor = colorGameColors[randomColorIndex];
+                tile.style.backgroundColor = tileColor;
+                tile.dataset.colorIndex = randomColorIndex;
+                
+                tile.onclick = () => checkColorMatch(tile);
+                tile.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        checkColorMatch(tile);
+                    }
+                };
+                
+                tiles.push(tile);
+                grid.appendChild(tile);
+            }
+            
+            // Ensure at least 2-3 tiles have the target color
+            const targetTileCount = Math.floor(Math.random() * 2) + 2; // 2 or 3 tiles
+            for (let i = 0; i < targetTileCount; i++) {
+                const randomTileIndex = Math.floor(Math.random() * 16);
+                const tile = tiles[randomTileIndex];
+                tile.style.backgroundColor = selectedColor;
+                tile.dataset.colorIndex = targetColorIndex;
+            }
+        }
+
+        function checkColorMatch(tile) {
+            const tileColorIndex = parseInt(tile.dataset.colorIndex);
+            
+            if (tileColorIndex === targetColorIndex) {
+                // Correct match
+                tile.classList.add('matched');
+                tile.classList.add('success-animation');
+                colorScore++;
+                document.getElementById('colorScore').textContent = colorScore;
+                
+                // Show success feedback
+                const targetColor = document.getElementById('targetColor');
+                targetColor.style.boxShadow = '0 0 20px #4CAF50';
+                
+                setTimeout(() => {
+                    targetColor.style.boxShadow = '';
+                    newColorGame();
+                }, 1000);
+            } else {
+                // Wrong match
+                tile.classList.add('shake');
+                setTimeout(() => {
+                    tile.classList.remove('shake');
+                }, 500);
+            }
+        }
+
+        // Zen Drawing Functions - IMPROVED FOR SMOOTH DRAWING
+        function initializeDrawingCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = isMobile ? 4 : 3;
+            
+            let drawing = false;
+            let points = [];
+            
+            function getEventPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                return {
+                    x: (clientX - rect.left) * (canvas.width / rect.width),
+                    y: (clientY - rect.top) * (canvas.height / rect.height)
+                };
+            }
+            
+            function startDrawing(e) {
+                e.preventDefault();
+                drawing = true;
+                points = [];
+                const pos = getEventPos(e);
+                points.push(pos);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+            
+            function draw(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                
+                const pos = getEventPos(e);
+                points.push(pos);
+                
+                ctx.strokeStyle = currentDrawColor;
+                
+                // Use quadratic curves for smoother lines
+                if (points.length >= 3) {
+                    const lastTwoPoints = points.slice(-2);
+                    const controlPoint = lastTwoPoints[0];
+                    const endPoint = {
+                        x: (lastTwoPoints[0].x + lastTwoPoints[1].x) / 2,
+                        y: (lastTwoPoints[0].y + lastTwoPoints[1].y) / 2
+                    };
+                    
+                    ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, endPoint.x, endPoint.y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(endPoint.x, endPoint.y);
+                }
+            }
+            
+            function stopDrawing(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                drawing = false;
+                points = [];
+                ctx.beginPath();
+            }
+            
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+        }
+
+        function setDrawColor(color) {
+            currentDrawColor = color;
+            
+            // Update active color picker
+            const pickers = document.querySelectorAll('.color-picker');
+            pickers.forEach(picker => picker.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function handleColorPickerKey(event, color) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setDrawColor(color);
+            }
+        }
+
+        function clearCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Memory Pattern Game - COMPLETELY FIXED VERSION
+        let patternGameState = {
+            isActive: false,
+            isShowingPattern: false,
+            isWaitingForInput: false,
+            currentLevel: 1,
+            sequence: [],
+            userInput: [],
+            currentStep: 0,
+            showTimeout: null,
+            tiles: []
+        };
+
+        function initializePatternGame() {
+            const grid = document.getElementById('patternGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            patternGameState.tiles = [];
+            
+            for (let i = 0; i < 9; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'pattern-tile';
+                tile.tabIndex = 0;
+                tile.textContent = i + 1;
+                tile.dataset.index = i;
+                
+                tile.onclick = () => handlePatternClick(i);
+                tile.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handlePatternClick(i);
+                    }
+                };
+                
+                patternGameState.tiles.push(tile);
+                grid.appendChild(tile);
+            }
+        }
+
+        function startPatternGame() {
+            // Prevent multiple starts
+            if (patternGameState.isActive) return;
+            
+            // Clear any existing timeouts
+            if (patternGameState.showTimeout) {
+                clearTimeout(patternGameState.showTimeout);
+            }
+            
+            // Reset game state
+            patternGameState.isActive = true;
+            patternGameState.isShowingPattern = false;
+            patternGameState.isWaitingForInput = false;
+            patternGameState.sequence = [];
+            patternGameState.userInput = [];
+            patternGameState.currentStep = 0;
+            
+            // Update UI
+            document.getElementById('patternLevel').textContent = patternGameState.currentLevel;
+            document.getElementById('patternStatus').textContent = 'Get ready...';
+            
+            // Clear all tile highlights
+            clearAllTileHighlights();
+            
+            // Generate new pattern
+            generateNewPattern();
+            
+            // Start showing pattern after delay
+            patternGameState.showTimeout = setTimeout(() => {
+                if (patternGameState.isActive) {
+                    showPatternSequence();
+                }
+            }, 1000);
+        }
+
+        function generateNewPattern() {
+            const patternLength = Math.min(patternGameState.currentLevel + 2, 8); // Max 8 steps
+            document.getElementById('patternLength').textContent = patternLength;
+            
+            patternGameState.sequence = [];
+            
+            // For Level 1, use predictable pattern for initial testing, then random for higher levels
+            if (patternGameState.currentLevel === 1) {
+                // Level 1: Use simple sequential pattern but with CORRECT length
+                for (let i = 0; i < patternLength; i++) {
+                    patternGameState.sequence.push(i); // Sequential: 0,1,2 for length 3, or 0,1,2,3 for length 4, etc.
+                }
+                console.log('🎯 LEVEL 1 PATTERN (Easy Sequential):', patternGameState.sequence);
+                console.log('🎯 Expected sequence: Click tiles', patternGameState.sequence.map(i => i + 1).join(', then '));
+            } else {
+                // Level 2+: Generate random pattern with proper length progression
+                for (let i = 0; i < patternLength; i++) {
+                    const randomIndex = Math.floor(Math.random() * 9); // 0-8 for 9 tiles
+                    patternGameState.sequence.push(randomIndex);
+                }
+                console.log('🎯 RANDOM PATTERN GENERATED (Level ' + patternGameState.currentLevel + '):', patternGameState.sequence);
+                console.log('🎯 Pattern length:', patternLength, 'tiles');
+            }
+            
+            console.log('🎯 PATTERN IN TILE NUMBERS:', patternGameState.sequence.map(i => i + 1));
+            console.log('🎯 Current Level:', patternGameState.currentLevel, '| Pattern Length:', patternGameState.sequence.length);
+            console.log('🎯 CALCULATED LENGTH vs ACTUAL LENGTH:', patternLength, 'vs', patternGameState.sequence.length);
+        }
+
+        function showPatternSequence() {
+            if (!patternGameState.isActive) return;
+            
+            patternGameState.isShowingPattern = true;
+            patternGameState.currentStep = 0;
+            document.getElementById('patternStatus').textContent = 'Watch the pattern...';
+            
+            showNextPatternStep();
+        }
+
+        function showNextPatternStep() {
+            if (!patternGameState.isActive || !patternGameState.isShowingPattern) return;
+            
+            // Clear previous highlight
+            if (patternGameState.currentStep > 0) {
+                const prevIndex = patternGameState.sequence[patternGameState.currentStep - 1];
+                patternGameState.tiles[prevIndex].classList.remove('active');
+            }
+            
+            // Check if pattern is complete
+            if (patternGameState.currentStep >= patternGameState.sequence.length) {
+                finishShowingPattern();
+                return;
+            }
+            
+            // Highlight current step
+            const currentIndex = patternGameState.sequence[patternGameState.currentStep];
+            patternGameState.tiles[currentIndex].classList.add('active');
+            
+            patternGameState.currentStep++;
+            
+            // Schedule next step
+            patternGameState.showTimeout = setTimeout(() => {
+                showNextPatternStep();
+            }, 600); // Consistent timing
+        }
+
+        function finishShowingPattern() {
+            // Clear last highlight
+            if (patternGameState.sequence.length > 0) {
+                const lastIndex = patternGameState.sequence[patternGameState.sequence.length - 1];
+                patternGameState.tiles[lastIndex].classList.remove('active');
+            }
+            
+            // Switch to input mode
+            patternGameState.isShowingPattern = false;
+            patternGameState.isWaitingForInput = true;
+            patternGameState.userInput = [];
+            
+            document.getElementById('patternStatus').textContent = 'Now repeat the pattern!';
+        }
+
+        function handlePatternClick(clickedIndex) {
+            console.log('🔥 CLICK RECEIVED - Tile', clickedIndex + 1, 'clicked');
+            console.log('🔥 CURRENT GAME STATE:', {
+                isActive: patternGameState.isActive,
+                isWaitingForInput: patternGameState.isWaitingForInput,
+                isShowingPattern: patternGameState.isShowingPattern,
+                currentSequence: patternGameState.sequence,
+                userInputSoFar: patternGameState.userInput
+            });
+            
+            // Only accept input when waiting for it
+            if (!patternGameState.isActive || !patternGameState.isWaitingForInput || patternGameState.isShowingPattern) {
+                console.log('❌ CLICK IGNORED - Invalid game state');
+                return;
+            }
+            
+            // Visual feedback for click
+            const tile = patternGameState.tiles[clickedIndex];
+            tile.classList.add('user-active');
+            setTimeout(() => {
+                tile.classList.remove('user-active');
+            }, 200);
+            
+            // Add to user input
+            patternGameState.userInput.push(clickedIndex);
+            const inputPosition = patternGameState.userInput.length - 1;
+            const expectedValue = patternGameState.sequence[inputPosition];
+            
+            console.log('🎯 VALIDATION CHECK:');
+            console.log('   User clicked:', clickedIndex, '(tile', clickedIndex + 1 + ')');
+            console.log('   Expected:', expectedValue, '(tile', expectedValue + 1 + ')');
+            console.log('   Position:', inputPosition + 1, 'of', patternGameState.sequence.length);
+            console.log('   Pattern:', patternGameState.sequence, '→', patternGameState.sequence.map(i => i + 1));
+            console.log('   User input:', patternGameState.userInput, '→', patternGameState.userInput.map(i => i + 1));
+            
+            // CRITICAL: Check if expectedValue is undefined
+            if (expectedValue === undefined) {
+                console.log('🚨 CRITICAL ERROR: expectedValue is undefined!');
+                console.log('   inputPosition:', inputPosition);
+                console.log('   sequence length:', patternGameState.sequence.length);
+                console.log('   sequence:', patternGameState.sequence);
+                handleWrongInput();
+                return;
+            }
+            
+            // Check if this click is correct
+            if (clickedIndex !== expectedValue) {
+                console.log('❌ MISMATCH!');
+                console.log('   Clicked:', clickedIndex, 'Expected:', expectedValue);
+                handleWrongInput();
+                return;
+            }
+            
+            console.log('✅ CORRECT! Moving to next step...');
+            
+            // Check if pattern is complete
+            if (patternGameState.userInput.length === patternGameState.sequence.length) {
+                console.log('🎉 PATTERN COMPLETE!');
+                handleCorrectPattern();
+            } else {
+                console.log('⏳ Continue... (' + patternGameState.userInput.length + '/' + patternGameState.sequence.length + ')');
+            }
+        }
+
+        function handleWrongInput() {
+            document.getElementById('patternStatus').textContent = 'Oops! Wrong sequence. Try again...';
+            
+            // Stop accepting input
+            patternGameState.isWaitingForInput = false;
+            
+            // Restart after delay
+            setTimeout(() => {
+                if (patternGameState.isActive) {
+                    resetAndRestart();
+                }
+            }, 1500);
+        }
+
+        function handleCorrectPattern() {
+            document.getElementById('patternStatus').textContent = 'Perfect! Well done!';
+            patternGameState.isWaitingForInput = false;
+            
+            // Level up
+            patternGameState.currentLevel++;
+            document.getElementById('patternLevel').textContent = patternGameState.currentLevel;
+            
+            // Start next level after delay
+            setTimeout(() => {
+                if (patternGameState.isActive) {
+                    startNextLevel();
+                }
+            }, 1500);
+        }
+
+        function startNextLevel() {
+            // Reset for next level
+            patternGameState.sequence = [];
+            patternGameState.userInput = [];
+            patternGameState.currentStep = 0;
+            
+            clearAllTileHighlights();
+            
+            document.getElementById('patternStatus').textContent = `Level ${patternGameState.currentLevel} - Get ready...`;
+            
+            // Generate and show new pattern
+            generateNewPattern();
+            
+            patternGameState.showTimeout = setTimeout(() => {
+                if (patternGameState.isActive) {
+                    showPatternSequence();
+                }
+            }, 1000);
+        }
+
+        function resetAndRestart() {
+            // Keep current level, just restart the same pattern
+            patternGameState.userInput = [];
+            patternGameState.currentStep = 0;
+            
+            clearAllTileHighlights();
+            
+            document.getElementById('patternStatus').textContent = 'Watch carefully...';
+            
+            patternGameState.showTimeout = setTimeout(() => {
+                if (patternGameState.isActive) {
+                    showPatternSequence();
+                }
+            }, 800);
+        }
+
+        function resetPatternGame() {
+            console.log('🔄 RESETTING PATTERN GAME - Full state cleanup');
+            
+            // Clear any timeouts
+            if (patternGameState.showTimeout) {
+                clearTimeout(patternGameState.showTimeout);
+                patternGameState.showTimeout = null;
+            }
+            
+            // Reset all state with logging
+            patternGameState.isActive = false;
+            patternGameState.isShowingPattern = false;
+            patternGameState.isWaitingForInput = false;
+            patternGameState.currentLevel = 1;
+            patternGameState.sequence = [];
+            patternGameState.userInput = [];
+            patternGameState.currentStep = 0;
+            
+            // Reset UI
+            document.getElementById('patternLevel').textContent = '1';
+            document.getElementById('patternStatus').textContent = 'Ready';
+            document.getElementById('patternLength').textContent = '3';
+            
+            // Clear all highlights
+            clearAllTileHighlights();
+            
+            console.log('✅ Pattern game reset complete - all state cleared');
+        }
+
+        function clearAllTileHighlights() {
+            patternGameState.tiles.forEach(tile => {
+                tile.classList.remove('active', 'user-active');
+            });
+        }
+
+        // Bubble Popping Game - FIXED POSITIONING
+        function startBubbles() {
+            if (bubblesActive) return;
+            bubblesActive = true;
+            document.getElementById('bubbleToggleBtn').textContent = 'Stop Bubbles';
+            
+            bubbleInterval = setInterval(createBubble, isMobile ? 1200 : 1000);
+        }
+
+        function stopBubbles() {
+            bubblesActive = false;
+            clearInterval(bubbleInterval);
+            document.getElementById('bubbleToggleBtn').textContent = 'Start Bubbles';
+            
+            // Clear existing bubbles
+            const container = document.getElementById('bubbleContainer');
+            if (container) {
+                const bubbles = container.querySelectorAll('.bubble');
+                bubbles.forEach(bubble => bubble.remove());
+            }
+        }
+
+        function toggleBubbles() {
+            if (bubblesActive) {
+                stopBubbles();
+            } else {
+                startBubbles();
+            }
+        }
+
+        function createBubble() {
+            const container = document.getElementById('bubbleContainer');
+            if (!container || !bubblesActive) return;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            const size = Math.random() * (isMobile ? 30 : 40) + (isMobile ? 20 : 25);
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = Math.random() * (container.offsetWidth - size) + 'px';
+            bubble.style.bottom = '-60px'; // Start from bottom
+            
+            const duration = Math.random() * 2 + 4; // 4-6 seconds
+            bubble.style.animationDuration = duration + 's';
+            
+            bubble.onclick = () => popBubble(bubble);
+            bubble.ontouchstart = (e) => {
+                e.preventDefault();
+                popBubble(bubble);
+            };
+            
+            container.appendChild(bubble);
+            
+            // Remove bubble after animation
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.parentNode.removeChild(bubble);
+                }
+            }, duration * 1000 + 1000);
+        }
+
+        function popBubble(bubble) {
+            if (!bubble.parentNode) return;
+            
+            bubble.style.animation = 'none';
+            bubble.style.transform = 'scale(1.5)';
+            bubble.style.opacity = '0';
+            bubble.style.transition = 'all 0.3s ease';
+            bubbleScore++;
+            document.getElementById('bubbleScore').textContent = bubbleScore;
+            
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.parentNode.removeChild(bubble);
+                }
+            }, 300);
+        }
+
+        function resetBubbleGame() {
+            bubbleScore = 0;
+            document.getElementById('bubbleScore').textContent = bubbleScore;
+        }
+
+        // Nature Scene Builder - ENHANCED
+        function selectElement(element) {
+            selectedElement = element;
+            
+            // Update button styles
+            const buttons = document.querySelectorAll('.element-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function handleElementBtnKey(event, element) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectElement(element);
+            }
+        }
+
+        function placeElement(e) {
+            if (!selectedElement) return;
+            
+            const sceneBuilder = document.getElementById('sceneBuilder');
+            const rect = sceneBuilder.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            // Don't place if clicking on existing element
+            if (e.target.classList.contains('nature-element')) return;
+            
+            const element = document.createElement('div');
+            element.className = 'nature-element';
+            element.textContent = selectedElement;
+            element.style.left = Math.max(0, Math.min(x - 15, rect.width - 30)) + 'px';
+            element.style.top = Math.max(0, Math.min(y - 15, rect.height - 30)) + 'px';
+            
+            // Make element draggable
+            makeDraggable(element);
+            
+            sceneBuilder.appendChild(element);
+            sceneBuilder.classList.add('has-elements');
+        }
+
+        function makeDraggable(element) {
+            let isDragging = false;
+            let startX, startY, startLeft, startTop;
+            
+            function onStart(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                isDragging = true;
+                element.classList.add('dragging');
+                
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                
+                startX = clientX;
+                startY = clientY;
+                startLeft = parseInt(element.style.left);
+                startTop = parseInt(element.style.top);
+                
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('touchmove', onMove);
+                document.addEventListener('touchend', onEnd);
+            }
+            
+            function onMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+                
+                const sceneRect = document.getElementById('sceneBuilder').getBoundingClientRect();
+                const newLeft = Math.max(0, Math.min(startLeft + deltaX, sceneRect.width - 30));
+                const newTop = Math.max(0, Math.min(startTop + deltaY, sceneRect.height - 30));
+                
+                element.style.left = newLeft + 'px';
+                element.style.top = newTop + 'px';
+            }
+            
+            function onEnd() {
+                isDragging = false;
+                element.classList.remove('dragging');
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onEnd);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend', onEnd);
+            }
+            
+            element.addEventListener('mousedown', onStart);
+            element.addEventListener('touchstart', onStart);
+            
+            // Double click/tap to remove
+            let lastTap = 0;
+            element.addEventListener('click', (e) => {
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    element.remove();
+                    checkSceneEmpty();
+                }
+                lastTap = now;
+            });
+        }
+
+        function clearScene() {
+            const elements = document.querySelectorAll('.nature-element');
+            elements.forEach(element => element.remove());
+            checkSceneEmpty();
+        }
+
+        function checkSceneEmpty() {
+            const sceneBuilder = document.getElementById('sceneBuilder');
+            const elements = sceneBuilder.querySelectorAll('.nature-element');
+            if (elements.length === 0) {
+                sceneBuilder.classList.remove('has-elements');
+            }
+        }
+
+        function saveScene() {
+            const elements = document.querySelectorAll('.nature-element');
+            if (elements.length === 0) {
+                showNotification('🌳 Add some elements to your scene first!');
+                return;
+            }
+            
+            showNotification('🌸 Your beautiful nature scene has been saved to your heart!');
+        }
+
+        // Utility functions
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(message);
+            } else {
+                alert(message);
+            }
+        }
+
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (isMobile) {
+                const canvas = document.getElementById('drawingCanvas');
+                if (canvas) {
+                    canvas.width = Math.min(window.innerWidth - 40, 350);
+                    canvas.height = Math.min(window.innerHeight * 0.3, 250);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Present Moment Hourglass</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            --text-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            height: 100vh;
+            /* Allow scrolling if vertical space is extremely tight, but try to hide it */
+            overflow-y: auto; 
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+        }
+
+        .app-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            /* changed from height: 100% to min-height to allow flex shrinking/growing without cutoff */
+            height: 100%; 
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between; /* Pushes content apart */
+            padding: 20px 10px;
+        }
+
+        /* Hourglass Stage */
+        .hourglass-stage {
+            position: relative;
+            /* Responsive Sizing Logic */
+            height: 55vh; /* Cap height to 55% of screen so UI fits */
+            max-height: 540px;
+            aspect-ratio: 2 / 3;
+            width: auto; /* Width scales based on height + aspect-ratio */
+            max-width: 100%; 
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            flex-shrink: 1; /* Allow shrinking if needed */
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glass-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        /* Breathing Text */
+        .meditation-text {
+            height: 60px; /* Reduced fixed height */
+            width: 90%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            margin-bottom: 10px;
+        }
+
+        .phrase {
+            font-size: 1.1rem; /* Slightly smaller for mobile safety */
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            opacity: 0;
+            position: absolute;
+            will-change: transform, opacity;
+            width: 100%;
+        }
+
+        .phrase.active {
+            opacity: 1;
+            animation: textBreathe 8s infinite ease-in-out; 
+        }
+
+        @keyframes textBreathe {
+            0%, 100% { 
+                transform: scale(0.95); 
+                opacity: 0.7; 
+            }
+            50% { 
+                transform: scale(1.05); 
+                opacity: 1; 
+                text-shadow: 0 0 20px rgba(255,215,0,0.4); 
+            }
+        }
+
+        /* Controls */
+        .controls-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 40;
+            width: 100%;
+            flex-shrink: 0; /* Prevent controls from being squashed */
+        }
+
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: 200;
+            opacity: 0.8;
+            letter-spacing: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Allow wrapping on very tiny screens */
+            justify-content: center;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button.active-mode {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+        }
+
+        /* Breathing Guide Ring */
+        .breath-guide {
+            position: absolute;
+            width: 80vw; /* Responsive width */
+            height: 80vw;
+            max-width: 400px;
+            max-height: 400px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .breath-guide::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transform: scale(0.8);
+            animation: guideBreathe 8s infinite ease-in-out;
+        }
+
+        @keyframes guideBreathe {
+            0%, 100% { transform: scale(0.8); opacity: 0.2; border-color: rgba(255,255,255,0.1); }
+            50% { transform: scale(1.1); opacity: 0.5; border-color: rgba(255,215,0,0.3); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="breath-guide"></div>
+
+        <div class="controls-area" style="margin-top: 10px;">
+            <div class="time-display" id="timer">05:00</div>
+        </div>
+
+        <div class="hourglass-stage">
+            <canvas id="sandCanvas"></canvas>
+            
+            <svg class="glass-overlay" viewBox="0 0 360 540" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="glassShine" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:0.0" />
+                        <stop offset="25%" style="stop-color:white;stop-opacity:0.1" />
+                        <stop offset="50%" style="stop-color:white;stop-opacity:0.0" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- Main Glass Shape -->
+                <path id="glassPath" d="M72,50 Q72,150 168,252 Q174,258 174,270 Q174,282 168,288 Q72,396 72,490 Q180,525 288,490 Q288,396 192,288 Q186,282 186,270 Q186,258 192,252 Q288,150 288,50 Z" 
+                      fill="rgba(255,255,255,0.02)" 
+                      stroke="rgba(255,255,255,0.4)" 
+                      stroke-width="4" />
+                
+                <!-- Shine Highlight -->
+                <path d="M90,60 Q90,150 170,248 Q174,252 174,270 Q174,288 170,292 Q90,396 90,480" 
+                      fill="none" 
+                      stroke="url(#glassShine)" 
+                      stroke-width="8" 
+                      stroke-linecap="round" />
+            </svg>
+        </div>
+
+        <div class="meditation-text">
+            <div id="phraseDisplay" class="phrase active">Welcome to the present moment.</div>
+        </div>
+
+        <div class="controls-area" style="margin-bottom: 20px;">
+            <div class="button-group">
+                <button id="startBtn">Begin</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+            <div class="button-group">
+                <button onclick="setDuration(1)">1 Min</button>
+                <button onclick="setDuration(5)" class="active-mode">5 Min</button>
+                <button onclick="setDuration(10)">10 Min</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const CONFIG = {
+            width: 360,
+            height: 540,
+            grainSize: 3, 
+            sandColor: [251, 191, 36], 
+            sandVariation: 30,
+            gravity: 4, 
+            maxFallSpeed: 9,
+            // UPDATED PATH: Matches the SVG exactly
+            pathData: "M72,50 Q72,150 168,252 Q174,258 174,270 Q174,282 168,288 Q72,396 72,490 Q180,525 288,490 Q288,396 192,288 Q186,282 186,270 Q186,258 192,252 Q288,150 288,50 Z"
+        };
+
+        const PHRASES = {
+            start: ["Inhale deeply...", "Center yourself..."],
+            flowing: [
+                "Breathe in... Expand...",
+                "Breathe out... Release...",
+                "The present moment is here.",
+                "Let thoughts flow like sand.",
+                "Soft belly, soft breath.",
+                "Ground yourself now.",
+                "This moment is enough."
+            ],
+            ending: ["Peace is settling.", "Stillness.", "Complete."],
+            paused: ["Paused.", "Just breathe."],
+            done: ["Namaste.", "Carry this peace."]
+        };
+
+        // --- STATE ---
+        let canvas, ctx;
+        let grid = []; // The Physics Map: 0=Empty(Walkable), 1=Wall(Solid), 2=Sand
+        let cols, rows;
+        let grains = [];
+        let animationId, timerInterval;
+        let state = {
+            isRunning: false,
+            isPaused: false,
+            totalTime: 300,
+            timeLeft: 300,
+            initialSandCount: 0,
+            grainsDropped: 0,
+            grainsPerSecond: 0,
+            startTime: 0,
+            pausedTime: 0
+        };
+
+        // --- MASKING TECHNIQUE ---
+        function createPhysicsMask() {
+            // 1. Create offscreen canvas
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d');
+            offCanvas.width = CONFIG.width;
+            offCanvas.height = CONFIG.height;
+
+            // 2. Fill Background Black (Wall)
+            offCtx.fillStyle = '#000000';
+            offCtx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+
+            // 3. Draw Hourglass Shape White (Empty Space)
+            const p = new Path2D(CONFIG.pathData);
+            offCtx.fillStyle = '#FFFFFF';
+            offCtx.fill(p);
+
+            // 4. Read Pixels & Build Grid
+            const imgData = offCtx.getImageData(0, 0, CONFIG.width, CONFIG.height).data;
+            
+            grid = new Array(rows * cols).fill(1); // Default to Wall
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    // Calculate pixel center
+                    const px = Math.floor(x * CONFIG.grainSize + CONFIG.grainSize/2);
+                    const py = Math.floor(y * CONFIG.grainSize + CONFIG.grainSize/2);
+                    
+                    // Get pixel index (RGBA)
+                    const i = (py * CONFIG.width + px) * 4;
+                    const r = imgData[i]; 
+                    
+                    // If it's bright enough, it's empty space.
+                    if (r > 80) {
+                        grid[y * cols + x] = 0; // Empty
+                    } else {
+                        grid[y * cols + x] = 1; // Wall
+                    }
+                }
+            }
+        }
+
+        function init() {
+            canvas = document.getElementById('sandCanvas');
+            ctx = canvas.getContext('2d', { alpha: true });
+            
+            // Set resolution based on DPR for crispness
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = CONFIG.width * dpr;
+            canvas.height = CONFIG.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // CSS handles the display size now
+
+            cols = Math.ceil(CONFIG.width / CONFIG.grainSize);
+            rows = Math.ceil(CONFIG.height / CONFIG.grainSize);
+
+            createPhysicsMask(); // Bake walls
+            resetSimulation();
+            loop();
+        }
+
+        function resetSimulation() {
+            createPhysicsMask(); // Re-read mask to clear old sand
+            grains = [];
+            state.grainsDropped = 0;
+
+            // Fill Top Chamber
+            state.initialSandCount = fillTopChamber();
+            state.grainsPerSecond = state.initialSandCount / state.totalTime;
+        }
+
+        function fillTopChamber() {
+            let count = 0;
+            const startY = Math.floor(250 / CONFIG.grainSize); // Neck
+            const endY = Math.floor(55 / CONFIG.grainSize);    // Top
+
+            // Fill upwards from neck
+            for (let y = startY; y >= endY; y--) {
+                for (let x = 0; x < cols; x++) {
+                    const idx = y * cols + x;
+                    if (grid[idx] === 0) { // If Empty
+                        grid[idx] = 2; // Place Sand
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        // --- PHYSICS ENGINE ---
+        function updatePhysics() {
+            if (!state.isRunning) return;
+
+            // 1. Sync & Spawning
+            const now = Date.now();
+            const elapsed = (now - state.startTime) / 1000;
+            const targetDropped = Math.min(state.initialSandCount, Math.floor(elapsed * state.grainsPerSecond));
+            let toDrop = targetDropped - state.grainsDropped;
+            toDrop = Math.min(toDrop, 15); // Cap per frame
+
+            for (let k = 0; k < toDrop; k++) {
+                if (erodeTopSand()) {
+                    spawnGrain();
+                    state.grainsDropped++;
+                }
+            }
+
+            // 2. Grain Movement
+            for (let i = grains.length - 1; i >= 0; i--) {
+                const g = grains[i];
+                
+                // Horizontal Motion (Spray Effect)
+                g.x += g.vx;
+                g.vx *= 0.98; // Air resistance
+
+                // Wall Collision (Horizontal)
+                // If we hit a wall horizontally, bounce back
+                const gxH = Math.floor(g.x / CONFIG.grainSize);
+                const gyH = Math.floor(g.y / CONFIG.grainSize);
+                if (gxH < 0 || gxH >= cols || grid[gyH * cols + gxH] === 1) {
+                    g.x -= g.vx; // Undo
+                    g.vx *= -0.4; // Bounce
+                }
+
+                // Vertical Motion (Gravity)
+                g.vy += 0.5;
+                if(g.vy > CONFIG.maxFallSpeed) g.vy = CONFIG.maxFallSpeed;
+
+                const nextX = g.x;
+                const nextY = g.y + g.vy;
+
+                // Grid Coordinates for Landing
+                const gx = Math.floor(nextX / CONFIG.grainSize);
+                const gy = Math.floor(nextY / CONFIG.grainSize);
+                
+                // Boundary Check
+                if (gy >= rows) {
+                    grains.splice(i, 1);
+                    continue;
+                }
+
+                // Collision Check
+                const idx = gy * cols + gx;
+                
+                // If destination is occupied (Wall or Sand)
+                if (grid[idx] !== 0) {
+                    // Try to slide
+                    let slid = false;
+                    const idxL = gy * cols + (gx - 1);
+                    const idxR = gy * cols + (gx + 1);
+
+                    // Randomize Slide Direction (Crucial for natural piles)
+                    const checkLeftFirst = Math.random() > 0.5;
+
+                    if (checkLeftFirst) {
+                        if (grid[idxL] === 0) {
+                            g.x -= CONFIG.grainSize; g.y += CONFIG.grainSize; slid = true;
+                        } else if (grid[idxR] === 0) {
+                            g.x += CONFIG.grainSize; g.y += CONFIG.grainSize; slid = true;
+                        }
+                    } else {
+                         if (grid[idxR] === 0) {
+                            g.x += CONFIG.grainSize; g.y += CONFIG.grainSize; slid = true;
+                        } else if (grid[idxL] === 0) {
+                            g.x -= CONFIG.grainSize; g.y += CONFIG.grainSize; slid = true;
+                        }
+                    }
+
+                    if (!slid) {
+                        // Solidify
+                        let landY = Math.floor(g.y / CONFIG.grainSize);
+                        let landX = Math.floor(g.x / CONFIG.grainSize);
+                        let landIdx = landY * cols + landX;
+                        
+                        // Backtrack to find surface
+                        let safety = 0;
+                        while (landY >= 0 && grid[landIdx] !== 0 && safety < 10) {
+                            landY--;
+                            landIdx = landY * cols + landX;
+                            safety++;
+                        }
+
+                        if (landY >= 0 && grid[landIdx] === 0) {
+                            grid[landIdx] = 2; // Becomes Sand
+                        }
+                        grains.splice(i, 1);
+                    }
+                } else {
+                    // Path clear, move
+                    g.y = nextY;
+                }
+            }
+        }
+
+        function spawnGrain() {
+            // Spawn at neck with RANDOM HORIZONTAL VELOCITY
+            // This creates a "spray" that fills the bottom width
+            grains.push({
+                x: CONFIG.width / 2 + (Math.random()*4 - 2),
+                y: 270,
+                vx: (Math.random() - 0.5) * 4.5, // Horizontal Spread
+                vy: 2
+            });
+        }
+
+        function erodeTopSand() {
+            const startY = Math.floor(250 / CONFIG.grainSize);
+            const cx = Math.floor(cols / 2);
+            
+            for (let y = startY; y >= 0; y--) {
+                const r = Math.min(30, 1 + (startY - y));
+                const startOff = Math.floor(Math.random()*r);
+                
+                for(let i=0; i<r; i++) {
+                    const off = (startOff+i)%r;
+                    // Check Left/Right
+                    const idxL = y*cols + (cx - off);
+                    if (grid[idxL] === 2) { grid[idxL] = 0; return true; }
+                    
+                    const idxR = y*cols + (cx + off);
+                    if (grid[idxR] === 2) { grid[idxR] = 0; return true; }
+                }
+            }
+            return false;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Settled Sand
+            ctx.fillStyle = `rgb(${CONFIG.sandColor.join(',')})`;
+            ctx.beginPath();
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (grid[y * cols + x] === 2) {
+                        ctx.rect(x * CONFIG.grainSize, y * CONFIG.grainSize, CONFIG.grainSize, CONFIG.grainSize);
+                    }
+                }
+            }
+            ctx.fill();
+
+            // Draw Falling Grains
+            ctx.fillStyle = '#fff8dc';
+            ctx.beginPath();
+            for (let g of grains) {
+                ctx.rect(g.x, g.y, CONFIG.grainSize, CONFIG.grainSize);
+            }
+            ctx.fill();
+        }
+
+        function loop() {
+            updatePhysics();
+            draw();
+            animationId = requestAnimationFrame(loop);
+        }
+
+        // --- TIMER & UI ---
+        function startTimer() {
+            if (state.isRunning) return;
+            state.isRunning = true;
+            state.isPaused = false;
+            
+            if (state.timeLeft === 0) {
+                resetTimer();
+                state.isRunning = true;
+            }
+
+            if (state.pausedTime > 0) {
+                state.startTime += (Date.now() - state.pausedTime);
+                state.pausedTime = 0;
+            } else {
+                state.startTime = Date.now();
+            }
+
+            timerInterval = setInterval(() => {
+                state.timeLeft--;
+                document.getElementById('timer').textContent = formatTime(state.timeLeft);
+                updatePhrase();
+                
+                if (state.timeLeft <= 0) {
+                    completeSession();
+                }
+            }, 1000);
+
+            updatePhrase("flowing");
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+        }
+
+        function pauseTimer() {
+            state.isRunning = false;
+            state.isPaused = true;
+            state.pausedTime = Date.now();
+            clearInterval(timerInterval);
+            updatePhrase("paused");
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('startBtn').textContent = "Resume";
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function resetTimer() {
+            state.isRunning = false;
+            state.isPaused = false;
+            state.pausedTime = 0;
+            clearInterval(timerInterval);
+            state.timeLeft = state.totalTime;
+            document.getElementById('timer').textContent = formatTime(state.timeLeft);
+            
+            resetSimulation();
+            
+            document.getElementById('phraseDisplay').textContent = "Ready to begin.";
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('startBtn').textContent = "Begin";
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+        }
+
+        function completeSession() {
+            state.isRunning = false;
+            clearInterval(timerInterval);
+            updatePhrase("done");
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('startBtn').textContent = "Start New";
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function setDuration(minutes) {
+            state.totalTime = minutes * 60;
+            document.querySelectorAll('.button-group button').forEach(b => {
+                b.classList.toggle('active-mode', b.textContent.includes(minutes + " Min"));
+            });
+            resetTimer();
+        }
+
+        function formatTime(s) {
+            return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+        }
+
+        let lastPhraseIndex = -1;
+        function updatePhrase(category) {
+            const cat = category || (state.timeLeft < 15 ? "ending" : "flowing");
+            const opts = PHRASES[cat];
+            let idx = Math.floor(Math.random() * opts.length);
+            if(idx === lastPhraseIndex && opts.length > 1) idx = (idx+1)%opts.length;
+            lastPhraseIndex = idx;
+            
+            const el = document.getElementById('phraseDisplay');
+            if(category || state.timeLeft % 10 === 0) {
+                el.classList.remove('active');
+                setTimeout(() => {
+                    el.textContent = opts[idx];
+                    el.classList.add('active');
+                }, 1000);
+            }
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startTimer);
+        document.getElementById('pauseBtn').addEventListener('click', pauseTimer);
+        document.getElementById('resetBtn').addEventListener('click', resetTimer);
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

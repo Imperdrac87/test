@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Present Moment Hourglass</title>
+  <style>
+    :root{
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+      --text-color: #e2e8f0;
+    }
+    *{ margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-tap-highlight-color:transparent; }
+    body{
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-gradient);
+      height:100vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      color:var(--text-color);
+    }
+    .app-container{
+      position:relative;
+      width:100%;
+      max-width:600px;
+      height:100%;
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:space-between;
+      padding:20px 10px;
+    }
+    .hourglass-stage{
+      position:relative;
+      height:55vh;
+      max-height:540px;
+      aspect-ratio:2/3;
+      width:auto;
+      max-width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      margin:10px 0;
+      flex-shrink:1;
+    }
+    canvas{
+      position:absolute;
+      top:0; left:0;
+      z-index:10;
+      width:100%;
+      height:100%;
+    }
+    .glass-overlay{
+      position:absolute;
+      top:0; left:0;
+      width:100%;
+      height:100%;
+      z-index:20;
+      pointer-events:none;
+    }
+    .meditation-text{
+      height:60px;
+      width:90%;
+      text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:30;
+      margin-bottom:10px;
+      position:relative;
+    }
+    .phrase{
+      font-size:1.1rem;
+      font-weight:300;
+      letter-spacing:0.5px;
+      line-height:1.3;
+      color:rgba(255,255,255,0.95);
+      text-shadow:0 2px 10px rgba(0,0,0,0.5);
+      opacity:0;
+      position:absolute;
+      will-change:transform, opacity;
+      width:100%;
+    }
+    .phrase.active{
+      opacity:1;
+      animation:textBreathe 8s infinite ease-in-out;
+    }
+    @keyframes textBreathe{
+      0%,100%{ transform:scale(0.95); opacity:0.7; }
+      50%{ transform:scale(1.05); opacity:1; text-shadow:0 0 20px rgba(255,215,0,0.4); }
+    }
+    .controls-area{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      z-index:40;
+      width:100%;
+      flex-shrink:0;
+    }
+    .time-display{
+      font-family:'Courier New', monospace;
+      font-size:2rem;
+      font-weight:200;
+      opacity:0.8;
+      letter-spacing:2px;
+    }
+    .button-group{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    button{
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.2);
+      color:white;
+      padding:10px 18px;
+      border-radius:50px;
+      font-size:0.85rem;
+      cursor:pointer;
+      transition:all 0.3s ease;
+      backdrop-filter:blur(5px);
+      text-transform:uppercase;
+      letter-spacing:1px;
+      white-space:nowrap;
+    }
+    button:hover{
+      background:rgba(255,255,255,0.2);
+      transform:translateY(-2px);
+    }
+    button.active-mode{
+      background:rgba(255,215,0,0.2);
+      border-color:rgba(255,215,0,0.4);
+      color:#ffd700;
+    }
+    .breath-guide{
+      position:absolute;
+      width:80vw;
+      height:80vw;
+      max-width:400px;
+      max-height:400px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,0.05);
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      pointer-events:none;
+      z-index:1;
+    }
+    .breath-guide::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,0.1);
+      transform:scale(0.8);
+      animation:guideBreathe 8s infinite ease-in-out;
+    }
+    @keyframes guideBreathe{
+      0%,100%{ transform:scale(0.8); opacity:0.2; border-color:rgba(255,255,255,0.1); }
+      50%{ transform:scale(1.1); opacity:0.5; border-color:rgba(255,215,0,0.3); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="breath-guide"></div>
+
+    <div class="controls-area" style="margin-top: 10px;">
+      <div class="time-display" id="timer">05:00</div>
+    </div>
+
+    <div class="hourglass-stage" id="stage">
+      <canvas id="sandCanvas"></canvas>
+
+      <svg class="glass-overlay" viewBox="0 0 360 540" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="glassShine" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:white;stop-opacity:0.0" />
+            <stop offset="25%" style="stop-color:white;stop-opacity:0.1" />
+            <stop offset="50%" style="stop-color:white;stop-opacity:0.0" />
+          </linearGradient>
+        </defs>
+
+        <path id="glassPath"
+          d="M72,50 Q72,150 168,252 Q174,258 174,270 Q174,282 168,288 Q72,396 72,490 Q180,525 288,490 Q288,396 192,288 Q186,282 186,270 Q186,258 192,252 Q288,150 288,50 Z"
+          fill="rgba(255,255,255,0.02)"
+          stroke="rgba(255,255,255,0.4)"
+          stroke-width="4" />
+
+        <path
+          d="M90,60 Q90,150 170,248 Q174,252 174,270 Q174,288 170,292 Q90,396 90,480"
+          fill="none"
+          stroke="url(#glassShine)"
+          stroke-width="8"
+          stroke-linecap="round" />
+      </svg>
+    </div>
+
+    <div class="meditation-text">
+      <div id="phraseDisplay" class="phrase active">Welcome to the present moment.</div>
+    </div>
+
+    <div class="controls-area" style="margin-bottom: 20px;">
+      <div class="button-group">
+        <button id="startBtn" type="button">Begin</button>
+        <button id="pauseBtn" type="button" style="display:none">Pause</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+      <div class="button-group" id="durationGroup">
+        <button class="duration-btn" type="button" data-minutes="1">1 Min</button>
+        <button class="duration-btn active-mode" type="button" data-minutes="5">5 Min</button>
+        <button class="duration-btn" type="button" data-minutes="10">10 Min</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      // ---------- CONFIG ----------
+      const BASE = Object.freeze({
+        w: 360,
+        h: 540,
+        // Matches SVG exactly (base coordinate system)
+        pathData: "M72,50 Q72,150 168,252 Q174,258 174,270 Q174,282 168,288 Q72,396 72,490 Q180,525 288,490 Q288,396 192,288 Q186,282 186,270 Q186,258 192,252 Q288,150 288,50 Z"
+      });
+
+      const CONFIG = Object.freeze({
+        // Keep grainSize stable across resizes to avoid “teleport” artifacts due to re-quantization.
+        grainSize: 3,
+        sandRGB: [251, 191, 36],
+        // Physics in px/s^2 and px/s (time-based for stable behavior)
+        gravityAcc: 2000,
+        maxFallSpeed: 600,
+        // Spawn/erosion tuning
+        maxSpawnPerFrame: 12,
+        // Key Y landmarks in BASE coords
+        neckY: 270 / BASE.h,
+        neckStartY: 250 / BASE.h,
+        topFillY: 55 / BASE.h
+      });
+
+      const PHRASES = Object.freeze({
+        start: ["Inhale deeply...", "Center yourself..."],
+        flowing: [
+          "Breathe in... Expand...",
+          "Breathe out... Release...",
+          "The present moment is here.",
+          "Let thoughts flow like sand.",
+          "Soft belly, soft breath.",
+          "Ground yourself now.",
+          "This moment is enough."
+        ],
+        ending: ["Peace is settling.", "Stillness.", "Complete."],
+        paused: ["Paused.", "Just breathe."],
+        done: ["Namaste.", "Carry this peace."]
+      });
+
+      const clamp = (v, lo, hi) => (v < lo ? lo : (v > hi ? hi : v));
+
+      function formatTime(s) {
+        const mm = Math.floor(s / 60).toString().padStart(2, "0");
+        const ss = Math.floor(s % 60).toString().padStart(2, "0");
+        return `${mm}:${ss}`;
+      }
+
+      // ---------- APP ----------
+      class HourglassApp {
+        constructor() {
+          // DOM
+          this.stage = null;
+          this.canvas = null;
+          this.ctx = null;
+          this.timerEl = null;
+          this.phraseEl = null;
+          this.startBtn = null;
+          this.pauseBtn = null;
+          this.resetBtn = null;
+          this.durationGroup = null;
+
+          // Rendering buffers
+          this.settledCanvas = document.createElement("canvas");
+          this.settledCtx = this.settledCanvas.getContext("2d", { alpha: true });
+
+          // Mask (reused)
+          this.maskCanvas = document.createElement("canvas");
+          this.maskCtx = this.maskCanvas.getContext("2d", { willReadFrequently: true });
+          this.path2d = null;
+
+          // Simulation space (measured from stage)
+          this.simW = BASE.w;
+          this.simH = BASE.h;
+          this.dpr = 1;
+          this.grainSize = CONFIG.grainSize;
+
+          // Grid: 0 empty, 1 wall, 2 sand
+          this.grid = new Uint8Array(1);
+          this.cols = 0;
+          this.rows = 0;
+
+          // Active (falling) grains in grid coords
+          // { gx, gy, vx, vy, jx, jy }
+          this.grains = [];
+
+          // Loop control
+          this.animId = 0;
+          this.lastFrameTs = 0;
+
+          // Resize control
+          this.resizeRAF = 0;
+          this.resizeObserver = null;
+
+          // UI phrase state
+          this.lastPhraseIndex = -1;
+
+          // Timer / session state
+          this.state = {
+            isRunning: false,
+            isPaused: false,
+
+            totalTime: 5 * 60,
+            timeLeft: 5 * 60,
+
+            initialSandCount: 0,
+            grainsDropped: 0,
+            grainsPerSecond: 0,
+
+            // Accurate elapsed tracking across pause/resume
+            elapsedBeforeRun: 0,
+            runStartMs: 0,
+
+            // Timer interval
+            timerId: 0
+          };
+        }
+
+        // ---- Grid helpers ----
+        idx(x, y) { return y * this.cols + x; }
+
+        getCell(x, y) {
+          if (x < 0 || x >= this.cols || y < 0 || y >= this.rows) return 1; // treat out-of-bounds as wall
+          return this.grid[this.idx(x, y)];
+        }
+
+        setCell(x, y, v) {
+          if (x < 0 || x >= this.cols || y < 0 || y >= this.rows) return;
+          this.grid[this.idx(x, y)] = v;
+        }
+
+        // ---- Time helpers ----
+        nowMs() { return performance.now(); }
+
+        getElapsedSeconds() {
+          const st = this.state;
+          const live = st.isRunning ? (this.nowMs() - st.runStartMs) / 1000 : 0;
+          return clamp(st.elapsedBeforeRun + live, 0, st.totalTime);
+        }
+
+        // ---- Initialization ----
+        init() {
+          this.stage = document.getElementById("stage");
+          this.canvas = document.getElementById("sandCanvas");
+          this.timerEl = document.getElementById("timer");
+          this.phraseEl = document.getElementById("phraseDisplay");
+          this.startBtn = document.getElementById("startBtn");
+          this.pauseBtn = document.getElementById("pauseBtn");
+          this.resetBtn = document.getElementById("resetBtn");
+          this.durationGroup = document.getElementById("durationGroup");
+
+          if (!this.stage || !this.canvas || !this.timerEl || !this.phraseEl || !this.startBtn || !this.pauseBtn || !this.resetBtn) {
+            console.error("Hourglass: missing required DOM elements.");
+            return;
+          }
+
+          // Safer context creation for mobile
+          this.ctx = this.canvas.getContext("2d", { alpha: true, desynchronized: true });
+          if (!this.ctx) {
+            console.error("Hourglass: unable to get 2D context.");
+            return;
+          }
+
+          // Path2D may throw on some edge browsers if malformed
+          try {
+            this.path2d = new Path2D(BASE.pathData);
+          } catch (e) {
+            console.error("Hourglass: Path2D creation failed.", e);
+            return;
+          }
+
+          // Wire UI
+          this.startBtn.addEventListener("click", () => this.startTimer(), { passive: true });
+          this.pauseBtn.addEventListener("click", () => this.pauseTimer(), { passive: true });
+          this.resetBtn.addEventListener("click", () => this.resetTimer(), { passive: true });
+
+          // Duration buttons (no inline JS)
+          if (this.durationGroup) {
+            this.durationGroup.addEventListener("click", (ev) => {
+              const btn = ev.target && ev.target.closest ? ev.target.closest("button[data-minutes]") : null;
+              if (!btn) return;
+              const mins = Number(btn.getAttribute("data-minutes"));
+              if (!Number.isFinite(mins) || mins <= 0) return;
+              this.setDuration(mins);
+            }, { passive: true });
+          }
+
+          // Resize handling (robust: ResizeObserver + window resize + visualViewport)
+          this.installResizeHandlers();
+
+          // Initial layout pass (after paint)
+          requestAnimationFrame(() => {
+            this.handleResize({ preserve: false, force: true });
+            this.resetTimer(true);
+            this.startLoop();
+          });
+        }
+
+        installResizeHandlers() {
+          const schedule = () => {
+            if (this.resizeRAF) return;
+            this.resizeRAF = requestAnimationFrame(() => {
+              this.resizeRAF = 0;
+              this.handleResize({ preserve: true, force: false });
+            });
+          };
+
+          window.addEventListener("resize", schedule, { passive: true });
+          window.addEventListener("orientationchange", () => {
+            schedule();
+            // iOS sometimes reports stale sizes immediately; re-check shortly after.
+            setTimeout(schedule, 150);
+          }, { passive: true });
+
+          if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", schedule, { passive: true });
+          }
+
+          if (window.ResizeObserver) {
+            this.resizeObserver = new ResizeObserver(() => schedule());
+            this.resizeObserver.observe(this.stage);
+          }
+        }
+
+        // ---- Resize / Rebuild ----
+        handleResize({ preserve, force }) {
+          const rect = this.stage.getBoundingClientRect();
+          const newW = Math.max(1, Math.round(rect.width));
+          const newH = Math.max(1, Math.round(rect.height));
+
+          if (!force && newW === this.simW && newH === this.simH) return;
+
+          // Save old simulation state for remap
+          const hadGrid = this.cols > 0 && this.rows > 0 && this.grid && this.grid.length > 1;
+          const old = preserve && hadGrid ? {
+            cols: this.cols,
+            rows: this.rows,
+            simW: this.simW,
+            simH: this.simH,
+            grid: this.grid,
+            grains: this.grains.map(g => ({ ...g })) // small copy; grain count is limited
+          } : null;
+
+          // Update sim size / DPR
+          this.simW = newW;
+          this.simH = newH;
+          this.dpr = window.devicePixelRatio || 1;
+
+          // Setup main canvas at device resolution
+          const pxW = Math.max(1, Math.floor(this.simW * this.dpr));
+          const pxH = Math.max(1, Math.floor(this.simH * this.dpr));
+          this.canvas.width = pxW;
+          this.canvas.height = pxH;
+
+          // Reset transform explicitly (prevents cumulative scaling bugs)
+          this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+          // Setup settled layer canvas (same internal pixel size as main)
+          this.settledCanvas.width = pxW;
+          this.settledCanvas.height = pxH;
+          this.settledCtx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+          // Recompute grid dims (stable grainSize)
+          this.cols = Math.ceil(this.simW / this.grainSize);
+          this.rows = Math.ceil(this.simH / this.grainSize);
+          this.grid = new Uint8Array(this.rows * this.cols);
+
+          // Rebuild walls mask
+          this.createPhysicsMask();
+
+          if (old) {
+            // Remap sand + active grains into the new grid, then re-render settled layer.
+            this.remapFromOld(old);
+            this.renderSettledFull();
+          } else {
+            // Fresh reset
+            this.resetSimulation();
+          }
+        }
+
+        createPhysicsMask() {
+          // Reuse offscreen canvas; draw scaled hourglass path into sim-sized bitmap.
+          const w = this.simW;
+          const h = this.simH;
+
+          this.maskCanvas.width = w;
+          this.maskCanvas.height = h;
+
+          const c = this.maskCtx;
+          c.setTransform(1, 0, 0, 1, 0, 0);
+          c.clearRect(0, 0, w, h);
+
+          // Fill black (wall)
+          c.fillStyle = "#000";
+          c.fillRect(0, 0, w, h);
+
+          // Fill white where hourglass interior exists
+          c.save();
+          c.setTransform(w / BASE.w, 0, 0, h / BASE.h, 0, 0);
+          c.fillStyle = "#fff";
+          c.fill(this.path2d);
+          c.restore();
+
+          const img = c.getImageData(0, 0, w, h).data;
+
+          // Default walls
+          this.grid.fill(1);
+
+          const half = this.grainSize * 0.5;
+          const cols = this.cols;
+          const rows = this.rows;
+
+          // Sample at cell centers (fast + stable)
+          for (let y = 0; y < rows; y++) {
+            const py = Math.min(h - 1, (y * this.grainSize + half) | 0);
+            const rowBase = y * cols;
+            const imgRow = py * w;
+
+            for (let x = 0; x < cols; x++) {
+              const px = Math.min(w - 1, (x * this.grainSize + half) | 0);
+              const i = ((imgRow + px) << 2); // *4
+              const r = img[i]; // 0..255
+              this.grid[rowBase + x] = (r > 80) ? 0 : 1;
+            }
+          }
+        }
+
+        remapFromOld(old) {
+          const newGrid = this.grid;
+          const newCols = this.cols;
+          const newRows = this.rows;
+
+          // 1) Remap settled sand cells
+          // Map by normalized cell coordinates to avoid edge “teleport”.
+          for (let oy = 0; oy < old.rows; oy++) {
+            const oRowBase = oy * old.cols;
+            const ny = Math.floor((oy + 0.5) * newRows / old.rows);
+            if (ny < 0 || ny >= newRows) continue;
+            const nRowBase = ny * newCols;
+
+            for (let ox = 0; ox < old.cols; ox++) {
+              if (old.grid[oRowBase + ox] !== 2) continue;
+              const nx = Math.floor((ox + 0.5) * newCols / old.cols);
+              if (nx < 0 || nx >= newCols) continue;
+
+              const nIdx = nRowBase + nx;
+              if (newGrid[nIdx] === 0) newGrid[nIdx] = 2; // only if empty interior
+            }
+          }
+
+          // 2) Remap active grains
+          // Keep within empty cells; drop grains that end up outside the hourglass.
+          const remapped = [];
+          for (const g of old.grains) {
+            const nx = Math.floor((g.gx + 0.5) * newCols / old.cols);
+            const ny = Math.floor((g.gy + 0.5) * newRows / old.rows);
+            if (this.getCell(nx, ny) !== 0) continue;
+            remapped.push({
+              gx: nx,
+              gy: ny,
+              vx: g.vx,
+              vy: g.vy,
+              jx: g.jx,
+              jy: g.jy
+            });
+          }
+          this.grains = remapped;
+        }
+
+        // ---- Rendering helpers ----
+        renderSettledFull() {
+          const c = this.settledCtx;
+          c.clearRect(0, 0, this.simW, this.simH);
+
+          c.fillStyle = `rgb(${CONFIG.sandRGB.join(",")})`;
+
+          // One-time full render (reset/resize only): simple fillRect loop.
+          const cols = this.cols;
+          const rows = this.rows;
+          const gs = this.grainSize;
+          const grid = this.grid;
+
+          for (let y = 0; y < rows; y++) {
+            const rowBase = y * cols;
+            const py = y * gs;
+            for (let x = 0; x < cols; x++) {
+              if (grid[rowBase + x] === 2) {
+                c.fillRect(x * gs, py, gs, gs);
+              }
+            }
+          }
+        }
+
+        paintSandCell(x, y, isSand) {
+          // Only updates the settled layer (incremental draw).
+          const c = this.settledCtx;
+          const gs = this.grainSize;
+          const px = x * gs;
+          const py = y * gs;
+
+          if (isSand) {
+            c.fillStyle = `rgb(${CONFIG.sandRGB.join(",")})`;
+            c.fillRect(px, py, gs, gs);
+          } else {
+            c.clearRect(px, py, gs, gs);
+          }
+        }
+
+        // ---- Simulation reset ----
+        resetSimulation() {
+          this.createPhysicsMask();
+          this.grains.length = 0;
+          this.state.grainsDropped = 0;
+
+          this.state.initialSandCount = this.fillTopChamber();
+          this.state.grainsPerSecond = this.state.initialSandCount / this.state.totalTime;
+
+          this.renderSettledFull();
+        }
+
+        fillTopChamber() {
+          let count = 0;
+          const cols = this.cols;
+          const rows = this.rows;
+          const grid = this.grid;
+
+          const startYPx = CONFIG.neckStartY * this.simH;
+          const endYPx = CONFIG.topFillY * this.simH;
+
+          const startY = clamp(Math.floor(startYPx / this.grainSize), 0, rows - 1);
+          const endY = clamp(Math.floor(endYPx / this.grainSize), 0, rows - 1);
+
+          for (let y = startY; y >= endY; y--) {
+            const rowBase = y * cols;
+            for (let x = 0; x < cols; x++) {
+              const i = rowBase + x;
+              if (grid[i] === 0) {
+                grid[i] = 2;
+                count++;
+              }
+            }
+          }
+          return count;
+        }
+
+        // ---- Sand removal at top (stable + bounds-safe) ----
+        erodeTopSand() {
+          const cols = this.cols;
+          const rows = this.rows;
+          const gs = this.grainSize;
+
+          const startYPx = CONFIG.neckStartY * this.simH;
+          const startY = clamp(Math.floor(startYPx / gs), 0, rows - 1);
+          const cx = Math.floor(cols / 2);
+
+          const maxR = Math.min(30, Math.floor(cols / 2) - 1);
+
+          // FIXED: Iterate from top-down to erode the surface first.
+          // This prevents the "floating sand" issue by ensuring we always 
+          // remove supported sand from the top layer downwards.
+          for (let y = 0; y <= startY; y++) {
+            const r = Math.min(maxR, 1 + (startY - y));
+            const startOff = (Math.random() * r) | 0;
+
+            for (let i = 0; i < r; i++) {
+              const off = (startOff + i) % r;
+
+              const xl = cx - off;
+              if (this.getCell(xl, y) === 2) {
+                this.setCell(xl, y, 0);
+                this.paintSandCell(xl, y, false);
+                return true;
+              }
+
+              const xr = cx + off;
+              if (this.getCell(xr, y) === 2) {
+                this.setCell(xr, y, 0);
+                this.paintSandCell(xr, y, false);
+                return true;
+              }
+            }
+          }
+          return false;
+        }
+
+        // ---- Active grain spawn ----
+        spawnGrain() {
+          const neckXPx = this.simW * 0.5 + (Math.random() * 4 - 2);
+          const neckYPx = CONFIG.neckY * this.simH;
+
+          let gx = clamp(Math.floor(neckXPx / this.grainSize), 0, this.cols - 1);
+          let gy = clamp(Math.floor(neckYPx / this.grainSize), 0, this.rows - 1);
+
+          // Ensure spawn inside empty interior; try small vertical nudge if needed.
+          if (this.getCell(gx, gy) !== 0) {
+            for (let dy = -2; dy <= 2; dy++) {
+              const yy = gy + dy;
+              if (this.getCell(gx, yy) === 0) { gy = yy; break; }
+            }
+            if (this.getCell(gx, gy) !== 0) return; // cannot spawn safely
+          }
+
+          this.grains.push({
+            gx,
+            gy,
+            vx: (Math.random() - 0.5) * 220,  // px/s horizontal bias
+            vy: 120,                           // px/s initial fall
+            jx: Math.random() * this.grainSize * 0.25,
+            jy: Math.random() * this.grainSize * 0.15
+          });
+        }
+
+        // ---- Physics update (optimized + stable stacking) ----
+        updatePhysics(dt) {
+          const st = this.state;
+          if (!st.isRunning) return;
+
+          // 1) Determine how many grains should have dropped by elapsed time.
+          const elapsed = this.getElapsedSeconds();
+          const targetDropped = Math.min(st.initialSandCount, Math.floor(elapsed * st.grainsPerSecond));
+          let toDrop = targetDropped - st.grainsDropped;
+          toDrop = clamp(toDrop, 0, CONFIG.maxSpawnPerFrame);
+
+          for (let k = 0; k < toDrop; k++) {
+            if (this.erodeTopSand()) {
+              this.spawnGrain();
+              st.grainsDropped++;
+            } else {
+              break;
+            }
+          }
+
+          // 2) Move active grains using cell-based steps (prevents tunneling/teleporting).
+          const gs = this.grainSize;
+          const gAcc = CONFIG.gravityAcc;
+          const maxV = CONFIG.maxFallSpeed;
+
+          for (let i = this.grains.length - 1; i >= 0; i--) {
+            const g = this.grains[i];
+
+            // Integrate velocities
+            g.vy = Math.min(g.vy + gAcc * dt, maxV);
+            g.vx *= 0.985;
+
+            // Convert intended motion into per-cell steps (bounded)
+            const dy = g.vy * dt; // px
+            const steps = clamp(Math.ceil(dy / gs), 1, 4);
+
+            let settled = false;
+
+            for (let s = 0; s < steps; s++) {
+              // Try down
+              if (this.getCell(g.gx, g.gy + 1) === 0) {
+                g.gy++;
+                continue;
+              }
+
+              // Down blocked => try diagonal slide (order biased by vx, randomized to avoid “striping”)
+              const biasRight = g.vx > 40;
+              const biasLeft  = g.vx < -40;
+              const rightFirst = biasRight ? true : (biasLeft ? false : (Math.random() < 0.5));
+
+              const tryDirs = rightFirst ? [1, -1] : [-1, 1];
+              let moved = false;
+
+              for (const dir of tryDirs) {
+                const nx = g.gx + dir;
+                const ny = g.gy + 1;
+
+                if (this.getCell(nx, ny) === 0) {
+                  g.gx = nx;
+                  g.gy = ny;
+                  // Small bias reinforcement to keep natural “spray”
+                  g.vx += dir * 25;
+                  moved = true;
+                  break;
+                }
+              }
+
+              if (moved) continue;
+
+              // Cannot move => settle in current cell (or nearest empty above).
+              settled = this.settleGrainAt(g.gx, g.gy);
+              break;
+            }
+
+            // Remove settled grains
+            if (settled) {
+              this.grains.splice(i, 1);
+            } else {
+              // Cull grains that somehow end up outside bottom (safety)
+              if (g.gy >= this.rows - 1) {
+                this.grains.splice(i, 1);
+              }
+            }
+          }
+        }
+
+        settleGrainAt(gx, gy) {
+          // Place sand in current cell if empty; otherwise search a few cells upward.
+          for (let k = 0; k < 6; k++) {
+            const y = gy - k;
+            if (y < 0) break;
+            if (this.getCell(gx, y) === 0) {
+              this.setCell(gx, y, 2);
+              this.paintSandCell(gx, y, true);
+              return true;
+            }
+          }
+          return false;
+        }
+
+        // ---- Draw (fast: blit settled layer + draw active grains only) ----
+        draw() {
+          const ctx = this.ctx;
+
+          // Clear in device pixels
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+          // Draw settled sand buffer (already in device pixels)
+          ctx.drawImage(this.settledCanvas, 0, 0);
+
+          // Draw active grains in sim coords (scaled by DPR)
+          ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+          ctx.fillStyle = "#fff8dc";
+          ctx.beginPath();
+          const gs = this.grainSize;
+
+          for (let i = 0; i < this.grains.length; i++) {
+            const g = this.grains[i];
+            const x = g.gx * gs + g.jx;
+            const y = g.gy * gs + g.jy;
+            ctx.rect(x, y, gs, gs);
+          }
+          ctx.fill();
+        }
+
+        // ---- Loop ----
+        startLoop() {
+          this.lastFrameTs = performance.now();
+          const tick = (ts) => {
+            const dt = clamp((ts - this.lastFrameTs) / 1000, 0, 0.05);
+            this.lastFrameTs = ts;
+
+            // Adaptive FPS cap for idle/paused (battery friendly)
+            const targetFps = this.state.isRunning ? 60 : 20;
+            if (!this._fpsGate) this._fpsGate = { acc: 0 };
+            this._fpsGate.acc += dt;
+
+            const step = 1 / targetFps;
+            if (this._fpsGate.acc >= step) {
+              // consume just one step worth to avoid spiral
+              this._fpsGate.acc = 0;
+
+              this.updatePhysics(dt);
+              this.draw();
+            }
+
+            this.animId = requestAnimationFrame(tick);
+          };
+          this.animId = requestAnimationFrame(tick);
+        }
+
+        // ---- Phrases ----
+        updatePhrase(category) {
+          const st = this.state;
+          const cat = category || (st.timeLeft < 15 ? "ending" : "flowing");
+          const opts = PHRASES[cat] || PHRASES.flowing;
+
+          let idx = (Math.random() * opts.length) | 0;
+          if (idx === this.lastPhraseIndex && opts.length > 1) idx = (idx + 1) % opts.length;
+          this.lastPhraseIndex = idx;
+
+          if (category || st.timeLeft % 10 === 0) {
+            this.phraseEl.classList.remove("active");
+            // Keep timeout short and bounded (avoid piling timeouts)
+            setTimeout(() => {
+              this.phraseEl.textContent = opts[idx];
+              this.phraseEl.classList.add("active");
+            }, 250);
+          }
+        }
+
+        // ---- Timer / UI ----
+        startTimer() {
+          const st = this.state;
+          if (st.isRunning) return;
+
+          if (st.timeLeft <= 0) {
+            this.resetTimer(true);
+          }
+
+          st.isRunning = true;
+          st.isPaused = false;
+          st.runStartMs = this.nowMs();
+
+          // UI
+          this.startBtn.style.display = "none";
+          this.pauseBtn.style.display = "inline-block";
+          this.startBtn.textContent = "Resume";
+
+          this.updatePhrase("flowing");
+
+          // Start/update timer loop
+          if (!st.timerId) {
+            st.timerId = setInterval(() => this.tickTimer(), 250);
+          }
+        }
+
+        pauseTimer() {
+          const st = this.state;
+          if (!st.isRunning) return;
+
+          // Accumulate elapsed before pausing
+          st.elapsedBeforeRun = this.getElapsedSeconds();
+          st.isRunning = false;
+          st.isPaused = true;
+
+          // UI
+          this.startBtn.style.display = "inline-block";
+          this.startBtn.textContent = "Resume";
+          this.pauseBtn.style.display = "none";
+
+          this.updatePhrase("paused");
+
+          if (st.timerId) {
+            clearInterval(st.timerId);
+            st.timerId = 0;
+          }
+
+          this.tickTimer(true);
+        }
+
+        resetTimer(keepDuration) {
+          const st = this.state;
+
+          st.isRunning = false;
+          st.isPaused = false;
+
+          if (st.timerId) {
+            clearInterval(st.timerId);
+            st.timerId = 0;
+          }
+
+          st.elapsedBeforeRun = 0;
+          st.runStartMs = 0;
+
+          if (!keepDuration) {
+            st.totalTime = 5 * 60;
+          }
+          st.timeLeft = st.totalTime;
+
+          this.timerEl.textContent = formatTime(st.timeLeft);
+
+          // Reset simulation (also recalcs grainsPerSecond using totalTime)
+          this.resetSimulation();
+
+          this.phraseEl.textContent = "Ready to begin.";
+          this.phraseEl.classList.add("active");
+
+          this.startBtn.style.display = "inline-block";
+          this.startBtn.textContent = "Begin";
+          this.pauseBtn.style.display = "none";
+        }
+
+        completeSession() {
+          const st = this.state;
+          st.isRunning = false;
+          st.isPaused = false;
+
+          if (st.timerId) {
+            clearInterval(st.timerId);
+            st.timerId = 0;
+          }
+
+          this.updatePhrase("done");
+
+          this.startBtn.style.display = "inline-block";
+          this.startBtn.textContent = "Start New";
+          this.pauseBtn.style.display = "none";
+        }
+
+        tickTimer(force) {
+          const st = this.state;
+          const elapsed = this.getElapsedSeconds();
+          const newLeft = Math.max(0, Math.ceil(st.totalTime - elapsed));
+
+          if (force || newLeft !== st.timeLeft) {
+            st.timeLeft = newLeft;
+            this.timerEl.textContent = formatTime(st.timeLeft);
+            this.updatePhrase();
+
+            if (st.timeLeft <= 0) {
+              // Lock elapsed at end
+              st.elapsedBeforeRun = st.totalTime;
+              this.completeSession();
+            }
+          }
+        }
+
+        setDuration(minutes) {
+          const st = this.state;
+          st.totalTime = Math.round(minutes * 60);
+          st.timeLeft = st.totalTime;
+
+          // Update active state in duration buttons only
+          const buttons = this.durationGroup ? this.durationGroup.querySelectorAll("button[data-minutes]") : [];
+          buttons.forEach(b => {
+            const m = Number(b.getAttribute("data-minutes"));
+            b.classList.toggle("active-mode", m === minutes);
+          });
+
+          // Reset fully (duration preserved)
+          this.resetTimer(true);
+        }
+      }
+
+      // Boot
+      document.addEventListener("DOMContentLoaded", () => {
+        const app = new HourglassApp();
+        app.init();
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

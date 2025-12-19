@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R-Studio: Syntax Overdrive v3.0</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+    :root{
+      --bg-dark:#0f172a;
+      --terminal-bg:#020617;
+      --neon-blue:#3b82f6;
+      --neon-gold:#fbbf24;
+      --neon-green:#10b981;
+      --neon-red:#ef4444;
+      --neon-purple:#8b5cf6;
+      --neon-cyan:#22d3ee;
+    }
+
+    body{
+      font-family:'JetBrains Mono', monospace;
+      background-color:#020617;
+      color:#f1f5f9;
+      overflow-x:hidden;
+      background-image:radial-gradient(#1e293b 1px, transparent 1px);
+      background-size:20px 20px;
+    }
+
+    /* --- SCROLLBARS --- */
+    .force-scroll::-webkit-scrollbar{ width:10px; }
+    .force-scroll::-webkit-scrollbar-track{ background:#0f172a; }
+    .force-scroll::-webkit-scrollbar-thumb{
+      background-color:#334155;border-radius:4px;border:2px solid #0f172a;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes shake{
+      0%,100%{ transform:translateX(0); }
+      10%,30%,50%,70%,90%{ transform:translateX(-4px); }
+      20%,40%,60%,80%{ transform:translateX(4px); }
+    }
+    .animate-shake{ animation:shake .4s cubic-bezier(.36,.07,.19,.97) both; }
+
+    @keyframes popIn{
+      0%{ transform:scale(.95) translateY(10px); opacity:0; }
+      100%{ transform:scale(1) translateY(0); opacity:1; }
+    }
+    .animate-pop{ animation:popIn .3s cubic-bezier(.175,.885,.32,1.275) forwards; }
+
+    @keyframes pulseGlow{
+      0%,100%{ box-shadow:0 0 0 rgba(34,211,238,0); }
+      50%{ box-shadow:0 0 22px rgba(34,211,238,.25); }
+    }
+    .glow-cyan{ animation:pulseGlow 1.2s ease-in-out infinite; }
+
+    /* --- CONSOLE --- */
+    .console-window{
+      background-color:var(--terminal-bg);
+      border:1px solid #334155;
+      box-shadow:inset 0 0 20px rgba(0,0,0,.5);
+    }
+    .console-line{ margin-bottom:4px; display:block; word-break:break-word; white-space:pre-wrap; }
+    .console-input{
+      background:transparent;border:none;color:#fff;width:100%;
+      outline:none;font-family:'JetBrains Mono', monospace; caret-color:var(--neon-blue);
+    }
+
+    .btn-neon{ transition:all .15s ease; }
+    .btn-neon:active{ transform:translateY(2px); }
+
+    /* Floating text */
+    .floating-text{
+      position:fixed; pointer-events:none; animation:floatUp 1s ease-out forwards;
+      z-index:100; font-weight:800; text-shadow:0 2px 6px rgba(0,0,0,.6);
+    }
+    @keyframes floatUp{
+      0%{ transform:translateY(0) scale(1); opacity:1; }
+      100%{ transform:translateY(-40px) scale(1.2); opacity:0; }
+    }
+
+    /* Modal */
+    .modal-scrim{ background:rgba(2,6,23,.9); backdrop-filter:blur(6px); }
+
+    /* Tiny “code glow” */
+    .chip{
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(15,23,42,.7);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center p-4">
+  <div id="app" class="max-w-6xl w-full z-10 relative flex flex-col gap-4">
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="text-center space-y-8 py-10 animate-pop">
+      <div class="inline-block relative group">
+        <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-40 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+        <h1 class="relative text-5xl md:text-7xl font-black text-white tracking-tighter p-6 bg-slate-900 rounded-lg border border-slate-700">
+          R-STUDIO<span class="text-blue-500">_</span>OVERDRIVE
+        </h1>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-700 p-8 rounded-xl shadow-2xl max-w-3xl mx-auto backdrop-blur-md">
+        <div class="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+          <div class="h-12 w-12 bg-blue-600 rounded flex items-center justify-center font-black text-2xl">R</div>
+          <div class="text-left">
+            <h2 class="text-xl font-bold text-white">Select Operation</h2>
+            <p class="text-slate-400 text-sm">Sigma Archives // Mode: LEARN+SPEEDRUN (you choose)</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button onclick="startCampaign('vectors')" class="btn-neon group relative overflow-hidden bg-slate-800 border-l-4 border-blue-500 p-6 text-left hover:bg-slate-800/80 transition-all">
+            <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30"><i data-lucide="database" class="w-16 h-16"></i></div>
+            <h3 class="text-blue-400 font-bold text-lg mb-1 group-hover:translate-x-1 transition-transform">CH 1: The Vector Vault</h3>
+            <p class="text-slate-400 text-xs leading-relaxed">Objects, atomic vectors, coercion, indexing, and vectorized ops.</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">c()</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">&lt;-</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">[ ]</span>
+            </div>
+          </button>
+
+          <button onclick="startCampaign('dataframes')" class="btn-neon group relative overflow-hidden bg-slate-800 border-l-4 border-purple-500 p-6 text-left hover:bg-slate-800/80 transition-all">
+            <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30"><i data-lucide="table" class="w-16 h-16"></i></div>
+            <h3 class="text-purple-400 font-bold text-lg mb-1 group-hover:translate-x-1 transition-transform">CH 2: Data Frame Dungeon</h3>
+            <p class="text-slate-400 text-xs leading-relaxed">$ indexing, [row, col], missingness, basic summaries.</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">$</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">is.na()</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">mean()</span>
+            </div>
+          </button>
+
+          <button onclick="startCampaign('wrangling')" class="btn-neon group relative overflow-hidden bg-slate-800 border-l-4 border-cyan-500 p-6 text-left hover:bg-slate-800/80 transition-all">
+            <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30"><i data-lucide="shuffle" class="w-16 h-16"></i></div>
+            <h3 class="text-cyan-300 font-bold text-lg mb-1 group-hover:translate-x-1 transition-transform">CH 3: Wrangling Reactor</h3>
+            <p class="text-slate-400 text-xs leading-relaxed">Import, select/filter/mutate, group summaries, tidy reshaping.</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">read.csv()</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">dplyr</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">tidyr</span>
+            </div>
+          </button>
+
+          <button onclick="startCampaign('stats')" class="btn-neon group relative overflow-hidden bg-slate-800 border-l-4 border-yellow-500 p-6 text-left hover:bg-slate-800/80 transition-all">
+            <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30"><i data-lucide="bar-chart-3" class="w-16 h-16"></i></div>
+            <h3 class="text-yellow-300 font-bold text-lg mb-1 group-hover:translate-x-1 transition-transform">CH 4: Inferential Engine</h3>
+            <p class="text-slate-400 text-xs leading-relaxed">Descriptives, t-tests, correlation, linear models, quick plots.</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">t.test()</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">lm()</span>
+              <span class="text-[10px] bg-slate-900 px-2 py-1 rounded text-slate-300">ggplot2</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center text-xs text-slate-500 font-mono">
+          <span id="version-stamp">v3.0.0 // REPL SIM</span>
+          <div class="flex items-center gap-3">
+            <button onclick="openCheatsheet()" class="hover:text-cyan-300">CHEATSHEET</button>
+            <button onclick="localStorage.clear(); location.reload()" class="hover:text-red-400">RESET SAVE DATA</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-3xl mx-auto text-left text-xs text-slate-400 leading-relaxed bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2 text-slate-200 font-bold">
+          <i data-lucide="sparkles" class="w-4 h-4 text-cyan-300"></i>
+          Learning rule (simple, powerful, slightly evil)
+        </div>
+        <p>
+          Use <span class="text-yellow-300 font-bold">HINT</span> for progressive help, or <span class="text-red-300 font-bold">REVEAL</span> to see the exact answer + why it works.
+          Both can push your score negative — because this is for learning, not gatekeeping.
+        </p>
+      </div>
+    </div>
+
+    <!-- BATTLE SCREEN -->
+    <div id="battle-screen" class="hidden flex-col gap-4 w-full h-[95vh]">
+
+      <!-- HUD -->
+      <div class="flex flex-wrap justify-between items-center bg-slate-900 border-b border-slate-700 p-3 rounded-xl shadow-lg gap-2">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1" id="lives-container"></div>
+          <div id="debt-badge" class="hidden text-[10px] font-bold px-2 py-1 rounded border border-red-500/40 text-red-300 bg-red-900/20">
+            SCORE DEBT
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-4">
+          <div id="timer-badge" class="chip px-3 py-1 rounded font-mono text-xs text-cyan-200 flex items-center gap-2">
+            <i data-lucide="timer" class="w-4 h-4 text-cyan-300"></i>
+            <span id="timer-display">00:00</span>
+          </div>
+
+          <div id="streak-badge" class="hidden text-xs font-black text-yellow-300 border border-yellow-600/60 px-2 py-1 rounded glow-cyan">
+            STREAK x<span id="streak-count">0</span>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-700 px-4 py-1 rounded font-mono text-blue-400 text-xl shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+            <span id="score-display">0000</span> PTS
+          </div>
+                    <button onclick="restartGame()" class="btn-neon bg-slate-800 border border-slate-600 px-3 py-2 rounded text-xs font-black text-slate-200 hover:bg-slate-700 flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-300"></i>
+                        <span class="hidden sm:inline">RESTART RUN</span>
+                    </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+
+        <!-- LEFT: DATA CONTEXT -->
+        <div class="lg:col-span-1 flex flex-col gap-4">
+          <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-xl flex-1 flex flex-col relative overflow-hidden">
+            <div class="absolute top-0 left-0 bg-slate-700 text-[10px] font-black px-2 py-1 rounded-br text-slate-200">DATA CONTEXT</div>
+            <div id="data-view" class="mt-6 font-mono text-xs text-slate-300 whitespace-pre overflow-x-auto p-2 bg-slate-900 rounded border border-slate-800 h-full force-scroll">
+# Loading dataset...
+            </div>
+          </div>
+
+          <!-- Tools -->
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="useHint()" id="btn-hint" class="btn-neon bg-slate-800 border border-slate-600 p-3 rounded hover:bg-slate-700 text-xs text-yellow-300 font-black flex items-center justify-center gap-2">
+              <i data-lucide="lightbulb" class="w-4 h-4"></i> HINT
+            </button>
+            <button onclick="useInspect()" id="btn-inspect" class="btn-neon bg-slate-800 border border-slate-600 p-3 rounded hover:bg-slate-700 text-xs text-purple-300 font-black flex items-center justify-center gap-2">
+              <i data-lucide="search" class="w-4 h-4"></i> STR()
+            </button>
+            <button onclick="useReveal()" id="btn-reveal" class="btn-neon bg-slate-800 border border-red-600/60 p-3 rounded hover:bg-slate-700 text-xs text-red-300 font-black flex items-center justify-center gap-2 col-span-2">
+              <i data-lucide="eye" class="w-4 h-4"></i> REVEAL ANSWER (-400)
+            </button>
+            <button onclick="openCheatsheet()" id="btn-cheatsheet" class="btn-neon bg-slate-800 border border-cyan-600/50 p-3 rounded hover:bg-slate-700 text-xs text-cyan-200 font-black flex items-center justify-center gap-2 col-span-2">
+              <i data-lucide="book-open" class="w-4 h-4"></i> CHEATSHEET (Unlocked)
+            </button>
+          </div>
+
+          <div class="text-[10px] text-slate-500 leading-relaxed bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+            <span class="text-slate-300 font-black">Scoring:</span>
+            hints/reveal reduce points and may push you into debt. Debt is allowed; learning is mandatory.
+          </div>
+        </div>
+
+        <!-- RIGHT: TERMINAL & TASK -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+
+          <!-- Task Card -->
+          <div class="bg-slate-800 border-l-4 border-blue-500 p-5 rounded-r-xl shadow-lg relative">
+            <h2 class="text-lg font-black text-white mb-2" id="task-title">Initialize Vector</h2>
+            <p class="text-slate-300 text-sm leading-relaxed" id="task-desc"></p>
+            <div class="flex items-center gap-2 mt-3 text-[11px] text-slate-400 font-mono">
+              <span class="chip px-2 py-1 rounded" id="task-tag">CODE</span>
+              <span class="chip px-2 py-1 rounded" id="task-skill">skill: ???</span>
+              <span class="chip px-2 py-1 rounded" id="task-difficulty">difficulty: ???</span>
+            </div>
+          </div>
+
+          <!-- Console -->
+          <div class="flex-1 bg-slate-950 rounded-xl border border-slate-700 flex flex-col shadow-2xl overflow-hidden relative console-window">
+            <div class="bg-slate-900 px-4 py-2 flex items-center justify-between border-b border-slate-800">
+              <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <div class="text-xs text-slate-500 font-mono" id="console-title">R Console (sim)</div>
+            </div>
+
+            <div id="console-output" class="flex-1 p-4 font-mono text-sm overflow-y-auto force-scroll text-slate-300 space-y-1">
+              <div class="text-slate-500">R version 4.3.1 (2023-06-16) -- "Beagle Scout"</div>
+              <div class="text-slate-500">Type 'help()' for on-line help.</div>
+              <div class="text-slate-500">This is a SIM. We validate patterns to teach syntax & intent.</div>
+              <br>
+            </div>
+
+            <div id="input-zone" class="bg-slate-900 p-4 border-t border-slate-800 min-h-[80px] flex items-center">
+              <!-- dynamic -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- VICTORY MODAL -->
+    <div id="victory-modal" class="hidden fixed inset-0 modal-scrim z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border-2 border-green-500 rounded-xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(34,197,94,0.2)] animate-pop">
+        <div class="inline-block p-4 rounded-full bg-green-900/30 mb-4">
+          <i data-lucide="award" class="w-12 h-12 text-green-400"></i>
+        </div>
+        <h2 class="text-3xl font-black text-white mb-2">CHAPTER COMPLETE</h2>
+        <p class="text-slate-400 mb-6">Module compiled. The R gods nod approvingly (quietly).</p>
+        <div class="flex justify-center gap-8 mb-8 font-mono">
+          <div>
+            <div class="text-xs text-slate-500 uppercase">Score</div>
+            <div class="text-2xl font-black text-green-400" id="final-score">0</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-500 uppercase">Errors</div>
+            <div class="text-2xl font-black text-red-400" id="final-errors">0</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-500 uppercase">Hints</div>
+            <div class="text-2xl font-black text-yellow-300" id="final-hints">0</div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-500 uppercase">Reveals</div>
+            <div class="text-2xl font-black text-red-300" id="final-reveals">0</div>
+          </div>
+        </div>
+        <button onclick="location.reload()" class="w-full btn-neon bg-green-600 hover:bg-green-500 text-white font-black py-3 rounded">
+          RETURN TO ROOT
+        </button>
+      </div>
+    </div>
+
+    <!-- CHEATSHEET MODAL -->
+    <div id="cheatsheet-modal" class="hidden fixed inset-0 modal-scrim z-50 p-4 flex items-center justify-center">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <i data-lucide="book-open" class="w-5 h-5 text-cyan-300"></i>
+            <div class="font-black text-white">Unlocked Cheatsheet</div>
+            <div class="text-[10px] text-slate-400 font-mono">(grows as you play)</div>
+          </div>
+          <button onclick="closeCheatsheet()" class="btn-neon text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="p-5">
+          <div class="text-xs text-slate-400 leading-relaxed mb-4">
+            This is your “I swear I’m not cheating, I’m studying” panel: a running list of commands you’ve encountered,
+            with tiny reminders of why/when to use them.
+          </div>
+          <div id="cheatsheet-content" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto force-scroll pr-2"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* =========================
+   R-STUDIO: SYNTAX OVERDRIVE
+   v3.0.0 — single-file
+   ========================= */
+
+const GAME_VERSION = "v3.0.0";
+
+/* --- DATA: CAMPAIGNS & LEVELS --- */
+const campaigns = {
+  vectors: {
+    title: "Chapter 1: The Vector Vault",
+    consoleTitle: "R Console (Objects & Vectors)",
+    dataset:
+`# Environment (sim)
+# No external dataset loaded.
+# Objects appear as you create them.
+# Tip: Use STR() to see the shape/type of objects.
+
+# Core commands: <-  c()  :  [ ]  length()  class()`,
+    levels: [
+      {
+        id: "v1",
+        type: "code",
+        title: "First Assignment",
+        desc: "Assign the value 42 to an object named `answer`.",
+        skill: "assignment",
+        difficulty: "easy",
+        timeLimit: 45,
+        starterCode: "",
+        solutionPatterns: [/^\s*answer\s*(<-|=)\s*42\s*$/],
+        successOutput: "[1] 42",
+        hintSteps: [
+          "Concept: create an object called `answer` that stores a number.",
+          "Syntax: use assignment: `name <- value` (or `name = value`).",
+          "Near-solution: `answer <- 42`"
+        ],
+        reveal: "answer <- 42",
+        explain: "Assignment stores the value 42 in the object `answer`."
+      },
+      {
+        id: "v2",
+        type: "code",
+        title: "Vector Creation",
+        desc: "Create a numeric vector named `vals` containing 10, 20, and 30 using `c()`.",
+        skill: "vectors",
+        difficulty: "easy",
+        timeLimit: 60,
+        starterCode: "vals <- ",
+        solutionPatterns: [/^\s*vals\s*(<-|=)\s*c\(\s*10\s*,\s*20\s*,\s*30\s*\)\s*$/],
+        successOutput: "[1] 10 20 30",
+        hintSteps: [
+          "Concept: `c()` combines values into a vector.",
+          "Skeleton: `vals <- c(10, 20, 30)`",
+          "Watch commas + parentheses: three numbers separated by commas."
+        ],
+        reveal: "vals <- c(10, 20, 30)",
+        explain: "`c()` (‘combine’) builds an atomic vector from its arguments."
+      },
+      {
+        id: "v3",
+        type: "choice",
+        title: "Type Coercion",
+        desc: "What is the result of `class(c(TRUE, 1, 'z'))`?",
+        skill: "types",
+        difficulty: "medium",
+        timeLimit: 35,
+        options: ["numeric","logical","character","complex"],
+        answer: "character",
+        successOutput: "[1] \"character\"",
+        hintSteps: [
+          "Concept: when types mix, R coerces to a single type that can hold everything.",
+          "Rule of thumb: character is ‘most general’ here.",
+          "So TRUE and 1 become \"TRUE\" and \"1\"."
+        ],
+        reveal: "character",
+        explain: "Combining logical, numeric, and character coerces everything to character."
+      },
+      {
+        id: "v4",
+        type: "fix",
+        title: "Syntax Repair",
+        desc: "This code is trying to generate a sequence from 1 to 5, but it's broken.",
+        skill: "functions",
+        difficulty: "easy",
+        timeLimit: 50,
+        starterCode: "seq(1 5)",
+        solutionPatterns: [/^\s*seq\(\s*1\s*,\s*5\s*\)\s*$/, /^\s*1\s*:\s*5\s*$/],
+        successOutput: "[1] 1 2 3 4 5",
+        hintSteps: [
+          "Concept: `seq(from, to)` needs a comma between arguments.",
+          "Fix: `seq(1, 5)`",
+          "Alternative: `1:5` uses the colon operator."
+        ],
+        reveal: "seq(1, 5)",
+        explain: "Function arguments are comma-separated; `1:5` is a shortcut sequence operator."
+      },
+      {
+        id: "v5",
+        type: "code",
+        title: "Vector Math",
+        desc: "You have `x <- c(2, 4)`. Write code to multiply every element by 10.",
+        skill: "vectorization",
+        difficulty: "easy",
+        timeLimit: 55,
+        setupLog: "x <- c(2, 4)",
+        starterCode: "",
+        solutionPatterns: [/^\s*x\s*\*\s*10\s*$/],
+        successOutput: "[1] 20 40",
+        hintSteps: [
+          "Concept: R is vectorized: operations apply element-wise.",
+          "Do: multiply the whole vector: `x * 10`",
+          "No loops needed. R likes math."
+        ],
+        reveal: "x * 10",
+        explain: "Multiplication is vectorized; it multiplies each element of `x` by 10."
+      },
+      {
+        id: "v6",
+        type: "code",
+        title: "Indexing Basics",
+        desc: "Given `x <- c(10, 20, 30)`, extract the SECOND element.",
+        skill: "indexing",
+        difficulty: "easy",
+        timeLimit: 45,
+        setupLog: "x <- c(10, 20, 30)",
+        solutionPatterns: [/^\s*x\[\s*2\s*\]\s*$/],
+        successOutput: "[1] 20",
+        hintSteps: [
+          "Concept: use square brackets `[ ]` to index.",
+          "R is 1-indexed: the first element is position 1.",
+          "So the second element is `x[2]`."
+        ],
+        reveal: "x[2]",
+        explain: "Index 2 returns the second element (R uses 1-based indexing)."
+      },
+      {
+        id: "v7",
+        type: "fix",
+        title: "Logical Subsetting",
+        desc: "We want values greater than 15 from `x <- c(10, 20, 30)`, but this is wrong: `x > 15`.",
+        skill: "subsetting",
+        difficulty: "medium",
+        timeLimit: 70,
+        starterCode: "x > 15",
+        setupLog: "x <- c(10, 20, 30)",
+        solutionPatterns: [/^\s*x\[\s*x\s*>\s*15\s*\]\s*$/],
+        successOutput: "[1] 20 30",
+        hintSteps: [
+          "Concept: `x > 15` gives a logical vector (TRUE/FALSE), not the values.",
+          "Use it INSIDE brackets: `x[ condition ]`.",
+          "So: `x[x > 15]`."
+        ],
+        reveal: "x[x > 15]",
+        explain: "Logical subsetting uses a TRUE/FALSE mask inside `[ ]` to keep matching elements."
+      }
+    ]
+  },
+
+  dataframes: {
+    title: "Chapter 2: Data Frame Dungeon",
+    consoleTitle: "R Console (Data Frames)",
+    dataset:
+`# Simulated object:
+df <- data.frame(
+  id    = c(1,2,3,4),
+  name  = c("Bob","Alice","Tim", NA),
+  score = c(85,92, NA, 78)
+)
+
+# Print preview:
+   id   name  score
+1   1    Bob     85
+2   2  Alice     92
+3   3    Tim     NA
+4   4   <NA>     78`,
+    levels: [
+      {
+        id: "df1",
+        type: "code",
+        title: "Column Access",
+        desc: "Extract the `score` column from `df` using `$`.",
+        skill: "column access",
+        difficulty: "easy",
+        timeLimit: 50,
+        solutionPatterns: [/^\s*df\$score\s*$/],
+        successOutput: "[1] 85 92 NA 78",
+        inspect: "str(df)\n'data.frame': 4 obs. of  3 variables:\n $ id   : num  1 2 3 4\n $ name : chr  \"Bob\" \"Alice\" \"Tim\" NA\n $ score: num  85 92 NA 78",
+        hintSteps: [
+          "Concept: `$` extracts a column by name.",
+          "Pattern: `df$column_name`",
+          "So: `df$score`."
+        ],
+        reveal: "df$score",
+        explain: "`$` returns the column vector inside the data frame."
+      },
+      {
+        id: "df2",
+        type: "fix",
+        title: "Indexing Error",
+        desc: "We want the value in row 2, column 3 (the score 92). The current code fails.",
+        skill: "indexing",
+        difficulty: "easy",
+        timeLimit: 70,
+        starterCode: "df[2, 3",
+        solutionPatterns: [/^\s*df\[\s*2\s*,\s*3\s*\]\s*$/],
+        successOutput: "[1] 92",
+        hintSteps: [
+          "Concept: data frames index like `[row, col]`.",
+          "You’re missing a closing bracket `]`.",
+          "Fix: `df[2, 3]`."
+        ],
+        reveal: "df[2, 3]",
+        explain: "`df[2, 3]` returns the element at row 2, column 3."
+      },
+      {
+        id: "df3",
+        type: "choice",
+        title: "Identify the NA Handler",
+        desc: "Which function returns a logical vector indicating which values are missing?",
+        skill: "missing values",
+        difficulty: "easy",
+        timeLimit: 35,
+        options: ["na.rm()","is.na()","na.omit()","missing()"],
+        answer: "is.na()",
+        successOutput: "function (x)  .Primitive(\"is.na\")",
+        hintSteps: [
+          "Concept: you want a TRUE/FALSE vector saying where NAs are.",
+          "The function name literally asks: ‘is this NA?’",
+          "Answer: `is.na()`."
+        ],
+        reveal: "is.na()",
+        explain: "`is.na(x)` returns TRUE where values are NA."
+      },
+      {
+        id: "df4",
+        type: "code",
+        title: "Clean the Mean",
+        desc: "Calculate the mean of `df$score`. You MUST exclude NAs, or the result becomes NA.",
+        skill: "summaries",
+        difficulty: "medium",
+        timeLimit: 85,
+        solutionPatterns: [/^\s*mean\(\s*df\$score\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*$/],
+        successOutput: "[1] 85",
+        hintSteps: [
+          "Concept: mean() returns NA if any NA values are present (unless told otherwise).",
+          "Use argument `na.rm = TRUE` to remove missing values.",
+          "Answer pattern: `mean(df$score, na.rm = TRUE)`."
+        ],
+        reveal: "mean(df$score, na.rm = TRUE)",
+        explain: "`na.rm=TRUE` ignores NA values when computing the mean."
+      },
+      {
+        id: "df5",
+        type: "fix",
+        title: "Subsetting Logic",
+        desc: "We want all rows where score is greater than 80. The comma is crucial.",
+        skill: "filtering",
+        difficulty: "medium",
+        timeLimit: 90,
+        starterCode: "df[df$score > 80]",
+        solutionPatterns: [
+          /^\s*df\[\s*df\$score\s*>\s*80\s*,\s*\]\s*$/,
+          /^\s*subset\(\s*df\s*,\s*score\s*>\s*80\s*\)\s*$/
+        ],
+        successOutput: "  id  name score\n1  1   Bob    85\n2  2 Alice    92",
+        hintSteps: [
+          "Concept: `df[rows, cols]` needs a comma even if you want ‘all columns’.",
+          "Correct shape: `df[ df$score > 80, ]`",
+          "Alternative: `subset(df, score > 80)`."
+        ],
+        reveal: "df[df$score > 80, ]",
+        explain: "The row-condition goes before the comma; leaving the col part blank means ‘all columns’."
+      },
+      {
+        id: "df6",
+        type: "code",
+        title: "Quick Peek",
+        desc: "Show the first 2 rows of `df` using `head()`.",
+        skill: "inspection",
+        difficulty: "easy",
+        timeLimit: 55,
+        solutionPatterns: [/^\s*head\(\s*df\s*,\s*2\s*\)\s*$/],
+        successOutput: "  id  name score\n1  1   Bob    85\n2  2 Alice    92",
+        hintSteps: [
+          "Concept: `head()` prints the first rows of an object.",
+          "Use the `n=` argument (or second positional arg) to set how many rows.",
+          "Try: `head(df, 2)`."
+        ],
+        reveal: "head(df, 2)",
+        explain: "`head(df, 2)` prints the first two rows for a quick preview."
+      }
+    ]
+  },
+
+  wrangling: {
+    title: "Chapter 3: Wrangling Reactor",
+    consoleTitle: "R Console (Wrangling Ops)",
+    dataset:
+`# Pretend we have a CSV called "survey.csv"
+# and also we loaded tidyverse tools (dplyr/tidyr).
+
+library(dplyr)
+library(tidyr)
+
+# Preview (df):
+   id  city    group score  age  income
+1   1  Cov     A      85   22   21000
+2   2  Lon     B      92   25   28000
+3   3  Cov     A      NA   24   24000
+4   4  Man     B      78   29   31000
+5   5  Man     A      88   31   36000`,
+    levels: [
+      {
+        id: "w1",
+        type: "code",
+        title: "Import the Data",
+        desc: "Load the CSV `survey.csv` into an object named `df`.",
+        skill: "import",
+        difficulty: "easy",
+        timeLimit: 75,
+        starterCode: "df <- ",
+        solutionPatterns: [
+          /^\s*df\s*(<-|=)\s*read\.csv\(\s*["']survey\.csv["']\s*\)\s*$/,
+          /^\s*df\s*(<-|=)\s*read\.csv\(\s*["']survey\.csv["']\s*,\s*stringsAsFactors\s*=\s*F(ALSe)?\s*\)\s*$/
+        ],
+        successOutput: "# df loaded (sim)\n# Use head(df) to preview.",
+        hintSteps: [
+          "Concept: base R reads CSV via `read.csv()`.",
+          "Skeleton: `df <- read.csv(\"survey.csv\")`",
+          "Optional: `stringsAsFactors = FALSE` (older R)."
+        ],
+        reveal: "df <- read.csv(\"survey.csv\")",
+        explain: "`read.csv()` imports a comma-separated file into a data frame."
+      },
+      {
+        id: "w2",
+        type: "code",
+        title: "Select Columns",
+        desc: "Using dplyr, keep only `id` and `score` columns from `df` (pipe style).",
+        skill: "select",
+        difficulty: "medium",
+        timeLimit: 80,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*select\(\s*id\s*,\s*score\s*\)\s*$/,
+          /^\s*df\s*\|\>\s*select\(\s*id\s*,\s*score\s*\)\s*$/
+        ],
+        successOutput: "  id score\n1  1    85\n2  2    92\n3  3    NA\n4  4    78\n5  5    88",
+        hintSteps: [
+          "Concept: `select()` keeps columns; the pipe feeds `df` into `select()`.",
+          "Form: `df %>% select(id, score)`",
+          "Base pipe `|>` is also acceptable: `df |> select(id, score)`."
+        ],
+        reveal: "df %>% select(id, score)",
+        explain: "`select()` chooses columns; the pipe passes `df` as the first argument."
+      },
+      {
+        id: "w3",
+        type: "code",
+        title: "Filter Rows",
+        desc: "Using dplyr, keep rows where `score >= 80` (ignore NAs naturally).",
+        skill: "filter",
+        difficulty: "medium",
+        timeLimit: 85,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*filter\(\s*score\s*>=\s*80\s*\)\s*$/,
+          /^\s*df\s*\|\>\s*filter\(\s*score\s*>=\s*80\s*\)\s*$/
+        ],
+        successOutput: "  id city group score age income\n1  1 Cov   A      85  22  21000\n2  2 Lon   B      92  25  28000\n5  5 Man   A      88  31  36000",
+        hintSteps: [
+          "Concept: `filter()` keeps rows that meet a condition.",
+          "Form: `df %>% filter(score >= 80)`",
+          "NAs drop because `NA >= 80` is NA (treated as not TRUE)."
+        ],
+        reveal: "df %>% filter(score >= 80)",
+        explain: "`filter()` keeps rows where the condition evaluates TRUE."
+      },
+      {
+        id: "w4",
+        type: "code",
+        title: "Create a New Variable",
+        desc: "Using dplyr, add a logical column `pass` that is TRUE when `score >= 80`.",
+        skill: "mutate",
+        difficulty: "medium",
+        timeLimit: 95,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*mutate\(\s*pass\s*=\s*score\s*>=\s*80\s*\)\s*$/,
+          /^\s*df\s*\|\>\s*mutate\(\s*pass\s*=\s*score\s*>=\s*80\s*\)\s*$/
+        ],
+        successOutput: "# df with new column `pass` (sim)",
+        hintSteps: [
+          "Concept: `mutate(new_col = expression)` creates (or overwrites) a column.",
+          "Expression: `score >= 80` returns TRUE/FALSE/NA.",
+          "Form: `df %>% mutate(pass = score >= 80)`."
+        ],
+        reveal: "df %>% mutate(pass = score >= 80)",
+        explain: "`mutate()` adds columns; the expression is computed row-wise."
+      },
+      {
+        id: "w5",
+        type: "code",
+        title: "Group Summary",
+        desc: "Compute the mean score by `city`, excluding NAs (dplyr pipeline). Name it `mean_score`.",
+        skill: "group_by + summarise",
+        difficulty: "hard",
+        timeLimit: 120,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*group_by\(\s*city\s*\)\s*%>%\s*summarise\(\s*mean_score\s*=\s*mean\(\s*score\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*\)\s*$/,
+          /^\s*df\s*\|\>\s*group_by\(\s*city\s*\)\s*\|\>\s*summarise\(\s*mean_score\s*=\s*mean\(\s*score\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*\)\s*$/
+        ],
+        successOutput: "  city mean_score\n1  Cov     85\n2  Lon     92\n3  Man     83",
+        hintSteps: [
+          "Concept: group_by() splits data into groups; summarise() collapses each group to one row.",
+          "Skeleton:\n`df %>% group_by(city) %>% summarise(mean_score = mean(score, na.rm = TRUE))`",
+          "Remember `na.rm=TRUE` or the Cov mean becomes NA."
+        ],
+        reveal: "df %>% group_by(city) %>% summarise(mean_score = mean(score, na.rm = TRUE))",
+        explain: "Grouping by city then summarising computes a per-city mean ignoring missing scores."
+      },
+      {
+        id: "w6",
+        type: "code",
+        title: "Reshape Wide to Long",
+        desc: "Suppose df has columns `q1`, `q2`, `q3`. Use `pivot_longer()` to make `question` and `value` columns.",
+        skill: "tidyr reshape",
+        difficulty: "hard",
+        timeLimit: 140,
+        starterCode: "df_long <- ",
+        solutionPatterns: [
+          /^\s*df_long\s*(<-|=)\s*pivot_longer\(\s*df\s*,\s*cols\s*=\s*starts_with\(\s*["']q["']\s*\)\s*,\s*names_to\s*=\s*["']question["']\s*,\s*values_to\s*=\s*["']value["']\s*\)\s*$/,
+          /^\s*df_long\s*(<-|=)\s*df\s*%>%\s*pivot_longer\(\s*cols\s*=\s*starts_with\(\s*["']q["']\s*\)\s*,\s*names_to\s*=\s*["']question["']\s*,\s*values_to\s*=\s*["']value["']\s*\)\s*$/
+        ],
+        successOutput: "# df_long created (sim)\n# Now each q-column becomes rows.",
+        hintSteps: [
+          "Concept: pivot_longer() stacks multiple columns into two: a key and a value.",
+          "Common pattern:\n`df_long <- pivot_longer(df, cols = starts_with('q'), names_to = 'question', values_to = 'value')`",
+          "You can also do `df %>% pivot_longer(...)`."
+        ],
+        reveal: "df_long <- pivot_longer(df, cols = starts_with('q'), names_to = 'question', values_to = 'value')",
+        explain: "This converts q1/q2/q3 columns into rows so each response becomes a (question, value) pair."
+      }
+    ]
+  },
+
+  stats: {
+    title: "Chapter 4: Inferential Engine",
+    consoleTitle: "R Console (Stats & Models)",
+    dataset:
+`# Simulated objects:
+x <- c(12, 14, 13, 17, 18, NA, 16)
+
+df <- data.frame(
+  group = c("A","A","B","B","B","A"),
+  score = c(78, 82, 91, 88, NA, 75),
+  age   = c(22, 25, 24, 29, 31, 28),
+  income= c(21000, 24000, 28000, 31000, 36000, 26000)
+)
+
+# Tip: stats often fail quietly when NA exists.
+# Always ask: 'what do I want to happen with missingness?'`,
+    levels: [
+      {
+        id: "s1",
+        type: "code",
+        title: "Descriptives: Mean",
+        desc: "Compute the mean of `x`, excluding NAs.",
+        skill: "descriptives",
+        difficulty: "easy",
+        timeLimit: 65,
+        solutionPatterns: [/^\s*mean\(\s*x\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*$/],
+        successOutput: "[1] 15",
+        hintSteps: [
+          "Concept: mean(x) returns NA if x contains NA (unless removed).",
+          "Use `na.rm = TRUE`.",
+          "Answer: `mean(x, na.rm = TRUE)`."
+        ],
+        reveal: "mean(x, na.rm = TRUE)",
+        explain: "Removes missing values before computing the mean."
+      },
+      {
+        id: "s2",
+        type: "code",
+        title: "Descriptives: SD",
+        desc: "Compute the standard deviation of `x`, excluding NAs.",
+        skill: "descriptives",
+        difficulty: "easy",
+        timeLimit: 70,
+        solutionPatterns: [/^\s*sd\(\s*x\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*$/],
+        successOutput: "[1] 2.37",
+        hintSteps: [
+          "Concept: sd() also returns NA if NAs exist unless removed.",
+          "Use `sd(x, na.rm = TRUE)`.",
+          "Same pattern as mean()."
+        ],
+        reveal: "sd(x, na.rm = TRUE)",
+        explain: "Standard deviation measures spread; removing NAs ensures it computes."
+      },
+      {
+        id: "s3",
+        type: "code",
+        title: "Frequency Table",
+        desc: "Create a frequency table of `df$group`.",
+        skill: "categorical summaries",
+        difficulty: "easy",
+        timeLimit: 55,
+        solutionPatterns: [/^\s*table\(\s*df\$group\s*\)\s*$/],
+        successOutput: "A B\n3 3",
+        hintSteps: [
+          "Concept: `table()` counts occurrences of values.",
+          "Column extraction: `df$group`.",
+          "Answer: `table(df$group)`."
+        ],
+        reveal: "table(df$group)",
+        explain: "Counts how many observations belong to each group."
+      },
+      {
+        id: "s4",
+        type: "code",
+        title: "Correlation (NA-safe)",
+        desc: "Compute correlation between `df$age` and `df$income`, using only complete cases.",
+        skill: "correlation",
+        difficulty: "medium",
+        timeLimit: 95,
+        solutionPatterns: [
+          /^\s*cor\(\s*df\$age\s*,\s*df\$income\s*,\s*use\s*=\s*["']complete\.obs["']\s*\)\s*$/
+        ],
+        successOutput: "[1] 0.93",
+        hintSteps: [
+          "Concept: `cor()` can be told how to handle missing values.",
+          "Use argument `use = 'complete.obs'` to drop rows with any NA.",
+          "Answer: `cor(df$age, df$income, use = 'complete.obs')`."
+        ],
+        reveal: "cor(df$age, df$income, use = 'complete.obs')",
+        explain: "Computes correlation using only rows where both variables are non-missing."
+      },
+      {
+        id: "s5",
+        type: "code",
+        title: "Two-Sample t-test",
+        desc: "Run a t-test comparing `score` between groups A and B using the formula interface and `df`.",
+        skill: "inference",
+        difficulty: "hard",
+        timeLimit: 140,
+        solutionPatterns: [
+          /^\s*t\.test\(\s*score\s*~\s*group\s*,\s*data\s*=\s*df\s*\)\s*$/
+        ],
+        successOutput: "t = -2.01, df = 3, p-value = 0.13\n# (sim output)",
+        hintSteps: [
+          "Concept: formula interface is `outcome ~ group`.",
+          "Use data argument so you don’t have to write df$score and df$group.",
+          "Answer: `t.test(score ~ group, data = df)`."
+        ],
+        reveal: "t.test(score ~ group, data = df)",
+        explain: "Tests whether the mean score differs between groups A and B."
+      },
+      {
+        id: "s6",
+        type: "code",
+        title: "Linear Model",
+        desc: "Fit a linear model predicting `income` from `age` using `df` and store it in `m`.",
+        skill: "regression",
+        difficulty: "hard",
+        timeLimit: 130,
+        starterCode: "m <- ",
+        solutionPatterns: [
+          /^\s*m\s*(<-|=)\s*lm\(\s*income\s*~\s*age\s*,\s*data\s*=\s*df\s*\)\s*$/
+        ],
+        successOutput: "Call:\nlm(formula = income ~ age, data = df)\n# (sim output)",
+        hintSteps: [
+          "Concept: `lm(y ~ x, data=...)` fits linear regression.",
+          "Here y is income, x is age.",
+          "Answer: `m <- lm(income ~ age, data = df)`."
+        ],
+        reveal: "m <- lm(income ~ age, data = df)",
+        explain: "Fits a simple regression line income = b0 + b1*age + error."
+      },
+      {
+        id: "s7",
+        type: "code",
+        title: "Model Summary",
+        desc: "Show the model summary for `m`.",
+        skill: "model output",
+        difficulty: "medium",
+        timeLimit: 70,
+        setupLog: "m <- lm(income ~ age, data = df)",
+        solutionPatterns: [/^\s*summary\(\s*m\s*\)\s*$/],
+        successOutput: "Coefficients:\n(Intercept)  age\n  ...        ...\n# (sim output)",
+        hintSteps: [
+          "Concept: `summary()` gives coefficients, SEs, R^2, etc.",
+          "If the model is stored in `m`, summarise it with `summary(m)`.",
+          "Answer: `summary(m)`."
+        ],
+        reveal: "summary(m)",
+        explain: "Summarises the fitted model: coefficients, standard errors, fit statistics."
+      }
+    ]
+  }
+};
+
+/* --- CHEATSHEET: command -> description --- */
+const commandGlossary = {
+  "<-": "Assignment: store a value in a named object.",
+  "c()": "Combine values into a vector.",
+  "seq()": "Generate sequences with flexible steps.",
+  ":": "Shortcut sequence operator (e.g., 1:5).",
+  "[ ]": "Index/subset vectors, lists, data frames.",
+  "$": "Extract a column from a data frame by name.",
+  "class()": "Check an object’s type/class.",
+  "length()": "Number of elements in a vector.",
+  "is.na()": "TRUE/FALSE vector: where values are missing.",
+  "mean()": "Average; use na.rm=TRUE to ignore NAs.",
+  "sd()": "Standard deviation; use na.rm=TRUE to ignore NAs.",
+  "head()": "Preview the first rows of an object.",
+  "read.csv()": "Import a CSV into a data frame.",
+  "%>% / |>": "Pipe: pass output into next function.",
+  "select()": "Choose columns (dplyr).",
+  "filter()": "Choose rows using conditions (dplyr).",
+  "mutate()": "Create/transform columns (dplyr).",
+  "group_by()": "Define groups for grouped operations (dplyr).",
+  "summarise()": "Reduce each group to summary rows (dplyr).",
+  "pivot_longer()": "Reshape wide data to long format (tidyr).",
+  "table()": "Frequency counts of categorical values.",
+  "cor()": "Correlation between numeric vectors.",
+  "t.test()": "t-test for mean differences.",
+  "lm()": "Fit a linear regression model.",
+  "summary()": "Summarise objects (models, vectors, data frames)."
+};
+
+/* --- STATE --- */
+let state = {
+  campaign: null,
+  levelIndex: 0,
+  score: 0,
+  lives: 3,
+  errors: 0,
+  streak: 0,
+  hintsUsed: 0,
+  revealsUsed: 0,
+
+  // per-level
+  hintTier: 0,
+  revealUsedThisLevel: false,
+
+  // timer
+  timerId: null,
+  timeLeft: 0
+};
+
+const els = {};
+
+let initialConsoleHTML = "";
+
+/* --- INIT --- */
+window.addEventListener('DOMContentLoaded', () => {
+  mapElements();
+  initialConsoleHTML = els.consoleOutput.innerHTML;
+  document.getElementById('version-stamp').innerText = `${GAME_VERSION} // REPL SIM`;
+  lucide.createIcons();
+});
+
+function mapElements(){
+  els.startScreen = document.getElementById('start-screen');
+  els.battleScreen = document.getElementById('battle-screen');
+  els.consoleOutput = document.getElementById('console-output');
+  els.inputZone = document.getElementById('input-zone');
+  els.dataView = document.getElementById('data-view');
+  els.taskTitle = document.getElementById('task-title');
+  els.taskDesc = document.getElementById('task-desc');
+  els.taskTag = document.getElementById('task-tag');
+  els.taskSkill = document.getElementById('task-skill');
+  els.taskDifficulty = document.getElementById('task-difficulty');
+
+  els.scoreDisplay = document.getElementById('score-display');
+  els.livesContainer = document.getElementById('lives-container');
+  els.debtBadge = document.getElementById('debt-badge');
+  els.streakBadge = document.getElementById('streak-badge');
+  els.streakCount = document.getElementById('streak-count');
+  els.timerDisplay = document.getElementById('timer-display');
+
+  els.victoryModal = document.getElementById('victory-modal');
+  els.finalScore = document.getElementById('final-score');
+  els.finalErrors = document.getElementById('final-errors');
+  els.finalHints = document.getElementById('final-hints');
+  els.finalReveals = document.getElementById('final-reveals');
+
+  els.consoleTitle = document.getElementById('console-title');
+
+  els.cheatModal = document.getElementById('cheatsheet-modal');
+  els.cheatContent = document.getElementById('cheatsheet-content');
+}
+
+/* =========================
+   CORE GAME FLOW
+   ========================= */
+
+window.startCampaign = function(campaignId){
+  state.campaign = campaigns[campaignId];
+  state.levelIndex = 0;
+
+  // reset run state
+  state.score = 0;
+  state.lives = 3;
+  state.errors = 0;
+  state.streak = 0;
+  state.hintsUsed = 0;
+  state.revealsUsed = 0;
+  state.hintTier = 0;
+  state.revealUsedThisLevel = false;
+
+  stopTimer();
+
+  // UI: switch screens
+  els.startScreen.classList.add('hidden');
+  els.battleScreen.classList.remove('hidden');
+  els.battleScreen.classList.add('flex');
+
+  // campaign UI
+  els.consoleTitle.innerText = state.campaign.consoleTitle || "R Console (sim)";
+  renderDataView();
+
+  // seed cheatsheet store
+  if (!localStorage.getItem('r_overdrive_unlocked')){
+    localStorage.setItem('r_overdrive_unlocked', JSON.stringify([]));
+  }
+
+  updateHUD();
+  loadLevel();
+};
+
+
+window.restartGame = function(){
+  const ok = confirm("Restart the run and return to the start menu?");
+  if (!ok) return;
+
+  stopTimer();
+
+  // reset run state (keep unlocks in localStorage)
+  state.campaign = null;
+  state.levelIndex = 0;
+  state.score = 0;
+  state.lives = 3;
+  state.errors = 0;
+  state.streak = 0;
+  state.hintsUsed = 0;
+  state.revealsUsed = 0;
+  state.hintTier = 0;
+  state.revealUsedThisLevel = false;
+  state.currentLevel = null;
+  state.timeLeft = 0;
+
+  // UI reset
+  els.battleScreen.classList.add('hidden');
+  els.battleScreen.classList.remove('flex');
+  els.battleScreen.classList.remove('animate-shake');
+
+  els.victoryModal.classList.add('hidden');
+  els.victoryModal.classList.remove('flex');
+
+  if (els.cheatModal){
+    els.cheatModal.classList.add('hidden');
+    els.cheatModal.classList.remove('flex');
+  }
+
+  els.startScreen.classList.remove('hidden');
+  els.startScreen.classList.add('animate-pop');
+
+  // reset console + panels
+  if (initialConsoleHTML) els.consoleOutput.innerHTML = initialConsoleHTML;
+  els.inputZone.innerHTML = '';
+  els.dataView.innerText = "# No campaign loaded. Select an operation.";
+
+  // reset HUD readouts (not visible on start screen, but keeps things sane)
+  if (els.timerDisplay) els.timerDisplay.innerText = "00:00";
+  updateHUD();
+
+  // re-render icons for safety
+  lucide.createIcons();
+};
+
+
+function loadLevel(){
+  const level = state.campaign.levels[state.levelIndex];
+  state.currentLevel = level;
+
+  // per-level flags
+  state.hintTier = 0;
+  state.revealUsedThisLevel = false;
+
+  // task UI
+  els.taskTitle.innerText = level.title;
+  els.taskDesc.innerText = level.desc;
+  els.taskTag.innerText = level.type.toUpperCase();
+  els.taskSkill.innerText = `skill: ${level.skill || "general"}`;
+  els.taskDifficulty.innerText = `difficulty: ${level.difficulty || "?"}`;
+
+  // log level load
+  logToConsole(`> # Loading Level ${state.levelIndex + 1}: ${level.title}...`, 'text-cyan-300');
+
+  if (level.setupLog){
+    logToConsole(`> ${level.setupLog}`, 'text-slate-400');
+  }
+
+  renderInputZone(level);
+  startTimer(level.timeLimit ?? 60);
+
+  // (nice) show streak vibe
+  if (state.streak >= 3){
+    logToConsole(`# OVERDRIVE: streak is live. Keep the compiler happy.`, 'text-yellow-300');
+  }
+}
+
+function renderDataView(){
+  els.dataView.innerText = state.campaign.dataset;
+}
+
+function renderInputZone(level){
+  els.inputZone.innerHTML = '';
+
+  if (level.type === 'code' || level.type === 'fix'){
+    const initialValue = level.starterCode || '';
+    const wrapper = document.createElement('div');
+    wrapper.className = "flex items-center w-full gap-2";
+    wrapper.innerHTML = `
+      <span class="text-blue-500 font-black select-none">&gt;</span>
+      <input type="text" id="console-input" class="console-input flex-1 bg-transparent border-none outline-none text-white font-mono"
+        value="${escapeHtml(initialValue)}"
+        placeholder="Type R code here..."
+        autocomplete="off" spellcheck="false">
+      <span class="text-xs text-slate-500 font-mono select-none">ENTER</span>
+    `;
+    els.inputZone.appendChild(wrapper);
+
+    const input = document.getElementById('console-input');
+    input.focus();
+    input.addEventListener('blur', () => setTimeout(() => input.focus(), 10));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){
+        handleConsoleSubmit(input.value);
+        input.value = '';
+      }
+    });
+  } else if (level.type === 'choice'){
+    const grid = document.createElement('div');
+    grid.className = "grid grid-cols-2 md:grid-cols-4 gap-2 w-full";
+    level.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = "btn-neon bg-slate-800 border border-slate-600 hover:border-blue-400 text-slate-300 py-3 rounded text-sm font-mono transition-colors";
+      btn.innerText = opt;
+      btn.onclick = () => handleChoice(opt);
+      grid.appendChild(btn);
+    });
+    els.inputZone.appendChild(grid);
+  }
+}
+
+/* =========================
+   GAMEPLAY HANDLERS
+   ========================= */
+
+function handleConsoleSubmit(code){
+  if (!code.trim()) return;
+  logToConsole(`> ${code}`);
+
+  const level = state.currentLevel;
+  let isCorrect = false;
+
+  if (level.solutionPatterns){
+    isCorrect = level.solutionPatterns.some(p => p.test(code));
+  }
+
+  if (isCorrect) handleSuccess(level.successOutput);
+  else handleFailure("Error: unexpected input or syntax error.");
+}
+
+function handleChoice(choice){
+  logToConsole(`> ${choice}`);
+  const level = state.currentLevel;
+  if (choice === level.answer) handleSuccess(level.successOutput);
+  else handleFailure(`Error: incorrect. Try again.`);
+}
+
+function handleSuccess(output){
+  stopTimer();
+
+  logToConsole(output, 'text-green-300');
+
+  // scoring: base + streak, with penalties for hints/reveal used
+  const base = 100;
+  const streakBonus = Math.min(state.streak * 10, 80);
+
+  // penalty multipliers
+  const revealMult = state.revealUsedThisLevel ? 0.35 : 1.0;
+  const hintMult = 1.0 - Math.min(state.hintTier * 0.10, 0.30); // up to -30%
+  const mult = Math.max(0.2, revealMult * hintMult);
+
+  const points = Math.round((base + streakBonus) * mult);
+  state.score += points;
+  state.streak++;
+
+  spawnFloatingText(els.scoreDisplay, `+${points}`, '#4ade80');
+
+  // unlock cheats: infer from level content
+  unlockFromLevel(state.currentLevel);
+
+  updateHUD();
+
+  setTimeout(() => nextLevel(), 900);
+}
+
+function handleFailure(msg){
+  logToConsole(msg, 'text-red-300');
+
+  state.lives--;
+  state.streak = 0;
+  state.errors++;
+
+  // shake
+  els.battleScreen.classList.remove('animate-shake');
+  void els.battleScreen.offsetWidth;
+  els.battleScreen.classList.add('animate-shake');
+
+  updateHUD();
+
+  if (state.lives <= 0){
+    logToConsole("FATAL ERROR: Session Terminated.", 'text-red-400 font-black');
+    stopTimer();
+    setTimeout(() => {
+      alert("Game Over! Try again.");
+      location.reload();
+    }, 800);
+  } else {
+    // reload same level after short delay
+    stopTimer();
+    setTimeout(() => loadLevel(), 650);
+  }
+}
+
+function handleTimeout(){
+  logToConsole("Error: TIMEOUT. The compiler got bored.", "text-red-300");
+  state.lives--;
+  state.errors++;
+  state.streak = 0;
+  updateHUD();
+
+  if (state.lives <= 0){
+    logToConsole("FATAL ERROR: Session Terminated.", 'text-red-400 font-black');
+    stopTimer();
+    setTimeout(() => {
+      alert("Game Over! Try again.");
+      location.reload();
+    }, 800);
+  } else {
+    setTimeout(() => loadLevel(), 650);
+  }
+}
+
+function nextLevel(){
+  state.levelIndex++;
+  updateHUD();
+
+  if (state.levelIndex >= state.campaign.levels.length){
+    victory();
+  } else {
+    loadLevel();
+  }
+}
+
+function victory(){
+  stopTimer();
+  els.finalScore.innerText = state.score;
+  els.finalErrors.innerText = state.errors;
+  els.finalHints.innerText = state.hintsUsed;
+  els.finalReveals.innerText = state.revealsUsed;
+
+  els.victoryModal.classList.remove('hidden');
+  els.victoryModal.classList.add('flex');
+}
+
+/* =========================
+   TOOLS: HINT / STR / REVEAL
+   ========================= */
+
+window.useHint = function(){
+  const level = state.currentLevel;
+  if (!level || !level.hintSteps || level.hintSteps.length === 0){
+    logToConsole("Hint: (none available for this level)", "text-yellow-300");
+    return;
+  }
+
+  const tier = state.hintTier;
+  if (tier >= level.hintSteps.length){
+    logToConsole("Hint: No more hints. Use REVEAL if you want the exact answer.", "text-yellow-300");
+    return;
+  }
+
+  // escalating costs, but never blocked (score can go negative)
+  const costs = [40, 80, 120];
+  const cost = costs[Math.min(tier, costs.length - 1)];
+  state.score -= cost;
+  state.hintsUsed++;
+  state.hintTier++;
+
+  updateHUD();
+
+  const label = ["HINT 1/3", "HINT 2/3", "HINT 3/3"][Math.min(tier, 2)];
+  logToConsole(`${label} (-${cost}): ${level.hintSteps[tier]}`, "text-yellow-300 italic");
+  spawnFloatingText(els.scoreDisplay, `-${cost}`, '#fbbf24');
+};
+
+window.useInspect = function(){
+  // emulate "str()" giving structure hints; always allowed, can go negative
+  const cost = 30;
+  state.score -= cost;
+  updateHUD();
+  spawnFloatingText(els.scoreDisplay, `-${cost}`, '#a78bfa');
+
+  const level = state.currentLevel;
+  const inspectText = level?.inspect || state.campaign?.inspect || null;
+
+  if (inspectText){
+    logToConsole(`STR() (-${cost}):\n${inspectText}`, "text-purple-300");
+  } else {
+    // fallback: show expected pattern "shape"
+    const pat = level?.solutionPatterns?.[0]?.source ? `/${level.solutionPatterns[0].source}/` : "unknown";
+    logToConsole(`STR() (-${cost}): Expected pattern looks like ${pat}`, "text-purple-300");
+  }
+};
+
+window.useReveal = function(){
+  const level = state.currentLevel;
+  const cost = 400;
+
+  state.score -= cost;
+  state.revealsUsed++;
+  state.revealUsedThisLevel = true;
+
+  updateHUD();
+  spawnFloatingText(els.scoreDisplay, `-${cost}`, '#f87171');
+
+  const answer = level?.reveal || "(no reveal available)";
+  const why = level?.explain || "Because the syntax matches the task requirement.";
+
+  logToConsole(`REVEAL (-${cost}): ${answer}`, "text-red-300 font-black");
+  logToConsole(`WHY: ${why}`, "text-slate-300");
+  logToConsole(`# Tip: re-type it yourself once (muscle memory > reading).`, "text-slate-400 italic");
+};
+
+/* =========================
+   CHEATSHEET
+   ========================= */
+
+window.openCheatsheet = function(){
+  renderCheatsheet();
+  els.cheatModal.classList.remove('hidden');
+  els.cheatModal.classList.add('flex');
+  lucide.createIcons();
+};
+
+window.closeCheatsheet = function(){
+  els.cheatModal.classList.add('hidden');
+  els.cheatModal.classList.remove('flex');
+};
+
+function getUnlocked(){
+  try{
+    return new Set(JSON.parse(localStorage.getItem('r_overdrive_unlocked') || "[]"));
+  }catch(e){
+    return new Set();
+  }
+}
+
+function setUnlocked(set){
+  localStorage.setItem('r_overdrive_unlocked', JSON.stringify([...set]));
+}
+
+function unlock(cmd){
+  const s = getUnlocked();
+  s.add(cmd);
+  setUnlocked(s);
+}
+
+function unlockFromLevel(level){
+  // lightweight parsing: unlock commands that appear in reveal/explain/desc
+  const text = `${level?.desc || ""} ${level?.reveal || ""} ${level?.explain || ""}`.toLowerCase();
+  const keys = Object.keys(commandGlossary);
+
+  // special tokens that get stripped by regex (so handle explicitly)
+  if (text.includes('$')) unlock("$");
+  if (text.includes('[') || text.includes(']')) unlock("[ ]");
+  if (text.includes('<-') || text.includes('= ')) unlock("<-");
+
+  keys.forEach(k => {
+    const token = k.toLowerCase();
+
+    // pipe is special
+    if (token.includes('%>%') || token.includes('|>')){
+      if (text.includes('%>%') || text.includes('|>') || text.includes('pipe')) unlock("%>% / |>");
+      return;
+    }
+
+    // remove punctuation to match words like mean, sd, read.csv, etc.
+    const simple = token.replace(/[()<>[\]$]/g, '').trim();
+    if (!simple) return;
+
+    // quick match
+    if (text.includes(simple)) unlock(k);
+  });
+}
+function renderCheatsheet(){
+  const unlocked = getUnlocked();
+
+  // if nothing unlocked yet, show “starter pack”
+  if (unlocked.size === 0){
+    ["<-","c()","[ ]","$","mean()","is.na()"].forEach(unlock);
+  }
+
+  const sorted = [...getUnlocked()].sort((a,b) => a.localeCompare(b));
+  els.cheatContent.innerHTML = "";
+
+  sorted.forEach(cmd => {
+    const card = document.createElement('div');
+    card.className = "bg-slate-800/60 border border-slate-700 rounded-xl p-3";
+    card.innerHTML = `
+      <div class="flex items-center justify-between gap-2">
+        <div class="font-black text-cyan-200">${escapeHtml(cmd)}</div>
+        <div class="text-[10px] text-slate-400 chip px-2 py-0.5 rounded">unlocked</div>
+      </div>
+      <div class="text-xs text-slate-300 mt-2 leading-relaxed">${escapeHtml(commandGlossary[cmd] || "—")}</div>
+    `;
+    els.cheatContent.appendChild(card);
+  });
+}
+
+/* =========================
+   TIMER
+   ========================= */
+
+function startTimer(seconds){
+  stopTimer();
+  state.timeLeft = Math.max(0, Number(seconds) || 0);
+  updateTimerDisplay();
+
+  state.timerId = setInterval(() => {
+    state.timeLeft--;
+    updateTimerDisplay();
+
+    if (state.timeLeft <= 0){
+      stopTimer();
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function stopTimer(){
+  if (state.timerId){
+    clearInterval(state.timerId);
+    state.timerId = null;
+  }
+}
+
+function updateTimerDisplay(){
+  const s = Math.max(0, state.timeLeft);
+  const mm = String(Math.floor(s/60)).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  els.timerDisplay.innerText = `${mm}:${ss}`;
+
+  // urgency styling
+  const badge = document.getElementById('timer-badge');
+  badge.classList.toggle('border-red-500/50', s <= 10);
+  badge.classList.toggle('text-red-300', s <= 10);
+}
+
+/* =========================
+   HUD / UTIL
+   ========================= */
+
+function updateHUD(){
+  // score formatting (keep digits stable even when negative)
+  const s = Number(state.score) || 0;
+  const abs = Math.abs(s);
+  const formatted = (s < 0 ? '-' : '') + String(abs).padStart(4,'0');
+  els.scoreDisplay.innerText = formatted;
+  if (s < 0){
+    els.scoreDisplay.classList.add('text-red-300');
+    els.debtBadge.classList.remove('hidden');
+  } else {
+    els.scoreDisplay.classList.remove('text-red-300');
+    els.debtBadge.classList.add('hidden');
+  }
+
+  // lives
+  els.livesContainer.innerHTML = '';
+  for (let i=0;i<3;i++){
+    const heart = document.createElement('i');
+    heart.setAttribute('data-lucide','heart');
+    heart.className = `w-5 h-5 ${i < state.lives ? 'text-red-500 fill-red-500' : 'text-slate-700'}`;
+    els.livesContainer.appendChild(heart);
+  }
+
+  // streak
+  if (state.streak > 1){
+    els.streakBadge.classList.remove('hidden');
+    els.streakCount.innerText = state.streak;
+  } else {
+    els.streakBadge.classList.add('hidden');
+  }
+
+  lucide.createIcons();
+}
+
+function logToConsole(text, colorClass=''){
+  const line = document.createElement('div');
+  line.className = `console-line ${colorClass}`;
+  line.innerText = text;
+  els.consoleOutput.appendChild(line);
+  els.consoleOutput.scrollTop = els.consoleOutput.scrollHeight;
+}
+
+function spawnFloatingText(targetEl, text, color){
+  const rect = targetEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.innerText = text;
+  el.className = 'floating-text text-xl font-mono';
+  el.style.left = `${rect.left + 20}px`;
+  el.style.top = `${rect.top}px`;
+  el.style.color = color;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+</script>
+</body>
+</html>

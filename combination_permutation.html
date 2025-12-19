@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lock & The Loot: Permutations vs Combinations</title>
+    <style>
+        :root {
+            --bg-dark: #1a202c;
+            --panel-dark: #2d3748;
+            --stone-light: #718096;
+            --accent-rune: #4fd1c5; /* Cyan for magic */
+            --accent-gold: #f6e05e; /* Gold for loot */
+            --text-main: #f7fafc;
+            --math-font: 'Georgia', 'Times New Roman', serif;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #171923;
+            width: 100%;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border-bottom: 4px solid #4a5568;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase; color: #cbd5e0; }
+        .subtitle { font-size: 0.9rem; opacity: 0.7; font-weight: 300; letter-spacing: 1px; margin-top: 5px; }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .tab-btn {
+            background: var(--panel-dark);
+            border: 2px solid #4a5568;
+            color: #a0aec0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .tab-btn.active {
+            background: #4a5568;
+            color: white;
+            border-color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .tab-btn:hover:not(.active) { background: #2d3748; color: white; }
+
+        /* Quick concept strip */
+        .info-panel {
+            width: 95%;
+            max-width: 800px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 10px 14px;
+            line-height: 1.4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .info-panel strong { color: var(--accent-gold); }
+        .info-panel .perm-label { color: var(--accent-rune); }
+
+        /* Main Stage */
+        .stage-container {
+            width: 95%;
+            max-width: 800px;
+            background: var(--panel-dark);
+            border-radius: 16px;
+            margin-top: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            min-height: 650px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scene {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+            width: 100%;
+        }
+        .scene.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Principles Header */
+        .principle-banner {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            width: 90%;
+            text-align: left;
+        }
+        .mission-lock { border-color: var(--accent-rune); }
+        .mission-loot { border-color: var(--accent-gold); }
+        
+        .principle-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 4px; display:block;}
+        .principle-text { font-size: 1rem; font-weight: 500; line-height: 1.4; }
+
+        /* SCENE 1: THE LOCK (PERMUTATIONS) */
+        .door-frame {
+            width: 320px;
+            height: 140px;
+            background: #2d3748;
+            border: 4px solid #4a5568;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* The "Slot Method" Container */
+        .slot-container {
+            display: flex;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .slot-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* The "Choices Available" Bubble above slot */
+        .choice-bubble {
+            background: var(--accent-rune);
+            color: #1a202c;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+        .choice-bubble.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px var(--accent-rune); }
+
+        .slot {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #718096;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .slot-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.7rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+        }
+        
+        .slot:hover { border-color: var(--accent-rune); background: rgba(79, 209, 197, 0.1); }
+        .slot.filled { border-style: solid; border-color: var(--accent-rune); background: rgba(79, 209, 197, 0.2); color: var(--accent-rune); text-shadow: 0 0 10px var(--accent-rune); }
+
+        /* Rune Inventory */
+        .inventory-area {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .item-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: #1a202c;
+            border: 2px solid #4a5568;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+        .item-btn:hover { transform: scale(1.1); border-color: white; }
+        .item-btn.disabled { opacity: 0.2; cursor: not-allowed; transform: none; filter: grayscale(100%); }
+
+        /* SCENE 2: THE LOOT (COMBINATIONS) */
+        .backpack {
+            width: 220px;
+            height: 180px;
+            background: #744210;
+            border-radius: 20px 20px 10px 10px;
+            border: 4px solid #975a16;
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 10px;
+            gap: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        /* Flap */
+        .backpack::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 60px;
+            background: #975a16; border-radius: 15px 15px 5px 5px;
+            z-index: 2;
+        }
+        
+        .loot-slot {
+            width: 50px; height: 50px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.8rem;
+            border: 2px solid transparent;
+        }
+        .loot-slot.filled { border-color: var(--accent-gold); animation: popIn 0.3s; }
+
+        /* MATH DISPLAY */
+        .math-block {
+            font-family: var(--math-font);
+            font-size: 1.3rem;
+            margin-top: 10px;
+            padding: 20px;
+            background: #1a202c;
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #4a5568;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .highlight-p { color: var(--accent-rune); font-weight: bold; }
+        .highlight-c { color: var(--accent-gold); font-weight: bold; }
+        
+        .teaching-comment {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1rem;
+            color: #f7fafc;
+            margin-bottom: 10px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .var-def {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            margin-top: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            border-top: 1px solid #2d3748;
+            padding-top: 8px;
+            width: 100%;
+        }
+
+        .math-var { font-family: 'Georgia', serif; font-style: italic; font-weight: bold; }
+
+        .scene-controls {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .reset-btn {
+            background: transparent; border: 1px solid #718096; color: #a0aec0;
+            padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: 0.2s;
+        }
+        .reset-btn:hover { border-color: white; color: white; background: rgba(255,255,255,0.1); }
+
+        /* Teacher prompt strip */
+        .teacher-tip {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #cbd5e0;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        /* PROBABILITY SCENE */
+        .prob-card {
+            background: white;
+            color: #2d3748;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 10px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            animation: popIn 0.5s;
+        }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* FRACTIONS */
+        .fraction-display {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            font-family: var(--math-font);
+            font-size: 1.2rem;
+            margin: 0 5px;
+        }
+        .numer { border-bottom: 2px solid #a0aec0; padding-bottom: 2px; display: block; }
+        .denom { padding-top: 2px; display: block; }
+        
+        .math-block .numer { border-bottom-color: #f7fafc; }
+        .prob-card .numer { border-bottom-color: #2d3748; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>The Lock & The Loot</h1>
+    <div class="subtitle">Permutations (locks) and combinations (loot), taught with the slot method</div>
+</header>
+
+<div class="nav-tabs">
+    <div class="tab-btn active" onclick="switchScene('lock')">1. The Lock (Perms)</div>
+    <div class="tab-btn" onclick="switchScene('loot')">2. The Loot (Combs)</div>
+    <div class="tab-btn" onclick="switchScene('boss')">3. The Odds</div>
+</div>
+
+<div class="info-panel">
+    <span class="perm-label"><strong>Permutations (Lock):</strong></span> order matters, no repeats. ⚡🌊🔥 is different from 🌊⚡🔥.
+    <br>
+    <strong>Combinations (Loot):</strong> order does not matter. {👑, 💰, 💍} is the same set as {💍, 👑, 💰}.
+</div>
+
+<div class="container">
+    <div class="stage-container">
+        
+        <!-- SCENE 1: PERMUTATIONS -->
+        <div id="scene-lock" class="scene active">
+            
+            <!-- PEDAGOGY PRINCIPLE: The Slot Method -->
+            <div class="principle-banner mission-lock">
+                <span class="principle-label">Goal: Calculate Security Complexity (Permutation without replacement)</span>
+                <div class="principle-text">
+                    We need to measure how secure this lock is.
+                    <br>Fill the slots one by one. Once you use a rune you cannot reuse it, so the number of choices shrinks.
+                    <br>This is a classic <strong>permutation</strong>: order matters, and there is no replacement.
+                </div>
+            </div>
+
+            <div class="door-frame">
+                <div class="slot-container" id="lockSlots">
+                    <!-- Generated by JS: 3 Slots with dynamic labels above them -->
+                </div>
+            </div>
+
+            <div class="math-block">
+                <!-- This content is now dynamic and conversational -->
+                <div id="perm-commentary" class="teaching-comment">
+                    Look at your Inventory below. You have 5 Runes to choose from.
+                </div>
+                <div id="perm-formula" style="display:flex; align-items:center; justify-content:center; gap:10px; font-size: 1.5rem;">
+                    <span style="opacity:0.5">Pick first rune...</span>
+                </div>
+                <div class="var-def">
+                    Constraint: The lock has <strong><span class="math-var">k</span>=3</strong> slots. We stop multiplying after 3 choices.
+                </div>
+                <div id="perm-general" class="var-def">
+                    <strong>Permutation formula:</strong>
+                    <span class="math-var">P(n,k) = n! / (n - k)!</span>.
+                    Here <span class="math-var">n = 5</span> runes and <span class="math-var">k = 3</span> slots, so
+                    <span class="math-var">P(5,3) = 5! / (5 - 3)! = 5 × 4 × 3 = 60</span> different passwords.
+                </div>
+            </div>
+
+            <div class="inventory-area" id="runeInventory">
+                <!-- Runes generated by JS -->
+            </div>
+
+            <div class="scene-controls">
+                <button class="reset-btn" onclick="resetLock()">Reset &amp; Try Again</button>
+            </div>
+            <div class="teacher-tip">
+                Teacher prompt: ask students to say out loud why ⚡🌊🔥 and 🌊⚡🔥 count as two different outcomes here.
+            </div>
+        </div>
+
+        <!-- SCENE 2: COMBINATIONS -->
+        <div id="scene-loot" class="scene">
+            
+            <div class="principle-banner mission-loot">
+                <span class="principle-label">Concept: Removing Redundancy (Combination without replacement)</span>
+                <div class="principle-text">
+                    The bag is a "Jumbler". Once items are inside, order is lost.
+                    <br>{Crown, Ring} is the same inventory as {Ring, Crown}. We must divide to remove these duplicate orderings.
+                    <br>This is a <strong>combination</strong>: order does not matter, and items are not replaced.
+                </div>
+            </div>
+
+            <div class="backpack" id="backpackDisplay">
+                <div class="loot-slot" id="loot-0"></div>
+                <div class="loot-slot" id="loot-1"></div>
+                <div class="loot-slot" id="loot-2"></div>
+            </div>
+
+            <div class="math-block">
+                <div id="comb-commentary" class="teaching-comment">
+                    Fill the backpack (3 items) to see the math.
+                </div>
+                <div id="comb-calc" style="font-size:1.2rem; color:#a0aec0;">
+                    0 / 3 Items Picked
+                </div>
+                <div id="comb-formula" class="var-def">
+                    <strong>Combination formula:</strong>
+                    <span class="math-var">C(n,k) = n! / (k!(n - k)!)</span>.
+                    Here <span class="math-var">n = 5</span> items and <span class="math-var">k = 3</span> slots, so
+                    <span class="math-var">C(5,3) = 5! / (3! · 2!) = 10</span> different loot sets.
+                </div>
+            </div>
+
+            <div class="inventory-area" id="lootInventory">
+                <!-- Loot generated by JS -->
+            </div>
+
+            <div class="scene-controls">
+                <button class="reset-btn" onclick="resetLoot()">Empty Bag</button>
+            </div>
+            <div class="teacher-tip">
+                Teacher prompt: once the bag is full, ask students how many different orders exist for the same three icons and why they now count as one.
+            </div>
+        </div>
+
+        <!-- SCENE 3: PROBABILITY -->
+        <div id="scene-boss" class="scene">
+            <div class="principle-banner">
+                <span class="principle-label">Application: Probability Spaces</span>
+                <div class="principle-text" style="text-align:center;">
+                    Probability is just <span class="math-var">1</span> ÷ <span class="math-var">Total Possible Outcomes</span> in your sample space.
+                </div>
+            </div>
+
+            <!-- Question 1: The Lock -->
+            <div class="prob-card">
+                <h3 style="margin:0 0 10px 0; color:var(--accent-rune);">🔐 The Password Problem</h3>
+                <p style="font-size:0.95rem; margin-bottom:15px;">
+                    There is only <strong>1</strong> correct sequence (e.g., ⚡🌊🔥).
+                    But we calculated <strong>60</strong> possible arrangements (Permutations).
+                </p>
+                <div style="font-size:1.1rem; display:flex; align-items:center; justify-content:center; gap:10px;">
+                    <span>Probability = </span>
+                    <div class="fraction-display">
+                        <span class="numer">1 Correct Key</span>
+                        <span class="denom">60 Total Keys</span>
+                    </div> 
+                    <span>= <strong>1.67%</strong></span>
+                </div>
+                <p style="margin-top:10px; font-size:0.85rem;">
+                    Link back: the 60 comes from <span class="math-var">P(5,3)</span>.
+                </p>
+            </div>
+
+            <!-- Question 2: The Loot -->
+            <div class="prob-card">
+                <h3 style="margin:0 0 10px 0; color:var(--accent-gold);">🎒 The Loot Problem</h3>
+                <p style="font-size:0.95rem; margin-bottom:15px;">
+                    You want the set {👑, 💰, 💍}. Order doesn't matter.
+                    We calculated only <strong>10</strong> possible unique sets (Combinations).
+                </p>
+                <div style="font-size:1.1rem; display:flex; align-items:center; justify-content:center; gap:10px;">
+                    <span>Probability = </span>
+                    <div class="fraction-display">
+                        <span class="numer">1 Winning Set</span>
+                        <span class="denom">10 Total Sets</span>
+                    </div> 
+                    <span>= <strong>10.0%</strong></span>
+                </div>
+                <div style="margin-top:10px; font-size:0.9rem; color:#2d3748; background:#edf2f7; padding:8px; border-radius:6px;">
+                    <strong>Insight:</strong> guessing a combination is easier than guessing a permutation because the sample space is smaller.
+                    Here the 10 comes from <span class="math-var">C(5,3)</span>, not from listing each order separately.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- DATA ---
+    const runes = ['⚡', '🌊', '🔥', '❄️', '🌍'];
+    const loot = ['👑', '💰', '💍', '🏺', '🗡️'];
+    
+    // --- STATE ---
+    let lockState = [null, null, null];
+    let lootState = [];
+
+    // --- INIT ---
+    function init() {
+        renderLockSlots();
+        renderRunes();
+        renderLootInventory();
+    }
+
+    function switchScene(sceneId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if(sceneId === 'lock') document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+        if(sceneId === 'loot') document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+        if(sceneId === 'boss') document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+
+        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+        document.getElementById('scene-' + sceneId).classList.add('active');
+    }
+
+    // --- SCENE 1: LOCK LOGIC (The Slot Method) ---
+    function renderLockSlots() {
+        const container = document.getElementById('lockSlots');
+        container.innerHTML = '';
+        
+        for(let i=0; i<3; i++) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'slot-wrapper';
+            
+            // Dynamic Bubble: explains choices
+            const bubble = document.createElement('div');
+            bubble.className = 'choice-bubble';
+            
+            if (lockState[i] === null) {
+                // Only show bubble for the NEXT available slot
+                const filledCount = lockState.filter(r => r !== null).length;
+                
+                // Calculate remaining items based on index (no replacement)
+                const remaining = 5 - i;
+                
+                if (i === filledCount) { 
+                    bubble.textContent = `${remaining} runes left`; 
+                    bubble.classList.add('active');
+                } else {
+                    bubble.style.opacity = 0; 
+                }
+            } else {
+                // Show history
+                const choicesAtThatTime = 5 - i;
+                bubble.textContent = `${choicesAtThatTime} choices`;
+                bubble.classList.add('active');
+                bubble.style.background = '#2d3748'; // Dimmed
+                bubble.style.color = '#a0aec0';
+            }
+
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            if(lockState[i]) {
+                slot.textContent = lockState[i];
+                slot.classList.add('filled');
+            }
+            
+            const label = document.createElement('div');
+            label.className = 'slot-label';
+            label.textContent = i === 0 ? "1st" : i === 1 ? "2nd" : "3rd";
+
+            slot.onclick = () => removeRune(i);
+
+            wrapper.appendChild(bubble);
+            wrapper.appendChild(slot);
+            wrapper.appendChild(label);
+            container.appendChild(wrapper);
+        }
+        
+        updatePermMath();
+    }
+
+    function renderRunes() {
+        const container = document.getElementById('runeInventory');
+        container.innerHTML = '';
+        runes.forEach((r, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'item-btn';
+            btn.textContent = r;
+            
+            if (lockState.includes(r)) {
+                btn.classList.add('disabled');
+            } else {
+                btn.onclick = () => addRune(r);
+            }
+            container.appendChild(btn);
+        });
+    }
+
+    function addRune(r) {
+        const emptyIdx = lockState.indexOf(null);
+        if (emptyIdx !== -1) {
+            lockState[emptyIdx] = r;
+            renderLockSlots(); 
+            renderRunes();
+        }
+    }
+
+    function removeRune(idx) {
+        if (lockState[idx] !== null) {
+            lockState[idx] = null;
+            renderLockSlots();
+            renderRunes();
+        }
+    }
+
+    function updatePermMath() {
+        const k = lockState.filter(x => x !== null).length;
+        const comment = document.getElementById('perm-commentary');
+        const formula = document.getElementById('perm-formula');
+
+        if (k === 0) {
+            comment.innerHTML = "Pick any rune for the <strong>1st position</strong>. You have 5 choices.";
+            formula.innerHTML = `<span class="highlight-p">5</span> × <span style="opacity:0.5">4 × 3</span>`;
+        } else if (k === 1) {
+            comment.innerHTML = "Great. 1 used, 4 remain. Pick for the <strong>2nd position</strong>.";
+            formula.innerHTML = `<span class="highlight-p">5</span> × <span class="highlight-p">4</span> × <span style="opacity:0.5">3</span>`;
+        } else if (k === 2) {
+            comment.innerHTML = "2 used, only 3 remain. Pick for the <strong>3rd position</strong>.";
+            formula.innerHTML = `<span class="highlight-p">5</span> × <span class="highlight-p">4</span> × <span class="highlight-p">3</span>`;
+        } else if (k === 3) {
+            comment.innerHTML = `Lock full! We have counted a <strong>permutation</strong> with <span class="math-var">n = 5</span> runes and <span class="math-var">k = 3</span> slots: <span class="math-var">P(5,3) = 60</span>.`;
+            formula.innerHTML = `<span class="highlight-p">5</span> × <span class="highlight-p">4</span> × <span class="highlight-p">3</span> = <strong>60</strong>`;
+        }
+    }
+
+    function resetLock() {
+        lockState = [null, null, null];
+        renderLockSlots();
+        renderRunes();
+    }
+
+    // --- SCENE 2: LOOT LOGIC ---
+    function renderLootInventory() {
+        const container = document.getElementById('lootInventory');
+        container.innerHTML = '';
+        loot.forEach((item, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'item-btn';
+            btn.style.borderColor = '#975a16'; 
+            btn.textContent = item;
+            
+            if (lootState.includes(item)) {
+                btn.classList.add('disabled');
+            } else if (lootState.length < 3) {
+                btn.onclick = () => addLoot(item);
+            } else {
+                btn.classList.add('disabled');
+            }
+            container.appendChild(btn);
+        });
+        updateLootVisuals();
+        updateCombMath();
+    }
+
+    function addLoot(item) {
+        if (lootState.length < 3 && !lootState.includes(item)) {
+            lootState.push(item);
+            renderLootInventory();
+        }
+    }
+
+    function removeLoot(index) {
+        if(index < lootState.length) {
+            lootState.splice(index, 1);
+            renderLootInventory();
+        }
+    }
+
+    function updateLootVisuals() {
+        const slots = document.getElementById('backpackDisplay').children;
+        for(let s of slots) { s.textContent = ''; s.classList.remove('filled'); s.onclick = null; }
+        
+        lootState.forEach((item, i) => {
+            slots[i].textContent = item;
+            slots[i].classList.add('filled');
+            slots[i].onclick = () => removeLoot(i);
+        });
+    }
+
+    function updateCombMath() {
+        const k = lootState.length; 
+        const comment = document.getElementById('comb-commentary');
+        const calc = document.getElementById('comb-calc');
+
+        if (k < 3) {
+            comment.innerHTML = `The bag can hold 3 items. Pick <strong>${3-k}</strong> more.`;
+            calc.innerHTML = `${k}/3 Picked`;
+            return;
+        }
+
+        comment.innerHTML = "Bag full! Each set of three icons can be ordered in 6 ways, but they are the same combination, so we divide by 6.";
+        calc.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap;">
+                <div class="fraction-display">
+                    <span class="numer">60 (permutations P(5,3))</span>
+                    <span class="denom">6 (orders of 3 items, 3!)</span>
+                </div>
+                <span style="margin:0 10px;">=</span>
+                <strong class="highlight-c">10 combinations C(5,3)</strong>
+            </div>
+            <div style="font-size:0.85rem; margin-top:8px; color:#cbd5e0;">
+                We divide by <span class="math-var">3!</span> because {👑, 💰, 💍} has 6 different orders but represents one loot set.
+            </div>
+        `;
+    }
+
+    function resetLoot() {
+        lootState = [];
+        renderLootInventory();
+    }
+
+    init();
+
+</script>
+
+</body>
+</html>

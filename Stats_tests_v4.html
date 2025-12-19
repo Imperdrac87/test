@@ -1,0 +1,2141 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temple of Sigma: The Alpha Protocol</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- jStat Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
+
+  <!-- MathJax for nice equations -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg-dark: #050608;
+
+      --neon-blue: #00e0ff;
+      --neon-gold: #ffd666;
+      --neon-green: #4ade80;
+      --neon-red: #f87171;
+      --neon-purple: #a78bfa;
+
+      /* Guide region colors */
+      --c-one-alpha: rgba(255, 214, 102, 0.30); /* 1-α */
+      --c-alpha:     rgba(248, 113, 113, 0.42); /* α */
+      --c-beta:      rgba(96, 165, 250, 0.42);  /* β */
+      --c-one-beta:  rgba(74, 222, 128, 0.26);  /* 1-β (Power) */
+      
+      /* Vault colors */
+      --v-fill: rgba(56, 189, 248, 0.1);
+      --v-alpha: rgba(248, 113, 113, 0.5);
+      --v-pvalue: rgba(56, 189, 248, 0.4);
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background-color: var(--bg-dark);
+      color: #f9fafb;
+      overflow-x: hidden;
+    }
+
+    /* --- UTILS --- */
+    .force-scroll::-webkit-scrollbar { width: 14px; }
+    .force-scroll::-webkit-scrollbar-track { background: #0f172a; border-left: 1px solid #334155; }
+    .force-scroll::-webkit-scrollbar-thumb { background-color: #64748b; border-radius: 6px; border: 3px solid #0f172a; }
+    .force-scroll::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    .force-scroll { scrollbar-width: auto; scrollbar-color: #64748b #0f172a; }
+
+    /* --- ANIMATIONS --- */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9) translateY(10px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    .btn-neon { transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-neon:active { transform: scale(0.95); }
+    .btn-neon:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(100%); }
+
+    /* Visualization Canvas */
+    .sigma-canvas {
+      width: 100%;
+      height: 300px; /* Taller for split view */
+      background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+      border-radius: 8px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .logic-step { margin-bottom: 12px; padding-left: 12px; border-left: 3px solid #4ade80; line-height: 1.5; }
+    .logic-conclusion { margin-top: 16px; padding: 12px; background: rgba(74, 222, 128, 0.05); border-radius: 6px; border: 1px solid #4ade80; font-weight: bold; color: #4ade80; text-align: center; }
+
+    #debug-overlay {
+      position: absolute;
+      top: 4px; left: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: #4ade80;
+      background: rgba(0,0,0,0.85);
+      padding: 6px;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 50;
+      border: 1px solid #22c55e;
+    }
+
+    .check-item { opacity: 0.5; transition: opacity 0.3s; }
+    .check-item.active { opacity: 1; font-weight: bold; color: #4ade80; }
+
+    .matrix-cell { transition: all 0.2s; cursor: pointer; user-select: none; }
+    .matrix-cell:hover { filter: brightness(1.15); }
+    .matrix-cell:active { transform: scale(0.98); }
+    .matrix-cell.active { border-color: #ffd666; box-shadow: 0 0 10px rgba(255, 214, 102, 0.35); background-color: #1e293b; }
+
+    /* Explainer Card Animation */
+    @keyframes fadeInSide {
+      from { opacity: 0; transform: translateX(10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .explainer-enter { animation: fadeInSide 0.3s ease-out; }
+
+    /* Tiny pulse for matrix */
+    @keyframes softPulse {
+      0%,100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+      50% { box-shadow: 0 0 16px rgba(255, 214, 102, 0.25); }
+    }
+    .soft-pulse { animation: softPulse 0.6s ease-out 1; }
+    
+    /* Range Slider Styling for Vault */
+    input[type=range].vault-slider {
+      -webkit-appearance: none; width: 100%; background: transparent;
+    }
+    input[type=range].vault-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #38bdf8; cursor: pointer; margin-top: -6px; border: 2px solid #0f172a;
+    }
+    input[type=range].vault-slider::-webkit-slider-runnable-track {
+      width: 100%; height: 4px; cursor: pointer; background: #334155; border-radius: 2px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center p-2 sm:p-4 relative">
+
+  <!-- APP CONTAINER -->
+  <div id="app" class="max-w-6xl w-full z-10 relative flex flex-col gap-4">
+
+    <!-- --- SCREEN: START --- -->
+    <div id="start-screen" class="text-center space-y-8 py-10 animate-in fade-in zoom-in duration-500 flex flex-col justify-center items-center min-h-[50vh]">
+      <div class="relative inline-block">
+        <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg blur opacity-75 animate-pulse"></div>
+        <h1 class="relative text-5xl md:text-6xl font-bold text-white tracking-tighter p-2">
+          THE ALPHA PROTOCOL
+        </h1>
+      </div>
+      <p class="text-xl text-blue-200 tracking-widest uppercase">Visual Stats Trivia</p>
+
+      <div class="bg-slate-900/90 border border-slate-700 p-8 rounded-xl shadow-2xl max-w-2xl mx-auto backdrop-blur-md w-full">
+        <p class="mb-6 text-lg text-slate-300">
+          Master the "Curve + Side" rule to distinguish statistical errors.<br>
+          <strong>Phase 1:</strong> Identify the Regions.<br>
+          <strong>Phase 2:</strong> Map Real Scenarios.<br>
+          <strong>Phase 3:</strong> Dynamic Changes.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <button onclick="prepareGame(15)" class="btn-neon bg-green-900/40 border border-green-500 text-green-400 hover:bg-green-500 hover:text-black font-bold py-4 rounded">
+            <div>STUDENT</div><div class="text-xs opacity-75">15 Mins</div>
+          </button>
+          <button onclick="prepareGame(10)" class="btn-neon bg-blue-900/40 border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-black font-bold py-4 rounded">
+            <div>RESEARCHER</div><div class="text-xs opacity-75">10 Mins</div>
+          </button>
+          <button onclick="prepareGame(5)" class="btn-neon bg-purple-900/40 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black font-bold py-4 rounded">
+            <div>SIGMA</div><div class="text-xs opacity-75">5 Mins</div>
+          </button>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+          <button onclick="startGuide()" class="text-yellow-400 hover:text-white underline text-sm flex items-center justify-center transition-colors font-bold">
+            <i data-lucide="play-circle" class="w-4 h-4 mr-2"></i> INTERACTIVE MINI-GUIDE
+          </button>
+          <button onclick="showLibrary()" class="text-slate-500 hover:text-white underline text-sm flex items-center justify-center transition-colors">
+            <i data-lucide="book-open" class="w-4 h-4 mr-2"></i> Open Research Manual
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: MINI-GUIDE --- -->
+    <div id="guide-screen" class="hidden flex flex-col gap-4 w-full max-w-6xl mx-auto py-2">
+      <div class="flex flex-col md:flex-row items-center justify-between bg-slate-900 p-3 rounded border border-slate-700 gap-3">
+        <h2 class="text-lg font-bold text-yellow-400 flex items-center">
+          <i data-lucide="compass" class="w-5 h-5 mr-2"></i> Calibration Training
+        </h2>
+        <div class="flex gap-2">
+            <button onclick="setGuideTab('errors')" id="tab-btn-errors" class="px-3 py-1 rounded text-xs font-bold border border-slate-600 bg-slate-700 text-white">Errors & Power</button>
+            <button onclick="setGuideTab('stats')" id="tab-btn-stats" class="px-3 py-1 rounded text-xs font-bold border border-slate-600 bg-slate-800 text-slate-400 hover:text-white">Test Statistic Vault</button>
+            <button onclick="showScreen('start-screen')" class="text-slate-400 hover:text-white bg-slate-800 p-1 rounded ml-2">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+      </div>
+
+      <!-- TAB: ERRORS & POWER (Original Guide) -->
+      <div id="guide-tab-errors">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Left: Canvas -->
+            <div class="lg:col-span-2 space-y-4">
+
+              <!-- Primer -->
+              <div class="bg-slate-800 p-4 rounded border border-slate-600 text-sm text-slate-200 shadow-md">
+                <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+                  <i data-lucide="info" class="w-4 h-4 text-cyan-300"></i> The Test Statistic (T)
+                </h3>
+                <div class="space-y-2 leading-relaxed">
+                  <p><strong>T = test statistic.</strong></p>
+                  <p class="pl-2 border-l-2 border-slate-600">
+                    <span class="text-slate-400 font-bold">Grey curve:</span> distribution of <strong>T if H0 is true</strong>.<br>
+                    <span class="text-blue-400 font-bold">Blue curve:</span> distribution of <strong>T if H1 is true</strong>.
+                  </p>
+                  <p>
+                    The <span class="text-yellow-400 font-bold">Yellow line</span> is the <strong>critical value (c)</strong>. If <strong>T is beyond c</strong>, we <strong>reject H0</strong>.
+                  </p>
+                  <div class="mt-3 pt-3 border-t border-slate-700">
+                    <p class="font-bold text-purple-300">Distance Δ = μ1 − μ0</p>
+                    <p class="text-xs text-slate-400">This horizontal distance measures how much the test statistic tends to shift when H1 is true. Bigger Δ (relative to spread) means less overlap → β goes down → power goes up.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-slate-800 p-2 rounded border border-slate-600 relative">
+                 <!-- Persistent Area Rule -->
+                <div class="text-center bg-slate-900/80 border border-slate-700 rounded p-1 mb-2">
+                   <p class="text-xs font-bold text-green-300">✅ Probability = shaded area under a curve (not curve height). Total area = 1.</p>
+                </div>
+
+                <!-- View Mode Toggle (Default Split) -->
+                <div class="absolute top-10 right-2 z-10 flex bg-slate-900 rounded p-1 border border-slate-700 shadow-xl">
+                  <button onclick="setGuideView('split')" id="btn-view-split" class="px-3 py-1 text-xs rounded transition-colors text-white bg-slate-700 font-bold">Split View</button>
+                  <button onclick="setGuideView('combined')" id="btn-view-combined" class="px-3 py-1 text-xs rounded transition-colors text-slate-400 hover:text-white">Combined</button>
+                </div>
+                
+                <canvas id="guide-canvas" class="sigma-canvas w-full"></canvas>
+                <div id="guide-tooltip" class="absolute top-4 left-4 bg-slate-900/90 text-white text-xs p-2 rounded border border-yellow-500 hidden pointer-events-none z-50 shadow-lg"></div>
+              </div>
+
+              <!-- Live probabilities -->
+              <div class="bg-slate-900 border border-slate-700 p-4 rounded text-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-green-300"></i> Live probabilities
+                  </h3>
+                  <div class="text-xs text-slate-400">Move the slider → see α/β change</div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                  <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--neon-gold)"></span><span class="text-yellow-300 font-bold">1−α</span></span>
+                    <span id="prob-one-alpha" class="text-slate-200 font-mono">—</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--neon-red)"></span><span class="text-red-300 font-bold">α</span></span>
+                    <span id="prob-alpha" class="text-slate-200 font-mono">—</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: #60a5fa"></span><span class="text-blue-300 font-bold">β</span></span>
+                    <span id="prob-beta" class="text-slate-200 font-mono">—</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--neon-green)"></span><span class="text-green-300 font-bold">1−β</span></span>
+                    <span id="prob-one-beta" class="text-slate-200 font-mono">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Explainer Panel -->
+              <div id="guide-explainer" class="bg-slate-900 border border-slate-600 p-4 rounded text-sm relative explainer-enter min-h-[170px]">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500" id="explainer-bar"></div>
+                <h3 class="font-bold text-white text-lg mb-1" id="explainer-title">Select a Region</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-slate-400 text-xs uppercase font-bold mb-1">What you’re looking at</p>
+                    <p id="explainer-context" class="text-slate-200">Click the matrix, graph, or buttons to learn.</p>
+                    <div class="mt-2 text-xs font-mono text-yellow-400 whitespace-pre-line" id="explainer-math"></div>
+                  </div>
+                  <div class="border-l border-slate-700 pl-4">
+                    <p class="text-slate-400 text-xs uppercase font-bold mb-1">Meaning (plain English)</p>
+                    <p id="explainer-desc" class="text-slate-300 text-xs whitespace-pre-line">Waiting for input...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz Section -->
+              <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
+                <p class="text-slate-300 mb-3 text-sm" id="quiz-instruction">
+                  Use the matrix to explore. Then <span class="font-bold text-white">Click a Region</span> on the graph.
+                </p>
+                <div id="quiz-feedback" class="h-6 text-sm font-bold mb-2"></div>
+                <div class="flex justify-center gap-2 flex-wrap">
+                  <button onclick="startGuideQuiz()" id="btn-start-quiz" class="btn-neon bg-yellow-700/50 text-yellow-200 text-xs font-bold py-2 px-6 rounded hover:bg-yellow-600">
+                    START REGION QUIZ
+                  </button>
+                  <button id="btn-start-from-guide" disabled onclick="prepareGame(10)" class="btn-neon bg-slate-800 text-slate-600 text-xs font-bold py-2 px-6 rounded opacity-50 cursor-not-allowed">
+                    GAME LOCKED
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Controls & Matrix -->
+            <div class="space-y-3">
+
+              <!-- Matrix Widget -->
+              <div class="bg-slate-800 p-3 rounded border border-slate-600">
+                <h3 class="font-bold text-xs text-slate-400 uppercase mb-2">The Decision Matrix (Truth × Decision)</h3>
+                <div class="text-[11px] text-slate-300 mb-2 leading-snug">
+                  <span class="text-slate-100 font-bold">Rows</span> = what’s true in reality.
+                  <span class="text-slate-100 font-bold">Columns</span> = what your test decides.
+                </div>
+
+                <div class="grid grid-cols-3 gap-1 text-[10px] text-center font-bold text-white">
+                  <div></div>
+                  <div class="bg-slate-700 py-1 rounded">Fail to Reject</div>
+                  <div class="bg-slate-700 py-1 rounded">Reject H0</div>
+
+                  <!-- Row 1 -->
+                  <div class="bg-slate-700 flex items-center justify-center rounded text-slate-300">H0 True<br><span class="text-slate-500 font-normal">(Null)</span></div>
+                  <div onclick="matrixClick('h0', 'fail')" id="mat-h0-fail" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-yellow-300 flex flex-col justify-center items-center h-16">
+                    <span>Correct</span>
+                    <span id="matval-one-alpha" class="text-[9px] text-slate-400 font-normal">1 − α</span>
+                  </div>
+                  <div onclick="matrixClick('h0', 'reject')" id="mat-h0-reject" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-red-300 flex flex-col justify-center items-center h-16">
+                    <span>Type I</span>
+                    <span id="matval-alpha" class="text-[9px] text-slate-400 font-normal">α</span>
+                  </div>
+
+                  <!-- Row 2 -->
+                  <div class="bg-slate-700 flex items-center justify-center rounded text-slate-300">H1 True<br><span class="text-slate-500 font-normal">(Alt)</span></div>
+                  <div onclick="matrixClick('h1', 'fail')" id="mat-h1-fail" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-blue-300 flex flex-col justify-center items-center h-16">
+                    <span>Type II</span>
+                    <span id="matval-beta" class="text-[9px] text-slate-400 font-normal">β</span>
+                  </div>
+                  <div onclick="matrixClick('h1', 'reject')" id="mat-h1-reject" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-green-300 flex flex-col justify-center items-center h-16">
+                    <span>Power</span>
+                    <span id="matval-one-beta" class="text-[9px] text-slate-400 font-normal">1 − β</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Manual Controls -->
+              <div class="bg-slate-800 p-3 rounded border border-slate-600 text-sm">
+                <h3 class="font-bold text-xs text-slate-400 uppercase mb-2">Manual Override</h3>
+
+                <div class="mb-3">
+                  <div class="flex justify-between text-xs mb-1"><span>Focus Region</span></div>
+                  <div class="grid grid-cols-5 gap-1">
+                    <button onclick="highlightGuide('correct')" class="p-1 bg-yellow-900/25 border border-yellow-900 text-yellow-200 text-xs rounded hover:bg-yellow-900/40">1−α</button>
+                    <button onclick="highlightGuide('alpha')" class="p-1 bg-red-900/30 border border-red-900 text-red-200 text-xs rounded hover:bg-red-900/50">α</button>
+                    <button onclick="highlightGuide('beta')" class="p-1 bg-blue-900/30 border border-blue-900 text-blue-200 text-xs rounded hover:bg-blue-900/50">β</button>
+                    <button onclick="highlightGuide('power')" class="p-1 bg-green-900/30 border border-green-900 text-green-200 text-xs rounded hover:bg-green-900/50">1−β</button>
+                    <button onclick="highlightGuide(null)" class="p-1 bg-slate-700 text-slate-300 text-xs rounded px-2">Reset</button>
+                  </div>
+
+                  <label class="mt-3 flex items-center gap-2 text-xs text-slate-300 select-none">
+                    <input type="checkbox" checked onchange="toggleGuideLabels(this.checked)" class="accent-yellow-400">
+                    Show formula labels on the graph
+                  </label>
+                </div>
+
+                <div class="border-t border-slate-700 pt-3">
+                  <div class="flex justify-between text-xs mb-1"><span>Critical Value Position (c)</span><span class="text-slate-400" id="crit-readout">50</span></div>
+                  <input id="crit-slider" type="range" min="0" max="100" value="50"
+                    class="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    oninput="updateGuideParams(this.value)">
+                </div>
+              
+                <!-- Dynamic Z-score Readout -->
+                <div class="mt-4 bg-slate-900 p-2 rounded border border-slate-700 text-xs font-mono space-y-1">
+                   <div class="flex justify-between"><span class="text-slate-400">Pos relative to H0 (z0):</span> <span class="text-slate-200" id="readout-z0">0.0</span></div>
+                   <div class="flex justify-between"><span class="text-slate-400">Pos relative to H1 (z1):</span> <span class="text-blue-300" id="readout-z1">0.0</span></div>
+                   <p class="text-[10px] text-slate-500 font-sans mt-1 pt-1 border-t border-slate-800">
+                     Same cutoff (c), but measured from different "world means." That’s why α and β differ.
+                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <!-- TAB: TEST STATISTIC VAULT (New) -->
+      <div id="guide-tab-stats" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Left: Vault Canvas & Outputs -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-slate-800 p-2 rounded border border-slate-600 relative">
+                    <div class="absolute top-2 right-2 text-[10px] text-slate-400 font-mono">
+                        Crit: <span id="vault-crit-readout" class="text-yellow-400">--</span> | p = <span id="vault-pvalue-readout" class="text-cyan-400">--</span>
+                    </div>
+                    <canvas id="vault-canvas" class="sigma-canvas w-full"></canvas>
+                    <div id="vault-tooltip" class="absolute top-4 left-4 bg-slate-900/90 text-white text-xs p-2 rounded border border-cyan-500 hidden pointer-events-none z-50 shadow-lg"></div>
+                </div>
+
+                <!-- Decision Readout -->
+                <div class="bg-slate-900 border border-slate-700 p-4 rounded text-center">
+                    <div class="text-xs text-slate-500 uppercase tracking-widest mb-1">Decision</div>
+                    <div id="vault-decision-readout" class="text-2xl font-bold font-mono text-slate-300">--</div>
+                </div>
+
+                <!-- Vault Drill Quiz -->
+                <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
+                    <h3 class="text-cyan-400 font-bold text-sm mb-1">Vault Drill</h3>
+                    <p class="text-slate-300 mb-3 text-sm" id="vault-quiz-instruction">Explore the distributions. Click Start to calibrate.</p>
+                    <div id="vault-quiz-feedback" class="h-6 text-sm font-bold mb-2"></div>
+                    <button onclick="startVaultQuiz()" id="vault-btn-start-quiz" class="btn-neon bg-cyan-900/40 border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-black font-bold py-2 px-6 rounded text-xs">
+                        Start Calibration
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Controls -->
+            <div class="space-y-3">
+                <div class="bg-slate-800 p-4 rounded border border-slate-600 text-sm space-y-4">
+                    <h3 class="font-bold text-xs text-slate-400 uppercase">Configuration</h3>
+                    
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Distribution</label>
+                        <select id="vault-select-test" onchange="updateVaultParams()" class="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs">
+                            <option value="t">Student's t</option>
+                            <option value="chi2">Chi-Squared (χ²)</option>
+                            <option value="f">F-Distribution</option>
+                            <option value="z">Normal (z)</option>
+                        </select>
+                    </div>
+
+                    <!-- Params (Dynamic) -->
+                    <div id="vault-group-df">
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">df</span><span id="readout-df" class="text-slate-400"></span></div>
+                        <input id="vault-input-df" type="range" min="1" max="100" value="24" class="vault-slider" oninput="updateVaultParams()">
+                    </div>
+
+                    <div id="vault-group-df1" class="hidden">
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">df1 (Numerator)</span><span id="readout-df1" class="text-slate-400"></span></div>
+                        <input id="vault-input-df1" type="range" min="1" max="50" value="2" class="vault-slider" oninput="updateVaultParams()">
+                    </div>
+
+                    <div id="vault-group-df2" class="hidden">
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-300">df2 (Denominator)</span><span id="readout-df2" class="text-slate-400"></span></div>
+                        <input id="vault-input-df2" type="range" min="1" max="50" value="27" class="vault-slider" oninput="updateVaultParams()">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Tails</label>
+                        <select id="vault-select-tails" onchange="updateVaultParams()" class="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-xs">
+                            <option value="two">Two-Tailed</option>
+                            <option value="right">Right-Tailed</option>
+                            <option value="left">Left-Tailed</option>
+                        </select>
+                    </div>
+
+                    <hr class="border-slate-700">
+
+                    <!-- Alpha & Obs -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-red-300 font-bold">Alpha (α)</span><span id="vault-alpha-readout" class="text-red-300 font-mono">0.05</span></div>
+                        <input id="vault-alpha" type="range" min="0.001" max="0.20" step="0.001" value="0.05" class="vault-slider" oninput="updateVaultParams()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-cyan-300 font-bold">Observed Stat</span><span id="vault-obs-readout" class="text-cyan-300 font-mono">2.0</span></div>
+                        <input id="vault-obs" type="range" min="-5" max="5" step="0.01" value="2.0" class="vault-slider" oninput="updateVaultParams()">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-600 p-3 rounded">
+                    <div id="vault-formula" class="text-xs text-center text-slate-300 font-mono py-2 min-h-[40px]"></div>
+                    <div id="vault-explain" class="text-xs text-slate-400 border-t border-slate-800 pt-2 leading-snug"></div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: BATTLE (HUD + GAME) --- -->
+    <div id="battle-screen" class="hidden flex flex-col gap-4 w-full max-w-4xl mx-auto">
+      <!-- HUD -->
+      <div class="flex flex-wrap justify-between items-center bg-slate-900/80 border-b-2 border-slate-700 p-3 sticky top-0 z-30 backdrop-blur-md rounded-b-xl shadow-lg">
+        <div class="flex items-center gap-2 w-1/4" id="lives-container"></div>
+        <div id="timer-display" class="font-mono text-2xl text-yellow-400 border border-yellow-600/50 bg-yellow-900/20 px-4 py-1 rounded">00:00</div>
+        <div class="w-1/4 flex items-center justify-end gap-3">
+          <div class="hidden sm:flex flex-col items-end mr-2">
+            <span class="text-xs text-slate-500 uppercase tracking-widest">Grant $</span>
+            <span class="text-xl font-bold text-blue-400" id="score-display">0</span>
+          </div>
+          <button onclick="confirmAction('restart')" class="p-2 bg-slate-800 rounded hover:bg-slate-700 text-blue-400 border border-slate-600" title="Restart Run"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+          <button onclick="confirmAction('end')" class="p-2 bg-slate-800 rounded hover:bg-red-900 text-red-400 border border-slate-600" title="End Study"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+        </div>
+        <div id="time-warning" class="hidden absolute top-full left-0 w-full text-center bg-red-900/90 text-red-200 text-xs font-bold py-1 animate-pulse">DEADLINE APPROACHING</div>
+      </div>
+
+      <!-- MAIN CARD AREA -->
+      <div id="game-card" class="bg-slate-800/50 border border-slate-600 p-6 rounded-xl relative overflow-hidden min-h-[500px] flex flex-col transition-all duration-300">
+        <div class="flex justify-between items-start mb-2">
+          <span id="diff-badge" class="text-xs font-bold text-purple-400 border border-purple-500/50 px-2 py-1 rounded">LEVEL 1</span>
+          <span class="text-xs text-slate-500">Visual Analysis Required</span>
+        </div>
+        <div class="w-full h-64 mb-4 rounded border border-slate-700/50 relative overflow-hidden bg-slate-900 shadow-inner">
+          <canvas id="viz-canvas" class="sigma-canvas"></canvas>
+          <div id="debug-overlay" class="hidden"></div>
+        </div>
+
+        <div class="bg-slate-900/50 p-2 rounded border border-slate-700 mb-4 flex justify-around text-[10px] md:text-xs text-slate-400">
+          <div id="check-1" class="check-item">1. Identify Scenario</div>
+          <div id="check-2" class="check-item border-l border-slate-700 pl-2">2. Analyze Graph</div>
+          <div id="check-3" class="check-item border-l border-slate-700 pl-2">3. Make Decision</div>
+        </div>
+
+        <div class="flex-grow flex flex-col items-center justify-center text-center mb-6 z-10 relative">
+          <h2 class="text-xl md:text-2xl font-bold text-white mb-2" id="scenario-title">Question</h2>
+          <p class="text-blue-100 text-lg md:text-xl max-w-lg leading-relaxed font-medium" id="scenario-desc">Loading...</p>
+          <!-- Stat Chips for Level 4 -->
+          <div id="stat-chips" class="mt-3 flex flex-wrap gap-2 justify-center text-[10px] text-slate-200"></div>
+        </div>
+
+        <div id="reaction-overlay" class="hidden absolute inset-0 bg-slate-950/95 z-40 flex flex-col items-center justify-center p-4"></div>
+      </div>
+
+      <!-- INTERACTION PANEL -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-1 space-y-2">
+          <div class="bg-slate-800 border border-slate-600 rounded p-2 flex flex-col gap-2">
+            <div class="text-xs font-bold text-slate-500 uppercase text-center">Tactical Support</div>
+
+            <button onclick="buyHint(1)" id="btn-hint-1" class="w-full btn-neon flex items-center justify-between bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded text-xs border border-slate-600">
+              <span><i data-lucide="search" class="w-3 h-3 inline mr-1 text-blue-400"></i> Curve Clue</span><span class="text-blue-300">-10$</span>
+            </button>
+
+            <button onclick="buyHint(2)" id="btn-hint-2" disabled class="w-full btn-neon flex items-center justify-between bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded text-xs border border-slate-600 opacity-50">
+              <span><i data-lucide="map" class="w-3 h-3 inline mr-1 text-yellow-400"></i> Side Clue</span><span class="text-yellow-300">-20$</span>
+            </button>
+
+            <button onclick="buyHint(3)" id="btn-hint-3" disabled class="w-full btn-neon flex items-center justify-between bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2 rounded text-xs border border-slate-600 opacity-50">
+              <span><i data-lucide="tag" class="w-3 h-3 inline mr-1 text-purple-400"></i> Name It</span><span class="text-purple-300">-30$</span>
+            </button>
+
+            <button onclick="pulseRegion()" id="btn-pulse" class="w-full btn-neon flex items-center justify-between bg-slate-900 hover:bg-slate-800 text-slate-400 px-3 py-2 rounded text-xs border border-slate-700 mt-2">
+              <span><i data-lucide="zap" class="w-3 h-3 inline mr-1 text-red-400"></i> Pulse Region</span><span class="text-red-300">-15$</span>
+            </button>
+          </div>
+
+          <button onclick="revealDeepLogic()" id="btn-deep-logic" class="w-full btn-neon flex items-center justify-between bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 px-4 py-2 rounded text-xs group">
+            <span><i data-lucide="brain-circuit" class="w-3 h-3 inline mr-1"></i> Deep Logic</span><span class="text-slate-400">-20$</span>
+          </button>
+
+          <!-- Reveal Answer Key -->
+          <button onclick="openReveal()" id="btn-reveal" class="w-full btn-neon flex items-center justify-between bg-red-900/20 hover:bg-red-900/35 border border-red-800/60 text-red-200 px-4 py-2 rounded text-xs">
+            <span><i data-lucide="key" class="w-3 h-3 inline mr-1"></i> Reveal Answer Key</span><span class="text-red-200">-40$</span>
+          </button>
+
+          <button onclick="toggleGrimoire()" class="w-full btn-neon flex items-center justify-center bg-slate-900/50 hover:bg-slate-800 border border-slate-700 text-slate-400 text-xs py-2 rounded">
+            <i data-lucide="book" class="w-3 h-3 mr-2"></i> <span id="grimoire-status">Open Manual (-50)</span>
+          </button>
+        </div>
+
+        <div class="lg:col-span-2 bg-slate-800 border border-slate-600 p-4 rounded-xl relative">
+          <div class="absolute top-0 right-0 bg-blue-600 text-xs font-bold px-2 py-1 rounded-bl text-white">SELECT ANSWER</div>
+
+          <div id="spell-tooltip" class="mb-3 min-h-[2.5rem] flex items-center justify-center text-center text-xs text-blue-200 italic bg-slate-900/50 rounded border border-blue-900/30 p-2">
+            <div id="tooltip-locked" class="flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i><span>Information Obscured. <button onclick="unlockTooltips()" class="underline text-blue-400 hover:text-blue-300">Identify (-20)</button></span></div>
+            <div id="tooltip-active" class="hidden w-full">Hover to define concept...</div>
+          </div>
+
+          <div id="options-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        </div>
+      </div>
+
+      <div id="panel-deep-logic" class="hidden bg-purple-900/20 border border-purple-500/30 p-4 rounded animate-in slide-in-from-left">
+        <h4 class="text-purple-400 font-bold text-sm mb-1"><i data-lucide="cpu" class="w-3 h-3 inline mr-1"></i> LOGIC CORE ANALYSIS</h4>
+        <div id="deep-logic-text" class="text-sm text-slate-300 space-y-1">...</div>
+      </div>
+
+      <div id="panel-hint-ladder" class="hidden bg-yellow-900/20 border border-yellow-500/30 p-4 rounded animate-in slide-in-from-left">
+        <h4 class="text-yellow-400 font-bold text-sm mb-2"><i data-lucide="zap" class="w-3 h-3 inline mr-1"></i> HINT FEED</h4>
+        <div id="hint-ladder-content" class="space-y-2 text-sm text-slate-300"></div>
+      </div>
+
+      <div id="grimoire-container" class="hidden bg-slate-900 border border-slate-500 p-4 rounded mt-4 h-64 overflow-y-auto text-sm force-scroll"></div>
+    </div>
+
+    <!-- --- SCREEN: REVEAL MODAL --- -->
+    <div id="reveal-modal" class="hidden fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border-2 border-red-500 rounded-lg p-6 max-w-lg w-full shadow-2xl relative animate-pop flex flex-col max-h-[80vh] min-h-[60vh]">
+        <button onclick="closeReveal()" class="absolute top-2 right-2 text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <div class="flex-shrink-0 mb-4 text-center">
+          <h2 class="text-3xl font-bold text-red-500 flex items-center justify-center gap-3 border-b border-slate-800 pb-2">
+            <i data-lucide="alert-triangle" class="w-8 h-8"></i> ANSWER KEY
+          </h2>
+          <p class="text-xs text-slate-400 mt-2">This shows the correct concept + the reasoning chain for this question.</p>
+        </div>
+        <div class="flex-1 min-h-0 overflow-y-auto force-scroll space-y-6 pr-2">
+          <div class="bg-slate-800 p-4 rounded border border-slate-700">
+            <p class="text-xs text-slate-500 uppercase tracking-widest mb-2">Correct Answer:</p>
+            <p id="reveal-correct-dist" class="text-xl md:text-2xl font-bold text-white"></p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-widest mb-2">Deep Logic:</p>
+            <div id="reveal-explanation" class="text-blue-200 text-sm leading-relaxed"></div>
+          </div>
+        </div>
+        <div class="flex-shrink-0 mt-6">
+          <button onclick="finishReveal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded border border-slate-600 shadow-lg">Close & Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: GAME OVER --- -->
+    <div id="gameover-screen" class="hidden flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center animate-in zoom-in">
+      <i data-lucide="ban" class="w-20 h-20 text-red-500"></i>
+      <h1 class="text-5xl font-bold text-white">FUNDING CUT</h1>
+      <p class="text-xl text-red-400 font-mono" id="gameover-reason">LIVES DEPLETED</p>
+      <div class="flex gap-4">
+        <button onclick="resetGame()" class="btn-neon bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded">RESTART RUN</button>
+        <button onclick="returnToStart()" class="btn-neon bg-slate-700 hover:bg-slate-600 text-white py-3 px-6 rounded">MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: VICTORY --- -->
+    <div id="victory-screen" class="hidden flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center animate-in zoom-in">
+      <div class="text-6xl animate-bounce">🏆</div>
+      <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">PAPER PUBLISHED</h1>
+      <p id="victory-msg" class="text-lg text-slate-300 max-w-md">Your findings are robust and replicable.</p>
+      <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+        <div class="bg-slate-800 p-4 rounded border border-slate-700"><div class="text-slate-500 text-xs uppercase">Funding Secured</div><div class="text-3xl font-bold text-white" id="final-score">0</div></div>
+        <div class="bg-slate-800 p-4 rounded border border-slate-700"><div class="text-slate-500 text-xs uppercase">Time Left</div><div class="text-3xl font-bold text-green-400" id="final-time">00:00</div></div>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="resetGame()" class="btn-neon bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-10 rounded shadow-[0_0_15px_rgba(37,99,235,0.5)]">NEW STUDY</button>
+        <button onclick="returnToStart()" class="btn-neon bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-10 rounded">MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: LIBRARY --- -->
+    <div id="library-screen" class="hidden w-full max-w-4xl pt-4 flex flex-col h-full">
+      <div class="flex items-center gap-4 mb-6 border-b border-slate-700 pb-4">
+        <button onclick="returnToStart()" class="p-2 bg-slate-800 rounded hover:bg-slate-700 text-white"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+        <h1 class="text-2xl font-bold text-white">The Research Manual</h1>
+      </div>
+      <div id="library-content" class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-y-auto"></div>
+    </div>
+
+    <!-- --- MODAL OVERLAY --- -->
+    <div id="modal-overlay" class="hidden fixed inset-0 bg-slate-950/90 z-[60] flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-600 p-6 rounded shadow-2xl max-w-sm w-full text-center">
+        <h3 id="modal-title" class="text-xl font-bold text-white mb-2">Confirm</h3>
+        <p id="modal-msg" class="text-slate-300 mb-6 text-sm">Are you sure?</p>
+        <div class="flex gap-4 justify-center">
+          <button id="modal-btn-no" onclick="closeModal()" class="px-4 py-2 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
+          <button id="modal-btn-yes" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500 font-bold">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOGIC -->
+  <script>
+    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+    // --- JSTAT UTILS & VAULT REGISTRY ---
+    const statVaultSpecs = {
+        t: {
+            label: "Student's t",
+            support: (p) => [-4.5, 4.5],
+            pdf: (x, p) => jStat.studentt.pdf(x, p.df),
+            cdf: (x, p) => jStat.studentt.cdf(x, p.df),
+            inv: (q, p) => jStat.studentt.inv(q, p.df),
+            latex: (p) => String.raw`f(t) = \frac{\Gamma(\frac{\nu+1}{2})}{\sqrt{\nu\pi}\Gamma(\frac{\nu}{2})} \left(1+\frac{t^2}{\nu}\right)^{-\frac{\nu+1}{2}}`,
+            explain: () => "Used when σ is unknown. Symmetric, bell-shaped, but heavier tails than Normal. As df increases, it approaches Z.",
+            obsRange: [-5, 5]
+        },
+        chi2: {
+            label: "Chi-Squared (χ²)",
+            support: (p) => {
+                const q = jStat.chisquare.inv(0.995, p.df);
+                const maxX = (Number.isFinite(q) ? q : (p.df * 3)) * 1.15;
+                return [0, Math.max(12, maxX)];
+            },
+            pdf: (x, p) => jStat.chisquare.pdf(x, p.df),
+            cdf: (x, p) => jStat.chisquare.cdf(x, p.df),
+            inv: (q, p) => jStat.chisquare.inv(q, p.df),
+            latex: (p) => String.raw`f(x) = \frac{1}{2^{k/2}\Gamma(k/2)} x^{k/2 - 1} e^{-x/2}`,
+            explain: () => "Used for variance, goodness of fit, and independence. Always positive, right-skewed. Shape depends on df.",
+            obsRange: [0, 30]
+        },
+        f: {
+            label: "F-Distribution",
+            support: (p) => {
+                const q = jStat.centralF.inv(0.995, p.df1, p.df2);
+                const maxX = (Number.isFinite(q) ? q : 8) * 1.15;
+                return [0, Math.max(6, maxX)];
+            },
+            pdf: (x, p) => jStat.centralF.pdf(x, p.df1, p.df2),
+            cdf: (x, p) => jStat.centralF.cdf(x, p.df1, p.df2),
+            inv: (q, p) => jStat.centralF.inv(q, p.df1, p.df2),
+            latex: (p) => String.raw`F = \frac{\text{between-group var}}{\text{within-group var}}`,
+            explain: () => "Ratio of two variances (ANOVA). Always positive, right-skewed. Depends on df1 and df2.",
+            obsRange: [0, 10]
+        },
+        z: {
+            label: "Standard Normal (Z)",
+            support: (p) => [-4.5, 4.5],
+            pdf: (x, p) => jStat.normal.pdf(x, 0, 1),
+            cdf: (x, p) => jStat.normal.cdf(x, 0, 1),
+            inv: (q, p) => jStat.normal.inv(q, 0, 1),
+            latex: (p) => String.raw`f(x) = \frac{1}{\sqrt{2\pi}} e^{-\frac{1}{2}x^2}`,
+            explain: () => "The standard curve. Used when σ is known or n is large. Symmetric.",
+            obsRange: [-5, 5]
+        }
+    };
+
+    let vaultState = {
+        test: 't', df: 24, df1: 2, df2: 27, tails: 'two', alpha: 0.05, obs: 2.0, quizStep: 0, highlight: null
+    };
+
+    function normalCDF(z) {
+      // Keep existing custom CDF for legacy/performance in basic battle
+      if(window.jStat) return jStat.normal.cdf(z, 0, 1);
+      const t = 1 / (1 + 0.2316419 * Math.abs(z));
+      const d = 0.398942280401432678 * Math.exp(-z * z / 2);
+      const prob = d * t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+      if (z > 0) return 1 - prob;
+      return prob;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    const concepts = [
+      { id: 'h0', name: "Null Hypothesis (H0)", desc: "The 'Status Quo'. No effect/Difference.", tooltip: "Assume H0 is true until proven otherwise." },
+      { id: 'h1', name: "Alt Hypothesis (H1)", desc: "The claim of an Effect or Difference.", tooltip: "What you are trying to find evidence for." },
+      { id: 'p_val', name: "P-value", desc: "Probability (under H0) of observing a result at least as extreme as the one observed.", tooltip: "Low P = Surprise! (Reject H0)." },
+      { id: 'alpha', name: "Alpha (α)", desc: "Threshold for significance (usually 0.05).", tooltip: "The cut-off point. If p < α, we reject." },
+      { id: 'type1', name: "Type I Error (α)", desc: "False Positive. Rejecting H0 when it's TRUE.", tooltip: "Crying wolf when there is no wolf." },
+      { id: 'type2', name: "Type II Error (β)", desc: "False Negative. Failing to Reject H0 when FALSE.", tooltip: "Missing a discovery that is actually there." },
+      { id: 'power', name: "Power", desc: "Prob. of finding an effect if it exists.", tooltip: "Power = 1 - Beta. Increases with Sample Size." },
+      { id: 'reject', name: "Reject Null", desc: "Decision when p < α.", tooltip: "Statistically Significant result." },
+      { id: 'fail_reject', name: "Fail to Reject", desc: "Decision when p > α.", tooltip: "Not enough evidence. (Never 'Accept' H0)." },
+      { id: 'n', name: "Sample Size (n)", desc: "Number of observations.", tooltip: "More n = More Power, narrower curves." },
+      { id: 'insufficient', name: "Insufficient Evidence", desc: "The correct interpretation of 'Fail to Reject'.", tooltip: "We have not proven H0 is true; we just failed to disprove it." }
+    ];
+
+    const level1 = [
+      { text: "Analyze the graph. What statistical error does the <span class='text-red-400 font-bold'>RED ZONE</span> represent?", answer: 'type1', diff: 'Level 1', clue: "It is under the H0 curve (Gray), right of the critical value.", logic: "1. The region is under the H0 curve (Status Quo).\n2. It lies in the 'Reject H0' zone.\n3. H0 is true, but we rejected it.\n→ **Type I Error (False Positive)**.", graph: { dist: 2.0, highlight: 'alpha' } },
+      { text: "Analyze the graph. What statistical error does the <span class='text-blue-400 font-bold'>BLUE ZONE</span> represent?", answer: 'type2', diff: 'Level 1', clue: "It is under the H1 curve (Blue), left of the critical value.", logic: "1. The region is under the H1 curve (Effect exists).\n2. It lies in the 'Fail to Reject' zone.\n3. We failed to find the effect.\n→ **Type II Error (False Negative)**.", graph: { dist: 2.0, highlight: 'beta' } },
+      { text: "Analyze the graph. What does the <span class='text-green-400 font-bold'>GREEN ZONE</span> represent?", answer: 'power', diff: 'Level 1', clue: "Correctly rejecting H0 when H1 is true.", logic: "1. Under H1 curve (Effect exists).\n2. In the 'Reject H0' zone (Correct).\n3. We found the effect!\n→ **Statistical Power**.", graph: { dist: 2.0, highlight: 'power' } },
+      { text: "What does the <span class='text-slate-400 font-bold'>GRAY CURVE</span> represent?", answer: 'h0', diff: 'Level 1', clue: "The distribution of 'No Effect'.", logic: "1. Centered at μ0.\n2. Represents the world where nothing happened.\n→ **Null Hypothesis (H0)**.", graph: { dist: 2.0, highlight: 'none' } }
+    ];
+
+    const level2 = [
+      { text: "<strong>Scenario:</strong> Jury <strong>convicts</strong> an <strong>innocent</strong> defendant.<br>Curve: H0 (Innocent). Side: Reject (Convict).<br>Name the error.", answer: 'type1', diff: 'Level 2', clue: "False Alarm. Punishing the innocent.", logic: "1. World: Innocent (H0 True).\n2. Decision: Convict (Reject H0).\n3. This is a False Positive.\n→ **Type I Error**.", graph: { dist: 2.0, highlight: 'alpha' } },
+      { text: "<strong>Scenario:</strong> Jury <strong>acquits</strong> a <strong>guilty</strong> defendant.<br>Curve: H1 (Guilty). Side: Fail to Reject (Acquit).<br>Name the error.", answer: 'type2', diff: 'Level 2', clue: "Missed Detection. Letting the guilty walk free.", logic: "1. World: Guilty (H1 True).\n2. Decision: Acquit (Fail to Reject).\n3. This is a False Negative.\n→ **Type II Error**.", graph: { dist: 2.0, highlight: 'beta' } },
+      { text: "<strong>Concept Check:</strong> We calculate p = 0.03. Our significance level is α = 0.05.<br>Since p < α, what is the decision?", answer: 'reject', diff: 'Level 2', clue: "The p-value is low, so the null must go.", logic: "1. P-value (0.03) is less than the threshold (0.05).\n2. The result is statistically significant.\n→ **Reject Null**.", graph: { dist: 2.0, highlight: 'alpha' } },
+      { text: "<strong>Concept Check:</strong> We Fail to Reject H0. Does this prove H0 is true?<br>Choose the best interpretation.", answer: 'insufficient', diff: 'Level 2', clue: "Absence of evidence is not evidence of absence.", logic: "1. Failing to reject just means we didn't find an effect.\n2. It does NOT prove the Null is true.\n3. We simply have... \n→ **Insufficient Evidence**.", graph: { dist: 2.0, highlight: 'correct' } }
+    ];
+
+    const level3 = [
+      { text: "<strong>Bridge Logic:</strong> We lower α from 0.05 to 0.01 (line moves Right).<br>Which value depends <strong>ONLY</strong> on the data and does <strong>NOT</strong> change?", answer: 'p_val', diff: 'Level 3', clue: "It measures the evidence in the data itself, not the threshold.", logic: "1. Alpha is a line we draw (the threshold).\n2. The P-value is calculated from the data points.\n3. Changing the threshold doesn't change the data.\n→ **P-value** remains constant.", graph: { dist: 2.0, highlight: 'none', shiftAlpha: 30 } },
+      { text: "<strong>Dynamics:</strong> We move the threshold LEFT (make it easier to reject).<br>1. Rejections go up.<br>2. <strong>Which error probability INCREASES?</strong> (Trace the H0 curve).", answer: 'type1', diff: 'Level 3', clue: "Easier to reject = more False Alarms.", logic: "1. Moving Left = Rejecting more often.\n2. This catches more real criminals (Power ↑).\n3. BUT it also convicts more innocent people.\n→ **Type I Error (α)** Increases.\n(Trade-off: α ↑, β ↓).", graph: { dist: 2.0, highlight: 'alpha', shiftAlpha: -30 } },
+      { text: "<strong>Dynamics:</strong> We increase sample size (N=1000). The curves become NARROW.<br>What happens to the probability of <strong>correctly detecting</strong> a real effect?", answer: 'power', diff: 'Level 3', clue: "Precision makes it easier to tell them apart.", logic: "1. Narrow curves overlap less.\n2. We can separate Signal (H1) from Noise (H0) easily.\n3. We miss fewer effects.\n→ **Power** Increases.", graph: { dist: 2.0, highlight: 'power', narrow: true } },
+      { text: "<strong>Concept Check:</strong> In a <strong>Two-Tailed</strong> test, the Rejection Region is split into both tails.<br>What is the total area of these two regions combined?", answer: 'alpha', diff: 'Level 3', clue: "The total probability of a False Alarm.", logic: "1. Two-tailed means we reject for high OR low values.\n2. We split our error budget (e.g., 0.025 each side).\n3. The total budget is still...\n→ **Alpha (α)**.", graph: { dist: 2.0, highlight: 'alpha' } }
+    ];
+
+    // --- LEVEL 4: STAT TRIALS (New) ---
+    const level4 = [
+        { 
+          text: "<strong>Stat Trial:</strong> You run a two-tailed t-test (df=24).<br>Alpha = 0.05. Observed t = 2.31.<br>Make the decision.", 
+          choices: ["Reject H0", "Fail to Reject H0"], answerChoice: "Reject H0", diff: 'Level 4', clue: "Critical value is approx 2.06. 2.31 is further out.", 
+          logic: "1. Two-tailed critical t (df=24, α=0.05) ≈ ±2.06.\n2. Obs (2.31) > 2.06.\n3. It falls in the Rejection Region.\n→ **Reject H0**.",
+          graph: { viz: 'stat', dist: 't', params: {df:24}, alpha: 0.05, tails: 'two', obs: 2.31 }
+        },
+        { 
+          text: "<strong>Stat Trial:</strong> Chi-Squared Test (df=5).<br>Alpha = 0.05. Observed χ² = 12.6.<br>Make the decision.", 
+          choices: ["Reject H0", "Fail to Reject H0"], answerChoice: "Reject H0", diff: 'Level 4', clue: "Critical value is approx 11.07.", 
+          logic: "1. Right-tailed critical χ² (df=5, α=0.05) ≈ 11.07.\n2. Obs (12.6) > 11.07.\n3. It is in the tail.\n→ **Reject H0**.",
+          graph: { viz: 'stat', dist: 'chi2', params: {df:5}, alpha: 0.05, tails: 'right', obs: 12.6 }
+        },
+        { 
+          text: "<strong>Stat Trial:</strong> ANOVA F-test (df1=2, df2=27).<br>Alpha = 0.05. Observed F = 2.5.<br>Make the decision.", 
+          choices: ["Reject H0", "Fail to Reject H0"], answerChoice: "Fail to Reject H0", diff: 'Level 4', clue: "Critical value is approx 3.35.", 
+          logic: "1. Right-tailed critical F (2, 27, α=0.05) ≈ 3.35.\n2. Obs (2.5) < 3.35.\n3. It is not in the rejection zone.\n→ **Fail to Reject H0**.",
+          graph: { viz: 'stat', dist: 'f', params: {df1:2, df2:27}, alpha: 0.05, tails: 'right', obs: 2.5 }
+        },
+        {
+          text: "<strong>Identify Test:</strong> You are comparing the means of <strong>4 independent groups</strong>.<br>Which test is appropriate?",
+          choices: ["One-sample t-test", "Chi-Squared Independence", "ANOVA F-test", "z-test"], answerChoice: "ANOVA F-test", diff: 'Level 4', clue: "Analysis of Variance.",
+          logic: "1. Comparing means > 2 groups.\n2. t-tests are for 1 or 2 groups.\n3. Chi-squared is for categories.\n→ **ANOVA F-test**.",
+          graph: { viz: 'stat', dist: 'f', params: {df1:3, df2:40}, alpha: 0.05, tails: 'right', obs: 1.0 }
+        },
+        {
+          text: "<strong>Identify Test:</strong> Investigating relationship between two <strong>categorical</strong> variables (e.g., Gender vs. Voting Preference).",
+          choices: ["Paired t-test", "Chi-Squared Independence", "ANOVA", "Regression"], answerChoice: "Chi-Squared Independence", diff: 'Level 4', clue: "Counts in a grid/matrix.",
+          logic: "1. Categorical vs Categorical data.\n2. We look at observed vs expected counts.\n→ **Chi-Squared Test of Independence**.",
+          graph: { viz: 'stat', dist: 'chi2', params: {df:4}, alpha: 0.05, tails: 'right', obs: 5.0 }
+        },
+        {
+          text: "<strong>Degrees of Freedom:</strong> You run a one-sample t-test with sample size <strong>n = 18</strong>.<br>What are the degrees of freedom?",
+          choices: ["18", "17", "19", "34"], answerChoice: "17", diff: 'Level 4', clue: "n - 1",
+          logic: "1. For a single mean, df = n - 1.\n2. 18 - 1 = 17.\n→ **df = 17**.",
+          graph: { viz: 'stat', dist: 't', params: {df:17}, alpha: 0.05, tails: 'two', obs: 0 }
+        },
+        {
+          text: "<strong>Visual Analysis:</strong> In the two-tailed graph shown, which shaded area represents the <strong>p-value</strong>?",
+          choices: ["Red Area only", "Blue Area (Both Tails)", "Center Area", "Right Tail only"], answerChoice: "Blue Area (Both Tails)", diff: 'Level 4', clue: "Probability of being AT LEAST as extreme as observed (in both directions).",
+          logic: "1. Two-tailed test.\n2. P-value is the probability beyond the observed stat in BOTH directions.\n3. Shown in blue.\n→ **Blue Area (Both Tails)**.",
+          graph: { viz: 'stat', dist: 't', params: {df:20}, alpha: 0.05, tails: 'two', obs: 2.1, highlight: 'pvalue' }
+        }
+    ];
+
+    let state = {
+      screen: 'start', lives: 3, score: 500, index: 0,
+      initialTime: 300, timeLeft: 300, timerId: null,
+      currentRun: [], tooltipsUnlocked: false, processing: false, debugMode: false,
+      hintsUnlocked: 0, pulseTarget: null,
+      revealUsed: false
+    };
+
+    let guideState = {
+      world: 'h0',
+      critPos: 50,
+      highlight: null,
+      quizStep: 0,
+      active: false,
+      showLabels: true,
+      viewMode: 'split',
+      tab: 'errors' // 'errors' or 'stats'
+    };
+
+    const els = {};
+    let guideRAF = null;
+    let vaultRAF = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const screenIds = ['start', 'battle', 'gameover', 'victory', 'library', 'guide'];
+      screenIds.forEach(id => els[id] = document.getElementById(`${id}-screen`));
+
+      const mapId = (key, id) => { const el = document.getElementById(id); if(el) els[key] = el; };
+      mapId('vizCanvas', 'viz-canvas'); mapId('guideCanvas', 'guide-canvas'); mapId('lives', 'lives-container');
+      mapId('timer', 'timer-display'); mapId('score', 'score-display'); mapId('hudQCurrent', 'hud-q-current');
+      mapId('diffBadge', 'diff-badge'); mapId('cardTitle', 'scenario-title'); mapId('cardDesc', 'scenario-desc');
+      mapId('overlay', 'reaction-overlay'); mapId('gameCard', 'game-card'); mapId('btnDeep', 'btn-deep-logic');
+      mapId('btnReveal', 'btn-reveal');
+      mapId('btnHint1', 'btn-hint-1'); mapId('btnHint2', 'btn-hint-2');
+      mapId('btnHint3', 'btn-hint-3'); mapId('panelDeep', 'panel-deep-logic'); mapId('panelHint', 'panel-hint-ladder');
+      mapId('revealModal', 'reveal-modal'); mapId('revealCorrectDist', 'reveal-correct-dist'); mapId('revealExplanation', 'reveal-explanation');
+      mapId('grimoireStatus', 'grimoire-status'); mapId('grimoireContainer', 'grimoire-container'); mapId('optionsGrid', 'options-grid');
+      mapId('tooltipLocked', 'tooltip-locked'); mapId('tooltipActive', 'tooltip-active'); mapId('hintContent', 'hint-ladder-content');
+      mapId('quizFeedback', 'quiz-feedback'); mapId('quizInstruction', 'quiz-instruction');
+      mapId('btnStartGuideQuiz', 'btn-start-quiz'); mapId('btnStartFromGuide', 'btn-start-from-guide');
+      mapId('explainerContext', 'explainer-context'); mapId('explainerDesc', 'explainer-desc'); mapId('explainerTitle', 'explainer-title');
+      mapId('explainerMath', 'explainer-math'); mapId('explainerBar', 'explainer-bar');
+      mapId('btnViewSplit', 'btn-view-split'); mapId('btnViewCombined', 'btn-view-combined');
+      mapId('matrixContainer', 'matrix-container');
+
+      // Vault Elements
+      mapId('vaultCanvas', 'vault-canvas');
+      mapId('guideTabErrors', 'guide-tab-errors'); mapId('guideTabStats', 'guide-tab-stats');
+      mapId('tabBtnErrors', 'tab-btn-errors'); mapId('tabBtnStats', 'tab-btn-stats');
+      mapId('vaultCrit', 'vault-crit-readout'); mapId('vaultP', 'vault-pvalue-readout');
+      mapId('vaultFormula', 'vault-formula'); mapId('vaultExplain', 'vault-explain');
+      mapId('vaultQuizFeedback', 'vault-quiz-feedback'); mapId('vaultQuizInstruct', 'vault-quiz-instruction');
+      mapId('vaultDecision', 'vault-decision-readout');
+      mapId('statChips', 'stat-chips');
+
+      lucide.createIcons();
+      buildLibrary(); buildGrimoire(); buildOptionButtons();
+
+      window.addEventListener('keydown', (e) => { if(e.key.toLowerCase() === 'd') toggleDebugMode(); });
+
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if(!els.battle?.classList.contains('hidden')) {
+            const sc = state.currentRun[state.index];
+            if(sc) {
+                if(sc.graph?.viz === 'stat') drawStatTrial(els.vizCanvas, sc.graph);
+                else drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, state.pulseTarget);
+            }
+          }
+          if(!els.guide?.classList.contains('hidden')) {
+              if(guideState.tab === 'errors') updateGuideCanvas();
+              else renderVault();
+          }
+        }, 120);
+      });
+
+      if(els.guideCanvas) {
+        els.guideCanvas.addEventListener('mousedown', handleGuideClick);
+        els.guideCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleGuideClick(e.touches[0]); }, {passive:false});
+      }
+      
+      // Vault Canvas Interaction (Pointer events for touch/mouse)
+      if(els.vaultCanvas) {
+          els.vaultCanvas.addEventListener('pointerdown', (ev) => {
+            ev.preventDefault();
+            handleVaultClick(ev);
+          }, { passive: false });
+      }
+    });
+
+    // --- GUIDE EXPLAINER (Restored) ---
+    function updateGuideExplainer(data) {
+      if(!els.explainerTitle) return;
+      const { focus, world, decision, alphaP, betaP, powerP } = data;
+
+      let title = "The Distribution";
+      let context = "Gray = H0 (no effect). Blue = H1 (real effect).";
+      let desc = "Click a coloured area (or matrix cell) to see what it means.\n\nProbability = shaded area under a curve.";
+      let math = "";
+      let color = "bg-slate-500";
+
+      const oneAlpha = 1 - alphaP;
+      const oneBeta = powerP;
+
+      const pct = (p) => `${(p*100).toFixed(1)}%`;
+
+      if (focus === 'alpha' || (world === 'h0' && decision === 'reject')) {
+        title = "α (Type I Error) — False Alarm";
+        context = "Truth world: <strong>H0 is true</strong> (no effect)\nDecision: <strong>Reject H0</strong> (you claim effect)";
+        desc =
+          "**α (false alarm)**: grey area in the Reject zone.\n" +
+          "\"We rejected H0 even though H0 was true.\"";
+        math = `α = P(Reject H0 | H0)\n≈ ${pct(alphaP)}`;
+        color = "bg-red-500";
+      } else if (focus === 'correct') {
+        title = "1−α — Correct (No False Alarm)";
+        context = "Truth world: <strong>H0 is true</strong> (no effect)\nDecision: <strong>Fail to Reject</strong> (you don’t claim effect)";
+        desc =
+          "**1−α**: grey area left of (c).\n" +
+          "\"Correct silence\". We correctly ignore noise.";
+        math = `1−α = P(Fail to Reject | H0)\n≈ ${pct(oneAlpha)}`;
+        color = "bg-yellow-400";
+      } else if (focus === 'beta' || (world === 'h1' && decision === 'fail')) {
+        title = "β (Type II Error) — Missed Detection";
+        context = "Truth world: <strong>H1 is true</strong> (real effect)\nDecision: <strong>Fail to Reject</strong> (you miss it)";
+        desc =
+          "**β (missed detection)**: blue area in the Fail-to-Reject zone.\n" +
+          "\"A real effect existed, but we didn’t detect it.\"";
+        math = `β = P(Fail to Reject | H1)\n≈ ${pct(betaP)}`;
+        color = "bg-blue-500";
+      } else if (focus === 'power' || (world === 'h1' && decision === 'reject')) {
+        title = "1−β (Power) — You Catch the Effect";
+        context = "Truth world: <strong>H1 is true</strong> (real effect)\nDecision: <strong>Reject H0</strong> (you detect it)";
+        desc =
+          "**Power** is the blue area in the Reject zone.\n" +
+          "\"When H1 is true, how often do we successfully reject H0?\"";
+        math = `1−β = P(Reject H0 | H1)\n≈ ${pct(oneBeta)}`;
+        color = "bg-green-500";
+      }
+
+      els.explainerTitle.innerText = title;
+      els.explainerContext.innerHTML = context.replace(/\n/g, "<br>");
+      els.explainerDesc.innerText = desc;
+      els.explainerMath.innerText = math;
+      els.explainerBar.className = `absolute top-0 left-0 w-1 h-full ${color}`;
+
+      const panel = document.getElementById('guide-explainer');
+      if(panel) {
+          panel.classList.remove('explainer-enter');
+          void panel.offsetWidth;
+          panel.classList.add('explainer-enter');
+      }
+    }
+
+    // --- GUIDE TABS & VAULT LOGIC ---
+    function setGuideTab(tab) {
+        guideState.tab = tab;
+        els.guideTabErrors.classList.toggle('hidden', tab !== 'errors');
+        els.guideTabStats.classList.toggle('hidden', tab !== 'stats');
+        
+        els.tabBtnErrors.className = tab === 'errors' 
+            ? "px-3 py-1 rounded text-xs font-bold border border-slate-600 bg-slate-700 text-white"
+            : "px-3 py-1 rounded text-xs font-bold border border-slate-600 bg-slate-800 text-slate-400 hover:text-white";
+            
+        els.tabBtnStats.className = tab === 'stats' 
+            ? "px-3 py-1 rounded text-xs font-bold border border-slate-600 bg-slate-700 text-white"
+            : "px-3 py-1 rounded text-xs font-bold border border-slate-600 bg-slate-800 text-slate-400 hover:text-white";
+            
+        if(tab === 'stats') {
+            updateVaultParams(); // Initial render
+        } else {
+            updateGuideCanvas();
+        }
+    }
+
+    function syncVaultObsSlider(spec) {
+      const obsEl = document.getElementById('vault-obs');
+      if (!obsEl) return;
+
+      const [minX, maxX] = spec.support(vaultState);
+      const pad = (maxX - minX) * 0.06;
+
+      let minObs = minX - pad;
+      let maxObs = maxX + pad;
+
+      // strictly positive distributions
+      if (vaultState.test === 'chi2' || vaultState.test === 'f') {
+        minObs = Math.max(0, minObs);
+        vaultState.obs = Math.max(0, vaultState.obs);
+      }
+
+      obsEl.min = minObs.toFixed(3);
+      obsEl.max = maxObs.toFixed(3);
+
+      const span = maxObs - minObs;
+      obsEl.step = (span <= 12 ? 0.01 : span <= 60 ? 0.05 : 0.1).toString();
+
+      vaultState.obs = clamp(vaultState.obs, minObs, maxObs);
+      obsEl.value = vaultState.obs;
+
+      const r = document.getElementById('vault-obs-readout');
+      if (r) r.innerText = Number(vaultState.obs).toFixed(2);
+    }
+
+    function updateVaultParams() {
+        if(guideState.tab !== 'stats') return;
+
+        // Get Inputs
+        const test = document.getElementById('vault-select-test').value;
+        const df = parseInt(document.getElementById('vault-input-df').value);
+        const df1 = parseInt(document.getElementById('vault-input-df1').value);
+        const df2 = parseInt(document.getElementById('vault-input-df2').value);
+        const tails = document.getElementById('vault-select-tails').value;
+        const alpha = parseFloat(document.getElementById('vault-alpha').value);
+        let obs = parseFloat(document.getElementById('vault-obs').value);
+
+        // Update State
+        vaultState.test = test;
+        vaultState.df = df; vaultState.df1 = df1; vaultState.df2 = df2;
+        vaultState.tails = tails; vaultState.alpha = alpha; vaultState.obs = obs;
+
+        // Visibility Logic
+        document.getElementById('vault-group-df').classList.toggle('hidden', test === 'f' || test === 'z');
+        document.getElementById('vault-group-df1').classList.toggle('hidden', test !== 'f');
+        document.getElementById('vault-group-df2').classList.toggle('hidden', test !== 'f');
+        
+        // Auto-fix tails for Chi2/F (always right-tailed mostly)
+        const tailsSel = document.getElementById('vault-select-tails');
+        if(test === 'chi2' || test === 'f') {
+            if(tailsSel.value !== 'right') { tailsSel.value = 'right'; vaultState.tails = 'right'; }
+            tailsSel.disabled = true;
+        } else {
+            tailsSel.disabled = false;
+        }
+
+        // Update Readouts
+        document.getElementById('readout-df').innerText = df;
+        document.getElementById('readout-df1').innerText = df1;
+        document.getElementById('readout-df2').innerText = df2;
+        document.getElementById('vault-alpha-readout').innerText = alpha.toFixed(3);
+        
+        // Update Formula & Explain
+        const spec = statVaultSpecs[test];
+        if(els.vaultFormula && window.MathJax) {
+            els.vaultFormula.innerHTML = `$$${spec.latex(vaultState)}$$`;
+            MathJax.typesetPromise([els.vaultFormula]);
+        }
+        if(els.vaultExplain) els.vaultExplain.innerText = spec.explain();
+
+        // NEW: Sync Slider & Re-read clamped obs
+        syncVaultObsSlider(spec);
+        obs = vaultState.obs;
+
+        // Calculate Criticals & P-value
+        let crits = [];
+        if(vaultState.tails === 'two') {
+            const c = spec.inv(1 - alpha/2, vaultState);
+            crits = [-c, c];
+        } else if(vaultState.tails === 'right') {
+            crits = [spec.inv(1 - alpha, vaultState)];
+        } else {
+            crits = [spec.inv(alpha, vaultState)];
+        }
+
+        let pval = 0;
+        const cdfVal = spec.cdf(obs, vaultState);
+        if(vaultState.tails === 'two') {
+            pval = 2 * (1 - spec.cdf(Math.abs(obs), vaultState));
+        } else if(vaultState.tails === 'right') {
+            pval = 1 - cdfVal;
+        } else {
+            pval = cdfVal;
+        }
+        pval = clamp(pval, 0, 1);
+
+        // Update HUD Readouts
+        els.vaultCrit.innerText = crits.map(x => x.toFixed(2)).join(', ');
+        els.vaultP.innerText = pval.toFixed(4);
+        
+        let reject = false;
+        if(vaultState.tails === 'two') reject = Math.abs(obs) > Math.abs(crits[1]);
+        else if(vaultState.tails === 'right') reject = obs > crits[0];
+        else reject = obs < crits[0];
+
+        if(reject) {
+            els.vaultDecision.innerText = "Reject H0";
+            els.vaultDecision.className = "text-2xl font-bold font-mono text-red-400 animate-pulse";
+        } else {
+            els.vaultDecision.innerText = "Fail to Reject H0";
+            els.vaultDecision.className = "text-2xl font-bold font-mono text-slate-400";
+        }
+        
+        // Quiz Auto-advance for Step 2
+        if(vaultState.quizStep === 2 && reject) {
+            vaultState.quizStep = 3;
+            updateVaultQuizUI();
+        }
+
+        requestAnimationFrame(renderVault);
+    }
+
+    function renderVault() {
+      if (!els.vaultCanvas) return;
+
+      const canvas = els.vaultCanvas;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+
+      const rect = canvas.getBoundingClientRect();
+      const cssW = rect.width;
+      const cssH = canvas.offsetHeight || 300;
+
+      if (canvas.width !== Math.round(cssW * dpr) || canvas.height !== Math.round(cssH * dpr)) {
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+      }
+
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.scale(dpr, dpr);
+
+      const w = cssW, h = cssH;
+      const spec = statVaultSpecs[vaultState.test];
+      const [minX, maxX] = spec.support(vaultState);
+
+      ctx.clearRect(0, 0, w, h);
+
+      const mapX = (val) => ((val - minX) / (maxX - minX)) * w;
+      const axisY = h - 30;
+
+      // peak scan
+      let maxPDF = 0;
+      const step = (maxX - minX) / 120;
+      for (let x = minX; x <= maxX; x += step) maxPDF = Math.max(maxPDF, spec.pdf(x, vaultState));
+      const scaleY = (h * 0.8) / (maxPDF || 1e-9);
+
+      // curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      for (let xPx = 0; xPx <= w; xPx += 2) {
+        const xVal = minX + (xPx / w) * (maxX - minX);
+        const yVal = axisY - spec.pdf(xVal, vaultState) * scaleY;
+        if (xPx === 0) ctx.moveTo(xPx, yVal);
+        else ctx.lineTo(xPx, yVal);
+      }
+      ctx.stroke();
+
+      // criticals
+      const alpha = vaultState.alpha;
+      let crits = [];
+      if (vaultState.tails === 'two') {
+        const c = spec.inv(1 - alpha / 2, vaultState);
+        crits = [-c, c];
+      } else if (vaultState.tails === 'right') {
+        crits = [spec.inv(1 - alpha, vaultState)];
+      } else {
+        crits = [spec.inv(alpha, vaultState)];
+      }
+
+      const fillRegion = (start, end, fillStyle) => {
+        ctx.fillStyle = fillStyle;
+        ctx.beginPath();
+        ctx.moveTo(mapX(start), axisY);
+        for (let xPx = mapX(start); xPx <= mapX(end); xPx += 2) {
+          const xVal = minX + (xPx / w) * (maxX - minX);
+          const yVal = axisY - spec.pdf(xVal, vaultState) * scaleY;
+          ctx.lineTo(xPx, yVal);
+        }
+        ctx.lineTo(mapX(end), axisY);
+        ctx.closePath();
+        ctx.fill();
+      };
+
+      // alpha region
+      const vAlpha = getComputedStyle(document.documentElement).getPropertyValue('--v-alpha');
+      if (vaultState.tails === 'two') {
+        fillRegion(minX, crits[0], vAlpha);
+        fillRegion(crits[1], maxX, vAlpha);
+      } else if (vaultState.tails === 'right') {
+        fillRegion(crits[0], maxX, vAlpha);
+      } else {
+        fillRegion(minX, crits[0], vAlpha);
+      }
+
+      // p-value region
+      const showP = vaultState.highlight === 'pvalue' || vaultState.quizStep === 3 || vaultState.quizStep === 4;
+      if (showP) {
+        const vP = getComputedStyle(document.documentElement).getPropertyValue('--v-pvalue');
+        const obs = vaultState.obs;
+        if (vaultState.tails === 'two') {
+          fillRegion(minX, -Math.abs(obs), vP);
+          fillRegion(Math.abs(obs), maxX, vP);
+        } else if (vaultState.tails === 'right') {
+          fillRegion(obs, maxX, vP);
+        } else {
+          fillRegion(minX, obs, vP);
+        }
+      }
+
+      // critical lines
+      ctx.strokeStyle = '#facc15';
+      ctx.setLineDash([5,5]);
+      ctx.lineWidth = 2;
+      crits.forEach(c => {
+        const cx = mapX(c);
+        ctx.beginPath();
+        ctx.moveTo(cx, axisY);
+        ctx.lineTo(cx, 20);
+        ctx.stroke();
+        ctx.fillStyle = '#facc15';
+        ctx.font = '10px monospace';
+        ctx.fillText(c.toFixed(2), cx - 10, 15);
+      });
+      ctx.setLineDash([]);
+
+      // obs line
+      const ox = mapX(vaultState.obs);
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ox, axisY);
+      ctx.lineTo(ox, 20);
+      ctx.stroke();
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = '10px monospace';
+      ctx.fillText('Obs', ox + 5, 30);
+
+      // axis
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, axisY);
+      ctx.lineTo(w, axisY);
+      ctx.stroke();
+    }
+
+    // Vault Quiz Logic
+    function startVaultQuiz() {
+        vaultState.quizStep = 1;
+        updateVaultQuizUI();
+    }
+
+    function updateVaultQuizUI() {
+        const ui = els.vaultQuizInstruct;
+        const fb = els.vaultQuizFeedback;
+        if(vaultState.quizStep === 1) {
+            ui.innerHTML = "Step 1: Click inside the <span class='text-red-400 font-bold'>Red Rejection Region</span> (Alpha).";
+            fb.innerText = "";
+        } else if(vaultState.quizStep === 2) {
+            ui.innerHTML = "Step 2: Move the <strong>Observed Stat</strong> slider until you Reject H0.";
+            fb.innerText = "Good. Now prove significance.";
+        } else if(vaultState.quizStep === 3) {
+            ui.innerHTML = "Step 3: Click the <span class='text-cyan-400 font-bold'>Blue P-Value Area</span> defined by your observation.";
+            fb.innerText = "Decision changed to Reject!";
+        } else if(vaultState.quizStep === 4) {
+            ui.innerHTML = "Calibration Complete.";
+            fb.className = "text-green-400 font-bold";
+            fb.innerText = "Vault Calibrated.";
+        }
+    }
+
+    function handleVaultClick(e) {
+        if(vaultState.quizStep !== 1 && vaultState.quizStep !== 3) return;
+        
+        const rect = els.vaultCanvas.getBoundingClientRect();
+        const xPx = (e.clientX - rect.left);
+        const w = rect.width;
+        const spec = statVaultSpecs[vaultState.test];
+        const [minX, maxX] = spec.support(vaultState);
+        const xVal = minX + (xPx/w)*(maxX - minX);
+        
+        // Check Alpha Region (Step 1)
+        if(vaultState.quizStep === 1) {
+            let hit = false;
+            let crits = [];
+            if(vaultState.tails === 'right') hit = xVal > spec.inv(1-vaultState.alpha, vaultState);
+            else if(vaultState.tails === 'left') hit = xVal < spec.inv(vaultState.alpha, vaultState);
+            else {
+                const c = spec.inv(1-vaultState.alpha/2, vaultState);
+                hit = Math.abs(xVal) > c;
+            }
+            
+            if(hit) {
+                vaultState.quizStep = 2;
+                updateVaultQuizUI();
+            } else {
+                els.vaultQuizFeedback.innerText = "Missed. Aim for the Red Zone.";
+            }
+        }
+        // Check P-Value Region (Step 3)
+        else if(vaultState.quizStep === 3) {
+            let hit = false;
+            const obs = vaultState.obs;
+            if(vaultState.tails === 'right') hit = xVal > obs;
+            else if(vaultState.tails === 'left') hit = xVal < obs;
+            else hit = Math.abs(xVal) > Math.abs(obs);
+            
+            if(hit) {
+                vaultState.quizStep = 4;
+                updateVaultQuizUI();
+                vaultState.highlight = 'pvalue'; // keep showing it
+                renderVault();
+            } else {
+                els.vaultQuizFeedback.innerText = "Missed. P-value is the tail area beyond Obs.";
+            }
+        }
+    }
+
+
+    // --- GLOBAL FUNCTIONS ---
+    function spend(cost) {
+      if(state.score < cost) return false;
+      state.score -= cost;
+      updateHUD();
+      return true;
+    }
+
+    function updateHUD() {
+      if(els.score) {
+        els.score.innerText = state.score;
+        els.score.className = state.score < 0 ? "text-xl font-bold text-red-400" : "text-xl font-bold text-blue-400";
+      }
+      const m = Math.floor(state.timeLeft / 60);
+      const s = (state.timeLeft % 60).toString().padStart(2, '0');
+      if(els.timer) els.timer.innerText = `${m}:${s}`;
+      if(els.lives) els.lives.innerHTML = Array(3).fill(0).map((_, i) =>
+        `<i data-lucide="heart" class="w-6 h-6 ${i < state.lives ? 'text-red-500 fill-red-500' : 'text-slate-700 fill-slate-800'}"></i>`
+      ).join('');
+      lucide.createIcons();
+    }
+
+    function buyHint(level) {
+      if(state.hintsUnlocked >= level) return;
+      if(spend(level * 10)) {
+        state.hintsUnlocked = level;
+        updateHintPanel();
+      }
+    }
+
+    function getHintsForScenario(sc) {
+      if(sc.graph?.viz === 'stat') return [sc.clue || "Check parameters.", "Look at observed vs critical.", "Use logic chain."];
+      
+      let h1 = "Check the shaded area's parent curve.";
+      let h2 = "Check if it is Reject or Fail region.";
+      let h3 = "Identify the definition.";
+      if(sc.answer === 'type1') { h1 = "Look under <strong>H0 (Gray)</strong>."; h2 = "Right of line (Reject)."; h3 = "Rejecting True H0 = Type I."; }
+      else if(sc.answer === 'type2') { h1 = "Look under <strong>H1 (Blue)</strong>."; h2 = "Left of line (Fail)."; h3 = "Missed effect = Type II."; }
+      else if(sc.answer === 'power') { h1 = "Look under <strong>H1 (Blue)</strong>."; h2 = "Right of line (Reject)."; h3 = "Found effect = Power."; }
+      return [h1, h2, h3];
+    }
+
+    function updateHintPanel() {
+      if(els.btnHint1) els.btnHint1.disabled = state.hintsUnlocked >= 1;
+      if(els.btnHint2) { els.btnHint2.disabled = state.hintsUnlocked < 1 || state.hintsUnlocked >= 2; els.btnHint2.classList.toggle('opacity-50', state.hintsUnlocked < 1); }
+      if(els.btnHint3) { els.btnHint3.disabled = state.hintsUnlocked < 2 || state.hintsUnlocked >= 3; els.btnHint3.classList.toggle('opacity-50', state.hintsUnlocked < 2); }
+
+      if(state.hintsUnlocked > 0 && els.panelHint) {
+        const sc = state.currentRun[state.index];
+        if(sc) {
+          const texts = getHintsForScenario(sc);
+          els.panelHint.classList.remove('hidden');
+          let html = "";
+          for(let i=0; i<state.hintsUnlocked; i++) html += `<div class="p-2 bg-slate-800 rounded border border-slate-700 mb-1"><strong class="text-yellow-500">Hint ${i+1}:</strong> ${texts[i]}</div>`;
+          if(els.hintContent) els.hintContent.innerHTML = html;
+        }
+      } else if(els.panelHint) els.panelHint.classList.add('hidden');
+    }
+
+    function pulseRegion() {
+      if(spend(15)) {
+        const sc = state.currentRun[state.index];
+        state.pulseTarget = sc.graph.highlight;
+        if(sc.graph?.viz === 'stat') drawStatTrial(els.vizCanvas, sc.graph);
+        else drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, state.pulseTarget);
+        
+        setTimeout(() => {
+          state.pulseTarget = null;
+          if(!els.battle?.classList.contains('hidden')) {
+             if(sc.graph?.viz === 'stat') drawStatTrial(els.vizCanvas, sc.graph);
+             else drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, null);
+          }
+        }, 2000);
+      }
+    }
+
+    function revealDeepLogic() {
+      if(spend(20)) {
+        els.panelDeep?.classList.remove('hidden');
+        if(els.btnDeep) { els.btnDeep.disabled = true; els.btnDeep.classList.add('opacity-50'); }
+      }
+    }
+
+    function toggleGrimoire() {
+      if(els.grimoireContainer?.classList.contains('hidden')) {
+        if(spend(50)) {
+          els.grimoireContainer.classList.remove('hidden');
+          if(els.grimoireStatus) els.grimoireStatus.innerText = "Close Manual";
+        }
+      } else {
+        els.grimoireContainer?.classList.add('hidden');
+        if(els.grimoireStatus) els.grimoireStatus.innerText = "Open Manual (-50)";
+      }
+    }
+
+    function unlockTooltips() {
+      if(spend(20)) {
+        state.tooltipsUnlocked = true;
+        els.tooltipLocked?.classList.add('hidden');
+        els.tooltipActive?.classList.remove('hidden');
+      }
+    }
+
+    function startGuide() {
+      showScreen('guide-screen');
+      guideState.active = true;
+      guideState.quizStep = 0;
+      guideState.highlight = null;
+      setGuideTab('errors'); // Reset to default tab
+      setGuideView('split');
+      
+      const slider = document.getElementById('crit-slider');
+      if(slider) slider.value = 50;
+      updateGuideParams(50);
+      updateQuizUI();
+    }
+
+    function startGuideQuiz() { guideState.quizStep = 1; updateQuizUI(); }
+    function setGuideWorld(w) { guideState.world = w; updateGuideCanvas(); }
+
+    function updateGuideParams(val) {
+      guideState.critPos = parseInt(val);
+      const readout = document.getElementById('crit-readout');
+      if(readout) readout.innerText = String(guideState.critPos);
+      if(guideRAF) cancelAnimationFrame(guideRAF);
+      guideRAF = requestAnimationFrame(() => {
+        updateGuideCanvas();
+        guideRAF = null;
+      });
+    }
+
+    function toggleGuideLabels(on) { guideState.showLabels = !!on; updateGuideCanvas(); }
+    function highlightGuide(type) { guideState.highlight = type; updateGuideCanvas(); }
+    
+    function setGuideView(mode) {
+      guideState.viewMode = mode;
+      const bSplit = document.getElementById('btn-view-split');
+      const bComb = document.getElementById('btn-view-combined');
+      if(mode === 'split') {
+        bSplit.classList.add('bg-slate-700','text-white'); bSplit.classList.remove('text-slate-400');
+        bComb.classList.remove('bg-slate-700','text-white'); bComb.classList.add('text-slate-400');
+      } else {
+        bComb.classList.add('bg-slate-700','text-white'); bComb.classList.remove('text-slate-400');
+        bSplit.classList.remove('bg-slate-700','text-white'); bSplit.classList.add('text-slate-400');
+      }
+      updateGuideCanvas();
+    }
+
+    function matrixClick(world, decision) {
+      if(guideState.tab !== 'errors') setGuideTab('errors');
+      setGuideWorld(world);
+      let focus = null;
+      if(world === 'h0' && decision === 'reject') focus = 'alpha';
+      else if(world === 'h1' && decision === 'fail') focus = 'beta';
+      else if(world === 'h1' && decision === 'reject') focus = 'power';
+      else focus = 'correct';
+
+      highlightGuide(focus);
+      document.querySelectorAll('.matrix-cell').forEach(el => el.classList.remove('active'));
+      const id = `mat-${world}-${decision}`;
+      const cell = document.getElementById(id);
+      if(cell) {
+        cell.classList.add('active');
+        cell.classList.remove('soft-pulse'); void cell.offsetWidth; cell.classList.add('soft-pulse');
+      }
+    }
+
+    function updateGuideCanvas() {
+      const shift = (guideState.critPos - 50) * 2;
+      if(els.guideCanvas) drawDistribution(els.guideCanvas, 2.5, guideState.highlight, false, shift, true, null, guideState.viewMode);
+      updateGuideNumbers();
+    }
+
+    function updateGuideNumbers() {
+      if(!els.guideCanvas) return;
+      const rect = els.guideCanvas.getBoundingClientRect();
+      const w = rect.width;
+
+      const mean1 = w * 0.35;
+      const baseSd = w * 0.12;
+      const shift = (guideState.critPos - 50) * 2;
+      const criticalX = clamp((mean1 + (1.645 * baseSd)) + shift, 0, w);
+      const mean2 = mean1 + (2.5 * baseSd);
+
+      const zAlpha = (criticalX - mean1) / baseSd;
+      const zBeta = (criticalX - mean2) / baseSd;
+
+      const alphaP = 1 - normalCDF(zAlpha);
+      const betaP  = normalCDF(zBeta);
+      const oneAlpha = 1 - alphaP;
+      const oneBeta = 1 - betaP;
+
+      const pct = (p) => `${(p*100).toFixed(1)}%`;
+
+      const pa = document.getElementById('prob-alpha');
+      const poa = document.getElementById('prob-one-alpha');
+      const pb = document.getElementById('prob-beta');
+      const pob = document.getElementById('prob-one-beta');
+
+      if(pa) pa.innerText = pct(alphaP);
+      if(poa) poa.innerText = pct(oneAlpha);
+      if(pb) pb.innerText = pct(betaP);
+      if(pob) pob.innerText = pct(oneBeta);
+
+      const m1 = document.getElementById('matval-alpha');
+      const m2 = document.getElementById('matval-one-alpha');
+      const m3 = document.getElementById('matval-beta');
+      const m4 = document.getElementById('matval-one-beta');
+
+      if(m1) m1.innerText = `α ≈ ${pct(alphaP)}`;
+      if(m2) m2.innerText = `1−α ≈ ${pct(oneAlpha)}`;
+      if(m3) m3.innerText = `β ≈ ${pct(betaP)}`;
+      if(m4) m4.innerText = `1−β ≈ ${pct(oneBeta)}`;
+      
+      const elZ0 = document.getElementById('readout-z0');
+      const elZ1 = document.getElementById('readout-z1');
+      if(elZ0) elZ0.innerText = zAlpha.toFixed(2);
+      if(elZ1) elZ1.innerText = zBeta.toFixed(2);
+
+      const focus = guideState.highlight;
+      let world = guideState.world, decision = null;
+
+      if(focus === 'alpha') { world='h0'; decision='reject'; }
+      else if(focus === 'correct') { world='h0'; decision='fail'; }
+      else if(focus === 'beta') { world='h1'; decision='fail'; }
+      else if(focus === 'power') { world='h1'; decision='reject'; }
+
+      updateGuideExplainer({
+        focus: focus,
+        world,
+        decision,
+        alphaP, betaP, powerP: oneBeta
+      });
+    }
+
+    function handleGuideClick(e) {
+      if(guideState.tab === 'stats') return; // Handled by vault click
+
+      const rect = els.guideCanvas.getBoundingClientRect();
+      const clientX = e.clientX || e.changedTouches?.[0]?.clientX;
+      const clientY = e.clientY || e.changedTouches?.[0]?.clientY;
+      const x = (clientX - rect.left) * (els.guideCanvas.width / rect.width);
+      const y = (clientY - rect.top) * (els.guideCanvas.height / rect.height);
+      const w = els.guideCanvas.width;
+      const h = els.guideCanvas.height;
+      const axisY = h - 30;
+
+      const mean1 = w * 0.35;
+      const baseSd = w * 0.12;
+      const shift = (guideState.critPos - 50) * 2;
+      const criticalX = clamp((mean1 + (1.645 * baseSd)) + shift, 0, w);
+      const mean2 = mean1 + (2.5 * baseSd);
+      const gaussian = (vx, mu, sigma) => Math.exp(-0.5 * Math.pow((vx - mu) / sigma, 2));
+
+      let clickedRegion = 'none';
+
+      if (guideState.viewMode === 'split') {
+        const topH = h / 2;
+        const axisYTop = topH - 20;
+        const axisYBot = h - 20;
+        if (y < topH) {
+           const curveY = axisYTop - (gaussian(x, mean1, baseSd) * (h * 0.35));
+           const isUnderCurve = y > curveY && y < axisYTop;
+           if (isUnderCurve) { if (x > criticalX) clickedRegion = 'alpha'; else clickedRegion = 'correct'; }
+        } else {
+           const curveY = axisYBot - (gaussian(x, mean2, baseSd) * (h * 0.35));
+           const isUnderCurve = y > curveY && y < axisYBot;
+           if (isUnderCurve) { if (x > criticalX) clickedRegion = 'power'; else clickedRegion = 'beta'; }
+        }
+      } else {
+        const yH0 = axisY - (gaussian(x, mean1, baseSd) * (h * 0.7));
+        const yH1 = axisY - (gaussian(x, mean2, baseSd) * (h * 0.7));
+        const isRight = x > criticalX;
+        const isLeft = x <= criticalX;
+        const underH0 = y < axisY && y > yH0;
+        const underH1 = y < axisY && y > yH1;
+        const distToH0 = Math.abs(y - yH0);
+        const distToH1 = Math.abs(y - yH1);
+        const closerToH0 = distToH0 < distToH1;
+
+        if (isRight) {
+          if (underH1 && (!underH0 || !closerToH0)) clickedRegion = 'power';
+          else if (underH0) clickedRegion = 'alpha';
+        } else {
+          if (underH1 && (!underH0 || !closerToH0)) clickedRegion = 'beta';
+          else if (underH0) clickedRegion = 'correct';
+        }
+      }
+
+      if (clickedRegion !== 'none') highlightGuide(clickedRegion);
+
+      if(guideState.quizStep > 0 && guideState.quizStep < 4) {
+        let required = '';
+        if(guideState.quizStep === 1) required = 'alpha';
+        else if(guideState.quizStep === 2) required = 'beta';
+        else if(guideState.quizStep === 3) required = 'power';
+
+        const fb = els.quizFeedback;
+        if(clickedRegion === required) {
+          fb.innerText = "Correct! Next...";
+          fb.className = "text-green-400 font-bold mb-2";
+          guideState.quizStep++;
+          if(guideState.quizStep === 4) {
+            fb.innerText = "TRAINING COMPLETE. GAME UNLOCKED.";
+            if(els.btnStartFromGuide) {
+              els.btnStartFromGuide.disabled = false;
+              els.btnStartFromGuide.classList.remove('bg-slate-800', 'text-slate-600', 'opacity-50', 'cursor-not-allowed');
+              els.btnStartFromGuide.classList.add('bg-green-600', 'text-white', 'animate-pulse');
+              els.btnStartFromGuide.innerText = "ENTER DUNGEON";
+            }
+            if(els.btnStartGuideQuiz) els.btnStartGuideQuiz.style.display = 'none';
+          }
+          updateQuizUI();
+        } else {
+          fb.innerText = `Missed! You clicked ${clickedRegion}. Try again.`;
+          fb.className = "text-red-400 font-bold mb-2";
+        }
+      } else {
+        const tt = document.getElementById('guide-tooltip');
+        if(tt) {
+          const labelMap = { alpha: "α (Type I / False Alarm)", beta: "β (Type II / Missed Effect)", power: "1−β (Power / Detect Effect)", correct: "1−α (Correct / No False Alarm)" };
+          tt.style.left = (clientX - rect.left + 15) + 'px';
+          tt.style.top = (clientY - rect.top - 15) + 'px';
+          tt.innerHTML = `Zone: <strong>${labelMap[clickedRegion] || 'Outside curves'}</strong>`;
+          tt.classList.remove('hidden');
+          setTimeout(() => tt.classList.add('hidden'), 2200);
+        }
+      }
+    }
+
+    function updateQuizUI() {
+      const instr = els.quizInstruction;
+      if(!instr) return;
+      if(guideState.quizStep === 0) instr.innerHTML = "Explore mode active. Click 'START REGION QUIZ' when ready.";
+      else if(guideState.quizStep === 1) { instr.innerHTML = "Quiz 1/3: Click <span class='text-red-400 font-bold'>α (Type I)</span>."; guideState.world='h0'; highlightGuide('alpha'); }
+      else if(guideState.quizStep === 2) { instr.innerHTML = "Quiz 2/3: Click <span class='text-blue-400 font-bold'>β (Type II)</span>."; guideState.world='h1'; highlightGuide('beta'); }
+      else if(guideState.quizStep === 3) { instr.innerHTML = "Quiz 3/3: Click <span class='text-green-400 font-bold'>1−β (Power)</span>."; guideState.world='h1'; highlightGuide('power'); }
+      else instr.innerHTML = "Great job. Your eye is calibrated.";
+    }
+
+    function showReaction(correct, msg) {
+      const overlay = els.overlay;
+      if(!overlay) return;
+      overlay.classList.remove('hidden');
+      const tone = correct ? "text-green-300" : "text-red-300";
+      const icon = correct ? "check-circle" : "x-circle";
+      overlay.innerHTML = `
+        <div class="max-w-md w-full bg-slate-900 border border-slate-700 rounded-xl p-5 text-center">
+          <div class="flex items-center justify-center gap-2 mb-2 ${tone}"><i data-lucide="${icon}" class="w-6 h-6"></i><div class="text-lg font-bold">${correct ? "Correct!" : "Not quite."}</div></div>
+          <div class="text-slate-300 text-sm mb-4">${msg}</div>
+          <div class="flex gap-2 justify-center flex-wrap">
+            <button onclick="nextLevel()" class="btn-neon bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-xs py-2 px-5 rounded">Continue</button>
+            <button onclick="openReveal()" class="btn-neon bg-red-900/20 hover:bg-red-900/35 border border-red-800/60 text-red-200 text-xs py-2 px-5 rounded">Answer Key (-40$)</button>
+          </div>
+        </div>`;
+      lucide.createIcons();
+    }
+
+    function nextLevel() {
+      els.overlay?.classList.add('hidden');
+      state.index++;
+      if(state.index >= state.currentRun.length) { victory(); } else { loadLevel(); updateHUD(); }
+    }
+
+    // UPDATED: Handle Answer (Supports choice strings)
+    function handleAnswer(val) {
+      if(state.processing) return;
+      state.processing = true;
+      const sc = state.currentRun[state.index];
+      
+      const isCorrect = sc.answerChoice ? (val === sc.answerChoice) : (val === sc.answer);
+      
+      if(isCorrect) {
+        state.score += 200; updateHUD(); showReaction(true, "Correct analysis. Your inference engine is warming up.");
+      } else {
+        state.lives--; updateHUD();
+        els.gameCard?.classList.remove('animate-shake'); void els.gameCard?.offsetWidth; els.gameCard?.classList.add('animate-shake');
+        if(state.lives <= 0) setTimeout(() => gameOver("TOO MANY ERRORS"), 350); else showReaction(false, "Incorrect. Use Curve + Side, then name the zone.");
+      }
+    }
+    
+    function prepareGame(minutes) {
+      state.initialTime = minutes * 60;
+      state.timeLeft = state.initialTime;
+      state.lives = 3;
+      state.score = 500;
+      state.index = 0;
+      state.hintsUnlocked = 0;
+      state.tooltipsUnlocked = false;
+      state.revealUsed = false;
+      state.processing = false;
+
+      // Build run: Shuffle levels and combine + Level 4
+      const run = [
+        ...shuffleArray([...level1]).slice(0, 3),
+        ...shuffleArray([...level2]).slice(0, 3),
+        ...shuffleArray([...level3]).slice(0, 3),
+        ...shuffleArray([...level4]).slice(0, 3)
+      ];
+      state.currentRun = run;
+
+      updateHUD();
+      updateHintPanel();
+      
+      if(els.tooltipLocked) els.tooltipLocked.classList.remove('hidden');
+      if(els.tooltipActive) els.tooltipActive.classList.add('hidden');
+      
+      showScreen('battle-screen');
+      loadLevel();
+      
+      clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        state.timeLeft--;
+        updateHUD();
+        if(state.timeLeft <= 0) gameOver("TIME EXPIRED");
+        else if(state.timeLeft <= 30) {
+            const w = document.getElementById('time-warning');
+            if(w) w.classList.remove('hidden');
+        }
+      }, 1000);
+    }
+
+    // UPDATED: Render Choices or Concepts
+    function renderChoices(sc) {
+        if(sc.choices) {
+            els.optionsGrid.innerHTML = sc.choices.map(c => `
+             <button onclick="handleAnswer('${c}')" 
+              class="btn-neon bg-slate-700 hover:bg-cyan-600 text-white text-xs py-3 px-1 rounded border border-slate-600 hover:border-cyan-400 transition-all font-bold">
+              ${c}
+            </button>`).join('');
+        } else {
+            buildOptionButtons(); // Default concept grid
+        }
+    }
+
+    function loadLevel() {
+      state.processing = false;
+      state.hintsUnlocked = 0;
+      updateHintPanel();
+      
+      // Clear specific UI elements
+      if(els.panelDeep) els.panelDeep.classList.add('hidden');
+      if(els.btnDeep) { els.btnDeep.disabled = false; els.btnDeep.classList.remove('opacity-50'); }
+      if(els.gameCard) els.gameCard.className = "bg-slate-800/50 border border-slate-600 p-6 rounded-xl relative overflow-hidden min-h-[500px] flex flex-col transition-all duration-300";
+
+      const sc = state.currentRun[state.index];
+      if(!sc) return victory();
+
+      if(els.cardTitle) els.cardTitle.innerHTML = `Subject #${state.index + 1}`;
+      if(els.cardDesc) els.cardDesc.innerHTML = sc.text;
+      
+      // Render specific choices if they exist
+      renderChoices(sc);
+
+      // Stat Chips logic
+      if(els.statChips) {
+          if(sc.graph?.viz === 'stat') {
+              const p = sc.graph.params;
+              let paramStr = `df=${p.df}`;
+              if(p.df1) paramStr = `df1=${p.df1}, df2=${p.df2}`;
+              els.statChips.innerHTML = `
+                <span class="bg-slate-900/60 border border-slate-700 rounded px-2 py-1 text-cyan-300">${sc.graph.dist.toUpperCase()}</span>
+                <span class="bg-slate-900/60 border border-slate-700 rounded px-2 py-1">${paramStr}</span>
+                <span class="bg-slate-900/60 border border-slate-700 rounded px-2 py-1 text-red-300">α=${sc.graph.alpha}</span>
+                <span class="bg-slate-900/60 border border-slate-700 rounded px-2 py-1 text-yellow-300">Obs=${sc.graph.obs}</span>
+              `;
+          } else {
+              els.statChips.innerHTML = '';
+          }
+      }
+
+      if(els.diffBadge) {
+        els.diffBadge.innerText = sc.diff.toUpperCase();
+        let color = 'text-blue-400 border-blue-500/50';
+        if(sc.diff === 'Level 2') color = 'text-purple-400 border-purple-500/50';
+        if(sc.diff === 'Level 3') color = 'text-red-400 border-red-500/50';
+        if(sc.diff === 'Level 4') color = 'text-cyan-400 border-cyan-500/50';
+        els.diffBadge.className = `text-xs font-bold px-2 py-1 rounded border ${color}`;
+      }
+      
+      const logicText = document.getElementById('deep-logic-text');
+      if(logicText) logicText.innerHTML = (sc.logic || "No data").replace(/\n/g, '<br>');
+      
+      const revDist = document.getElementById('reveal-correct-dist');
+      if(revDist) revDist.innerText = sc.answerChoice || (concepts.find(c => c.id === sc.answer)?.name || sc.answer);
+      const revExp = document.getElementById('reveal-explanation');
+      if(revExp) revExp.innerHTML = (sc.logic || "").replace(/\n/g, '<br>');
+
+      // Switch drawing engine
+      if(sc.graph?.viz === 'stat') drawStatTrial(els.vizCanvas, sc.graph);
+      else drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, null);
+    }
+    
+    function finishReveal() { closeReveal(); nextLevel(); }
+    function openReveal() { if(spend(40)) document.getElementById('reveal-modal')?.classList.remove('hidden'); }
+    function closeReveal() { document.getElementById('reveal-modal')?.classList.add('hidden'); }
+
+    // --- MISSING FUNCTIONS (Restored) ---
+    function showScreen(screenId) {
+      ['start', 'battle', 'gameover', 'victory', 'library', 'guide'].forEach(id => els[id]?.classList.add('hidden'));
+      els[screenId.replace('-screen','')]?.classList.remove('hidden');
+
+      if(screenId !== 'guide-screen') guideState.active = false;
+    }
+
+    function resetGame() { clearInterval(state.timerId); showScreen('start-screen'); guideState.active = false; }
+    function returnToStart() { resetGame(); }
+    function showLibrary() { showScreen('library-screen'); }
+
+    function victory() {
+      clearInterval(state.timerId);
+      const fs = document.getElementById('final-score');
+      if(fs) fs.innerText = state.score;
+
+      const ft = document.getElementById('final-time');
+      if(ft) {
+        const m = Math.floor(state.timeLeft / 60);
+        const s = (state.timeLeft % 60).toString().padStart(2, '0');
+        ft.innerText = `${m}:${s}`;
+      }
+
+      showScreen('victory-screen');
+    }
+
+    function gameOver(reason) {
+      clearInterval(state.timerId);
+      const r = document.getElementById('gameover-reason');
+      if(r) r.innerText = reason;
+      showScreen('gameover-screen');
+    }
+
+    // --- DRAWING: STAT TRIALS (Battle Mode) ---
+    function drawStatTrial(canvas, graph) {
+        if(!canvas || !window.jStat) return;
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        if(canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+          canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(dpr, dpr);
+        const w = rect.width; const h = rect.height;
+        ctx.clearRect(0, 0, w, h);
+        
+        const spec = statVaultSpecs[graph.dist];
+        const [minX, maxX] = spec.support(graph.params);
+        
+        // Scale
+        let maxPDF = 0;
+        for(let i=minX; i<=maxX; i+=(maxX-minX)/50) maxPDF = Math.max(maxPDF, spec.pdf(i, graph.params));
+        const scaleY = (h * 0.75) / maxPDF;
+        const axisY = h - 30;
+        const mapX = (val) => ((val - minX) / (maxX - minX)) * w;
+
+        // Draw Curve
+        ctx.beginPath(); ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+        for(let xPx = 0; xPx <= w; xPx+=2) {
+            const xVal = minX + (xPx/w)*(maxX-minX);
+            const yVal = axisY - spec.pdf(xVal, graph.params) * scaleY;
+            if(xPx===0) ctx.moveTo(xPx, yVal); else ctx.lineTo(xPx, yVal);
+        }
+        ctx.stroke();
+
+        // Calculate Criticals
+        let crits = [];
+        if(graph.tails === 'two') {
+            const c = spec.inv(1 - graph.alpha/2, graph.params);
+            crits = [-c, c];
+        } else if(graph.tails === 'right') crits = [spec.inv(1 - graph.alpha, graph.params)];
+        else crits = [spec.inv(graph.alpha, graph.params)];
+
+        // Shade Alpha Region (Always visible in battle for clarity)
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-alpha');
+        const fillRegion = (start, end) => {
+            ctx.beginPath();
+            for(let xPx = mapX(start); xPx <= mapX(end); xPx+=2) {
+                const xVal = minX + (xPx/w)*(maxX-minX);
+                const yVal = axisY - spec.pdf(xVal, graph.params) * scaleY;
+                if(xPx === mapX(start)) ctx.moveTo(xPx, axisY);
+                ctx.lineTo(xPx, yVal);
+            }
+            ctx.lineTo(mapX(end), axisY);
+            ctx.closePath();
+            ctx.fill();
+        };
+
+        if(graph.tails === 'two') { fillRegion(minX, crits[0]); fillRegion(crits[1], maxX); }
+        else if(graph.tails === 'right') fillRegion(crits[0], maxX);
+        else fillRegion(minX, crits[0]);
+        
+        // Shade P-value if highlighted
+        if(graph.highlight === 'pvalue') {
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-beta'); // Use beta color for p-value contrast
+            const obs = graph.obs;
+            if(graph.tails === 'two') { fillRegion(minX, -Math.abs(obs)); fillRegion(Math.abs(obs), maxX); }
+            else if(graph.tails === 'right') fillRegion(obs, maxX);
+            else fillRegion(minX, obs);
+        }
+
+        // Draw Lines
+        ctx.setLineDash([4,4]); ctx.strokeStyle = '#facc15';
+        crits.forEach(c => {
+            const cx = mapX(c);
+            ctx.beginPath(); ctx.moveTo(cx, axisY); ctx.lineTo(cx, 20); ctx.stroke();
+        });
+        
+        ctx.setLineDash([]); ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 2;
+        const ox = mapX(graph.obs);
+        ctx.beginPath(); ctx.moveTo(ox, axisY); ctx.lineTo(ox, 20); ctx.stroke();
+        
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#facc15'; ctx.fillText('Crit', mapX(crits[0])-20, 15);
+        ctx.fillStyle = '#22d3ee'; ctx.fillText('Obs', ox+5, 30);
+    }
+
+    // --- DRAWING: STANDARD (Legacy) ---
+    function drawDistribution(canvas, dist, highlight, narrow, shiftAlpha, isGuide, pulseTarget, viewMode = 'combined') {
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if(canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(dpr, dpr);
+      const w = rect.width; const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const mean1 = w * 0.35;
+      const baseSd = w * 0.12;
+      const sd = narrow ? baseSd * 0.5 : baseSd;
+      const mean2 = mean1 + (dist * baseSd);
+      const criticalX = clamp((mean1 + (1.645 * sd)) + (shiftAlpha || 0), 0, w);
+      const gaussian = (x, mu, sigma) => Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+
+      // SPLIT VIEW RENDERING
+      if (isGuide && viewMode === 'split') {
+        const topH = h / 2;
+        const axisYTop = topH - 20;
+        const axisYBot = h - 20;
+
+        // Draw H0 Top
+        ctx.save();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-one-alpha');
+        ctx.beginPath(); ctx.moveTo(0, axisYTop);
+        for(let x = 0; x <= criticalX; x+=2) ctx.lineTo(x, axisYTop - (gaussian(x, mean1, sd) * (h * 0.35)));
+        ctx.lineTo(criticalX, axisYTop); ctx.fill();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-alpha');
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYTop);
+        for(let x = criticalX; x <= w; x+=2) ctx.lineTo(x, axisYTop - (gaussian(x, mean1, sd) * (h * 0.35)));
+        ctx.lineTo(w, axisYTop); ctx.fill();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.beginPath();
+        for(let x=0; x<w; x+=2) { const y = axisYTop - (gaussian(x, mean1, sd) * (h * 0.35)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, axisYTop); ctx.lineTo(w, axisYTop); ctx.strokeStyle = '#475569'; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYTop); ctx.lineTo(criticalX, 20); ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText('H0 World (Null)', 10, 20);
+        ctx.restore();
+
+        // Draw H1 Bottom
+        ctx.save();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-beta');
+        ctx.beginPath(); ctx.moveTo(0, axisYBot);
+        for(let x = 0; x <= criticalX; x+=2) ctx.lineTo(x, axisYBot - (gaussian(x, mean2, sd) * (h * 0.35)));
+        ctx.lineTo(criticalX, axisYBot); ctx.fill();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-one-beta');
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYBot);
+        for(let x = criticalX; x <= w; x+=2) ctx.lineTo(x, axisYBot - (gaussian(x, mean2, sd) * (h * 0.35)));
+        ctx.lineTo(w, axisYBot); ctx.fill();
+        ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.beginPath();
+        for(let x=0; x<w; x+=2) { const y = axisYBot - (gaussian(x, mean2, sd) * (h * 0.35)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, axisYBot); ctx.lineTo(w, axisYBot); ctx.strokeStyle = '#475569'; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYBot); ctx.lineTo(criticalX, topH + 20); ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#60a5fa'; ctx.fillText('H1 World (Alt)', 10, topH + 20);
+        ctx.restore();
+
+        return;
+      }
+
+      // COMBINED VIEW (Original)
+      const axisY = h - 30;
+      let dimOneAlpha = 1, dimAlpha = 1, dimBeta = 1, dimOneBeta = 1, dimH0 = 1, dimH1 = 1;
+      const activeHighlight = pulseTarget || (isGuide ? guideState.highlight : highlight);
+
+      if(activeHighlight) {
+        dimOneAlpha = dimAlpha = dimBeta = dimOneBeta = 0.18;
+        if(activeHighlight === 'correct') { dimOneAlpha = 1; dimH0 = 1; dimH1 = 0.18; }
+        if(activeHighlight === 'alpha')   { dimAlpha = 1;   dimH0 = 1; dimH1 = 0.18; }
+        if(activeHighlight === 'beta')    { dimBeta = 1;    dimH1 = 1; dimH0 = 0.18; }
+        if(activeHighlight === 'power')   { dimOneBeta = 1; dimH1 = 1; dimH0 = 0.18; }
+      }
+
+      ctx.fillStyle = "rgba(51, 65, 85, 0.10)"; ctx.fillRect(0, 0, criticalX, axisY);
+      ctx.fillStyle = "rgba(127, 29, 29, 0.08)"; ctx.fillRect(criticalX, 0, w - criticalX, axisY);
+
+      const drawArea = (mu, startX, endX, rgbaColor, baseOpacity) => {
+        ctx.save(); ctx.globalAlpha = baseOpacity; ctx.fillStyle = rgbaColor; ctx.beginPath(); ctx.moveTo(startX, axisY);
+        for(let x = startX; x <= endX; x += 2) ctx.lineTo(x, axisY - (gaussian(x, mu, sd) * (h * 0.7)));
+        ctx.lineTo(endX, axisY); ctx.fill(); ctx.restore();
+      };
+
+      drawArea(mean1, 0, criticalX, getComputedStyle(document.documentElement).getPropertyValue('--c-one-alpha'), dimOneAlpha);
+      drawArea(mean1, criticalX, w, getComputedStyle(document.documentElement).getPropertyValue('--c-alpha'), dimAlpha);
+      drawArea(mean2, 0, criticalX, getComputedStyle(document.documentElement).getPropertyValue('--c-beta'), dimBeta);
+      drawArea(mean2, criticalX, w, getComputedStyle(document.documentElement).getPropertyValue('--c-one-beta'), dimOneBeta);
+
+      const drawCurve = (mu, color, opacity) => {
+        ctx.save(); ctx.globalAlpha = opacity; ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 3;
+        for(let x=0; x<w; x+=2) { const y = axisY - (gaussian(x, mu, sd) * (h * 0.7)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        ctx.stroke(); ctx.restore();
+      };
+      drawCurve(mean1, '#94a3b8', dimH0); drawCurve(mean2, '#60a5fa', dimH1);
+
+      ctx.beginPath(); ctx.moveTo(0, axisY); ctx.lineTo(w, axisY); ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.stroke();
+      
+      // Visual Elements for Distance (Combined View only)
+      if(isGuide && viewMode === 'combined') {
+        const drawMeanMarker = (x, label, color) => {
+          ctx.save();
+          ctx.strokeStyle = color;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath(); ctx.moveTo(x, axisY); ctx.lineTo(x, 20); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = color; ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center"; ctx.fillText(label, x, axisY + 14);
+          ctx.restore();
+        };
+
+        drawMeanMarker(mean1, "μ0", "#94a3b8");
+        drawMeanMarker(mean2, "μ1", "#60a5fa");
+
+        // Δ bracket
+        const yB = 40;
+        ctx.save();
+        ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(mean1, yB); ctx.lineTo(mean2, yB); ctx.stroke();
+        const ah = 6;
+        ctx.beginPath(); ctx.moveTo(mean1, yB); ctx.lineTo(mean1 + ah, yB - ah); ctx.lineTo(mean1 + ah, yB + ah); ctx.closePath(); ctx.fillStyle = "#a78bfa"; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(mean2, yB); ctx.lineTo(mean2 - ah, yB - ah); ctx.lineTo(mean2 - ah, yB + ah); ctx.closePath(); ctx.fill();
+        ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center"; ctx.fillText("Δ = μ1 − μ0", (mean1 + mean2)/2, yB - 10);
+        ctx.restore();
+      }
+
+      ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center";
+      ctx.fillStyle = "#94a3b8"; ctx.fillText("Fail to Reject", clamp(criticalX/2, 40, criticalX-10), h - 10);
+      ctx.fillStyle = "#f87171"; ctx.fillText("Reject H0", clamp((criticalX+w)/2, criticalX+10, w-40), h - 10);
+
+      ctx.beginPath(); ctx.moveTo(criticalX, axisY); ctx.lineTo(criticalX, 20); ctx.strokeStyle = '#facc15'; ctx.setLineDash([5, 3]); ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = "#facc15"; ctx.fillText("Crit Val", clamp(criticalX, 60, w-60), 15);
+
+      if(!isGuide && !pulseTarget) {
+        ctx.font = "bold 12px sans-serif";
+        if(highlight === 'alpha') { ctx.fillStyle = '#f87171'; ctx.textAlign = "left"; ctx.fillText("α / Type I", clamp(criticalX + 10, 0, w-120), axisY - 30); }
+        else if(highlight === 'beta') { ctx.fillStyle = '#60a5fa'; ctx.textAlign = "right"; ctx.fillText("β / Type II", clamp(criticalX - 10, 120, w), axisY - 30); }
+        else if(highlight === 'power') { ctx.fillStyle = '#4ade80'; ctx.textAlign = "left"; ctx.fillText("1−β (Power)", clamp(criticalX + 10, 0, w-140), axisY - 50); }
+      }
+
+      if(isGuide && guideState.showLabels) {
+        const labelBox = (tx, ty, text, strokeColor) => {
+          ctx.save();
+          ctx.font = "10px sans-serif"; ctx.textAlign = "left"; const pad = 5;
+          const metrics = ctx.measureText(text); const bw = metrics.width + pad*2; const bh = 16;
+          ctx.fillStyle = "rgba(2,6,23,0.75)"; ctx.strokeStyle = strokeColor; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.roundRect(tx, ty, bw, bh, 5); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#e5e7eb"; ctx.fillText(text, tx + pad, ty + 11);
+          ctx.restore();
+        };
+
+        const yAt = (x, mu) => axisY - (gaussian(x, mu, sd) * (h * 0.7));
+        const xOneAlpha = clamp(mean1 - sd, 10, criticalX-10);
+        const xAlpha = clamp(criticalX + sd, criticalX+10, w-10);
+        const xBeta = clamp(criticalX - sd, 10, criticalX-10);
+        const xOneBeta = clamp(mean2 + sd, criticalX+10, w-10);
+
+        labelBox(xOneAlpha, yAt(xOneAlpha, mean1) - 22, "1−α = P(Fail | H0)", "#facc15");
+        labelBox(xAlpha,    yAt(xAlpha, mean1) - 22,    "α = P(Reject | H0)", "#f87171");
+        labelBox(xBeta,     yAt(xBeta, mean2) - 22,     "β = P(Fail | H1)", "#60a5fa");
+        labelBox(xOneBeta,  yAt(xOneBeta, mean2) - 22,  "1−β = P(Reject | H1)", "#4ade80");
+      }
+    }
+
+    function buildOptionButtons() {
+      if(els.optionsGrid) els.optionsGrid.innerHTML = concepts.map(c => `
+        <button onclick="handleAnswer('${c.id}')" onmouseenter="updateHover('${c.id}')" onmouseleave="resetHover()"
+          class="btn-neon bg-slate-700 hover:bg-blue-600 text-white text-xs py-3 px-1 rounded border border-slate-600 hover:border-blue-400 transition-all">
+          ${c.name}
+        </button>`).join('');
+    }
+
+    function buildGrimoire() {
+      if(els.grimoireContainer) els.grimoireContainer.innerHTML = concepts.map(c => `
+        <div class="mb-3 border-b border-slate-800 pb-2">
+          <strong class="text-blue-400">${c.name}</strong>
+          <p class="text-xs text-slate-400">${c.desc}</p>
+        </div>`).join('');
+    }
+
+    function buildLibrary() {
+      const el = document.getElementById('library-content');
+      if(el) el.innerHTML = concepts.map(c => `
+        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+          <h3 class="text-lg font-bold text-white mb-2">${c.name}</h3>
+          <p class="text-sm text-slate-300 mb-2">${c.desc}</p>
+        </div>`).join('');
+    }
+
+    function toggleDebugMode() {
+      state.debugMode = !state.debugMode;
+      document.getElementById('debug-overlay')?.classList.toggle('hidden', !state.debugMode);
+    }
+  </script>
+</body>
+</html>

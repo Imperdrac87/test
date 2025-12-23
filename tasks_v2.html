@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <title>Energy List</title>
+  <style>
+    :root{
+      --tap: 48px;
+      --radius: 16px;
+      --gap: 16px;
+      --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+      /* === THEME: DARK (Default) === */
+      --bg: #0b0f19;
+      --bg-grad-1: rgba(59,130,246,.15);
+      --bg-grad-2: rgba(168,85,247,.10);
+      --panel: rgba(17, 24, 39, 0.85);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --input-bg: rgba(0, 0, 0, 0.2);
+      
+      --tag-l-bg: rgba(34, 197, 94, 0.15); --tag-l-txt: #4ade80;
+      --tag-m-bg: rgba(245, 158, 11, 0.15); --tag-m-txt: #fbbf24;
+      --tag-h-bg: rgba(239, 68, 68, 0.15); --tag-h-txt: #f87171;
+
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* === THEME: LIGHT === */
+    body[data-theme="light"]{
+      --bg: #f8fafc;
+      --bg-grad-1: rgba(59,130,246,.08);
+      --bg-grad-2: rgba(168,85,247,.06);
+      --panel: rgba(255, 255, 255, 0.95);
+      --panel-border: rgba(0, 0, 0, 0.08);
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --input-bg: rgba(255, 255, 255, 0.6);
+      
+      --tag-l-bg: #dcfce7; --tag-l-txt: #15803d;
+      --tag-m-bg: #fef3c7; --tag-m-txt: #b45309;
+      --tag-h-bg: #fee2e2; --tag-h-txt: #b91c1c;
+    }
+
+    /* === THEME: SEPIA (Warm/Paper) === */
+    body[data-theme="sepia"]{
+      --bg: #f3e9d2; /* Warm parchment */
+      --bg-grad-1: rgba(217, 119, 6, 0.08);
+      --bg-grad-2: rgba(180, 83, 9, 0.06);
+      --panel: rgba(253, 250, 243, 0.9);
+      --panel-border: rgba(120, 53, 15, 0.12);
+      --text: #4a3b32;
+      --text-muted: #8c7b70;
+      --primary: #d97706; /* Warm amber */
+      --danger: #c2410c;
+      --success: #65a30d;
+      --input-bg: rgba(231, 222, 205, 0.6);
+
+      --tag-l-bg: #ecfccb; --tag-l-txt: #3f6212;
+      --tag-m-bg: #ffedd5; --tag-m-txt: #9a3412;
+      --tag-h-bg: #ffe4e6; --tag-h-txt: #9f1239;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 0%, var(--bg-grad-1), transparent 40%),
+        radial-gradient(circle at 85% 10%, var(--bg-grad-2), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* --- Header --- */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .app-title { 
+      font-size: 26px; 
+      font-weight: 800; 
+      background: linear-gradient(135deg, var(--text), var(--text-muted)); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+    }
+    .header-actions { display: flex; gap: 8px; }
+
+    /* --- Components --- */
+    .card {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: var(--gap);
+      overflow: hidden;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--tap);
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: var(--primary); color: #fff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    /* Fix text color for primary button in sepia mode if needed */
+    body[data-theme="sepia"] .btn-primary { color: #fff; }
+
+    .btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
+    .btn-ghost:hover { background: var(--input-bg); color: var(--text); }
+    .btn-icon { width: var(--tap); padding: 0; font-size: 18px; }
+
+    input, select {
+      height: var(--tap);
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 16px; 
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: var(--primary); }
+    input::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+    /* --- Add Task --- */
+    .input-group {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr auto auto auto;
+    }
+    @media (max-width: 600px) {
+      .input-group { grid-template-columns: 1fr; }
+      .input-row-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    }
+
+    /* --- Filter Controls --- */
+    .controls {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding-bottom: 4px; /* Space for scrollbar if needed */
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Hide scrollbar Firefox */
+    }
+    .filter-row::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+
+    .filter-label { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      color: var(--text-muted); 
+      font-weight: 700; 
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .pill {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 99px;
+      border: 1px solid var(--panel-border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .pill:hover { background: var(--input-bg); color: var(--text); }
+    .pill.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+      font-weight: 700;
+    }
+    /* Sepia specific pill active state */
+    body[data-theme="sepia"] .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .search-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .search-input { height: 36px; font-size: 14px; width: 100%; max-width: 240px; }
+
+    /* --- Task List --- */
+    .section-header {
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.02);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .section-count { font-size: 12px; opacity: 0.6; }
+
+    .task-list { list-style: none; padding: 0; margin: 0; }
+    
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--panel-border);
+      animation: slideIn 0.2s ease-out;
+    }
+    .task-item:last-child { border-bottom: none; }
+    .task-item.done .task-text { text-decoration: line-through; color: var(--text-muted); opacity: 0.7; }
+    .task-item.done .tag-badge { opacity: 0.4; filter: grayscale(0.8); }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .check-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .check-circle svg { width: 14px; height: 14px; color: var(--bg); transform: scale(0); transition: transform 0.2s; }
+    .task-item.done .check-circle { background: var(--success); border-color: var(--success); }
+    .task-item.done .check-circle svg { transform: scale(1); }
+    /* Sepia check mark color fix */
+    body[data-theme="sepia"] .task-item.done .check-circle svg { color: #fff; }
+
+    .tag-badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      min-width: 42px;
+      text-align: center;
+    }
+    .tag-L { background: var(--tag-l-bg); color: var(--tag-l-txt); }
+    .tag-M { background: var(--tag-m-bg); color: var(--tag-m-txt); }
+    .tag-H { background: var(--tag-h-bg); color: var(--tag-h-txt); }
+
+    .task-content { flex: 1; min-width: 0; cursor: pointer; }
+    .task-text { font-size: 15px; line-height: 1.4; word-break: break-word; }
+
+    .task-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+    .task-item:hover .task-actions, .task-item:focus-within .task-actions { opacity: 1; }
+    /* Always show actions on touch devices if we could detect them, but opacity hover works okay for now. */
+    
+    .btn-mini { 
+      height: 30px; 
+      padding: 0 8px; 
+      font-size: 12px; 
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .btn-mini:hover { background: var(--input-bg); color: var(--text); }
+    .btn-mini.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* Screenshot Mode */
+    body.screenshot .hide-on-shot { display: none !important; }
+    body.screenshot .card { border: 1px solid #ccc; box-shadow: none; background: #fff; color: #000; }
+    body.screenshot { --bg: #fff; background: #fff; color: #000; }
+    body.screenshot .task-text { color: #000; }
+    body.screenshot .section-header { background: #f4f4f5; color: #000; border-bottom: 1px solid #ddd; }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 20px;
+      border-radius: 99px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    /* Sepia toast fix */
+    body[data-theme="sepia"] .toast { background: var(--primary); color: #fff; }
+
+    dialog {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    dialog::backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+  </style>
+</head>
+<body data-theme="dark">
+
+  <div class="wrap">
+    
+    <!-- Header -->
+    <div class="header hide-on-shot">
+      <div>
+        <div class="app-title">Energy List</div>
+        <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">Robust. Simple. Calm.</div>
+      </div>
+      <div class="header-actions">
+         <button id="themeBtn" class="btn btn-ghost btn-icon" title="Cycle Theme (Dark/Light/Sepia)">🌗</button>
+         <button id="helpBtn" class="btn btn-ghost btn-icon" title="Help">?</button>
+      </div>
+    </div>
+
+    <!-- Input Card -->
+    <div class="card hide-on-shot">
+      <div class="input-group">
+        <input id="taskInput" type="text" placeholder="Add a new task..." autocomplete="off" aria-label="Task name" />
+        
+        <div class="input-row-mobile">
+          <select id="tagSelect" aria-label="Energy Level">
+            <option value="L">Low Energy 🍃</option>
+            <option value="M">Med Energy ⚙️</option>
+            <option value="H">High Energy 💡</option>
+          </select>
+          <select id="bucketSelect" aria-label="Time Bucket">
+            <option value="sudden">Inbox</option>
+            <option value="today">Today</option>
+            <option value="week">Week</option>
+          </select>
+        </div>
+        
+        <button id="addBtn" class="btn btn-primary">Add</button>
+      </div>
+    </div>
+
+    <!-- Controls & Filters -->
+    <div class="card controls hide-on-shot">
+      
+      <!-- Filter Row: View (Bucket) -->
+      <div class="filter-row">
+        <span class="filter-label">View</span>
+        <button class="pill active" data-filter-type="bucket" data-val="all">All</button>
+        <button class="pill" data-filter-type="bucket" data-val="sudden">Inbox</button>
+        <button class="pill" data-filter-type="bucket" data-val="today">Today</button>
+        <button class="pill" data-filter-type="bucket" data-val="week">Week</button>
+      </div>
+
+      <!-- Filter Row: Energy (Tags) -->
+      <div class="filter-row">
+        <span class="filter-label">Energy</span>
+        <button class="pill active" data-filter-type="tag" data-val="all">Any</button>
+        <button class="pill" data-filter-type="tag" data-val="L">Low 🍃</button>
+        <button class="pill" data-filter-type="tag" data-val="M">Med ⚙️</button>
+        <button class="pill" data-filter-type="tag" data-val="H">High 💡</button>
+      </div>
+
+      <!-- Search & Tools -->
+      <div class="search-row" style="margin-top:8px; padding-top:12px; border-top:1px solid var(--panel-border);">
+         <input id="searchInput" class="search-input" type="text" placeholder="Filter text..." aria-label="Search" />
+         
+         <div style="display:flex; gap:4px;">
+           <button id="shotBtn" class="btn btn-ghost btn-icon" title="Screenshot">📷</button>
+           <button id="copyBtn" class="btn btn-ghost btn-icon" title="Copy List">📋</button>
+           <button id="clearBtn" class="btn btn-ghost btn-icon" title="Clear Completed" style="color:var(--danger)">🗑</button>
+         </div>
+      </div>
+    </div>
+
+    <!-- Main Board -->
+    <div id="board"></div>
+
+    <!-- Shot Header -->
+    <div class="section-header" id="shotHeader" style="display:none; margin-bottom: 20px; border-radius: 12px; background: transparent; border:none;">
+      <div class="section-title" style="font-size: 24px;">Energy List</div>
+      <div class="section-count" id="shotDate" style="font-size: 14px; opacity:1;"></div>
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast">Action completed</div>
+
+  <dialog id="helpDialog">
+    <h2 style="margin-top:0;">Using Energy List</h2>
+    <p style="line-height:1.6; color:var(--text-muted);">
+      This app saves everything to your device automatically.
+    </p>
+    <ul style="padding-left:20px; line-height:1.6; color:var(--text-muted);">
+      <li><strong>Inbox:</strong> Quick capture. Sort later.</li>
+      <li><strong>Energy Tags:</strong> Filter by Low/Med/High to match your current mental state.</li>
+      <li><strong>Filters:</strong> Combine bucket & energy filters (e.g., "Today" + "Low").</li>
+      <li><strong>Theme:</strong> Tap 🌗 to cycle Dark / Light / Sepia.</li>
+    </ul>
+    <div style="text-align:right; margin-top:24px;">
+      <button id="closeHelp" class="btn">Got it</button>
+    </div>
+  </dialog>
+
+  <button id="exitShotBtn" class="btn btn-primary" style="position:fixed; bottom:20px; right:20px; z-index:999; display:none;">Exit Screenshot</button>
+
+  <script>
+    (() => {
+      // --- CONFIGURATION ---
+      const STORAGE_KEY = "energy_list_v7_robust"; // Changed key to ensure clean start for new robust version
+      const THEME_KEY = "energy_list_theme_pref";
+      
+      const BUCKETS = [
+        { key: "sudden", name: "Inbox", icon: "📥" },
+        { key: "today",  name: "Today", icon: "☀️" },
+        { key: "week",   name: "Week", icon: "📅" }
+      ];
+      
+      const TAGS = {
+        L: { label: "LOW",  class: "tag-L", weight: 1 },
+        M: { label: "MED",  class: "tag-M", weight: 2 },
+        H: { label: "HIGH", class: "tag-H", weight: 3 }
+      };
+
+      const THEMES = ["dark", "light", "sepia"];
+
+      // --- STATE ---
+      let state = {
+        tasks: [],
+        bucketFilter: "all", // all, sudden, today, week
+        tagFilter: "all",    // all, L, M, H
+        search: ""
+      };
+
+      // --- ELEMENTS ---
+      const el = {
+        taskInput: document.getElementById("taskInput"),
+        tagSelect: document.getElementById("tagSelect"),
+        bucketSelect: document.getElementById("bucketSelect"),
+        addBtn: document.getElementById("addBtn"),
+        board: document.getElementById("board"),
+        toast: document.getElementById("toast"),
+        searchInput: document.getElementById("searchInput"),
+        themeBtn: document.getElementById("themeBtn"),
+        shotHeader: document.getElementById("shotHeader"),
+        exitShotBtn: document.getElementById("exitShotBtn"),
+        bucketPills: document.querySelectorAll('[data-filter-type="bucket"]'),
+        tagPills: document.querySelectorAll('[data-filter-type="tag"]'),
+        helpDialog: document.getElementById("helpDialog")
+      };
+
+      // --- ROBUST STORAGE ---
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          const data = JSON.parse(raw);
+          return Array.isArray(data) ? data : [];
+        } catch (e) {
+          console.error("Load failed", e);
+          return [];
+        }
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
+        } catch (e) {
+          showToast("⚠️ Save failed! Storage full?");
+        }
+      }
+
+      // --- CORE ACTIONS ---
+      function addTask() {
+        const text = el.taskInput.value.trim();
+        if (!text) return;
+
+        const newTask = {
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+          text: text,
+          tag: el.tagSelect.value,
+          bucket: el.bucketSelect.value,
+          done: false,
+          created: Date.now()
+        };
+
+        state.tasks.push(newTask);
+        el.taskInput.value = "";
+        save();
+        render();
+        
+        // Responsive focus: keep focus on desktop, dismiss on mobile
+        if(window.innerWidth > 600) el.taskInput.focus();
+      }
+
+      function toggleTask(id) {
+        const task = state.tasks.find(t => t.id === id);
+        if (task) {
+          task.done = !task.done;
+          save();
+          render();
+        }
+      }
+
+      function deleteTask(id) {
+        if(confirm("Delete this task permanently?")) {
+          state.tasks = state.tasks.filter(t => t.id !== id);
+          save();
+          render();
+          showToast("Task deleted");
+        }
+      }
+
+      function moveTask(id, newBucket) {
+        const task = state.tasks.find(t => t.id === id);
+        if (task) {
+          task.bucket = newBucket;
+          save();
+          render();
+          // Find friendly name
+          const bName = BUCKETS.find(b => b.key === newBucket)?.name || newBucket;
+          showToast(`Moved to ${bName}`);
+        }
+      }
+
+      function clearCompleted() {
+        const count = state.tasks.filter(t => t.done).length;
+        if (count === 0) return showToast("No completed tasks");
+        
+        if (confirm(`Clear ${count} completed tasks?`)) {
+          state.tasks = state.tasks.filter(t => !t.done);
+          save();
+          render();
+          showToast("Cleaned up");
+        }
+      }
+
+      // --- FILTERING & RENDER ---
+      function getVisibleTasks() {
+        return state.tasks.filter(t => {
+          // Bucket Filter
+          if (state.bucketFilter !== "all" && t.bucket !== state.bucketFilter) return false;
+          // Tag Filter
+          if (state.tagFilter !== "all" && t.tag !== state.tagFilter) return false;
+          // Search
+          if (state.search && !t.text.toLowerCase().includes(state.search.toLowerCase())) return false;
+          return true;
+        });
+      }
+
+      function render() {
+        el.board.innerHTML = "";
+        const visible = getVisibleTasks();
+
+        // Group by Bucket for display (if viewing All)
+        // If viewing specific bucket, just show that one section
+        const bucketsToShow = state.bucketFilter === "all" 
+          ? BUCKETS 
+          : BUCKETS.filter(b => b.key === state.bucketFilter);
+
+        let hasAnyTasks = false;
+
+        bucketsToShow.forEach(bucket => {
+          // Filter visible tasks for this specific bucket section
+          let bucketTasks = visible.filter(t => t.bucket === bucket.key);
+          
+          if (bucketTasks.length === 0 && state.bucketFilter === "all") return; // Don't show empty sections in "All" view
+          
+          hasAnyTasks = true;
+
+          // SORT: High Priority -> Med -> Low -> Newest
+          bucketTasks.sort((a, b) => {
+            if (a.done !== b.done) return a.done ? 1 : -1; // Done tasks last
+            const wA = TAGS[a.tag].weight;
+            const wB = TAGS[b.tag].weight;
+            if (wB !== wA) return wB - wA;
+            return b.created - a.created;
+          });
+
+          // Build Card
+          const card = document.createElement("div");
+          card.className = "card";
+          
+          const openCount = bucketTasks.filter(t => !t.done).length;
+          
+          card.innerHTML = `
+            <div class="section-header">
+              <div class="section-title">
+                <span>${bucket.icon}</span> ${bucket.name}
+              </div>
+              <div class="section-count">${openCount} open</div>
+            </div>
+            <ul class="task-list"></ul>
+          `;
+
+          const ul = card.querySelector("ul");
+          
+          if (bucketTasks.length === 0) {
+            ul.innerHTML = `<li style="padding:20px; text-align:center; color:var(--text-muted); font-style:italic;">No tasks match your filters.</li>`;
+          } else {
+            bucketTasks.forEach(t => {
+              const li = document.createElement("li");
+              li.className = `task-item ${t.done ? "done" : ""}`;
+              const tagData = TAGS[t.tag];
+
+              li.innerHTML = `
+                <div class="check-circle" role="button" aria-label="Toggle done">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div class="tag-badge ${tagData.class}">${tagData.label}</div>
+                <div class="task-content">
+                  <div class="task-text">${escapeHtml(t.text)}</div>
+                </div>
+                <div class="task-actions hide-on-shot">
+                  <button class="btn-mini" onclick="window.appMove('${t.id}', 'sudden')" title="Move to Inbox">📥</button>
+                  <button class="btn-mini" onclick="window.appMove('${t.id}', 'today')" title="Move to Today">☀️</button>
+                  <button class="btn-mini" onclick="window.appMove('${t.id}', 'week')" title="Move to Week">📅</button>
+                  <button class="btn-mini danger" onclick="window.appDel('${t.id}')" title="Delete">✕</button>
+                </div>
+              `;
+
+              // Event Binding
+              li.querySelector(".check-circle").addEventListener("click", (e) => { e.stopPropagation(); toggleTask(t.id); });
+              li.querySelector(".task-content").addEventListener("click", () => toggleTask(t.id));
+
+              ul.appendChild(li);
+            });
+          }
+          el.board.appendChild(card);
+        });
+
+        if (!hasAnyTasks) {
+          el.board.innerHTML = `
+            <div style="text-align:center; padding:40px; color:var(--text-muted);">
+              <div style="font-size:40px; margin-bottom:10px;">☕</div>
+              <div>All quiet.</div>
+              ${state.bucketFilter !== 'all' || state.tagFilter !== 'all' ? '<br><small>Try adjusting your filters.</small>' : ''}
+            </div>
+          `;
+        }
+
+        // Update Pill UI
+        updatePills();
+      }
+
+      function updatePills() {
+        el.bucketPills.forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.val === state.bucketFilter);
+        });
+        el.tagPills.forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.val === state.tagFilter);
+        });
+      }
+
+      function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      }
+
+      // --- THEME ---
+      function cycleTheme() {
+        const current = document.body.getAttribute("data-theme") || "dark";
+        const idx = THEMES.indexOf(current);
+        const next = THEMES[(idx + 1) % THEMES.length];
+        
+        document.body.setAttribute("data-theme", next);
+        localStorage.setItem(THEME_KEY, next);
+        
+        const labels = { dark: "Dark Mode", light: "Light Mode", sepia: "Sepia Mode" };
+        showToast(labels[next]);
+      }
+
+      // --- CLIPBOARD (Robust Fallback) ---
+      function copyText() {
+        const visible = getVisibleTasks();
+        const lines = [`Energy List (${new Date().toLocaleDateString()})`];
+        
+        BUCKETS.forEach(b => {
+          const bt = visible.filter(t => t.bucket === b.key && !t.done);
+          if (bt.length) {
+            lines.push(`\n[ ${b.name} ]`);
+            bt.forEach(t => lines.push(`- [${TAGS[t.tag].label}] ${t.text}`));
+          }
+        });
+        
+        const text = lines.join("\n");
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => showToast("Copied to clipboard!"))
+            .catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+      }
+
+      function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed"; 
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        try {
+          document.execCommand('copy');
+          showToast("Copied to clipboard!");
+        } catch (err) {
+          prompt("Copy manually:", text);
+        }
+        document.body.removeChild(ta);
+      }
+
+      function showToast(msg) {
+        el.toast.textContent = msg;
+        el.toast.classList.add("show");
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(() => el.toast.classList.remove("show"), 2500);
+      }
+
+      // --- SCREENSHOT ---
+      function enterShot() {
+        document.body.classList.add("screenshot");
+        el.shotHeader.style.display = "flex";
+        el.exitShotBtn.style.display = "block";
+        document.getElementById("shotDate").textContent = new Date().toLocaleDateString(undefined, {dateStyle:"full"});
+        showToast("Screenshot Mode");
+      }
+      function exitShot() {
+        document.body.classList.remove("screenshot");
+        el.shotHeader.style.display = "none";
+        el.exitShotBtn.style.display = "none";
+      }
+
+      // --- INIT & BINDINGS ---
+      // Window level (for inline onclicks)
+      window.appDel = deleteTask;
+      window.appMove = moveTask;
+
+      el.addBtn.addEventListener("click", addTask);
+      el.taskInput.addEventListener("keydown", e => { if (e.key === "Enter") addTask(); });
+      
+      // Filter Clicks
+      el.bucketPills.forEach(btn => btn.addEventListener("click", () => {
+        state.bucketFilter = btn.dataset.val;
+        render();
+      }));
+      el.tagPills.forEach(btn => btn.addEventListener("click", () => {
+        state.tagFilter = btn.dataset.val;
+        render();
+      }));
+
+      el.searchInput.addEventListener("input", (e) => {
+        state.search = e.target.value;
+        render();
+      });
+
+      el.themeBtn.addEventListener("click", cycleTheme);
+      document.getElementById("copyBtn").addEventListener("click", copyText);
+      document.getElementById("clearBtn").addEventListener("click", clearCompleted);
+      document.getElementById("shotBtn").addEventListener("click", enterShot);
+      el.exitShotBtn.addEventListener("click", exitShot);
+      
+      document.getElementById("helpBtn").addEventListener("click", () => el.helpDialog.showModal());
+      document.getElementById("closeHelp").addEventListener("click", () => el.helpDialog.close());
+
+      // Boot
+      state.tasks = load();
+      const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
+      document.body.setAttribute("data-theme", savedTheme);
+      
+      // Defaults
+      el.bucketSelect.value = "sudden"; // Default to Inbox
+      render();
+
+    })();
+  </script>
+</body>
+</html>

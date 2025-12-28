@@ -1,0 +1,2365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Wellness Companion</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTWVudGFsIFdlbGxuZXNzIENvbXBhbmlvbiIsInNob3J0X25hbWUiOiJXZWxsbmVzcyIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2Y4ZjZmMyIsInRoZW1lX2NvbG9yIjoiIzdkNmU1ZiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBMU1USWdOVEV5SWo0OGNtVmpkQ0I0UFNJeU5TSWdlVDBpTWpVaUlIZHBaSFJvUFNJME5qSWlJR2hsYVdkb2REMGlORFl5SWlCbWFXeHNQU0luSTNaa2JtVTFaaUluTHo0OEwzTjJaejQ9IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJzaXplcyI6IjUxMng1MTIifV19">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB4PSIyNSIgeT0iMjUiIHdpZHRoPSI0NjIiIGhlaWdodD0iNDYyIiBmaWxsPSIjN2Q2ZTVmIi8+PC9zdmc+">
+    
+    <style>
+        /* CSS Variables for Enhanced Theme Management */
+        :root {
+            --theme-name: 'earth';
+            --bg-primary: #f8f6f3;
+            --bg-secondary: #f0ede8;
+            --bg-card: #ffffff;
+            --text-primary: #2c2c2c;
+            --text-secondary: #5a5a5a;
+            --text-muted: #8a8a8a;
+            --accent-primary: #7d6e5f;
+            --accent-secondary: #a69688;
+            --accent-light: #d4c9be;
+            --border-color: #e5e0db;
+            --shadow: 0 2px 8px rgba(125, 110, 95, 0.1);
+            --shadow-hover: 0 4px 16px rgba(125, 110, 95, 0.15);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --animation-speed: 1;
+            --font-scale: 1;
+            --spacing-scale: 1;
+        }
+
+        /* Forest Theme */
+        [data-theme="forest"] {
+            --theme-name: 'forest';
+            --bg-primary: #f4f7f4;
+            --bg-secondary: #e8f0e8;
+            --bg-card: #ffffff;
+            --text-primary: #2d3e2d;
+            --text-secondary: #4a5d4a;
+            --text-muted: #7a8a7a;
+            --accent-primary: #4a7c59;
+            --accent-secondary: #6b9b7a;
+            --accent-light: #a8c8b3;
+            --border-color: #d4e4d4;
+        }
+
+        /* Sunset Theme */
+        [data-theme="sunset"] {
+            --theme-name: 'sunset';
+            --bg-primary: #fdf7f0;
+            --bg-secondary: #f9ede0;
+            --bg-card: #ffffff;
+            --text-primary: #3d2f1f;
+            --text-secondary: #5d4a35;
+            --text-muted: #8d7a65;
+            --accent-primary: #d4722b;
+            --accent-secondary: #e89660;
+            --accent-light: #f4c2a1;
+            --border-color: #ead4c4;
+        }
+
+        /* Lavender Theme */
+        [data-theme="lavender"] {
+            --theme-name: 'lavender';
+            --bg-primary: #f8f6fb;
+            --bg-secondary: #f0ebf5;
+            --bg-card: #ffffff;
+            --text-primary: #3d2f4a;
+            --text-secondary: #5d4a6b;
+            --text-muted: #8d7a9b;
+            --accent-primary: #8b5fbf;
+            --accent-secondary: #a67fd4;
+            --accent-light: #c9b3e8;
+            --border-color: #e0d4ed;
+        }
+
+        /* Dark Mode Variants */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --bg-card: #333333;
+            --text-primary: #e5e5e5;
+            --text-secondary: #b8b8b8;
+            --text-muted: #888888;
+            --accent-primary: #a69688;
+            --accent-secondary: #7d6e5f;
+            --accent-light: #5a4f42;
+            --border-color: #444444;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="forest-dark"] {
+            --bg-primary: #1a2e1a;
+            --bg-secondary: #2a3e2a;
+            --bg-card: #334433;
+            --text-primary: #e5f0e5;
+            --text-secondary: #b8d0b8;
+            --text-muted: #88a888;
+            --accent-primary: #6b9b7a;
+            --accent-secondary: #4a7c59;
+            --accent-light: #3a5c49;
+            --border-color: #445544;
+        }
+
+        [data-theme="sunset-dark"] {
+            --bg-primary: #2e1f1a;
+            --bg-secondary: #3e2f2a;
+            --bg-card: #443833;
+            --text-primary: #f0e5d5;
+            --text-secondary: #d0c0a8;
+            --text-muted: #a89880;
+            --accent-primary: #e89660;
+            --accent-secondary: #d4722b;
+            --accent-light: #b45a1b;
+            --border-color: #554433;
+        }
+
+        [data-theme="lavender-dark"] {
+            --bg-primary: #2e1f2e;
+            --bg-secondary: #3e2f3e;
+            --bg-card: #443344;
+            --text-primary: #f0e5f0;
+            --text-secondary: #d0b8d0;
+            --text-muted: #a888a8;
+            --accent-primary: #a67fd4;
+            --accent-secondary: #8b5fbf;
+            --accent-light: #6b4f8f;
+            --border-color: #554455;
+        }
+
+        /* High Contrast Theme */
+        [data-theme="high-contrast"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0f0f0;
+            --bg-card: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #333333;
+            --text-muted: #666666;
+            --accent-primary: #0066cc;
+            --accent-secondary: #004499;
+            --accent-light: #cce6ff;
+            --border-color: #000000;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Accessibility Preferences */
+        [data-reduced-motion="true"] {
+            --transition: none;
+            --animation-speed: 0;
+        }
+
+        [data-font-size="small"] { --font-scale: 0.875; }
+        [data-font-size="large"] { --font-scale: 1.125; }
+        [data-font-size="extra-large"] { --font-scale: 1.25; }
+
+        [data-spacing="compact"] { --spacing-scale: 0.75; }
+        [data-spacing="comfortable"] { --spacing-scale: 1.25; }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+            font-size: calc(1rem * var(--font-scale));
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'Arvo', serif;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: calc(1rem * var(--spacing-scale));
+        }
+
+        h1 { font-size: calc(2.2rem * var(--font-scale)); }
+        h2 { font-size: calc(1.8rem * var(--font-scale)); }
+        h3 { font-size: calc(1.4rem * var(--font-scale)); }
+
+        p {
+            margin-bottom: calc(1rem * var(--spacing-scale));
+            color: var(--text-secondary);
+        }
+
+        /* Layout Components */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: calc(2rem * var(--spacing-scale));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: calc(3rem * var(--spacing-scale));
+            padding: calc(2rem * var(--spacing-scale)) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--accent-primary);
+            margin-bottom: calc(0.5rem * var(--spacing-scale));
+        }
+
+        .header p {
+            font-size: calc(1.1rem * var(--font-scale));
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Enhanced Navigation */
+        .nav-container {
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            z-index: 100;
+            padding: calc(1rem * var(--spacing-scale)) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: calc(1rem * var(--spacing-scale));
+            padding: calc(1rem * var(--spacing-scale));
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            margin-bottom: calc(2rem * var(--spacing-scale));
+        }
+
+        .nav-tab {
+            padding: calc(0.75rem * var(--spacing-scale)) calc(1.5rem * var(--spacing-scale));
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .nav-tab:hover {
+            background: var(--accent-light);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .nav-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        /* Module Cards */
+        .module {
+            display: none;
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: calc(2rem * var(--spacing-scale));
+            box-shadow: var(--shadow);
+            margin-bottom: calc(2rem * var(--spacing-scale));
+            transition: var(--transition);
+        }
+
+        .module.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .module-header {
+            margin-bottom: calc(2rem * var(--spacing-scale));
+            padding-bottom: calc(1rem * var(--spacing-scale));
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .module-description {
+            background: var(--bg-secondary);
+            padding: calc(1rem * var(--spacing-scale));
+            border-radius: var(--border-radius);
+            margin-bottom: calc(2rem * var(--spacing-scale));
+            font-style: italic;
+            color: var(--text-secondary);
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        /* Enhanced Form Elements */
+        .form-group {
+            margin-bottom: calc(1.5rem * var(--spacing-scale));
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: calc(0.5rem * var(--spacing-scale));
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: calc(0.75rem * var(--spacing-scale));
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: calc(1rem * var(--font-scale));
+            transition: var(--transition);
+            min-height: 44px;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(125, 110, 95, 0.1);
+        }
+
+        .form-textarea {
+            min-height: calc(120px * var(--spacing-scale));
+            resize: vertical;
+        }
+
+        /* Enhanced Buttons */
+        .btn {
+            padding: calc(0.75rem * var(--spacing-scale)) calc(1.5rem * var(--spacing-scale));
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: calc(1rem * var(--font-scale));
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            min-height: 44px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-small {
+            padding: calc(0.5rem * var(--spacing-scale)) calc(1rem * var(--spacing-scale));
+            font-size: calc(0.9rem * var(--font-scale));
+        }
+
+        /* Enhanced Slider Component */
+        .slider-group {
+            margin-bottom: calc(1.5rem * var(--spacing-scale));
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            outline: none;
+            -webkit-appearance: none;
+            transition: var(--transition);
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: calc(0.5rem * var(--spacing-scale));
+            font-size: calc(0.9rem * var(--font-scale));
+            color: var(--text-muted);
+        }
+
+        .slider-value {
+            text-align: center;
+            margin-top: calc(0.5rem * var(--spacing-scale));
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        /* Enhanced Breathing Timer */
+        .breathing-container {
+            text-align: center;
+            padding: calc(2rem * var(--spacing-scale));
+        }
+
+        .breathing-circle {
+            width: calc(200px * var(--spacing-scale));
+            height: calc(200px * var(--spacing-scale));
+            border: 4px solid var(--accent-primary);
+            border-radius: 50%;
+            margin: calc(2rem * var(--spacing-scale)) auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(1.2rem * var(--font-scale));
+            font-weight: 600;
+            color: var(--accent-primary);
+            transition: transform calc(4s / var(--animation-speed)) ease-in-out, 
+                        background-color calc(4s / var(--animation-speed)) ease-in-out,
+                        box-shadow calc(4s / var(--animation-speed)) ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .breathing-circle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+            transition: all calc(4s / var(--animation-speed)) ease-in-out;
+            z-index: -1;
+        }
+
+        .breathing-circle.inhale {
+            transform: scale(1.4);
+            background: rgba(125, 110, 95, 0.1);
+            box-shadow: 0 0 30px rgba(125, 110, 95, 0.3);
+        }
+
+        .breathing-circle.inhale::before {
+            opacity: 0.2;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .breathing-circle.exhale {
+            transform: scale(1);
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .breathing-circle.exhale::before {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        /* Nature-inspired breathing animations */
+        [data-theme*="forest"] .breathing-circle.inhale {
+            background: rgba(74, 124, 89, 0.15);
+            box-shadow: 0 0 30px rgba(74, 124, 89, 0.3);
+        }
+
+        [data-theme*="sunset"] .breathing-circle.inhale {
+            background: rgba(212, 114, 43, 0.15);
+            box-shadow: 0 0 30px rgba(212, 114, 43, 0.3);
+        }
+
+        [data-theme*="lavender"] .breathing-circle.inhale {
+            background: rgba(139, 95, 191, 0.15);
+            box-shadow: 0 0 30px rgba(139, 95, 191, 0.3);
+        }
+
+        .breathing-controls {
+            display: flex;
+            gap: calc(1rem * var(--spacing-scale));
+            justify-content: center;
+            margin-top: calc(2rem * var(--spacing-scale));
+            flex-wrap: wrap;
+        }
+
+        .breathing-timer {
+            margin-top: calc(1rem * var(--spacing-scale));
+            font-size: calc(1.1rem * var(--font-scale));
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Thought Reframing */
+        .reframing-step {
+            background: var(--bg-secondary);
+            padding: calc(1.5rem * var(--spacing-scale));
+            border-radius: var(--border-radius);
+            margin-bottom: calc(1.5rem * var(--spacing-scale));
+            border-left: 4px solid var(--accent-primary);
+            transition: var(--transition);
+        }
+
+        .reframing-step:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .reframing-step h4 {
+            color: var(--accent-primary);
+            margin-bottom: calc(1rem * var(--spacing-scale));
+        }
+
+        /* Enhanced Journal Entries */
+        .journal-entry {
+            background: var(--bg-secondary);
+            padding: calc(1.5rem * var(--spacing-scale));
+            border-radius: var(--border-radius);
+            margin-bottom: calc(1rem * var(--spacing-scale));
+            border-left: 4px solid var(--accent-primary);
+            transition: var(--transition);
+        }
+
+        .journal-entry:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-1px);
+        }
+
+        .journal-date {
+            font-size: calc(0.9rem * var(--font-scale));
+            color: var(--text-muted);
+            margin-bottom: calc(0.5rem * var(--spacing-scale));
+        }
+
+        .journal-content {
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Values List */
+        .values-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: calc(1rem * var(--spacing-scale));
+            margin-top: calc(1rem * var(--spacing-scale));
+        }
+
+        .value-item {
+            background: var(--bg-secondary);
+            padding: calc(1rem * var(--spacing-scale));
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .value-item:hover {
+            border-color: var(--accent-light);
+            transform: translateY(-1px);
+        }
+
+        .value-item.selected {
+            border-color: var(--accent-primary);
+            background: rgba(125, 110, 95, 0.1);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        /* Enhanced Controls Bar */
+        .controls-bar {
+            position: fixed;
+            top: calc(1rem * var(--spacing-scale));
+            right: calc(1rem * var(--spacing-scale));
+            display: flex;
+            flex-direction: column;
+            gap: calc(0.5rem * var(--spacing-scale));
+            z-index: 1000;
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            font-size: calc(1.2rem * var(--font-scale));
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .control-btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: calc(1rem * var(--spacing-scale));
+            box-shadow: var(--shadow);
+            margin-bottom: calc(2rem * var(--spacing-scale));
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: calc(0.5rem * var(--spacing-scale));
+            margin-top: calc(1rem * var(--spacing-scale));
+        }
+
+        .theme-option {
+            padding: calc(0.75rem * var(--spacing-scale));
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            font-size: calc(0.9rem * var(--font-scale));
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .theme-option.active {
+            border-color: var(--accent-primary);
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Accessibility Features */
+        .accessibility-panel {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: calc(1.5rem * var(--spacing-scale));
+            margin-bottom: calc(2rem * var(--spacing-scale));
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .accessibility-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: calc(1rem * var(--spacing-scale));
+            margin-top: calc(1rem * var(--spacing-scale));
+        }
+
+        .accessibility-option {
+            display: flex;
+            align-items: center;
+            gap: calc(0.5rem * var(--spacing-scale));
+        }
+
+        .accessibility-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-primary);
+        }
+
+        /* Privacy Notice */
+        .privacy-notice {
+            background: var(--bg-secondary);
+            padding: calc(1rem * var(--spacing-scale));
+            border-radius: var(--border-radius);
+            margin-bottom: calc(2rem * var(--spacing-scale));
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .privacy-notice h4 {
+            color: var(--accent-primary);
+            margin-bottom: calc(0.5rem * var(--spacing-scale));
+        }
+
+        /* Mobile Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: calc(0.5rem * var(--spacing-scale));
+            display: none;
+            z-index: 1000;
+        }
+
+        .bottom-nav-items {
+            display: flex;
+            justify-content: space-around;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: calc(0.5rem * var(--spacing-scale));
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            min-width: 60px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .bottom-nav-item:hover {
+            background: var(--accent-light);
+        }
+
+        .bottom-nav-item.active {
+            color: var(--accent-primary);
+        }
+
+        .bottom-nav-icon {
+            font-size: calc(1.2rem * var(--font-scale));
+            margin-bottom: calc(0.25rem * var(--spacing-scale));
+        }
+
+        .bottom-nav-label {
+            font-size: calc(0.7rem * var(--font-scale));
+            text-align: center;
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-muted { color: var(--text-muted); }
+        .mb-1 { margin-bottom: calc(1rem * var(--spacing-scale)); }
+        .mb-2 { margin-bottom: calc(2rem * var(--spacing-scale)); }
+        .mt-2 { margin-top: calc(2rem * var(--spacing-scale)); }
+        .hidden { display: none !important; }
+
+        /* Export/Import Styles */
+        .file-input { display: none; }
+
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: calc(0.5rem * var(--spacing-scale)) calc(1rem * var(--spacing-scale));
+            background: var(--accent-secondary);
+            color: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 44px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .file-label:hover {
+            background: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Touch Gesture Indicators */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: calc(2rem * var(--font-scale));
+            color: var(--accent-light);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .swipe-indicator.left {
+            left: calc(1rem * var(--spacing-scale));
+        }
+
+        .swipe-indicator.right {
+            right: calc(1rem * var(--spacing-scale));
+        }
+
+        .swipe-indicator.show {
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: calc(1rem * var(--spacing-scale));
+                padding-bottom: 80px; /* Space for bottom nav */
+            }
+            
+            .nav-tabs {
+                display: none; /* Hide top nav on mobile */
+            }
+            
+            .bottom-nav {
+                display: block; /* Show bottom nav on mobile */
+            }
+            
+            .controls-bar {
+                position: relative;
+                top: auto;
+                right: auto;
+                flex-direction: row;
+                justify-content: center;
+                margin-bottom: calc(2rem * var(--spacing-scale));
+            }
+            
+            .breathing-circle {
+                width: calc(150px * var(--spacing-scale));
+                height: calc(150px * var(--spacing-scale));
+            }
+            
+            .theme-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .values-list {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .breathing-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .theme-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .breathing-circle {
+                transition: none !important;
+            }
+        }
+
+        /* High Contrast Support */
+        @media (prefers-contrast: high) {
+            :root {
+                --border-color: #000000;
+                --shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .controls-bar,
+            .bottom-nav,
+            .nav-tabs,
+            .breathing-controls,
+            .btn {
+                display: none !important;
+            }
+            
+            .module {
+                display: block !important;
+                page-break-inside: avoid;
+                margin-bottom: 2rem;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+        }
+    </style>
+</head>
+<body data-theme="earth">
+    <!-- Enhanced Controls Bar -->
+    <div class="controls-bar">
+        <button class="control-btn" id="themeToggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">🌙</button>
+        <button class="control-btn" id="themeSelector" title="Select Theme" aria-label="Select Theme">🎨</button>
+        <button class="control-btn" id="accessibilityToggle" title="Accessibility Options" aria-label="Accessibility Options">♿</button>
+        <button class="control-btn" id="exportData" title="Export Data" aria-label="Export Data">📤</button>
+        <button class="control-btn" id="importData" title="Import Data" aria-label="Import Data">📥</button>
+        <input type="file" id="fileInput" class="file-input" accept=".json" aria-label="Import data file">
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+        <div class="bottom-nav-items">
+            <div class="bottom-nav-item active" data-module="checkin" role="button" tabindex="0" aria-label="Daily Check-In">
+                <div class="bottom-nav-icon">🪞</div>
+                <div class="bottom-nav-label">Check-In</div>
+            </div>
+            <div class="bottom-nav-item" data-module="reframing" role="button" tabindex="0" aria-label="Thought Reframing">
+                <div class="bottom-nav-icon">🧠</div>
+                <div class="bottom-nav-label">Reframe</div>
+            </div>
+            <div class="bottom-nav-item" data-module="mindset" role="button" tabindex="0" aria-label="Mindset Builder">
+                <div class="bottom-nav-icon">🌱</div>
+                <div class="bottom-nav-label">Mindset</div>
+            </div>
+            <div class="bottom-nav-item" data-module="regulation" role="button" tabindex="0" aria-label="Regulation Tools">
+                <div class="bottom-nav-icon">🧘</div>
+                <div class="bottom-nav-label">Regulate</div>
+            </div>
+            <div class="bottom-nav-item" data-module="journal" role="button" tabindex="0" aria-label="Personal Journal">
+                <div class="bottom-nav-icon">📓</div>
+                <div class="bottom-nav-label">Journal</div>
+            </div>
+            <div class="bottom-nav-item" data-module="values" role="button" tabindex="0" aria-label="Values Compass">
+                <div class="bottom-nav-icon">🧭</div>
+                <div class="bottom-nav-label">Values</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="header">
+            <h1>Mental Wellness Companion</h1>
+            <p>A private, honest mental companion that supports healing, clarity, and self-directed growth</p>
+        </header>
+
+        <!-- Privacy Notice -->
+        <div class="privacy-notice">
+            <h4>🔐 Your Privacy Matters</h4>
+            <p>Everything you share here stays on your device. No data is sent to servers, no tracking, no analytics. This is your private space for reflection and growth.</p>
+        </div>
+
+        <!-- Theme Selector Panel -->
+        <div class="theme-selector hidden" id="themeSelectorPanel">
+            <h3>🎨 Choose Your Theme</h3>
+            <p class="text-muted">Select a visual theme that feels right for your mental wellness journey.</p>
+            <div class="theme-options">
+                <div class="theme-option active" data-theme="earth">🌍 Earth</div>
+                <div class="theme-option" data-theme="forest">🌲 Forest</div>
+                <div class="theme-option" data-theme="sunset">🌅 Sunset</div>
+                <div class="theme-option" data-theme="lavender">💜 Lavender</div>
+                <div class="theme-option" data-theme="high-contrast">⚫ High Contrast</div>
+            </div>
+        </div>
+
+        <!-- Accessibility Panel -->
+        <div class="accessibility-panel hidden" id="accessibilityPanel">
+            <h3>♿ Accessibility Options</h3>
+            <p class="text-muted">Customize the app to meet your accessibility needs.</p>
+            <div class="accessibility-options">
+                <label class="accessibility-option">
+                    <input type="checkbox" id="reducedMotion">
+                    <span>Reduce motion and animations</span>
+                </label>
+                <label class="accessibility-option">
+                    <input type="checkbox" id="largeText">
+                    <span>Larger text size</span>
+                </label>
+                <label class="accessibility-option">
+                    <input type="checkbox" id="extraLargeText">
+                    <span>Extra large text size</span>
+                </label>
+                <label class="accessibility-option">
+                    <input type="checkbox" id="comfortableSpacing">
+                    <span>More comfortable spacing</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="nav-container">
+            <nav class="nav-tabs" role="navigation" aria-label="Main navigation">
+                <div class="nav-tab active" data-module="checkin" role="button" tabindex="0" aria-label="Daily Check-In">🪞 Daily Check-In</div>
+                <div class="nav-tab" data-module="reframing" role="button" tabindex="0" aria-label="Thought Reframing">🧠 Thought Reframing</div>
+                <div class="nav-tab" data-module="mindset" role="button" tabindex="0" aria-label="Mindset Builder">🌱 Mindset Builder</div>
+                <div class="nav-tab" data-module="regulation" role="button" tabindex="0" aria-label="Regulation Tools">🧘 Regulation Tools</div>
+                <div class="nav-tab" data-module="journal" role="button" tabindex="0" aria-label="Personal Journal">📓 Personal Journal</div>
+                <div class="nav-tab" data-module="values" role="button" tabindex="0" aria-label="Values Compass">🧭 Values Compass</div>
+            </nav>
+        </div>
+
+        <!-- Swipe Indicators -->
+        <div class="swipe-indicator left" id="swipeLeft">‹</div>
+        <div class="swipe-indicator right" id="swipeRight">›</div>
+
+        <!-- Daily Check-In Module -->
+        <div class="module active" id="checkin" role="main" aria-labelledby="checkin-title">
+            <div class="module-header">
+                <h2 id="checkin-title">🪞 Daily Mental Check-In</h2>
+                <div class="module-description">
+                    Ground yourself in reality before any mindset work begins. This prevents bypassing pain with positivity. Healing starts with acknowledgment.
+                </div>
+            </div>
+
+            <form id="checkinForm" aria-label="Daily check-in form">
+                <div class="form-group">
+                    <label class="form-label" for="currentFeeling">How do I feel right now?</label>
+                    <textarea class="form-textarea" id="currentFeeling" placeholder="Describe your current emotional state honestly..." aria-describedby="feeling-help"></textarea>
+                    <div id="feeling-help" class="text-muted" style="font-size: 0.9rem; margin-top: 0.25rem;">Take a moment to honestly assess your emotional state without judgment.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="energyLevel">Energy Level</label>
+                    <input type="range" class="slider" id="energyLevel" min="1" max="10" value="5" aria-describedby="energy-value">
+                    <div class="slider-value" id="energy-value">5</div>
+                    <div class="slider-labels">
+                        <span>Drained</span>
+                        <span>Balanced</span>
+                        <span>Energized</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="stressLevel">Stress Level</label>
+                    <input type="range" class="slider" id="stressLevel" min="1" max="10" value="5" aria-describedby="stress-value">
+                    <div class="slider-value" id="stress-value">5</div>
+                    <div class="slider-labels">
+                        <span>Calm</span>
+                        <span>Moderate</span>
+                        <span>Overwhelmed</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="weighingOn">What's weighing on me?</label>
+                    <textarea class="form-textarea" id="weighingOn" placeholder="What concerns, worries, or challenges are present today?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="feelsStable">What feels stable today?</label>
+                    <textarea class="form-textarea" id="feelsStable" placeholder="What aspects of your life feel solid, reliable, or positive right now?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Complete Check-In</button>
+            </form>
+
+            <div id="checkinResult" class="hidden mt-2" role="alert">
+                <h3>Today's Check-In Complete</h3>
+                <p>Thank you for taking time to acknowledge where you are today. This awareness is the foundation for any meaningful growth.</p>
+            </div>
+        </div>
+
+        <!-- Thought Reframing Module -->
+        <div class="module" id="reframing" role="main" aria-labelledby="reframing-title">
+            <div class="module-header">
+                <h2 id="reframing-title">🧠 Thought Reframing Workspace</h2>
+                <div class="module-description">
+                    Examine your thoughts without judgment. This is CBT-inspired but self-directed—no manipulation, no forced optimism. You choose what feels most honest.
+                </div>
+            </div>
+
+            <form id="reframingForm" aria-label="Thought reframing form">
+                <div class="form-group">
+                    <label class="form-label" for="recurringThought">What thought keeps recurring?</label>
+                    <textarea class="form-textarea" id="recurringThought" placeholder="Enter a thought that's been on your mind..."></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="startReframing">Begin Examination</button>
+            </form>
+
+            <div id="reframingSteps" class="hidden" role="region" aria-label="Thought examination steps">
+                <div class="reframing-step">
+                    <h4>Step 1: Evidence Supporting This Thought</h4>
+                    <p class="text-muted">What facts or experiences support this thought? Be honest and specific.</p>
+                    <textarea class="form-textarea" id="evidenceFor" placeholder="List concrete evidence that supports this thought..."></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>Step 2: Evidence Against This Thought</h4>
+                    <p class="text-muted">What facts or experiences contradict this thought? Look for counter-examples.</p>
+                    <textarea class="form-textarea" id="evidenceAgainst" placeholder="List evidence that challenges this thought..."></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>Step 3: Alternative Interpretations</h4>
+                    <p class="text-muted">What other ways could you view this situation? Consider different perspectives.</p>
+                    <textarea class="form-textarea" id="alternatives" placeholder="What are other possible interpretations?"></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>Step 4: What Feels Most Honest?</h4>
+                    <p class="text-muted">Based on your examination, what perspective feels most balanced and truthful?</p>
+                    <textarea class="form-textarea" id="mostHonest" placeholder="What interpretation feels most accurate and helpful?"></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="saveReframing">Save This Examination</button>
+            </div>
+        </div>
+
+        <!-- Mindset Builder Module -->
+        <div class="module" id="mindset" role="main" aria-labelledby="mindset-title">
+            <div class="module-header">
+                <h2 id="mindset-title">🌱 Intentional Mindset Builder</h2>
+                <div class="module-description">
+                    Support positive mental states you consciously choose. Nothing auto-plays. Nothing pushes. Everything is user-triggered.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="mindsetFocus">Choose your focus for today:</label>
+                <select class="form-select" id="mindsetFocus" aria-describedby="mindset-help">
+                    <option value="">Select a focus...</option>
+                    <option value="calm">Calm</option>
+                    <option value="confidence">Confidence</option>
+                    <option value="patience">Patience</option>
+                    <option value="self-compassion">Self-Compassion</option>
+                    <option value="resilience">Resilience</option>
+                    <option value="gratitude">Gratitude</option>
+                </select>
+                <div id="mindset-help" class="text-muted" style="font-size: 0.9rem; margin-top: 0.25rem;">Choose the mental state you want to consciously cultivate today.</div>
+            </div>
+
+            <div id="mindsetContent" class="hidden">
+                <div id="mindsetPrompts"></div>
+                
+                <div class="form-group mt-2">
+                    <label class="form-label" for="personalAffirmation">Write your own affirmation (optional):</label>
+                    <textarea class="form-textarea" id="personalAffirmation" placeholder="Create an affirmation that feels authentic to you..."></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="saveMindset">Save This Session</button>
+            </div>
+        </div>
+
+        <!-- Regulation Tools Module -->
+        <div class="module" id="regulation" role="main" aria-labelledby="regulation-title">
+            <div class="module-header">
+                <h2 id="regulation-title">🧘 Regulation Tools</h2>
+                <div class="module-description">
+                    Support nervous system regulation before cognitive work. A regulated body makes mindset work real—not performative.
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-tool="breathing" role="button" tabindex="0">Breathing Timer</div>
+                <div class="nav-tab" data-tool="bodyscan" role="button" tabindex="0">Body Scan</div>
+                <div class="nav-tab" data-tool="grounding" role="button" tabindex="0">Grounding Exercise</div>
+            </div>
+
+            <!-- Enhanced Breathing Timer -->
+            <div class="regulation-tool active" id="breathing" role="region" aria-labelledby="breathing-title">
+                <div class="breathing-container">
+                    <h3 id="breathing-title">Breathing Timer</h3>
+                    <p class="text-muted">Follow the circle's rhythm. Inhale as it expands, exhale as it contracts.</p>
+                    
+                    <div class="breathing-circle" id="breathingCircle" role="img" aria-label="Breathing guide circle">
+                        <span id="breathingText">Ready</span>
+                    </div>
+                    
+                    <div class="breathing-timer" id="breathingTimer" aria-live="polite"></div>
+                    
+                    <div class="breathing-controls">
+                        <button class="btn btn-primary" id="startBreathing">Start</button>
+                        <button class="btn btn-secondary" id="stopBreathing">Stop</button>
+                        <button class="btn btn-secondary" id="pauseBreathing">Pause</button>
+                    </div>
+                    
+                    <div class="form-group mt-2">
+                        <label class="form-label" for="breathingDuration">Session Length:</label>
+                        <select class="form-select" id="breathingDuration" style="max-width: 200px; margin: 0;">
+                            <option value="2">2 minutes</option>
+                            <option value="5" selected>5 minutes</option>
+                            <option value="10">10 minutes</option>
+                            <option value="15">15 minutes</option>
+                            <option value="20">20 minutes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Scan -->
+            <div class="regulation-tool" id="bodyscan" role="region" aria-labelledby="bodyscan-title">
+                <h3 id="bodyscan-title">Body Scan Exercise</h3>
+                <p class="text-muted">Take a few minutes to notice physical sensations without judgment.</p>
+                
+                <div class="reframing-step">
+                    <h4>Instructions</h4>
+                    <ol>
+                        <li>Find a comfortable position, sitting or lying down</li>
+                        <li>Close your eyes or soften your gaze</li>
+                        <li>Start at the top of your head and slowly move your attention down</li>
+                        <li>Notice any sensations: tension, warmth, coolness, tingling</li>
+                        <li>Don't try to change anything, just observe</li>
+                        <li>If your mind wanders, gently return to the body part you were focusing on</li>
+                    </ol>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="bodyscanNotes">What did you notice? (optional)</label>
+                    <textarea class="form-textarea" id="bodyscanNotes" placeholder="Any observations about physical sensations, areas of tension, or insights..."></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="saveBodyscan">Save Notes</button>
+            </div>
+
+            <!-- Grounding Exercise -->
+            <div class="regulation-tool" id="grounding" role="region" aria-labelledby="grounding-title">
+                <h3 id="grounding-title">5-4-3-2-1 Grounding Exercise</h3>
+                <p class="text-muted">Use your senses to anchor yourself in the present moment.</p>
+
+                <div class="reframing-step">
+                    <h4>5 things you can SEE</h4>
+                    <textarea class="form-textarea" id="grounding5" placeholder="Look around and name 5 things you can see..."></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>4 things you can TOUCH</h4>
+                    <textarea class="form-textarea" id="grounding4" placeholder="Notice 4 things you can feel or touch..."></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>3 things you can HEAR</h4>
+                    <textarea class="form-textarea" id="grounding3" placeholder="Listen for 3 sounds around you..."></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>2 things you can SMELL</h4>
+                    <textarea class="form-textarea" id="grounding2" placeholder="Notice 2 scents or smells..."></textarea>
+                </div>
+
+                <div class="reframing-step">
+                    <h4>1 thing you can TASTE</h4>
+                    <textarea class="form-textarea" id="grounding1" placeholder="Notice any taste in your mouth..."></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="saveGrounding">Save Grounding Session</button>
+            </div>
+        </div>
+
+        <!-- Personal Journal Module -->
+        <div class="module" id="journal" role="main" aria-labelledby="journal-title">
+            <div class="module-header">
+                <h2 id="journal-title">📓 Personal Narrative Journal</h2>
+                <div class="module-description">
+                    Help you rewrite your story without denying reality. No analysis, no scoring, no "insights" generated by the app.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="journalPrompt">Choose a prompt or write freely:</label>
+                <select class="form-select" id="journalPrompt">
+                    <option value="">Free writing</option>
+                    <option value="What did I survive that I don't give myself credit for?">What did I survive that I don't give myself credit for?</option>
+                    <option value="What am I learning about myself lately?">What am I learning about myself lately?</option>
+                    <option value="What patterns do I notice in my thoughts or behaviors?">What patterns do I notice in my thoughts or behaviors?</option>
+                    <option value="What would I tell a friend going through what I'm experiencing?">What would I tell a friend going through what I'm experiencing?</option>
+                    <option value="What small progress have I made recently?">What small progress have I made recently?</option>
+                    <option value="What do I need to forgive myself for?">What do I need to forgive myself for?</option>
+                    <option value="What am I grateful for today, even in small ways?">What am I grateful for today, even in small ways?</option>
+                    <option value="What would self-compassion look like in this situation?">What would self-compassion look like in this situation?</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="journalLabel">Your thoughts:</label>
+                <textarea class="form-textarea" id="journalEntry" placeholder="Write freely about your thoughts, experiences, or reflections..." style="min-height: 200px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" id="saveJournal">Save Entry</button>
+                <button type="button" class="btn btn-secondary" id="exportJournal">Export All Entries</button>
+                <button type="button" class="btn btn-secondary" id="exportJournalPDF">Export as PDF</button>
+            </div>
+
+            <div id="journalEntries">
+                <h3>Previous Entries</h3>
+                <div id="journalList"></div>
+            </div>
+        </div>
+
+        <!-- Values Compass Module -->
+        <div class="module" id="values" role="main" aria-labelledby="values-title">
+            <div class="module-header">
+                <h2 id="values-title">🧭 Values Compass</h2>
+                <div class="module-description">
+                    Keep the app aligned with your values, not external ideals. Define what matters most to you.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Select your core values (choose up to 5):</label>
+                <div class="values-list" id="valuesList" role="group" aria-label="Core values selection">
+                    <!-- Values will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="boundaries">Personal boundaries:</label>
+                <textarea class="form-textarea" id="boundaries" placeholder="What are your non-negotiables? What boundaries are important to you?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="valuesInAction">What does living by these values look like for you?</label>
+                <textarea class="form-textarea" id="valuesInAction" placeholder="How do these values show up in your daily life and decisions?"></textarea>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="saveValues">Save Values Compass</button>
+
+            <div id="valuesDisplay" class="mt-2 hidden">
+                <h3>Your Values Compass</h3>
+                <div id="selectedValues"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Mental Wellness App with PWA capabilities
+        class EnhancedMentalWellnessApp {
+            constructor() {
+                this.data = this.loadData();
+                this.currentModule = 'checkin';
+                this.breathingTimer = null;
+                this.breathingActive = false;
+                this.breathingPaused = false;
+                this.breathingStartTime = null;
+                this.breathingDuration = 0;
+                this.breathingElapsed = 0;
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+                this.modules = ['checkin', 'reframing', 'mindset', 'regulation', 'journal', 'values'];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.populateValues();
+                this.loadJournalEntries();
+                this.loadValuesDisplay();
+                this.setupTheme();
+                this.setupAccessibility();
+                this.setupTouchGestures();
+                this.setupServiceWorker();
+                this.setupSliderUpdates();
+            }
+
+            // Enhanced Data Management
+            loadData() {
+                const saved = localStorage.getItem('mentalWellnessData');
+                return saved ? JSON.parse(saved) : {
+                    checkins: [],
+                    reframings: [],
+                    mindsetSessions: [],
+                    regulationSessions: [],
+                    journalEntries: [],
+                    values: {
+                        selected: [],
+                        boundaries: '',
+                        valuesInAction: ''
+                    },
+                    preferences: {
+                        theme: 'earth',
+                        darkMode: false,
+                        reducedMotion: false,
+                        fontSize: 'medium',
+                        spacing: 'normal'
+                    }
+                };
+            }
+
+            saveData() {
+                localStorage.setItem('mentalWellnessData', JSON.stringify(this.data));
+            }
+
+            // Enhanced Export with multiple formats
+            exportData() {
+                const dataStr = JSON.stringify(this.data, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `mental-wellness-data-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+
+            exportJournalAsPDF() {
+                if (this.data.journalEntries.length === 0) {
+                    alert('No journal entries to export.');
+                    return;
+                }
+
+                // Create a simple HTML document for PDF conversion
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Personal Journal Entries</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; }
+                            h1 { color: #7d6e5f; border-bottom: 2px solid #7d6e5f; padding-bottom: 10px; }
+                            .entry { margin-bottom: 30px; page-break-inside: avoid; }
+                            .date { font-weight: bold; color: #5a5a5a; margin-bottom: 5px; }
+                            .prompt { font-style: italic; color: #8a8a8a; margin-bottom: 10px; }
+                            .content { margin-left: 20px; }
+                            @media print { body { margin: 0; } }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Personal Journal Entries</h1>
+                        <p>Exported on ${new Date().toLocaleDateString()}</p>
+                        ${this.data.journalEntries.map(entry => `
+                            <div class="entry">
+                                <div class="date">${new Date(entry.date).toLocaleDateString()}</div>
+                                <div class="prompt">${entry.prompt}</div>
+                                <div class="content">${entry.content.replace(/\n/g, '<br>')}</div>
+                            </div>
+                        `).join('')}
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `journal-entries-${new Date().toISOString().split('T')[0]}.html`;
+                link.click();
+                URL.revokeObjectURL(url);
+
+                // Show instructions for PDF conversion
+                setTimeout(() => {
+                    alert('HTML file downloaded! To convert to PDF:\n1. Open the downloaded HTML file in your browser\n2. Press Ctrl+P (or Cmd+P on Mac)\n3. Select "Save as PDF" as the destination\n4. Click Save');
+                }, 500);
+            }
+
+            importData(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (confirm('This will replace all your current data. Are you sure?')) {
+                            this.data = { ...this.data, ...importedData };
+                            this.saveData();
+                            this.loadJournalEntries();
+                            this.loadValuesDisplay();
+                            this.applyPreferences();
+                            alert('Data imported successfully!');
+                        }
+                    } catch (error) {
+                        alert('Error importing data. Please check the file format.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            // PWA Service Worker Setup
+            setupServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    // Create service worker inline
+                    const swCode = `
+                        const CACHE_NAME = 'mental-wellness-v1';
+                        const urlsToCache = ['/'];
+                        
+                        self.addEventListener('install', event => {
+                            event.waitUntil(
+                                caches.open(CACHE_NAME)
+                                    .then(cache => cache.addAll(urlsToCache))
+                            );
+                        });
+                        
+                        self.addEventListener('fetch', event => {
+                            event.respondWith(
+                                caches.match(event.request)
+                                    .then(response => response || fetch(event.request))
+                            );
+                        });
+                    `;
+                    
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    
+                    navigator.serviceWorker.register(swUrl)
+                        .then(registration => console.log('SW registered'))
+                        .catch(error => console.log('SW registration failed'));
+                }
+            }
+
+            // Touch Gesture Support
+            setupTouchGestures() {
+                const container = document.querySelector('.container');
+                
+                container.addEventListener('touchstart', (e) => {
+                    this.touchStartX = e.touches[0].clientX;
+                    this.touchStartY = e.touches[0].clientY;
+                }, { passive: true });
+
+                container.addEventListener('touchend', (e) => {
+                    if (!this.touchStartX || !this.touchStartY) return;
+
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    
+                    const deltaX = this.touchStartX - touchEndX;
+                    const deltaY = this.touchStartY - touchEndY;
+                    
+                    // Only process horizontal swipes
+                    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                        const currentIndex = this.modules.indexOf(this.currentModule);
+                        
+                        if (deltaX > 0 && currentIndex < this.modules.length - 1) {
+                            // Swipe left - next module
+                            this.showSwipeIndicator('right');
+                            this.switchModule(this.modules[currentIndex + 1]);
+                        } else if (deltaX < 0 && currentIndex > 0) {
+                            // Swipe right - previous module
+                            this.showSwipeIndicator('left');
+                            this.switchModule(this.modules[currentIndex - 1]);
+                        }
+                    }
+                    
+                    this.touchStartX = 0;
+                    this.touchStartY = 0;
+                }, { passive: true });
+            }
+
+            showSwipeIndicator(direction) {
+                const indicator = document.getElementById(`swipe${direction.charAt(0).toUpperCase() + direction.slice(1)}`);
+                indicator.classList.add('show');
+                setTimeout(() => indicator.classList.remove('show'), 300);
+            }
+
+            // Enhanced Event Listeners
+            setupEventListeners() {
+                // Navigation (both desktop and mobile)
+                document.querySelectorAll('[data-module]').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const module = e.target.closest('[data-module]').dataset.module;
+                        if (module) this.switchModule(module);
+                    });
+                    
+                    // Keyboard navigation
+                    tab.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            const module = e.target.closest('[data-module]').dataset.module;
+                            if (module) this.switchModule(module);
+                        }
+                    });
+                });
+
+                // Regulation tool navigation
+                document.querySelectorAll('[data-tool]').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const tool = e.target.dataset.tool;
+                        if (tool) this.switchRegulationTool(tool);
+                    });
+                });
+
+                // Enhanced Controls
+                document.getElementById('themeToggle').addEventListener('click', () => this.toggleDarkMode());
+                document.getElementById('themeSelector').addEventListener('click', () => this.toggleThemeSelector());
+                document.getElementById('accessibilityToggle').addEventListener('click', () => this.toggleAccessibilityPanel());
+                document.getElementById('exportData').addEventListener('click', () => this.exportData());
+                document.getElementById('importData').addEventListener('click', () => document.getElementById('fileInput').click());
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    if (e.target.files[0]) this.importData(e.target.files[0]);
+                });
+
+                // Theme selection
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        const theme = e.target.dataset.theme;
+                        this.setTheme(theme);
+                    });
+                });
+
+                // Accessibility options
+                document.getElementById('reducedMotion').addEventListener('change', (e) => {
+                    this.setReducedMotion(e.target.checked);
+                });
+                document.getElementById('largeText').addEventListener('change', (e) => {
+                    this.setFontSize(e.target.checked ? 'large' : 'medium');
+                });
+                document.getElementById('extraLargeText').addEventListener('change', (e) => {
+                    this.setFontSize(e.target.checked ? 'extra-large' : 'medium');
+                    if (e.target.checked) {
+                        document.getElementById('largeText').checked = false;
+                    }
+                });
+                document.getElementById('comfortableSpacing').addEventListener('change', (e) => {
+                    this.setSpacing(e.target.checked ? 'comfortable' : 'normal');
+                });
+
+                // Check-in form
+                document.getElementById('checkinForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveCheckin();
+                });
+
+                // Thought reframing
+                document.getElementById('startReframing').addEventListener('click', () => this.startReframing());
+                document.getElementById('saveReframing').addEventListener('click', () => this.saveReframing());
+
+                // Mindset builder
+                document.getElementById('mindsetFocus').addEventListener('change', (e) => this.loadMindsetContent(e.target.value));
+                document.getElementById('saveMindset').addEventListener('click', () => this.saveMindset());
+
+                // Enhanced breathing timer
+                document.getElementById('startBreathing').addEventListener('click', () => this.startBreathing());
+                document.getElementById('stopBreathing').addEventListener('click', () => this.stopBreathing());
+                document.getElementById('pauseBreathing').addEventListener('click', () => this.pauseBreathing());
+
+                // Regulation tools
+                document.getElementById('saveBodyscan').addEventListener('click', () => this.saveRegulationSession('bodyscan'));
+                document.getElementById('saveGrounding').addEventListener('click', () => this.saveRegulationSession('grounding'));
+
+                // Enhanced journal
+                document.getElementById('journalPrompt').addEventListener('change', (e) => this.updateJournalPrompt(e.target.value));
+                document.getElementById('saveJournal').addEventListener('click', () => this.saveJournalEntry());
+                document.getElementById('exportJournal').addEventListener('click', () => this.exportJournal());
+                document.getElementById('exportJournalPDF').addEventListener('click', () => this.exportJournalAsPDF());
+
+                // Values
+                document.getElementById('saveValues').addEventListener('click', () => this.saveValues());
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.altKey) {
+                        const keyMap = {
+                            '1': 'checkin',
+                            '2': 'reframing', 
+                            '3': 'mindset',
+                            '4': 'regulation',
+                            '5': 'journal',
+                            '6': 'values'
+                        };
+                        
+                        if (keyMap[e.key]) {
+                            e.preventDefault();
+                            this.switchModule(keyMap[e.key]);
+                        }
+                    }
+                });
+            }
+
+            // Slider value updates
+            setupSliderUpdates() {
+                const energySlider = document.getElementById('energyLevel');
+                const stressSlider = document.getElementById('stressLevel');
+                const energyValue = document.getElementById('energy-value');
+                const stressValue = document.getElementById('stress-value');
+
+                energySlider.addEventListener('input', (e) => {
+                    energyValue.textContent = e.target.value;
+                });
+
+                stressSlider.addEventListener('input', (e) => {
+                    stressValue.textContent = e.target.value;
+                });
+            }
+
+            // Enhanced Module Navigation
+            switchModule(moduleId) {
+                // Update navigation (both desktop and mobile)
+                document.querySelectorAll('[data-module]').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll(`[data-module="${moduleId}"]`).forEach(tab => tab.classList.add('active'));
+
+                // Update modules
+                document.querySelectorAll('.module').forEach(module => module.classList.remove('active'));
+                document.getElementById(moduleId).classList.add('active');
+
+                this.currentModule = moduleId;
+
+                // Hide panels when switching modules
+                this.hideAllPanels();
+
+                // Announce to screen readers
+                const moduleTitle = document.querySelector(`#${moduleId} h2`).textContent;
+                this.announceToScreenReader(`Switched to ${moduleTitle}`);
+            }
+
+            switchRegulationTool(toolId) {
+                // Update navigation
+                document.querySelectorAll('#regulation [data-tool]').forEach(tab => tab.classList.remove('active'));
+                document.querySelector(`[data-tool="${toolId}"]`).classList.add('active');
+
+                // Update tools
+                document.querySelectorAll('.regulation-tool').forEach(tool => tool.classList.remove('active'));
+                document.getElementById(toolId).classList.add('active');
+            }
+
+            // Enhanced Theme Management
+            setupTheme() {
+                const preferences = this.data.preferences;
+                this.setTheme(preferences.theme);
+                if (preferences.darkMode) {
+                    this.toggleDarkMode();
+                }
+            }
+
+            setTheme(themeName) {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const isDark = currentTheme && currentTheme.includes('-dark');
+                
+                let newTheme = themeName;
+                if (isDark && !themeName.includes('-dark')) {
+                    newTheme = themeName + '-dark';
+                }
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                
+                // Update theme selector
+                document.querySelectorAll('.theme-option').forEach(option => option.classList.remove('active'));
+                document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
+                
+                this.data.preferences.theme = themeName;
+                this.saveData();
+            }
+
+            toggleDarkMode() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const baseTheme = currentTheme.replace('-dark', '');
+                const isDark = currentTheme.includes('-dark');
+                
+                const newTheme = isDark ? baseTheme : baseTheme + '-dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                
+                document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
+                
+                this.data.preferences.darkMode = !isDark;
+                this.saveData();
+            }
+
+            toggleThemeSelector() {
+                const panel = document.getElementById('themeSelectorPanel');
+                const isHidden = panel.classList.contains('hidden');
+                
+                this.hideAllPanels();
+                
+                if (isHidden) {
+                    panel.classList.remove('hidden');
+                }
+            }
+
+            // Enhanced Accessibility
+            setupAccessibility() {
+                const preferences = this.data.preferences;
+                
+                if (preferences.reducedMotion) {
+                    this.setReducedMotion(true);
+                    document.getElementById('reducedMotion').checked = true;
+                }
+                
+                if (preferences.fontSize !== 'medium') {
+                    this.setFontSize(preferences.fontSize);
+                    if (preferences.fontSize === 'large') {
+                        document.getElementById('largeText').checked = true;
+                    } else if (preferences.fontSize === 'extra-large') {
+                        document.getElementById('extraLargeText').checked = true;
+                    }
+                }
+                
+                if (preferences.spacing !== 'normal') {
+                    this.setSpacing(preferences.spacing);
+                    document.getElementById('comfortableSpacing').checked = true;
+                }
+            }
+
+            toggleAccessibilityPanel() {
+                const panel = document.getElementById('accessibilityPanel');
+                const isHidden = panel.classList.contains('hidden');
+                
+                this.hideAllPanels();
+                
+                if (isHidden) {
+                    panel.classList.remove('hidden');
+                }
+            }
+
+            setReducedMotion(enabled) {
+                document.documentElement.setAttribute('data-reduced-motion', enabled);
+                this.data.preferences.reducedMotion = enabled;
+                this.saveData();
+            }
+
+            setFontSize(size) {
+                document.documentElement.setAttribute('data-font-size', size);
+                this.data.preferences.fontSize = size;
+                this.saveData();
+                
+                // Update checkboxes
+                document.getElementById('largeText').checked = size === 'large';
+                document.getElementById('extraLargeText').checked = size === 'extra-large';
+            }
+
+            setSpacing(spacing) {
+                document.documentElement.setAttribute('data-spacing', spacing);
+                this.data.preferences.spacing = spacing;
+                this.saveData();
+            }
+
+            hideAllPanels() {
+                document.getElementById('themeSelectorPanel').classList.add('hidden');
+                document.getElementById('accessibilityPanel').classList.add('hidden');
+            }
+
+            applyPreferences() {
+                const prefs = this.data.preferences;
+                this.setTheme(prefs.theme);
+                this.setReducedMotion(prefs.reducedMotion);
+                this.setFontSize(prefs.fontSize);
+                this.setSpacing(prefs.spacing);
+                
+                if (prefs.darkMode) {
+                    this.toggleDarkMode();
+                }
+            }
+
+            // Enhanced Breathing Timer
+            startBreathing() {
+                if (this.breathingActive && !this.breathingPaused) return;
+
+                if (this.breathingPaused) {
+                    // Resume from pause
+                    this.breathingPaused = false;
+                    this.breathingStartTime = Date.now() - this.breathingElapsed;
+                } else {
+                    // Start new session
+                    this.breathingActive = true;
+                    this.breathingPaused = false;
+                    this.breathingDuration = parseInt(document.getElementById('breathingDuration').value) * 60 * 1000;
+                    this.breathingStartTime = Date.now();
+                    this.breathingElapsed = 0;
+                }
+
+                const circle = document.getElementById('breathingCircle');
+                const text = document.getElementById('breathingText');
+                const timer = document.getElementById('breathingTimer');
+                
+                let isInhaling = true;
+                
+                const breatheCycle = () => {
+                    if (!this.breathingActive || this.breathingPaused) return;
+                    
+                    if (isInhaling) {
+                        circle.classList.remove('exhale');
+                        circle.classList.add('inhale');
+                        text.textContent = 'Inhale';
+                        this.announceToScreenReader('Inhale', true);
+                    } else {
+                        circle.classList.remove('inhale');
+                        circle.classList.add('exhale');
+                        text.textContent = 'Exhale';
+                        this.announceToScreenReader('Exhale', true);
+                    }
+                    
+                    isInhaling = !isInhaling;
+                };
+
+                // Start immediately
+                breatheCycle();
+                
+                // Continue every 4 seconds
+                this.breathingTimer = setInterval(() => {
+                    if (!this.breathingPaused) {
+                        breatheCycle();
+                        
+                        // Update timer display
+                        this.breathingElapsed = Date.now() - this.breathingStartTime;
+                        const remaining = Math.max(0, this.breathingDuration - this.breathingElapsed);
+                        const minutes = Math.floor(remaining / 60000);
+                        const seconds = Math.floor((remaining % 60000) / 1000);
+                        timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
+                        
+                        // Check if session is complete
+                        if (remaining <= 0) {
+                            this.stopBreathing();
+                            this.saveRegulationSession('breathing');
+                            this.announceToScreenReader('Breathing session complete');
+                        }
+                    }
+                }, 4000);
+
+                document.getElementById('startBreathing').disabled = true;
+                document.getElementById('pauseBreathing').disabled = false;
+            }
+
+            pauseBreathing() {
+                if (!this.breathingActive) return;
+                
+                this.breathingPaused = !this.breathingPaused;
+                const pauseBtn = document.getElementById('pauseBreathing');
+                
+                if (this.breathingPaused) {
+                    pauseBtn.textContent = 'Resume';
+                    this.breathingElapsed = Date.now() - this.breathingStartTime;
+                    this.announceToScreenReader('Breathing paused');
+                } else {
+                    pauseBtn.textContent = 'Pause';
+                    this.breathingStartTime = Date.now() - this.breathingElapsed;
+                    this.announceToScreenReader('Breathing resumed');
+                }
+            }
+
+            stopBreathing() {
+                this.breathingActive = false;
+                this.breathingPaused = false;
+                
+                if (this.breathingTimer) {
+                    clearInterval(this.breathingTimer);
+                    this.breathingTimer = null;
+                }
+
+                const circle = document.getElementById('breathingCircle');
+                const text = document.getElementById('breathingText');
+                const timer = document.getElementById('breathingTimer');
+                
+                circle.classList.remove('inhale', 'exhale');
+                text.textContent = 'Ready';
+                timer.textContent = '';
+                
+                document.getElementById('startBreathing').disabled = false;
+                document.getElementById('pauseBreathing').disabled = true;
+                document.getElementById('pauseBreathing').textContent = 'Pause';
+            }
+
+            // Screen Reader Announcements
+            announceToScreenReader(message, isLive = false) {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', isLive ? 'assertive' : 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.style.position = 'absolute';
+                announcement.style.left = '-10000px';
+                announcement.style.width = '1px';
+                announcement.style.height = '1px';
+                announcement.style.overflow = 'hidden';
+                announcement.textContent = message;
+                
+                document.body.appendChild(announcement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(announcement);
+                }, 1000);
+            }
+
+            // All other methods remain the same as the original app...
+            // (saveCheckin, startReframing, saveReframing, loadMindsetContent, etc.)
+            
+            saveCheckin() {
+                const checkin = {
+                    date: new Date().toISOString(),
+                    currentFeeling: document.getElementById('currentFeeling').value,
+                    energyLevel: document.getElementById('energyLevel').value,
+                    stressLevel: document.getElementById('stressLevel').value,
+                    weighingOn: document.getElementById('weighingOn').value,
+                    feelsStable: document.getElementById('feelsStable').value
+                };
+
+                this.data.checkins.push(checkin);
+                this.saveData();
+
+                // Show result
+                document.getElementById('checkinForm').classList.add('hidden');
+                document.getElementById('checkinResult').classList.remove('hidden');
+
+                this.announceToScreenReader('Check-in completed successfully');
+
+                // Reset form after delay
+                setTimeout(() => {
+                    document.getElementById('checkinForm').classList.remove('hidden');
+                    document.getElementById('checkinResult').classList.add('hidden');
+                    document.getElementById('checkinForm').reset();
+                    document.getElementById('energy-value').textContent = '5';
+                    document.getElementById('stress-value').textContent = '5';
+                }, 3000);
+            }
+
+            startReframing() {
+                const thought = document.getElementById('recurringThought').value.trim();
+                if (!thought) {
+                    alert('Please enter a recurring thought first.');
+                    return;
+                }
+
+                document.getElementById('reframingSteps').classList.remove('hidden');
+                document.getElementById('startReframing').textContent = 'Examining: "' + thought.substring(0, 50) + '..."';
+                this.announceToScreenReader('Thought examination steps are now available');
+            }
+
+            saveReframing() {
+                const reframing = {
+                    date: new Date().toISOString(),
+                    thought: document.getElementById('recurringThought').value,
+                    evidenceFor: document.getElementById('evidenceFor').value,
+                    evidenceAgainst: document.getElementById('evidenceAgainst').value,
+                    alternatives: document.getElementById('alternatives').value,
+                    mostHonest: document.getElementById('mostHonest').value
+                };
+
+                this.data.reframings.push(reframing);
+                this.saveData();
+
+                alert('Thought examination saved. Well done on this reflective work.');
+                this.announceToScreenReader('Thought examination saved successfully');
+                
+                // Reset form
+                document.getElementById('reframingForm').reset();
+                document.getElementById('reframingSteps').classList.add('hidden');
+                document.getElementById('startReframing').textContent = 'Begin Examination';
+                document.querySelectorAll('#reframingSteps textarea').forEach(textarea => textarea.value = '');
+            }
+
+            loadMindsetContent(focus) {
+                if (!focus) {
+                    document.getElementById('mindsetContent').classList.add('hidden');
+                    return;
+                }
+
+                const prompts = {
+                    calm: [
+                        "What evidence do I have that I can handle today's challenges?",
+                        "What has helped me feel calm in the past?",
+                        "What would a calm version of myself do right now?"
+                    ],
+                    confidence: [
+                        "What skills and strengths do I already possess?",
+                        "What challenges have I overcome before?",
+                        "What would I do if I trusted myself completely?"
+                    ],
+                    patience: [
+                        "What am I learning from this waiting period?",
+                        "How can I be kind to myself while things unfold?",
+                        "What good things have come from patience in my past?"
+                    ],
+                    "self-compassion": [
+                        "How would I treat a good friend going through this?",
+                        "What do I need to forgive myself for?",
+                        "What would unconditional self-acceptance look like?"
+                    ],
+                    resilience: [
+                        "What evidence do I have of my own resilience?",
+                        "What resources and support do I have available?",
+                        "How have difficult times contributed to my growth?"
+                    ],
+                    gratitude: [
+                        "What small things went well today?",
+                        "Who or what am I grateful for right now?",
+                        "What opportunities do I have that I might take for granted?"
+                    ]
+                };
+
+                const promptsHtml = prompts[focus].map(prompt => 
+                    `<div class="reframing-step">
+                        <h4>${prompt}</h4>
+                        <textarea class="form-textarea mindset-response" placeholder="Reflect on this question..." aria-label="${prompt}"></textarea>
+                    </div>`
+                ).join('');
+
+                document.getElementById('mindsetPrompts').innerHTML = promptsHtml;
+                document.getElementById('mindsetContent').classList.remove('hidden');
+                this.announceToScreenReader(`${focus} mindset prompts loaded`);
+            }
+
+            saveMindset() {
+                const focus = document.getElementById('mindsetFocus').value;
+                const responses = Array.from(document.querySelectorAll('.mindset-response')).map(textarea => textarea.value);
+                const personalAffirmation = document.getElementById('personalAffirmation').value;
+
+                const session = {
+                    date: new Date().toISOString(),
+                    focus: focus,
+                    responses: responses,
+                    personalAffirmation: personalAffirmation
+                };
+
+                this.data.mindsetSessions.push(session);
+                this.saveData();
+
+                alert('Mindset session saved. Remember, this positive state is something you\'ve consciously chosen and cultivated.');
+                this.announceToScreenReader('Mindset session saved successfully');
+                
+                // Reset
+                document.getElementById('mindsetFocus').value = '';
+                document.getElementById('personalAffirmation').value = '';
+                document.getElementById('mindsetContent').classList.add('hidden');
+            }
+
+            saveRegulationSession(type) {
+                let sessionData = {
+                    date: new Date().toISOString(),
+                    type: type
+                };
+
+                if (type === 'bodyscan') {
+                    sessionData.notes = document.getElementById('bodyscanNotes').value;
+                    document.getElementById('bodyscanNotes').value = '';
+                } else if (type === 'grounding') {
+                    sessionData.responses = {
+                        see: document.getElementById('grounding5').value,
+                        touch: document.getElementById('grounding4').value,
+                        hear: document.getElementById('grounding3').value,
+                        smell: document.getElementById('grounding2').value,
+                        taste: document.getElementById('grounding1').value
+                    };
+                    // Clear form
+                    ['grounding5', 'grounding4', 'grounding3', 'grounding2', 'grounding1'].forEach(id => {
+                        document.getElementById(id).value = '';
+                    });
+                } else if (type === 'breathing') {
+                    sessionData.duration = document.getElementById('breathingDuration').value;
+                }
+
+                this.data.regulationSessions.push(sessionData);
+                this.saveData();
+
+                alert('Regulation session saved. Well done taking time for nervous system care.');
+                this.announceToScreenReader(`${type} session saved successfully`);
+            }
+
+            updateJournalPrompt(prompt) {
+                const label = document.getElementById('journalLabel');
+                const textarea = document.getElementById('journalEntry');
+                
+                if (prompt) {
+                    label.textContent = prompt;
+                    textarea.placeholder = `Reflect on: ${prompt}`;
+                    textarea.setAttribute('aria-label', prompt);
+                } else {
+                    label.textContent = 'Your thoughts:';
+                    textarea.placeholder = 'Write freely about your thoughts, experiences, or reflections...';
+                    textarea.setAttribute('aria-label', 'Your thoughts');
+                }
+            }
+
+            saveJournalEntry() {
+                const prompt = document.getElementById('journalPrompt').value;
+                const entry = document.getElementById('journalEntry').value.trim();
+
+                if (!entry) {
+                    alert('Please write something before saving.');
+                    return;
+                }
+
+                const journalEntry = {
+                    date: new Date().toISOString(),
+                    prompt: prompt || 'Free writing',
+                    content: entry
+                };
+
+                this.data.journalEntries.push(journalEntry);
+                this.saveData();
+                this.loadJournalEntries();
+
+                // Clear form
+                document.getElementById('journalEntry').value = '';
+                document.getElementById('journalPrompt').value = '';
+                this.updateJournalPrompt('');
+
+                alert('Journal entry saved.');
+                this.announceToScreenReader('Journal entry saved successfully');
+            }
+
+            loadJournalEntries() {
+                const container = document.getElementById('journalList');
+                const entries = this.data.journalEntries.slice(-10).reverse(); // Show last 10, newest first
+
+                if (entries.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No journal entries yet. Start writing to see your entries here.</p>';
+                    return;
+                }
+
+                container.innerHTML = entries.map(entry => `
+                    <div class="journal-entry">
+                        <div class="journal-date">${new Date(entry.date).toLocaleDateString()} - ${entry.prompt}</div>
+                        <div class="journal-content">${entry.content}</div>
+                    </div>
+                `).join('');
+            }
+
+            exportJournal() {
+                if (this.data.journalEntries.length === 0) {
+                    alert('No journal entries to export.');
+                    return;
+                }
+
+                const journalText = this.data.journalEntries.map(entry => 
+                    `Date: ${new Date(entry.date).toLocaleDateString()}\nPrompt: ${entry.prompt}\n\n${entry.content}\n\n---\n\n`
+                ).join('');
+
+                const blob = new Blob([journalText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `journal-entries-${new Date().toISOString().split('T')[0]}.txt`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+
+            populateValues() {
+                const values = [
+                    'Honesty', 'Compassion', 'Growth', 'Authenticity', 'Courage',
+                    'Creativity', 'Connection', 'Peace', 'Justice', 'Freedom',
+                    'Wisdom', 'Gratitude', 'Resilience', 'Kindness', 'Balance',
+                    'Adventure', 'Security', 'Excellence', 'Humor', 'Spirituality',
+                    'Family', 'Independence', 'Learning', 'Service', 'Beauty'
+                ];
+
+                const container = document.getElementById('valuesList');
+                container.innerHTML = values.map(value => `
+                    <div class="value-item" data-value="${value}" role="button" tabindex="0" aria-label="Select ${value}">
+                        <strong>${value}</strong>
+                    </div>
+                `).join('');
+
+                // Add click and keyboard handlers
+                container.querySelectorAll('.value-item').forEach(item => {
+                    item.addEventListener('click', () => this.toggleValue(item));
+                    item.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.toggleValue(item);
+                        }
+                    });
+                });
+
+                // Load saved selections
+                this.data.values.selected.forEach(value => {
+                    const item = container.querySelector(`[data-value="${value}"]`);
+                    if (item) item.classList.add('selected');
+                });
+            }
+
+            toggleValue(item) {
+                const value = item.dataset.value;
+                const selected = this.data.values.selected;
+
+                if (item.classList.contains('selected')) {
+                    item.classList.remove('selected');
+                    const index = selected.indexOf(value);
+                    if (index > -1) selected.splice(index, 1);
+                    this.announceToScreenReader(`${value} deselected`);
+                } else {
+                    if (selected.length >= 5) {
+                        alert('Please select no more than 5 core values.');
+                        return;
+                    }
+                    item.classList.add('selected');
+                    selected.push(value);
+                    this.announceToScreenReader(`${value} selected`);
+                }
+            }
+
+            saveValues() {
+                this.data.values.boundaries = document.getElementById('boundaries').value;
+                this.data.values.valuesInAction = document.getElementById('valuesInAction').value;
+                this.saveData();
+                this.loadValuesDisplay();
+
+                alert('Values compass saved. These will help guide your decisions and self-reflection.');
+                this.announceToScreenReader('Values compass saved successfully');
+            }
+
+            loadValuesDisplay() {
+                const display = document.getElementById('valuesDisplay');
+                const container = document.getElementById('selectedValues');
+
+                if (this.data.values.selected.length === 0) {
+                    display.classList.add('hidden');
+                    return;
+                }
+
+                display.classList.remove('hidden');
+                container.innerHTML = `
+                    <div class="reframing-step">
+                        <h4>Core Values</h4>
+                        <p>${this.data.values.selected.join(', ')}</p>
+                    </div>
+                    ${this.data.values.boundaries ? `
+                    <div class="reframing-step">
+                        <h4>Boundaries</h4>
+                        <p>${this.data.values.boundaries}</p>
+                    </div>
+                    ` : ''}
+                    ${this.data.values.valuesInAction ? `
+                    <div class="reframing-step">
+                        <h4>Values in Action</h4>
+                        <p>${this.data.values.valuesInAction}</p>
+                    </div>
+                    ` : ''}
+                `;
+
+                // Load saved text
+                document.getElementById('boundaries').value = this.data.values.boundaries || '';
+                document.getElementById('valuesInAction').value = this.data.values.valuesInAction || '';
+            }
+        }
+
+        // Initialize the enhanced app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnhancedMentalWellnessApp();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rhythmic Word Pendulum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap');
+
+        :root {
+            --swing-duration: 4s; /* Time for one full left-right-left cycle */
+            --text-color: #e2e8f0;
+            --accent-color: #38bdf8;
+            --bg-color: #0f172a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            /* Use dvh for better mobile browser bar handling */
+            height: 100vh;
+            height: 100dvh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.5s ease;
+        }
+
+        /* --- Background Layers --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+
+        .bg-layer.active {
+            opacity: 1;
+        }
+
+        /* Mode 1: Nebula */
+        #bg-nebula {
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #172554, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        /* Mode 2: Stars */
+        #bg-stars {
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        }
+
+        /* Mode 3: Pulse (Breathing Circle) */
+        #bg-pulse {
+            background: #020617;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pulse-circle {
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(15, 23, 42, 0) 70%);
+            border-radius: 50%;
+            /* Matches pendulum duration */
+            animation: breathe var(--swing-duration) ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(0.8); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+            100% { transform: scale(0.8); opacity: 0.3; }
+        }
+
+        /* Particles (Nebula) */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            bottom: -50px;
+        }
+
+        /* Star (Stars) */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.5; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        /* --- Pendulum Structure --- */
+        .pendulum-container {
+            position: relative;
+            width: 200px;
+            height: 40vh; /* Responsive height */
+            min-height: 250px;
+            max-height: 400px;
+            display: flex;
+            justify-content: center;
+            animation: swing var(--swing-duration) ease-in-out infinite;
+            transform-origin: top center;
+            z-index: 10;
+            margin-top: -10vh; /* Pull up slightly for visual balance */
+        }
+
+        .pivot {
+            width: 12px;
+            height: 12px;
+            background: #94a3b8;
+            border-radius: 50%;
+            position: absolute;
+            top: -6px;
+            z-index: 20;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        .rod {
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, #475569, #94a3b8);
+            position: absolute;
+            top: 0;
+        }
+
+        .bob {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #e0f2fe, #0ea5e9, #0369a1);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -30px;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+        }
+
+        @keyframes swing {
+            0% { transform: rotate(25deg); }
+            50% { transform: rotate(-25deg); }
+            100% { transform: rotate(25deg); }
+        }
+
+        /* --- The Text Area --- */
+        .word-display-container {
+            position: relative;
+            margin-top: 60px; /* Space from bob */
+            width: 100%;
+            text-align: center;
+            z-index: 5;
+            pointer-events: none;
+            height: 120px; /* Fixed height container to prevent layout shifts */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #dynamic-word {
+            font-size: clamp(2.5rem, 8vw, 5rem); /* Responsive text scaling */
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 1s ease-in-out, transform 1s ease-out;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+
+        #dynamic-word.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* --- UI Controls --- */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 50;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 24px; /* Larger touch target */
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.3);
+        }
+
+        @media (hover: hover) {
+            .btn:hover {
+                background: rgba(255,255,255,0.2);
+                color: white;
+                transform: translateY(-2px);
+            }
+        }
+
+        /* --- Modal for Input --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            resize: none; /* Disable resize on mobile */
+            font-family: inherit;
+            font-size: 16px; /* Prevents iOS zoom on focus */
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .pendulum-container { 
+                /* Scale down visual for small screens */
+                transform: scale(0.85); 
+                margin-top: -5vh;
+            }
+            .word-display-container {
+                margin-top: 40px;
+            }
+            .controls {
+                bottom: 20px;
+                gap: 0.5rem;
+            }
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.8rem;
+                flex: 1 1 auto; /* Distribute buttons evenly */
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Layers -->
+    <div id="bg-nebula" class="bg-layer active"></div>
+    <div id="bg-stars" class="bg-layer"></div>
+    <div id="bg-pulse" class="bg-layer">
+        <div class="pulse-circle"></div>
+    </div>
+
+    <!-- Pivot Point Visual (Top Gradient) -->
+    <div style="position: absolute; top: 0; width: 100%; height: 40px; background: linear-gradient(to bottom, rgba(15, 23, 42, 1), transparent); z-index: 15; pointer-events: none;"></div>
+
+    <!-- The Pendulum -->
+    <div class="pendulum-container">
+        <div class="pivot"></div>
+        <div class="rod"></div>
+        <div class="bob"></div>
+    </div>
+
+    <!-- The Appearing Word -->
+    <div class="word-display-container">
+        <div id="dynamic-word">BREATHE</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="btn" onclick="openSettings()">Edit Words</button>
+        <button class="btn" onclick="toggleAnimation()" id="pauseBtn">Pause</button>
+        <button class="btn" onclick="cycleEffects()" id="bgBtn">Effect: Nebula</button>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-2 text-white">Custom Words</h2>
+            <p class="text-sm text-slate-400">Enter words separated by commas or new lines.</p>
+            
+            <textarea id="wordInput" placeholder="Inhale, Exhale, Relax, Peace..."></textarea>
+            
+            <div class="flex justify-end gap-2 mt-2">
+                <button class="btn" onclick="closeSettings()">Cancel</button>
+                <button class="btn" style="background: #0ea5e9; color: white; border: none;" onclick="saveWords()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let words = ["INHALE", "EXHALE"];
+        let currentIndex = 0;
+        let isPaused = false;
+        let timer = null;
+        
+        // Effects: 0=Nebula, 1=Stars, 2=Pulse, 3=Off
+        let currentEffect = 0;
+        const effectNames = ["Effect: Nebula", "Effect: Stars", "Effect: Pulse", "Effect: Off"];
+        const effectIds = ["bg-nebula", "bg-stars", "bg-pulse"];
+
+        // --- DOM Elements ---
+        const wordEl = document.getElementById('dynamic-word');
+        const pendulumEl = document.querySelector('.pendulum-container');
+        const pulseCircle = document.querySelector('.pulse-circle');
+        const modal = document.getElementById('settingsModal');
+        const textarea = document.getElementById('wordInput');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const bgBtn = document.getElementById('bgBtn');
+
+        // --- Core Logic ---
+        const HALF_CYCLE_MS = 2000; 
+
+        function updateWord() {
+            if (isPaused) return;
+
+            wordEl.classList.remove('visible');
+
+            setTimeout(() => {
+                currentIndex = (currentIndex + 1) % words.length;
+                wordEl.innerText = words[currentIndex];
+                wordEl.classList.add('visible');
+            }, 500); 
+        }
+
+        function startLoop() {
+            wordEl.innerText = words[0];
+            wordEl.classList.add('visible');
+            if (timer) clearInterval(timer);
+            timer = setInterval(updateWord, HALF_CYCLE_MS);
+        }
+
+        // --- Interaction ---
+
+        function toggleAnimation() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                pendulumEl.style.animationPlayState = 'paused';
+                pulseCircle.style.animationPlayState = 'paused'; // Pause bg pulse too
+                pauseBtn.innerText = "Resume";
+            } else {
+                pendulumEl.style.animationPlayState = 'running';
+                pulseCircle.style.animationPlayState = 'running';
+                pauseBtn.innerText = "Pause";
+            }
+        }
+
+        function cycleEffects() {
+            // Hide current
+            if (currentEffect < 3) {
+                document.getElementById(effectIds[currentEffect]).classList.remove('active');
+            }
+
+            // Advance index
+            currentEffect = (currentEffect + 1) % 4;
+
+            // Show new (if not Off)
+            if (currentEffect < 3) {
+                document.getElementById(effectIds[currentEffect]).classList.add('active');
+            }
+
+            // Update button text
+            bgBtn.innerText = effectNames[currentEffect];
+        }
+
+        function openSettings() {
+            textarea.value = words.join('\n');
+            modal.classList.add('open');
+            if (!isPaused) toggleAnimation();
+        }
+
+        function closeSettings() {
+            modal.classList.remove('open');
+        }
+
+        function saveWords() {
+            const rawText = textarea.value;
+            const newWords = rawText.split(/[\n,]+/).map(w => w.trim()).filter(w => w.length > 0);
+            
+            if (newWords.length > 0) {
+                words = newWords;
+                currentIndex = -1; 
+                
+                wordEl.classList.remove('visible');
+                setTimeout(() => {
+                    currentIndex = 0;
+                    wordEl.innerText = words[0];
+                    wordEl.classList.add('visible');
+                }, 500);
+            }
+            
+            closeSettings();
+            if (isPaused) toggleAnimation();
+        }
+
+        // --- Initialization ---
+        function initBackgrounds() {
+            // 1. Nebula Particles
+            const nebula = document.getElementById('bg-nebula');
+            for(let i=0; i<15; i++) {
+                createParticle(nebula, 'particle');
+            }
+
+            // 2. Stars
+            const starLayer = document.getElementById('bg-stars');
+            for(let i=0; i<100; i++) {
+                let s = document.createElement('div');
+                s.className = 'star';
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.width = Math.random() * 2 + 1 + 'px';
+                s.style.height = s.style.width;
+                s.style.animationDelay = Math.random() * 4 + 's';
+                starLayer.appendChild(s);
+            }
+        }
+
+        function createParticle(container, className) {
+            let p = document.createElement('div');
+            p.className = className;
+            p.style.left = Math.random() * 100 + '%';
+            p.style.width = Math.random() * 20 + 10 + 'px';
+            p.style.height = p.style.width;
+            p.style.animationDelay = Math.random() * 15 + 's';
+            p.style.animationDuration = Math.random() * 10 + 15 + 's';
+            container.appendChild(p);
+        }
+
+        window.onload = () => {
+            initBackgrounds();
+            // Sync start
+            setTimeout(startLoop, 100);
+        };
+
+    </script>
+</body>
+</html>

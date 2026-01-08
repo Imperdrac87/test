@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R-Studio: Syntax Overdrive v6.3 (Fixed Tabs)</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+    :root{
+      --bg-dark:#0f172a;
+      --terminal-bg:#020617;
+      --neon-blue:#3b82f6;
+      --neon-gold:#fbbf24;
+      --neon-green:#10b981;
+      --neon-red:#ef4444;
+      --neon-purple:#8b5cf6;
+      --neon-cyan:#22d3ee;
+    }
+
+    body{
+      font-family:'JetBrains Mono', monospace;
+      background-color:#020617;
+      color:#f1f5f9;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* --- SCROLLBARS --- */
+    .force-scroll::-webkit-scrollbar{ width:8px; height:8px; }
+    .force-scroll::-webkit-scrollbar-track{ background:#0f172a; }
+    .force-scroll::-webkit-scrollbar-thumb{
+      background-color:#334155;border-radius:4px;border:1px solid #0f172a;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes popIn{
+      0%{ transform:scale(.95) translateY(10px); opacity:0; }
+      100%{ transform:scale(1) translateY(0); opacity:1; }
+    }
+    .animate-pop{ animation:popIn .3s cubic-bezier(.175,.885,.32,1.275) forwards; }
+
+    /* --- PANE STYLES --- */
+    .ide-pane {
+        display: flex;
+        flex-direction: column;
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .pane-header {
+        background-color: #1e293b;
+        border-bottom: 1px solid #334155;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        user-select: none;
+        height: 36px;
+        padding: 0 0.5rem;
+    }
+
+    /* Tabs */
+    .tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 12px;
+        height: 100%;
+        font-size: 11px;
+        cursor: pointer;
+        border-right: 1px solid #334155;
+        transition: background-color 0.2s;
+    }
+    .tab-active {
+        background-color: #0f172a; /* Matches content bg */
+        color: #60a5fa; /* Blue text */
+        border-top: 2px solid #60a5fa;
+    }
+    .tab-inactive {
+        background-color: #1e293b;
+        color: #94a3b8;
+        border-top: 2px solid transparent;
+    }
+    .tab-inactive:hover {
+        background-color: #334155;
+    }
+
+    /* Console Specifics */
+    .console-input{
+      background:transparent;border:none;color:#fff;width:100%;
+      outline:none;font-family:'JetBrains Mono', monospace; caret-color:var(--neon-blue);
+    }
+    .console-line{ margin-bottom:4px; display:block; word-break:break-word; white-space:pre-wrap; }
+
+    .btn-neon{ transition:all .15s ease; cursor: pointer; }
+    .btn-neon:active{ transform:translateY(2px); }
+
+    /* Data Viewer Table */
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .data-table th { background: #f1f5f9; color: #334155; position: sticky; top: 0; z-index: 10; font-size: 11px; padding: 6px 8px; text-align: left; border-bottom: 1px solid #cbd5e1; font-weight: 800; }
+    .data-table td { background: #ffffff; color: #0f172a; font-size: 11px; padding: 4px 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #f1f5f9; }
+    .data-table tr:nth-child(even) td { background: #f8fafc; }
+    .data-table tr:hover td { background: #e0f2fe; }
+
+    /* Floating text */
+    .floating-text{
+      position:fixed; pointer-events:none; animation:floatUp 1s ease-out forwards;
+      z-index:100; font-weight:800; text-shadow:0 2px 6px rgba(0,0,0,.6);
+    }
+    @keyframes floatUp{
+      0%{ transform:translateY(0) scale(1); opacity:1; }
+      100%{ transform:translateY(-40px) scale(1.2); opacity:0; }
+    }
+
+    /* Modal */
+    .modal-scrim{ background:rgba(2,6,23,.9); backdrop-filter:blur(6px); }
+
+    /* Chip */
+    .chip{
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(15,23,42,.7);
+    }
+    
+    /* IDE Grid Layout */
+    .ide-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, minmax(200px, 1fr));
+        gap: 0.5rem;
+        height: 100vh;
+        width: 100vw;
+        padding: 0.5rem;
+    }
+
+    @media (min-width: 1024px) {
+        .ide-grid {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr; /* 2x2 Layout */
+        }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950">
+
+  <!-- APP CONTAINER -->
+  <div id="app" class="w-full h-full relative">
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="absolute inset-0 z-20 overflow-y-auto bg-slate-950 flex flex-col items-center justify-center p-4 animate-pop">
+      <div class="max-w-4xl w-full space-y-8 py-10 text-center">
+        
+        <div class="inline-block relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-40 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+          <h1 class="relative text-5xl md:text-7xl font-black text-white tracking-tighter p-6 bg-slate-900 rounded-lg border border-slate-700">
+            R-STUDIO<span class="text-blue-500">_</span>OVERDRIVE
+          </h1>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-700 p-8 rounded-xl shadow-2xl max-w-3xl mx-auto backdrop-blur-md">
+          <div class="flex items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+            <div class="h-12 w-12 bg-blue-600 rounded flex items-center justify-center font-black text-2xl text-white">R</div>
+            <div class="text-left">
+              <h2 class="text-xl font-bold text-white">Select Operation</h2>
+              <p class="text-slate-400 text-sm">Sigma Archives // IDE Mode Active</p>
+            </div>
+          </div>
+
+          <!-- CAMPAIGN SELECTION -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button onclick="startCampaign('vectors')" class="btn-neon bg-slate-800 border-l-4 border-blue-500 p-4 text-left hover:bg-slate-800/80">
+              <h3 class="text-blue-400 font-bold">CH 1: Vectors</h3>
+              <p class="text-slate-500 text-xs">c(), &lt;-, [ ]</p>
+            </button>
+            <button onclick="startCampaign('dataframes')" class="btn-neon bg-slate-800 border-l-4 border-purple-500 p-4 text-left hover:bg-slate-800/80">
+              <h3 class="text-purple-400 font-bold">CH 2: Data Frames</h3>
+              <p class="text-slate-500 text-xs">$, [row,col], is.na</p>
+            </button>
+            <button onclick="startCampaign('wrangling')" class="btn-neon bg-slate-800 border-l-4 border-cyan-500 p-4 text-left hover:bg-slate-800/80">
+              <h3 class="text-cyan-300 font-bold">CH 3: Wrangling</h3>
+              <p class="text-slate-500 text-xs">dplyr, tidyr</p>
+            </button>
+            <button onclick="startCampaign('stats')" class="btn-neon bg-slate-800 border-l-4 border-yellow-500 p-4 text-left hover:bg-slate-800/80">
+              <h3 class="text-yellow-300 font-bold">CH 4: Inference</h3>
+              <p class="text-slate-500 text-xs">t.test, lm, plots</p>
+            </button>
+          </div>
+
+          <button onclick="startCampaign('sigmaChallenge')" class="mt-4 w-full btn-neon bg-slate-800 border-l-4 border-emerald-500 p-4 text-left hover:bg-slate-800/80">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-emerald-300 font-bold">SIGMA Challenge (Workshop)</h3>
+                <p class="text-slate-500 text-xs">Vectors -> Descriptives -> Obesity Data -> Tapply</p>
+              </div>
+              <i data-lucide="target" class="text-emerald-500"></i>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTLE SCREEN (IDE LAYOUT) -->
+    <div id="battle-screen" class="hidden ide-grid">
+      
+      <!-- TOP LEFT: SOURCE / DATA VIEWER -->
+      <div class="ide-pane relative">
+        <!-- TAB BAR -->
+        <div class="pane-header !p-0">
+            <button id="tab-script" onclick="switchTab('script')" class="tab-btn tab-active">
+                <i data-lucide="file-code" class="w-3 h-3"></i> 
+                <span>mission_script.R</span>
+            </button>
+            
+            <button id="tab-data" onclick="switchTab('data')" class="tab-btn tab-inactive hidden">
+                <i data-lucide="table" class="w-3 h-3"></i> 
+                <span id="tab-data-name">Data</span>
+                <i onclick="closeDataView(event)" data-lucide="x" class="w-3 h-3 ml-1 hover:text-red-400"></i>
+            </button>
+
+            <span class="ml-auto text-xs text-slate-500 pr-3" id="task-difficulty">Difficulty: ???</span>
+        </div>
+
+        <!-- 1. SCRIPT VIEW (Default) -->
+        <div id="script-view" class="flex-1 overflow-y-auto force-scroll p-6 bg-slate-900">
+            <div class="space-y-4">
+                <div>
+                    <h2 class="text-xl font-black text-white mb-2" id="task-title">Task Title</h2>
+                    <div class="h-1 w-12 bg-blue-500 rounded mb-4"></div>
+                    <p class="text-slate-300 text-sm leading-relaxed whitespace-pre-line" id="task-desc">
+                        Task description goes here...
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-4">
+                     <span class="chip px-2 py-1 rounded text-[10px] text-slate-400 font-mono" id="task-tag">CODE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DATA VIEWER (Hidden) -->
+        <div id="data-view" class="hidden flex-1 overflow-auto bg-white force-scroll">
+            <div id="data-view-content" class="min-w-full">
+                <!-- Table injected here -->
+            </div>
+        </div>
+      </div>
+
+      <!-- TOP RIGHT: ENVIRONMENT -->
+      <div class="ide-pane">
+        <div class="pane-header">
+            <i data-lucide="list" class="w-3 h-3 text-emerald-400 mr-2"></i>
+            <span>Environment</span>
+            <span class="ml-auto text-[10px] text-slate-500">Global Environment</span>
+        </div>
+        <div class="flex-1 overflow-y-auto force-scroll bg-slate-900 p-2">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-700 text-[10px] text-slate-500 uppercase">
+                        <th class="py-1 px-2">Name</th>
+                        <th class="py-1 px-2">Value / Description</th>
+                    </tr>
+                </thead>
+                <tbody id="env-list" class="text-xs font-mono text-slate-300">
+                    <!-- Dynamic Env Items Here -->
+                </tbody>
+            </table>
+        </div>
+      </div>
+
+      <!-- BOTTOM LEFT: CONSOLE -->
+      <div class="ide-pane">
+        <div class="pane-header flex justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="terminal" class="w-3 h-3 text-slate-400"></i>
+                <span id="console-title">Console</span>
+            </div>
+            <span class="text-[10px] text-slate-600">R 4.3.1</span>
+        </div>
+        
+        <div id="console-output" class="flex-1 p-3 font-mono text-sm overflow-y-auto force-scroll text-slate-300 space-y-1 bg-slate-950">
+            <div class="text-slate-500">R version 4.3.1 (2023-06-16) -- "Beagle Scout"</div>
+            <div class="text-slate-500">Type 'help()' for on-line help.</div>
+            <br>
+        </div>
+
+        <div id="input-zone" class="bg-slate-900 p-3 border-t border-slate-800 min-h-[50px] flex items-center">
+            <!-- Dynamic Input -->
+        </div>
+      </div>
+
+      <!-- BOTTOM RIGHT: VIEWER / CONTROLS -->
+      <div class="ide-pane">
+        <div class="pane-header">
+            <i data-lucide="layout-grid" class="w-3 h-3 text-purple-400 mr-2"></i>
+            <span>Viewer / Tools</span>
+        </div>
+        <div class="flex-1 overflow-y-auto force-scroll p-4 bg-slate-900 flex flex-col gap-4">
+            
+            <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700 flex justify-between items-center">
+                <div>
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Score</div>
+                    <div class="text-2xl font-black text-blue-400 font-mono" id="score-display">0000</div>
+                    <div id="debt-badge" class="hidden text-[10px] text-red-400 font-bold">DEBT ACTIVE</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Timer</div>
+                    <div class="text-xl font-mono text-cyan-200" id="timer-display">00:00</div>
+                    <div id="streak-badge" class="hidden text-[10px] text-yellow-300 font-bold mt-1">STREAK x<span id="streak-count">0</span></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="useHint()" class="btn-neon bg-slate-800 border border-slate-600 p-2 rounded text-xs text-yellow-300 font-bold hover:bg-slate-700 flex flex-col items-center justify-center gap-1">
+                    <i data-lucide="lightbulb" class="w-4 h-4"></i> HINT
+                </button>
+                <button onclick="useInspect()" class="btn-neon bg-slate-800 border border-slate-600 p-2 rounded text-xs text-purple-300 font-bold hover:bg-slate-700 flex flex-col items-center justify-center gap-1">
+                    <i data-lucide="search" class="w-4 h-4"></i> STR()
+                </button>
+                <button onclick="useReveal()" class="btn-neon bg-slate-800 border border-red-900/50 p-2 rounded text-xs text-red-400 font-bold hover:bg-slate-700 col-span-2 flex items-center justify-center gap-2">
+                    <i data-lucide="eye" class="w-4 h-4"></i> REVEAL ANSWER (-400)
+                </button>
+            </div>
+
+            <div class="mt-auto space-y-2 pt-4 border-t border-slate-800">
+                <button onclick="openCheatsheet()" class="w-full btn-neon bg-slate-800/50 border border-slate-700 p-2 rounded text-xs text-cyan-200 hover:text-white hover:bg-slate-700 flex items-center justify-center gap-2">
+                    <i data-lucide="book-open" class="w-3 h-3"></i> Full Cheatsheet
+                </button>
+                
+                <button onclick="restartGame()" class="w-full btn-neon bg-slate-800/50 border border-slate-700 p-2 rounded text-xs text-slate-400 hover:text-red-400 hover:bg-slate-700 flex items-center justify-center gap-2">
+                    <i data-lucide="power" class="w-3 h-3"></i> ABORT / MENU
+                </button>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="victory-modal" class="hidden fixed inset-0 modal-scrim z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border-2 border-green-500 rounded-xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(34,197,94,0.2)] animate-pop">
+        <div class="inline-block p-4 rounded-full bg-green-900/30 mb-4">
+          <i data-lucide="award" class="w-12 h-12 text-green-400"></i>
+        </div>
+        <h2 class="text-3xl font-black text-white mb-2">CHAPTER COMPLETE</h2>
+        <button onclick="location.reload()" class="w-full btn-neon bg-green-600 hover:bg-green-500 text-white font-black py-3 rounded">
+          RETURN TO ROOT
+        </button>
+      </div>
+    </div>
+
+    <div id="cheatsheet-modal" class="hidden fixed inset-0 modal-scrim z-50 p-4 flex items-center justify-center">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[80vh]">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900">
+          <div class="flex items-center gap-2">
+            <i data-lucide="book-open" class="w-5 h-5 text-cyan-300"></i>
+            <div class="font-black text-white">Full Reference Cheatsheet</div>
+          </div>
+          <button onclick="closeCheatsheet()" class="btn-neon text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="p-5 overflow-y-auto force-scroll bg-slate-950/50">
+          <div id="cheatsheet-content" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- TUTORIAL MODALS -->
+    <div id="tutorial-modal-main" class="fixed inset-0 modal-scrim z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-blue-500 rounded-xl max-w-md w-full p-6 animate-pop shadow-2xl">
+            <h2 class="text-2xl font-black text-white mb-2">Welcome, Analyst.</h2>
+            <p class="text-slate-400 text-sm mb-6">Select a module to begin simulation.</p>
+            <button onclick="closeMainTutorial()" class="w-full btn-neon bg-blue-600 text-white py-2 rounded font-bold">INITIALIZE</button>
+        </div>
+    </div>
+
+    <!-- HELP / TUTORIAL MODAL -->
+    <div id="tutorial-modal-battle" class="hidden fixed inset-0 modal-scrim z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-cyan-500 rounded-xl max-w-2xl w-full p-6 animate-pop shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
+                <i data-lucide="layout-dashboard" class="text-cyan-400 w-6 h-6"></i>
+                <h2 class="text-2xl font-black text-white">IDE Interface & Controls</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Section 1: The Layout -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">The Workspace</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <strong class="text-blue-400 block mb-1 text-sm"><i data-lucide="file-code" class="inline w-3 h-3 mr-1"></i> Source (Top Left)</strong>
+                            Your mission briefing. Also serves as the **Data Viewer**. Click a blue dataframe in Environment to open a new tab here.
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <strong class="text-emerald-400 block mb-1 text-sm"><i data-lucide="list" class="inline w-3 h-3 mr-1"></i> Environment (Top Right)</strong>
+                            Displays active objects. <span class="text-yellow-300">Click on blue dataframes</span> to view their contents.
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <strong class="text-slate-200 block mb-1 text-sm"><i data-lucide="terminal" class="inline w-3 h-3 mr-1"></i> Console (Bottom Left)</strong>
+                            The command line. Type your R code here and press <span class="bg-slate-700 px-1 rounded text-white font-mono">ENTER</span> to execute.
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <strong class="text-purple-400 block mb-1 text-sm"><i data-lucide="layout-grid" class="inline w-3 h-3 mr-1"></i> Viewer (Bottom Right)</strong>
+                            Contains your Score, Timer, and the <strong>Control Panel</strong> (Tools & Menu).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Tools & Controls -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Control Panel Tools</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start gap-2">
+                            <div class="bg-slate-800 p-1.5 rounded text-yellow-300"><i data-lucide="lightbulb" class="w-4 h-4"></i></div>
+                            <div>
+                                <strong class="text-yellow-300 block">HINT</strong>
+                                <span class="text-slate-400">Progressive text clues. Small point cost, but keeps your streak alive.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <div class="bg-slate-800 p-1.5 rounded text-purple-300"><i data-lucide="search" class="w-4 h-4"></i></div>
+                            <div>
+                                <strong class="text-purple-300 block">STR()</strong>
+                                <span class="text-slate-400">Inspects the "Structure" of the answer. Reveals syntax patterns without solving it.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <div class="bg-slate-800 p-1.5 rounded text-red-400"><i data-lucide="eye" class="w-4 h-4"></i></div>
+                            <div>
+                                <strong class="text-red-400 block">REVEAL</strong>
+                                <span class="text-slate-400">Auto-types the correct answer. Heavy penalty (-400 pts). Use as a last resort.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <div class="bg-slate-800 p-1.5 rounded text-slate-300"><i data-lucide="power" class="w-4 h-4"></i></div>
+                            <div>
+                                <strong class="text-slate-300 block">ABORT / MENU</strong>
+                                <span class="text-slate-400">Immediately exit the current session and return to the main menu.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeBattleTutorial()" class="w-full btn-neon bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded font-bold mt-6 text-sm tracking-widest shadow-lg shadow-cyan-900/20">
+                INITIALIZE SESSION
+            </button>
+        </div>
+    </div>
+
+  </div>
+
+<script>
+/* =========================
+   R-STUDIO: SYNTAX OVERDRIVE
+   v6.3 — Fixed Tabs & Difficulty
+   ========================= */
+
+const GAME_VERSION = "v6.3";
+
+/* --- MOCK DATA FOR DATA VIEWER --- */
+const datasetDefinitions = {
+    // CHAPTER 2
+    "df": `
+    <table class="data-table">
+        <thead><tr><th></th><th>id</th><th>name</th><th>score</th></tr></thead>
+        <tbody>
+            <tr><td class="bg-gray-100 text-center font-bold text-gray-500">1</td><td>1</td><td>Bob</td><td>85</td></tr>
+            <tr><td class="bg-gray-100 text-center font-bold text-gray-500">2</td><td>2</td><td>Alice</td><td>92</td></tr>
+            <tr><td class="bg-gray-100 text-center font-bold text-gray-500">3</td><td>3</td><td>Tim</td><td>NA</td></tr>
+            <tr><td class="bg-gray-100 text-center font-bold text-gray-500">4</td><td>4</td><td>NA</td><td>78</td></tr>
+        </tbody>
+    </table>`,
+    
+    // CHAPTER 3/4 (Specific Key)
+    "df (survey)": `
+    <table class="data-table">
+        <thead><tr><th></th><th>id</th><th>city</th><th>group</th><th>score</th><th>age</th><th>income</th></tr></thead>
+        <tbody>
+            <tr><td class="bg-gray-100 text-center text-gray-500">1</td><td>1</td><td>Cov</td><td>A</td><td>85</td><td>22</td><td>21000</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">2</td><td>2</td><td>Lon</td><td>B</td><td>92</td><td>25</td><td>28000</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">3</td><td>3</td><td>Cov</td><td>A</td><td>NA</td><td>24</td><td>24000</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">4</td><td>4</td><td>Man</td><td>B</td><td>78</td><td>29</td><td>31000</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">5</td><td>5</td><td>Man</td><td>A</td><td>88</td><td>31</td><td>36000</td></tr>
+        </tbody>
+    </table>`,
+
+    // SIGMA
+    "obesity": `
+    <table class="data-table">
+        <thead><tr><th></th><th>patno</th><th>age</th><th>gender</th><th>height</th><th>weightweek0</th><th>weightweek8</th><th>treatgroup</th><th>weightchange</th></tr></thead>
+        <tbody>
+            <tr><td class="bg-gray-100 text-center text-gray-500">1</td><td>1</td><td>45</td><td>M</td><td>1.75</td><td>98.2</td><td>95.1</td><td>1</td><td>-3.1</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">2</td><td>2</td><td>32</td><td>F</td><td>1.62</td><td>82.0</td><td>80.5</td><td>2</td><td>-1.5</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">3</td><td>3</td><td>51</td><td>M</td><td>1.80</td><td>105.0</td><td>99.2</td><td>2</td><td>-5.8</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">4</td><td>4</td><td>29</td><td>F</td><td>1.68</td><td>90.1</td><td>88.0</td><td>1</td><td>-2.1</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">5</td><td>5</td><td>38</td><td>F</td><td>1.70</td><td>92.5</td><td>92.0</td><td>1</td><td>-0.5</td></tr>
+            <tr><td class="bg-gray-100 text-center text-gray-500">...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+        </tbody>
+    </table>`
+};
+
+/* --- DATA: CAMPAIGNS & LEVELS --- */
+const campaigns = {
+  vectors: {
+    title: "Chapter 1: The Vector Vault",
+    consoleTitle: "R Console (Objects & Vectors)",
+    levels: [
+      {
+        id: "v1",
+        type: "code",
+        title: "First Assignment",
+        desc: "Assign the value 42 to an object named `answer`.",
+        skill: "assignment",
+        difficulty: "Easy",
+        timeLimit: 45,
+        starterCode: "",
+        solutionPatterns: [/^\s*answer\s*(<-|=)\s*42\s*$/],
+        successOutput: "[1] 42",
+        creates: { name: "answer", value: "42" },
+        hintSteps: ["Create an object `answer`.", "Use `<-`.", "`answer <- 42`"],
+        reveal: "answer <- 42",
+        explain: "Assignment stores the value 42 in the object `answer`.",
+        syntax: "name <- value"
+      },
+      {
+        id: "v2",
+        type: "code",
+        title: "Vector Creation",
+        desc: "Create a numeric vector named `vals` containing 10, 20, and 30 using `c()`.",
+        skill: "vectors",
+        difficulty: "Easy",
+        timeLimit: 60,
+        starterCode: "vals <- ",
+        solutionPatterns: [/^\s*vals\s*(<-|=)\s*c\(\s*10\s*,\s*20\s*,\s*30\s*\)\s*$/],
+        successOutput: "[1] 10 20 30",
+        creates: { name: "vals", value: "num [1:3] 10 20 30" },
+        hintSteps: ["Use `c()`.", "Comma separated.", "`vals <- c(10, 20, 30)`"],
+        reveal: "vals <- c(10, 20, 30)",
+        explain: "`c()` (‘combine’) builds an atomic vector from its arguments.",
+        syntax: "name <- c(...)"
+      },
+      {
+        id: "v3",
+        type: "choice",
+        title: "Type Coercion",
+        desc: "What is the result of `class(c(TRUE, 1, 'z'))`?",
+        skill: "types",
+        difficulty: "Medium",
+        timeLimit: 35,
+        options: ["numeric","logical","character","complex"],
+        answer: "character",
+        successOutput: "[1] \"character\"",
+        hintSteps: ["Mixed types coerce.", "Character is most general."],
+        reveal: "character",
+        explain: "Combining logical, numeric, and character coerces everything to character.",
+        syntax: "class(object)"
+      },
+      {
+        id: "v4",
+        type: "fix",
+        title: "Syntax Repair",
+        desc: "This code is trying to generate a sequence from 1 to 5, but it's broken.",
+        skill: "functions",
+        difficulty: "Easy",
+        timeLimit: 50,
+        starterCode: "seq(1 5)",
+        solutionPatterns: [/^\s*seq\(\s*1\s*,\s*5\s*\)\s*$/, /^\s*1\s*:\s*5\s*$/],
+        successOutput: "[1] 1 2 3 4 5",
+        hintSteps: ["Missing comma.", "Use `seq(1, 5)`."],
+        reveal: "seq(1, 5)",
+        explain: "Function arguments are comma-separated; `1:5` is a shortcut sequence operator.",
+        syntax: "seq(from, to)"
+      },
+      {
+        id: "v5",
+        type: "code",
+        title: "Vector Math",
+        desc: "You have `x <- c(2, 4)`. Write code to multiply every element by 10.",
+        skill: "vectorization",
+        difficulty: "Easy",
+        timeLimit: 55,
+        setupLog: "x <- c(2, 4)",
+        preLoad: { name: "x", value: "num [1:2] 2 4" },
+        solutionPatterns: [/^\s*x\s*\*\s*10\s*$/],
+        successOutput: "[1] 20 40",
+        hintSteps: ["Vector math is element-wise.", "`x * 10`"],
+        reveal: "x * 10",
+        explain: "Multiplication is vectorized; it multiplies each element of `x` by 10.",
+        syntax: "vector * scalar"
+      },
+      {
+        id: "v6",
+        type: "code",
+        title: "Indexing Basics",
+        desc: "Given `x <- c(10, 20, 30)`, extract the SECOND element.",
+        skill: "indexing",
+        difficulty: "Easy",
+        timeLimit: 45,
+        setupLog: "x <- c(10, 20, 30)",
+        preLoad: { name: "x", value: "num [1:3] 10 20 30" },
+        solutionPatterns: [/^\s*x\[\s*2\s*\]\s*$/],
+        successOutput: "[1] 20",
+        hintSteps: ["Use `[]`.", "Index starts at 1.", "`x[2]`"],
+        reveal: "x[2]",
+        explain: "Index 2 returns the second element (R uses 1-based indexing).",
+        syntax: "vector[index]"
+      },
+      {
+        id: "v7",
+        type: "fix",
+        title: "Logical Subsetting",
+        desc: "We want values greater than 15 from `x <- c(10, 20, 30)`, but this is wrong: `x > 15`.",
+        skill: "subsetting",
+        difficulty: "Medium",
+        timeLimit: 70,
+        starterCode: "x > 15",
+        setupLog: "x <- c(10, 20, 30)",
+        preLoad: { name: "x", value: "num [1:3] 10 20 30" },
+        solutionPatterns: [/^\s*x\[\s*x\s*>\s*15\s*\]\s*$/],
+        successOutput: "[1] 20 30",
+        hintSteps: ["`x > 15` is boolean.", "Put inside `[]`.", "`x[x > 15]`"],
+        reveal: "x[x > 15]",
+        explain: "Logical subsetting uses a TRUE/FALSE mask inside `[ ]` to keep matching elements.",
+        syntax: "vector[condition]"
+      }
+    ]
+  },
+
+  dataframes: {
+    title: "Chapter 2: Data Frame Dungeon",
+    consoleTitle: "R Console (Data Frames)",
+    initialObjects: { "df": "4 obs. of 3 variables" },
+    levels: [
+      {
+        id: "df1",
+        type: "code",
+        title: "Column Access",
+        desc: "Extract the `score` column from `df` using `$`.",
+        skill: "column access",
+        difficulty: "Easy",
+        timeLimit: 50,
+        solutionPatterns: [/^\s*df\$score\s*$/],
+        successOutput: "[1] 85 92 NA 78",
+        hintSteps: ["Use `$`.", "`df$score`"],
+        reveal: "df$score",
+        explain: "`$` returns the column vector inside the data frame.",
+        syntax: "df$col"
+      },
+      {
+        id: "df2",
+        type: "fix",
+        title: "Indexing Error",
+        desc: "We want the value in row 2, column 3 (the score 92). The current code fails.",
+        skill: "indexing",
+        difficulty: "Easy",
+        timeLimit: 70,
+        starterCode: "df[2, 3",
+        solutionPatterns: [/^\s*df\[\s*2\s*,\s*3\s*\]\s*$/],
+        successOutput: "[1] 92",
+        hintSteps: ["Missing bracket.", "`df[2, 3]`"],
+        reveal: "df[2, 3]",
+        explain: "`df[2, 3]` returns the element at row 2, column 3.",
+        syntax: "df[row, col]"
+      },
+      {
+        id: "df3",
+        type: "choice",
+        title: "Identify the NA Handler",
+        desc: "Which function returns a logical vector indicating which values are missing?",
+        skill: "missing values",
+        difficulty: "Easy",
+        timeLimit: 35,
+        options: ["na.rm()","is.na()","na.omit()","missing()"],
+        answer: "is.na()",
+        successOutput: "function (x)  .Primitive(\"is.na\")",
+        hintSteps: ["Checks for NA.", "`is.na()`"],
+        reveal: "is.na()",
+        explain: "`is.na(x)` returns TRUE where values are NA.",
+        syntax: "is.na(x)"
+      },
+      {
+        id: "df4",
+        type: "code",
+        title: "Clean the Mean",
+        desc: "Calculate the mean of `df$score`. You MUST exclude NAs, or the result becomes NA.",
+        skill: "summaries",
+        difficulty: "Medium",
+        timeLimit: 85,
+        solutionPatterns: [/^\s*mean\(\s*df\$score\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*$/],
+        successOutput: "[1] 85",
+        hintSteps: ["Use `na.rm=TRUE`.", "`mean(df$score, na.rm=TRUE)`"],
+        reveal: "mean(df$score, na.rm = TRUE)",
+        explain: "`na.rm=TRUE` ignores NA values when computing the mean.",
+        syntax: "mean(x, na.rm=TRUE)"
+      },
+      {
+        id: "df5",
+        type: "fix",
+        title: "Subsetting Logic",
+        desc: "We want all rows where score is greater than 80. The comma is crucial.",
+        skill: "filtering",
+        difficulty: "Medium",
+        timeLimit: 90,
+        starterCode: "df[df$score > 80]",
+        solutionPatterns: [
+          /^\s*df\[\s*df\$score\s*>\s*80\s*,\s*\]\s*$/,
+          /^\s*subset\(\s*df\s*,\s*score\s*>\s*80\s*\)\s*$/
+        ],
+        successOutput: "  id  name score\n1  1   Bob    85\n2  2 Alice    92",
+        hintSteps: ["Needs comma.", "`df[df$score > 80, ]`"],
+        reveal: "df[df$score > 80, ]",
+        explain: "The row-condition goes before the comma; leaving the col part blank means ‘all columns’.",
+        syntax: "df[rows, ]"
+      },
+      {
+        id: "df6",
+        type: "code",
+        title: "Quick Peek",
+        desc: "Show the first 2 rows of `df` using `head()`.",
+        skill: "inspection",
+        difficulty: "Easy",
+        timeLimit: 55,
+        solutionPatterns: [/^\s*head\(\s*df\s*,\s*2\s*\)\s*$/],
+        successOutput: "  id  name score\n1  1   Bob    85\n2  2 Alice    92",
+        hintSteps: ["Use `head`.", "`head(df, 2)`"],
+        reveal: "head(df, 2)",
+        explain: "`head(df, 2)` prints the first two rows for a quick preview.",
+        syntax: "head(x, n)"
+      }
+    ]
+  },
+
+  wrangling: {
+    title: "Chapter 3: Wrangling Reactor",
+    consoleTitle: "R Console (Wrangling Ops)",
+    initialObjects: { "df": "5 obs. of 6 variables" },
+    levels: [
+      {
+        id: "w1",
+        type: "code",
+        title: "Import the Data",
+        desc: "Load the CSV `survey.csv` into an object named `df`.",
+        skill: "import",
+        difficulty: "Easy",
+        timeLimit: 75,
+        starterCode: "df <- ",
+        solutionPatterns: [
+          /^\s*df\s*(<-|=)\s*read\.csv\(\s*["']survey\.csv["']\s*\)\s*$/,
+          /^\s*df\s*(<-|=)\s*read\.csv\(\s*["']survey\.csv["']\s*,\s*stringsAsFactors\s*=\s*F(ALSe)?\s*\)\s*$/
+        ],
+        successOutput: "# df loaded from survey.csv",
+        creates: { name: "df", value: "5 obs. of 6 variables" },
+        hintSteps: ["`read.csv`.", "`df <- read.csv('survey.csv')`"],
+        reveal: "df <- read.csv(\"survey.csv\")",
+        explain: "`read.csv()` imports a comma-separated file into a data frame.",
+        syntax: "read.csv(file)"
+      },
+      {
+        id: "w2",
+        type: "code",
+        title: "Select Columns",
+        desc: "Using dplyr, keep only `id` and `score` columns from `df`.",
+        skill: "select",
+        difficulty: "Medium",
+        timeLimit: 80,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*select\(\s*id\s*,\s*score\s*\)\s*$/
+        ],
+        successOutput: "# A tibble: 5 x 2\n     id score\n  <int> <int>\n1     1    85\n2     2    92\n3     3    NA\n4     4    78\n5     5    88",
+        hintSteps: ["Use `select`.", "`df %>% select(id, score)`"],
+        reveal: "df %>% select(id, score)",
+        explain: "`select()` chooses columns; the pipe passes `df` as the first argument.",
+        syntax: "data %>% select(...)"
+      },
+      {
+        id: "w3",
+        type: "code",
+        title: "Filter Rows",
+        desc: "Using dplyr, keep rows where `score >= 80`.",
+        skill: "filter",
+        difficulty: "Medium",
+        timeLimit: 85,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*filter\(\s*score\s*>=\s*80\s*\)\s*$/
+        ],
+        successOutput: "# A tibble: 3 x 6\n     id city  group score   age income\n  <int> <chr> <chr> <int> <int>  <int>\n1     1 Cov   A        85    22  21000\n2     2 Lon   B        92    25  28000\n3     5 Man   A        88    31  36000",
+        hintSteps: ["Use `filter`.", "`df %>% filter(score >= 80)`"],
+        reveal: "df %>% filter(score >= 80)",
+        explain: "`filter()` keeps rows where the condition evaluates TRUE.",
+        syntax: "data %>% filter(...)"
+      },
+      {
+        id: "w4",
+        type: "code",
+        title: "Create a New Variable",
+        desc: "Using dplyr, add a logical column `pass` that is TRUE when `score >= 80`.",
+        skill: "mutate",
+        difficulty: "Medium",
+        timeLimit: 95,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*mutate\(\s*pass\s*=\s*score\s*>=\s*80\s*\)\s*$/
+        ],
+        successOutput: "# A tibble: 5 x 7\n     id city  group score   age income pass \n  <int> <chr> <chr> <int> <int>  <int> <lgl>\n1     1 Cov   A        85    22  21000 TRUE \n2     2 Lon   B        92    25  28000 TRUE \n3     3 Cov   A        NA    24  24000 NA   \n4     4 Man   B        78    29  31000 FALSE\n5     5 Man   A        88    31  36000 TRUE ",
+        hintSteps: ["Use `mutate`.", "`pass = score >= 80`"],
+        reveal: "df %>% mutate(pass = score >= 80)",
+        explain: "`mutate()` adds columns; the expression is computed row-wise.",
+        syntax: "data %>% mutate(...)"
+      },
+      {
+        id: "w5",
+        type: "code",
+        title: "Group Summary",
+        desc: "Compute the mean score by `city`.",
+        skill: "group_by",
+        difficulty: "Hard",
+        timeLimit: 120,
+        solutionPatterns: [
+          /^\s*df\s*%>%\s*group_by\(\s*city\s*\)\s*%>%\s*summarise\(\s*mean_score\s*=\s*mean\(\s*score\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*\)\s*$/
+        ],
+        successOutput: "# A tibble: 3 x 2\n  city  mean_score\n  <chr>      <dbl>\n1 Cov           85\n2 Lon           92\n3 Man           83",
+        hintSteps: ["`group_by(city)`", "`summarise(...)`"],
+        reveal: "df %>% group_by(city) %>% summarise(mean_score = mean(score, na.rm = TRUE))",
+        explain: "Grouping by city then summarising computes a per-city mean ignoring missing scores.",
+        syntax: "group_by(...) %>% summarise(...)"
+      },
+      {
+        id: "w6",
+        type: "code",
+        title: "Reshape Wide to Long",
+        desc: "Use `pivot_longer` to reshape 'q' columns.",
+        skill: "reshape",
+        difficulty: "Hard",
+        timeLimit: 140,
+        starterCode: "df_long <- ",
+        solutionPatterns: [
+          /^\s*df_long\s*(<-|=)\s*pivot_longer\(\s*df\s*,\s*cols\s*=\s*starts_with\(\s*["']q["']\s*\)\s*,\s*names_to\s*=\s*["']question["']\s*,\s*values_to\s*=\s*["']value["']\s*\)\s*$/
+        ],
+        successOutput: "# A tibble: 15 x 3\n   id question value\n<int> <chr>    <int>\n 1  1 q1          5\n 2  1 q2          4\n 3  1 q3          5\n ...",
+        creates: { name: "df_long", value: "15 obs. of 3 variables" },
+        hintSteps: ["`pivot_longer`.", "`cols = starts_with('q')`"],
+        reveal: "df_long <- pivot_longer(df, cols = starts_with('q'), names_to = 'question', values_to = 'value')",
+        explain: "This converts q1/q2/q3 columns into rows so each response becomes a (question, value) pair.",
+        syntax: "pivot_longer(...)"
+      }
+    ]
+  },
+
+  stats: {
+    title: "Chapter 4: Inferential Engine",
+    consoleTitle: "R Console (Stats & Models)",
+    initialObjects: {
+        "x": "num [1:7] 12 14 ...",
+        "df": "6 obs. of 4 variables"
+    },
+    levels: [
+      {
+        id: "s1",
+        type: "code",
+        title: "Descriptives: Mean",
+        desc: "Mean of `x`, excluding NAs.",
+        skill: "mean",
+        difficulty: "Easy",
+        timeLimit: 65,
+        solutionPatterns: [/^\s*mean\(\s*x\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*$/],
+        successOutput: "[1] 15",
+        hintSteps: ["`na.rm=TRUE`"],
+        reveal: "mean(x, na.rm = TRUE)",
+        explain: "Removes missing values before computing the mean.",
+        syntax: "mean(x)"
+      },
+      {
+        id: "s2",
+        type: "code",
+        title: "Descriptives: SD",
+        desc: "SD of `x`, excluding NAs.",
+        skill: "sd",
+        difficulty: "Easy",
+        timeLimit: 70,
+        solutionPatterns: [/^\s*sd\(\s*x\s*,\s*na\.rm\s*=\s*T(RUE)?\s*\)\s*$/],
+        successOutput: "[1] 2.366432",
+        hintSteps: ["`na.rm=TRUE`"],
+        reveal: "sd(x, na.rm = TRUE)",
+        explain: "Standard deviation measures spread; removing NAs ensures it computes.",
+        syntax: "sd(x)"
+      },
+      {
+        id: "s3",
+        type: "code",
+        title: "Frequency Table",
+        desc: "Table of `df$group`.",
+        skill: "table",
+        difficulty: "Easy",
+        timeLimit: 55,
+        solutionPatterns: [/^\s*table\(\s*df\$group\s*\)\s*$/],
+        successOutput: "\nA B \n3 3 ",
+        hintSteps: ["`table(df$group)`"],
+        reveal: "table(df$group)",
+        explain: "Counts how many observations belong to each group.",
+        syntax: "table(x)"
+      },
+      {
+        id: "s4",
+        type: "code",
+        title: "Correlation",
+        desc: "Correlation `age` vs `income` (complete cases).",
+        skill: "cor",
+        difficulty: "Medium",
+        timeLimit: 95,
+        solutionPatterns: [/^\s*cor\(\s*df\$age\s*,\s*df\$income\s*,\s*use\s*=\s*["']complete\.obs["']\s*\)\s*$/],
+        successOutput: "[1] 0.93201",
+        hintSteps: ["`use='complete.obs'`"],
+        reveal: "cor(df$age, df$income, use = 'complete.obs')",
+        explain: "Computes correlation using only rows where both variables are non-missing.",
+        syntax: "cor(x, y)"
+      },
+      {
+        id: "s5",
+        type: "code",
+        title: "Two-Sample t-test",
+        desc: "T-test `score ~ group`.",
+        skill: "ttest",
+        difficulty: "Hard",
+        timeLimit: 140,
+        solutionPatterns: [
+          /^\s*t\.test\(\s*score\s*~\s*group\s*,\s*data\s*=\s*df\s*\)\s*$/
+        ],
+        successOutput: "\n\tWelch Two Sample t-test\n\ndata:  score by group\nt = -2.012, df = 3.015, p-value = 0.136\nalternative hypothesis: true difference in means between group A and group B is not equal to 0\n95 percent confidence interval:\n -24.12   5.45\nsample estimates:\nmean in group A mean in group B \n          78.33           89.50",
+        hintSteps: ["`score ~ group`"],
+        reveal: "t.test(score ~ group, data = df)",
+        explain: "Tests whether the mean score differs between groups A and B.",
+        syntax: "t.test(formula, data)"
+      },
+      {
+        id: "s6",
+        type: "code",
+        title: "Linear Model",
+        desc: "Fit `lm(income ~ age)` to `m`.",
+        skill: "lm",
+        difficulty: "Hard",
+        timeLimit: 130,
+        starterCode: "m <- ",
+        solutionPatterns: [
+          /^\s*m\s*(<-|=)\s*lm\(\s*income\s*~\s*age\s*,\s*data\s*=\s*df\s*\)\s*$/
+        ],
+        successOutput: "# m created",
+        creates: { name: "m", value: "List of 12 (lm object)" },
+        hintSteps: ["`lm(...)`"],
+        reveal: "m <- lm(income ~ age, data = df)",
+        explain: "Fits a simple regression line income = b0 + b1*age + error.",
+        syntax: "lm(formula, data)"
+      },
+      {
+        id: "s7",
+        type: "code",
+        title: "Model Summary",
+        desc: "Show summary of `m`.",
+        skill: "summary",
+        difficulty: "Medium",
+        timeLimit: 70,
+        setupLog: "m <- lm(income ~ age, data = df)",
+        preLoad: { name: "m", value: "List of 12 (lm object)" },
+        solutionPatterns: [/^\s*summary\(\s*m\s*\)\s*$/],
+        successOutput: "\nCall:\nlm(formula = income ~ age, data = df)\n\nResiduals:\n      1       2       3       4       5       6 \n-1520.4  -420.2   850.5  1430.1   910.8 -1250.8 \n\nCoefficients:\n            Estimate Std. Error t value Pr(>|t|)   \n(Intercept) -12304.5     5430.2  -2.266   0.0861 . \nage           1520.5      203.4   7.476   0.0017 **\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 1540 on 4 degrees of freedom\nMultiple R-squared:  0.9332,	Adjusted R-squared:  0.9165 \nF-statistic: 55.89 on 1 and 4 DF,  p-value: 0.001705",
+        hintSteps: ["`summary(m)`"],
+        reveal: "summary(m)",
+        explain: "Summarises the fitted model: coefficients, standard errors, fit statistics.",
+        syntax: "summary(object)"
+      }
+    ]
+  },
+
+  sigmaChallenge: {
+    title: "SIGMA Challenge (Workshop)",
+    consoleTitle: "R Console (SIGMA Workshop)",
+    levels: [
+      {
+        id: "sigma1",
+        type: "code",
+        title: "Vectors: Pre-test",
+        desc: "Create `pretest` with: 0.19, 0.23, 0.35, 0.22, 0.20, 0.26",
+        skill: "vectors",
+        difficulty: "Easy",
+        timeLimit: 75,
+        solutionPatterns: [/^\s*pretest\s*(<-|=)\s*c\(\s*0\.19\s*,\s*0\.23\s*,\s*0\.35\s*,\s*0\.22\s*,\s*0\.20\s*,\s*0\.26\s*\)\s*$/],
+        successOutput: "# pretest created",
+        creates: { name: "pretest", value: "num [1:6] 0.19 0.23..." },
+        hintSteps: ["`c(...)`"],
+        reveal: "pretest <- c(0.19,0.23,0.35,0.22,0.20,0.26)",
+        explain: "Creates a numeric vector.",
+        syntax: "name <- c(...)"
+      },
+      {
+        id: "sigma2",
+        type: "code",
+        title: "Vectors: Post-test",
+        desc: "Create `posttest` with: 0.15, 0.20, 0.34, 0.16, 0.11, 0.22",
+        skill: "vectors",
+        difficulty: "Easy",
+        timeLimit: 75,
+        solutionPatterns: [/^\s*posttest\s*(<-|=)\s*c\(\s*0\.15\s*,\s*0\.20\s*,\s*0\.34\s*,\s*0\.16\s*,\s*0\.11\s*,\s*0\.22\s*\)\s*$/],
+        successOutput: "# posttest created",
+        creates: { name: "posttest", value: "num [1:6] 0.15 0.20..." },
+        hintSteps: ["`c(...)`"],
+        reveal: "posttest <- c(0.15,0.20,0.34,0.16,0.11,0.22)",
+        explain: "Creates the second numeric vector.",
+        syntax: "name <- c(...)"
+      },
+      {
+        id: "sigma3",
+        type: "code",
+        title: "Vectors: Difference",
+        desc: "Create `diff` (posttest - pretest).",
+        skill: "vector math",
+        difficulty: "Easy",
+        timeLimit: 60,
+        solutionPatterns: [/^\s*diff\s*(<-|=)\s*posttest\s*-\s*pretest\s*$/],
+        successOutput: "# diff created",
+        creates: { name: "diff", value: "num [1:6] -0.04 -0.03..." },
+        hintSteps: ["`posttest - pretest`"],
+        reveal: "diff <- posttest - pretest",
+        explain: "R performs element-wise subtraction.",
+        syntax: "vec1 - vec2"
+      },
+      {
+        id: "sigma4",
+        type: "code",
+        title: "Stats: Post-test Mean",
+        desc: "Mean of `posttest`.",
+        skill: "mean",
+        difficulty: "Easy",
+        timeLimit: 45,
+        solutionPatterns: [/^\s*mean\s*\(\s*posttest\s*\)\s*$/],
+        successOutput: "[1] 0.1966667",
+        hintSteps: ["`mean(posttest)`"],
+        reveal: "mean(posttest)",
+        explain: "Computes the average.",
+        syntax: "mean(x)"
+      },
+      {
+        id: "sigma5",
+        type: "code",
+        title: "Stats: Diff Mean",
+        desc: "Mean of `diff`.",
+        skill: "mean",
+        difficulty: "Easy",
+        timeLimit: 45,
+        solutionPatterns: [/^\s*mean\s*\(\s*diff\s*\)\s*$/],
+        successOutput: "[1] -0.045",
+        hintSteps: ["`mean(diff)`"],
+        reveal: "mean(diff)",
+        explain: "The participants lost 0.045 units on average.",
+        syntax: "mean(x)"
+      },
+      {
+        id: "sigma6",
+        type: "code",
+        title: "Obesity: Week 8 Summary",
+        desc: "Summary of `obesity$weightweek8`.",
+        skill: "summary",
+        difficulty: "Medium",
+        timeLimit: 75,
+        preLoad: { name: "obesity", value: "37 obs. of 12 variables" },
+        solutionPatterns: [/^\s*summary\s*\(\s*obesity\s*\$\s*weightweek8\s*\)\s*$/],
+        successOutput: "   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. \n  85.00   92.50   95.00   95.10   98.00  105.00 ",
+        hintSteps: ["`summary(...)`"],
+        reveal: "summary(obesity$weightweek8)",
+        explain: "Summary provides min, max, median, mean, and quartiles.",
+        syntax: "summary(x)"
+      },
+      {
+        id: "sigma7",
+        type: "code",
+        title: "Group Means",
+        desc: "Mean `weightchange` by `treatgroup` (using `tapply`).",
+        skill: "tapply",
+        difficulty: "Hard",
+        timeLimit: 90,
+        solutionPatterns: [/^\s*tapply\s*\(\s*obesity\s*\$\s*weightchange\s*,\s*obesity\s*\$\s*treatgroup\s*,\s*mean\s*\)\s*$/],
+        successOutput: "    1     2 \n-1.36 -5.01 ",
+        hintSteps: ["`tapply(...)`"],
+        reveal: "tapply(obesity$weightchange, obesity$treatgroup, mean)",
+        explain: "Calculates the mean for each group separately.",
+        syntax: "tapply(X, INDEX, FUN)"
+      },
+      {
+        id: "sigma8",
+        type: "code",
+        title: "Group SDs",
+        desc: "SD `weightchange` by `treatgroup` (using `tapply`).",
+        skill: "tapply",
+        difficulty: "Hard",
+        timeLimit: 90,
+        solutionPatterns: [/^\s*tapply\s*\(\s*obesity\s*\$\s*weightchange\s*,\s*obesity\s*\$\s*treatgroup\s*,\s*sd\s*\)\s*$/],
+        successOutput: "    1     2 \n 2.14  2.72 ",
+        hintSteps: ["`FUN=sd`"],
+        reveal: "tapply(obesity$weightchange, obesity$treatgroup, sd)",
+        explain: "Calculates standard deviation per group.",
+        syntax: "tapply(X, INDEX, FUN)"
+      },
+      {
+        id: "sigma9",
+        type: "code",
+        title: "Motivation Analysis",
+        desc: "Mean `weightchange` by `motivation` (using `tapply`).",
+        skill: "tapply",
+        difficulty: "Hard",
+        timeLimit: 90,
+        solutionPatterns: [/^\s*tapply\s*\(\s*obesity\s*\$\s*weightchange\s*,\s*obesity\s*\$\s*motivation\s*,\s*mean\s*\)\s*$/],
+        successOutput: "    1     2     3 \n-4.01 -2.95 -0.30 ",
+        hintSteps: ["`INDEX=obesity$motivation`"],
+        reveal: "tapply(obesity$weightchange, obesity$motivation, mean)",
+        explain: "Compares weight loss across motivation levels.",
+        syntax: "tapply(X, INDEX, FUN)"
+      },
+      {
+        id: "sigma10",
+        type: "code",
+        title: "Cross-Tabulation",
+        desc: "Table `treatgroup` vs `ageonset`.",
+        skill: "table",
+        difficulty: "Medium",
+        timeLimit: 75,
+        solutionPatterns: [/^\s*table\s*\(\s*obesity\s*\$\s*treatgroup\s*,\s*obesity\s*\$\s*ageonset\s*\)\s*$/],
+        successOutput: "   \n    Young Old\n  1    10   9\n  2     8  10",
+        hintSteps: ["`table(...)`"],
+        reveal: "table(obesity$treatgroup, obesity$ageonset)",
+        explain: "Counts frequencies for combinations of groups.",
+        syntax: "table(row, col)"
+      }
+    ]
+  }
+};
+
+/* --- CHEATSHEET --- */
+const commandGlossary = {
+  "<-": "Assignment: store a value in a named object.",
+  "c()": "Combine values into a vector.",
+  "seq()": "Generate sequences with flexible steps.",
+  ":": "Shortcut sequence operator (e.g., 1:5).",
+  "[ ]": "Index/subset vectors, lists, data frames.",
+  "$": "Extract a column from a data frame by name.",
+  "class()": "Check an object’s type/class.",
+  "length()": "Number of elements in a vector.",
+  "is.na()": "TRUE/FALSE vector: where values are missing.",
+  "mean()": "Average; use na.rm=TRUE to ignore NAs.",
+  "sd()": "Standard deviation; use na.rm=TRUE to ignore NAs.",
+  "head()": "Preview the first rows of an object.",
+  "read.csv()": "Import a CSV into a data frame.",
+  "%>% / |>": "Pipe: pass output into next function.",
+  "select()": "Choose columns (dplyr).",
+  "filter()": "Choose rows using conditions (dplyr).",
+  "mutate()": "Create/transform columns (dplyr).",
+  "group_by()": "Define groups for grouped operations (dplyr).",
+  "summarise()": "Reduce each group to summary rows (dplyr).",
+  "pivot_longer()": "Reshape wide data to long format (tidyr).",
+  "table()": "Frequency counts of categorical values.",
+  "cor()": "Correlation between numeric vectors.",
+  "t.test()": "t-test for mean differences.",
+  "lm()": "Fit a linear regression model.",
+  "summary()": "Summarise objects (models, vectors, data frames).",
+  "tapply()": "Apply a function over a ragged array (grouping)."
+};
+
+/* --- STATE --- */
+let state = {
+  campaign: null,
+  levelIndex: 0,
+  score: 0,
+  errors: 0,
+  streak: 0,
+  hintsUsed: 0,
+  revealsUsed: 0,
+  hintTier: 0,
+  revealUsedThisLevel: false,
+  timerId: null,
+  timeLeft: 0,
+  timerDeadlineMs: 0,
+  timerPaused: false,
+  timerPauseRemainingMs: 0,
+  _timerLastSecond: null,
+  timeoutsThisLevel: 0,
+  env: {}
+};
+
+const els = {};
+let initialConsoleHTML = "";
+
+/* --- INIT --- */
+window.addEventListener('DOMContentLoaded', () => {
+  mapElements();
+  initialConsoleHTML = els.consoleOutput.innerHTML;
+  lucide.createIcons();
+  els.mainTutorial.classList.remove('hidden');
+});
+
+function mapElements(){
+  els.startScreen = document.getElementById('start-screen');
+  els.battleScreen = document.getElementById('battle-screen');
+  els.consoleOutput = document.getElementById('console-output');
+  els.inputZone = document.getElementById('input-zone');
+  els.envList = document.getElementById('env-list');
+  
+  els.tabScript = document.getElementById('tab-script');
+  els.tabData = document.getElementById('tab-data');
+  els.tabDataName = document.getElementById('tab-data-name');
+  els.scriptView = document.getElementById('script-view');
+  els.dataView = document.getElementById('data-view');
+  els.dataViewContent = document.getElementById('data-view-content');
+
+  els.taskTitle = document.getElementById('task-title');
+  els.taskDesc = document.getElementById('task-desc');
+  els.taskTag = document.getElementById('task-tag');
+  els.taskDifficulty = document.getElementById('task-difficulty');
+  
+  els.scoreDisplay = document.getElementById('score-display');
+  els.debtBadge = document.getElementById('debt-badge');
+  els.streakBadge = document.getElementById('streak-badge');
+  els.streakCount = document.getElementById('streak-count');
+  els.timerDisplay = document.getElementById('timer-display');
+
+  els.victoryModal = document.getElementById('victory-modal');
+  els.consoleTitle = document.getElementById('console-title');
+
+  els.cheatModal = document.getElementById('cheatsheet-modal');
+  els.cheatContent = document.getElementById('cheatsheet-content');
+
+  els.mainTutorial = document.getElementById('tutorial-modal-main');
+  els.battleTutorial = document.getElementById('tutorial-modal-battle');
+}
+
+/* --- GAME FLOW --- */
+window.startCampaign = function(campaignId){
+  state.campaign = campaigns[campaignId];
+  state.levelIndex = 0;
+  state.score = 0;
+  state.errors = 0;
+  state.streak = 0;
+  state.hintsUsed = 0;
+  state.revealsUsed = 0;
+  state.hintTier = 0;
+  state.revealUsedThisLevel = false;
+  state.timeoutsThisLevel = 0;
+  state.env = { ... (state.campaign.initialObjects || {}) };
+
+  stopTimer();
+
+  els.startScreen.classList.add('hidden');
+  els.battleScreen.classList.remove('hidden');
+  els.battleScreen.classList.add('ide-grid');
+
+  els.consoleTitle.innerText = state.campaign.consoleTitle || "Console";
+  renderEnvironment();
+  switchTab('script'); 
+  closeDataView(); // Reset data tabs
+  
+  els.battleTutorial.classList.remove('hidden');
+  updateHUD();
+  loadLevel();
+};
+
+window.restartGame = function(){
+  const ok = confirm("Abort current session?");
+  if (!ok) return;
+  stopTimer();
+  state.campaign = null;
+  state.levelIndex = 0;
+  state.score = 0;
+  state.env = {};
+  els.battleScreen.classList.add('hidden');
+  els.battleScreen.classList.remove('ide-grid');
+  els.victoryModal.classList.add('hidden');
+  els.cheatModal.classList.add('hidden');
+  els.mainTutorial.classList.add('hidden'); 
+  els.battleTutorial.classList.add('hidden');
+  els.startScreen.classList.remove('hidden');
+  els.startScreen.classList.add('animate-pop');
+  if (initialConsoleHTML) els.consoleOutput.innerHTML = initialConsoleHTML;
+  els.inputZone.innerHTML = '';
+  renderEnvironment();
+  els.timerDisplay.innerText = "00:00";
+  updateHUD();
+};
+
+window.closeMainTutorial = function(){ els.mainTutorial.classList.add('hidden'); };
+window.closeBattleTutorial = function(){ els.battleTutorial.classList.add('hidden'); };
+
+function loadLevel(){
+  const level = state.campaign.levels[state.levelIndex];
+  state.currentLevel = level;
+  state.hintTier = 0;
+  state.revealUsedThisLevel = false;
+  state.timeoutsThisLevel = 0;
+
+  els.taskTitle.innerText = level.title;
+  els.taskDesc.innerText = level.desc;
+  els.taskTag.innerText = level.type.toUpperCase();
+  
+  // FIX: Explicitly set difficulty text
+  els.taskDifficulty.innerText = `Difficulty: ${level.difficulty || "Normal"}`;
+
+  logToConsole(`> # Loading Level ${state.levelIndex + 1}: ${level.title}...`, 'text-cyan-300');
+
+  if (level.setupLog) logToConsole(`> ${level.setupLog}`, 'text-slate-400');
+  
+  if (level.preLoad) {
+      state.env[level.preLoad.name] = level.preLoad.value;
+      renderEnvironment();
+  }
+
+  renderInputZone(level);
+  startTimer(level.timeLimit ?? 60);
+
+  if (state.streak >= 3) logToConsole(`# OVERDRIVE: streak is live.`, 'text-yellow-300');
+}
+
+/* --- ENVIRONMENT & DATA VIEWER --- */
+function renderEnvironment(){
+    const list = els.envList;
+    list.innerHTML = "";
+    const keys = Object.keys(state.env).sort();
+    if (keys.length === 0) {
+        list.innerHTML = `<tr><td colspan="2" class="p-2 text-slate-600 italic text-center">Environment is empty</td></tr>`;
+        return;
+    }
+    keys.forEach(key => {
+        // Determine if object maps to a dataset definition
+        let isClickable = false;
+        if (datasetDefinitions[key]) isClickable = true;
+        // Special case for 'df' which changes based on campaign
+        if (key === 'df') isClickable = true; 
+
+        const row = document.createElement('tr');
+        row.className = "border-b border-slate-800 hover:bg-slate-800/50 transition-colors";
+        
+        let nameHtml = `<span class="text-blue-300 font-bold">${key}</span>`;
+        if (isClickable) {
+            nameHtml = `<button onclick="viewData('${key}')" class="text-blue-400 font-bold hover:underline cursor-pointer flex items-center gap-1 text-left w-full"><i data-lucide="table" class="w-3 h-3"></i> ${key}</button>`;
+        }
+
+        row.innerHTML = `<td class="py-2 px-2">${nameHtml}</td><td class="py-2 px-2 text-slate-400 truncate max-w-[150px]">${state.env[key]}</td>`;
+        list.appendChild(row);
+    });
+    lucide.createIcons();
+}
+
+window.viewData = function(dataName){
+    // Resolve content
+    let content = datasetDefinitions[dataName];
+    if (dataName === 'df') {
+        if (state.campaign.title.includes("Wrangling")) {
+            content = datasetDefinitions['df (survey)'];
+        } else {
+            content = datasetDefinitions['df'];
+        }
+    }
+
+    if (!content) return;
+
+    // Show Data Tab
+    els.dataViewContent.innerHTML = content;
+    els.tabDataName.innerText = dataName;
+    els.tabData.classList.remove('hidden');
+    switchTab('data');
+};
+
+window.switchTab = function(tabName){
+    if (tabName === 'script') {
+        els.scriptView.classList.remove('hidden');
+        els.dataView.classList.add('hidden');
+        
+        els.tabScript.classList.add('tab-active');
+        els.tabScript.classList.remove('tab-inactive');
+        
+        els.tabData.classList.remove('tab-active');
+        els.tabData.classList.add('tab-inactive');
+    } else {
+        els.scriptView.classList.add('hidden');
+        els.dataView.classList.remove('hidden');
+        
+        els.tabScript.classList.remove('tab-active');
+        els.tabScript.classList.add('tab-inactive');
+        
+        els.tabData.classList.add('tab-active');
+        els.tabData.classList.remove('tab-inactive');
+    }
+};
+
+window.closeDataView = function(e){
+    if(e) e.stopPropagation(); // Prevent tab switch when clicking close X
+    els.tabData.classList.add('hidden');
+    switchTab('script');
+};
+
+function renderInputZone(level){
+  els.inputZone.innerHTML = '';
+  if (level.type === 'code' || level.type === 'fix'){
+    const initialValue = level.starterCode || '';
+    const wrapper = document.createElement('div');
+    wrapper.className = "flex items-center w-full gap-2";
+    wrapper.innerHTML = `
+      <span class="text-blue-500 font-black select-none">&gt;</span>
+      <input type="text" id="console-input" class="console-input flex-1 bg-transparent border-none outline-none text-white font-mono"
+        value="${escapeHtml(initialValue)}" placeholder="Type R code here..." autocomplete="off" spellcheck="false">
+    `;
+    els.inputZone.appendChild(wrapper);
+    const input = document.getElementById('console-input');
+    input.focus();
+    input.addEventListener('blur', () => setTimeout(() => input.focus(), 10));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){ handleConsoleSubmit(input.value); input.value = ''; }
+    });
+  } else if (level.type === 'choice'){
+    const grid = document.createElement('div');
+    grid.className = "grid grid-cols-2 md:grid-cols-4 gap-2 w-full";
+    level.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = "btn-neon bg-slate-800 border border-slate-600 hover:border-blue-400 text-slate-300 py-2 rounded text-xs font-mono transition-colors";
+      btn.innerText = opt;
+      btn.onclick = () => handleChoice(opt);
+      grid.appendChild(btn);
+    });
+    els.inputZone.appendChild(grid);
+  }
+}
+
+function handleConsoleSubmit(code){
+  if (!code.trim()) return;
+  logToConsole(`> ${code}`);
+  const level = state.currentLevel;
+  let isCorrect = level.solutionPatterns && level.solutionPatterns.some(p => p.test(code));
+  if (isCorrect) handleSuccess(level.successOutput);
+  else handleFailure("Error: unexpected input or syntax error.");
+}
+
+function handleChoice(choice){
+  logToConsole(`> ${choice}`);
+  const level = state.currentLevel;
+  if (choice === level.answer) handleSuccess(level.successOutput);
+  else handleFailure(`Error: incorrect. Try again.`);
+}
+
+function handleSuccess(output){
+  stopTimer();
+  logToConsole(output, 'text-green-300'); // Standard formatting now handled by CSS 'white-space: pre-wrap'
+  
+  if (state.currentLevel.creates) {
+      const obj = state.currentLevel.creates;
+      state.env[obj.name] = obj.value;
+      renderEnvironment();
+  }
+
+  const base = 100;
+  const streakBonus = Math.min(state.streak * 10, 80);
+  const revealMult = state.revealUsedThisLevel ? 0.35 : 1.0;
+  const hintMult = 1.0 - Math.min(state.hintTier * 0.10, 0.30);
+  const mult = Math.max(0.2, revealMult * hintMult);
+  const points = Math.round((base + streakBonus) * mult);
+  state.score += points;
+  state.streak++;
+  spawnFloatingText(els.scoreDisplay, `+${points}`, '#4ade80');
+  updateHUD();
+  setTimeout(() => nextLevel(), 1200); // Slightly longer delay to read output
+}
+
+function handleFailure(msg){
+  logToConsole(msg, 'text-red-300');
+  state.streak = 0;
+  state.errors++;
+  const penalty = 200;
+  state.score -= penalty;
+  spawnFloatingText(els.scoreDisplay, `-${penalty}`, '#ef4444');
+  updateHUD();
+  stopTimer();
+  setTimeout(() => loadLevel(), 650);
+}
+
+function handleTimeout(){
+  const level = state.currentLevel;
+  logToConsole("Error: TIMEOUT. Let’s scaffold and try again.", "text-red-300");
+  state.errors++;
+  state.streak = 0;
+  state.timeoutsThisLevel = (state.timeoutsThisLevel || 0) + 1;
+  updateHUD();
+  if (level?.hintSteps && state.hintTier < level.hintSteps.length){
+    logToConsole("# Scaffold: auto-hint unlocked. (+time)", "text-yellow-300");
+    window.useHint({ auto: true });
+    startTimer(Math.max(15, Math.round((level.timeLimit ?? 60) * 0.6)));
+    return;
+  }
+  if (!state.revealUsedThisLevel){
+    logToConsole("# Scaffold: auto-reveal unlocked. (+time)", "text-red-200");
+    window.useReveal({ auto: true });
+    startTimer(30);
+    return;
+  }
+  logToConsole("# Scaffold: extra time granted.", "text-slate-300");
+  startTimer(30);
+}
+
+function nextLevel(){
+  state.levelIndex++;
+  updateHUD();
+  if (state.levelIndex >= state.campaign.levels.length){
+    victory();
+  } else {
+    loadLevel();
+  }
+}
+
+function victory(){
+  stopTimer();
+  els.victoryModal.classList.remove('hidden');
+  els.victoryModal.classList.add('flex');
+}
+
+/* --- TOOLS --- */
+window.useHint = function(opts = {}){
+  const auto = !!opts.auto;
+  const level = state.currentLevel;
+  if (!level || !level.hintSteps || level.hintSteps.length === 0){
+    logToConsole("Hint: (none)", "text-yellow-300");
+    return;
+  }
+  const tier = state.hintTier;
+  if (tier >= level.hintSteps.length){
+    logToConsole("Hint: No more hints. Use REVEAL.", "text-yellow-300");
+    return;
+  }
+  const costs = [40, 80, 120];
+  const cost = auto ? 0 : costs[Math.min(tier, costs.length - 1)];
+  state.score -= cost;
+  if (!auto) state.hintsUsed++;
+  state.hintTier++;
+  updateHUD();
+  const label = auto ? `AUTO HINT` : `HINT`;
+  logToConsole(`${label}: ${level.hintSteps[tier]}`, "text-yellow-300 italic");
+  if (!auto && cost > 0) spawnFloatingText(els.scoreDisplay, `-${cost}`, '#fbbf24');
+};
+
+window.useInspect = function(){
+  const cost = 30;
+  state.score -= cost;
+  updateHUD();
+  spawnFloatingText(els.scoreDisplay, `-${cost}`, '#a78bfa');
+  const level = state.currentLevel;
+  const inspectText = level?.explain || "Structure unknown.";
+  logToConsole(`STR() (-${cost}): ${inspectText}`, "text-purple-300");
+};
+
+window.useReveal = function(opts = {}){
+  const auto = !!opts.auto;
+  const level = state.currentLevel;
+  const cost = auto ? 0 : 400;
+  state.score -= cost;
+  if (!auto) state.revealsUsed++;
+  state.revealUsedThisLevel = true;
+  updateHUD();
+  if (!auto && cost > 0) spawnFloatingText(els.scoreDisplay, `-${cost}`, '#f87171');
+  const answer = level?.reveal || "(no reveal)";
+  const label = auto ? "AUTO REVEAL" : `REVEAL (-${cost})`;
+  logToConsole(`${label}: ${answer}`, "text-red-300 font-bold");
+  const input = document.getElementById('console-input');
+  if(input) {
+    input.value = answer;
+    input.classList.remove('input-flash');
+    void input.offsetWidth;
+    input.classList.add('input-flash');
+    input.focus();
+  }
+};
+
+window.openCheatsheet = function(){ renderCheatsheet(); els.cheatModal.classList.remove('hidden'); els.cheatModal.classList.add('flex'); };
+window.closeCheatsheet = function(){ els.cheatModal.classList.add('hidden'); els.cheatModal.classList.remove('flex'); };
+
+function renderCheatsheet(){
+  const sorted = Object.keys(commandGlossary).sort((a,b) => a.localeCompare(b));
+  els.cheatContent.innerHTML = "";
+  sorted.forEach(cmd => {
+    const card = document.createElement('div');
+    card.className = "bg-slate-800/60 border border-slate-700 rounded-xl p-3";
+    card.innerHTML = `<div class="font-black text-cyan-200 text-sm">${escapeHtml(cmd)}</div><div class="text-xs text-slate-300 mt-1">${escapeHtml(commandGlossary[cmd])}</div>`;
+    els.cheatContent.appendChild(card);
+  });
+}
+
+/* --- TIMER --- */
+const Timer = {
+  _tickMs: 250, _onTimeout: null,
+  now(){ return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now(); },
+  start(seconds, opts = {}){
+    stopTimer();
+    const dur = Math.max(0, Number(seconds) || 0);
+    state.timerPaused = false;
+    state._timerLastSecond = null;
+    const now = this.now();
+    state.timerDeadlineMs = now + dur * 1000;
+    state.timeLeft = Math.ceil(dur);
+    updateTimerDisplay();
+    this._onTimeout = typeof opts.onTimeout === 'function' ? opts.onTimeout : null;
+    state.timerId = setInterval(() => this._tick(), this._tickMs);
+  },
+  _tick(){
+    const s = Math.max(0, Math.ceil((state.timerDeadlineMs - this.now()) / 1000));
+    if (state._timerLastSecond !== s){ state._timerLastSecond = s; state.timeLeft = s; updateTimerDisplay(); }
+    if (s <= 0){ stopTimer(); if (this._onTimeout) this._onTimeout(); }
+  }
+};
+
+function startTimer(seconds){ Timer.start(seconds, { onTimeout: handleTimeout }); }
+function stopTimer(){ if (state.timerId){ clearInterval(state.timerId); state.timerId = null; } }
+function updateTimerDisplay(){
+  const s = Math.max(0, Number(state.timeLeft) || 0);
+  els.timerDisplay.innerText = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  els.timerDisplay.classList.toggle('text-red-400', s <= 10);
+}
+
+/* --- HUD/UTIL --- */
+function updateHUD(){
+  const s = Number(state.score) || 0;
+  els.scoreDisplay.innerText = (s < 0 ? '-' : '') + String(Math.abs(s)).padStart(4,'0');
+  els.scoreDisplay.classList.toggle('text-red-300', s < 0);
+  els.debtBadge.classList.toggle('hidden', s >= 0);
+  els.streakBadge.classList.toggle('hidden', state.streak <= 1);
+  els.streakCount.innerText = state.streak;
+  lucide.createIcons();
+}
+
+function logToConsole(text, colorClass=''){
+  const line = document.createElement('div');
+  line.className = `console-line ${colorClass}`;
+  line.innerText = text;
+  els.consoleOutput.appendChild(line);
+  els.consoleOutput.scrollTop = els.consoleOutput.scrollHeight;
+}
+
+function spawnFloatingText(targetEl, text, color){
+  const rect = targetEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.innerText = text;
+  el.className = 'floating-text text-xl font-mono';
+  el.style.left = `${rect.left + 20}px`;
+  el.style.top = `${rect.top}px`;
+  el.style.color = color;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function escapeHtml(str){ return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;"); }
+</script>
+</body>
+</html>

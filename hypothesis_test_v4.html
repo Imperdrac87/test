@@ -1,0 +1,1673 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Temple of Sigma: The Alpha Protocol v5.1</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- MathJax for nice equations -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg-dark: #050608;
+
+      --neon-blue: #00e0ff;
+      --neon-gold: #ffd666;
+      --neon-green: #4ade80;
+      --neon-red: #f87171;
+      --neon-purple: #a78bfa;
+
+      /* Guide region colors */
+      --c-one-alpha: rgba(255, 214, 102, 0.30); /* 1-α */
+      --c-alpha:     rgba(248, 113, 113, 0.42); /* α */
+      --c-beta:      rgba(96, 165, 250, 0.42);  /* β */
+      --c-one-beta:  rgba(74, 222, 128, 0.26);  /* 1-β (Power) */
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background-color: var(--bg-dark);
+      color: #f9fafb;
+      /* LAYOUT LOCK: Prevent scrolling globally for the game view */
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- UTILS --- */
+    .force-scroll::-webkit-scrollbar { width: 14px; }
+    .force-scroll::-webkit-scrollbar-track { background: #0f172a; border-left: 1px solid #334155; }
+    .force-scroll::-webkit-scrollbar-thumb { background-color: #64748b; border-radius: 6px; border: 3px solid #0f172a; }
+    .force-scroll::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    .force-scroll { scrollbar-width: auto; scrollbar-color: #64748b #0f172a; }
+
+    /* --- ANIMATIONS --- */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9) translateY(10px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    /* New Pulse Ring Animation for the Canvas */
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); border-color: rgba(248, 113, 113, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); border-color: rgba(248, 113, 113, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); border-color: rgba(51, 65, 85, 0.5); }
+    }
+    .animate-pulse-ring { animation: pulseRing 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+    .btn-neon { transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-neon:active { transform: scale(0.95); }
+    .btn-neon:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(100%); }
+
+    /* Visualization Canvas */
+    .sigma-canvas {
+      width: 100%;
+      height: 100%; /* Fill container */
+      background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+      border-radius: 8px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .logic-step { margin-bottom: 12px; padding-left: 12px; border-left: 3px solid #4ade80; line-height: 1.5; }
+    .logic-conclusion { margin-top: 16px; padding: 12px; background: rgba(74, 222, 128, 0.05); border-radius: 6px; border: 1px solid #4ade80; font-weight: bold; color: #4ade80; text-align: center; }
+
+    #debug-overlay {
+      position: absolute;
+      top: 4px; left: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: #4ade80;
+      background: rgba(0,0,0,0.85);
+      padding: 6px;
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 50;
+      border: 1px solid #22c55e;
+    }
+
+    .check-item { opacity: 0.5; transition: opacity 0.3s; }
+    .check-item.active { opacity: 1; font-weight: bold; color: #4ade80; }
+
+    .matrix-cell { transition: all 0.2s; cursor: pointer; user-select: none; }
+    .matrix-cell:hover { filter: brightness(1.15); }
+    .matrix-cell:active { transform: scale(0.98); }
+    .matrix-cell.active { border-color: #ffd666; box-shadow: 0 0 10px rgba(255, 214, 102, 0.35); background-color: #1e293b; }
+
+    /* Explainer Card Animation */
+    @keyframes fadeInSide {
+      from { opacity: 0; transform: translateX(10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .explainer-enter { animation: fadeInSide 0.3s ease-out; }
+
+    /* Tiny pulse for matrix */
+    @keyframes softPulse {
+      0%,100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+      50% { box-shadow: 0 0 16px rgba(255, 214, 102, 0.25); }
+    }
+    .soft-pulse { animation: softPulse 0.6s ease-out 1; }
+  </style>
+</head>
+
+<body> <!-- Body already has layout lock in CSS -->
+
+  <!-- APP CONTAINER: Full height flex col -->
+  <div id="app" class="w-full h-full flex flex-col p-2 sm:p-4 max-w-6xl mx-auto z-10 relative">
+
+    <!-- --- SCREEN: START --- -->
+    <div id="start-screen" class="text-center space-y-8 py-10 animate-in fade-in zoom-in duration-500 flex flex-col justify-center items-center h-full overflow-y-auto">
+      <div class="relative inline-block shrink-0">
+        <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg blur opacity-75 animate-pulse"></div>
+        <h1 class="relative text-4xl md:text-6xl font-bold text-white tracking-tighter p-2">
+          THE ALPHA PROTOCOL
+        </h1>
+      </div>
+      <p class="text-xl text-blue-200 tracking-widest uppercase shrink-0">Visual Stats Trivia v5.1</p>
+      
+      <!-- High Score Display -->
+      <div id="high-score-display" class="hidden text-sm text-yellow-500 font-bold border border-yellow-900/50 bg-yellow-900/10 px-4 py-2 rounded-full shrink-0">
+        HIGHEST GRANT: $<span id="high-score-val">0</span>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-700 p-8 rounded-xl shadow-2xl max-w-2xl mx-auto backdrop-blur-md w-full shrink-0">
+        <p class="mb-6 text-lg text-slate-300">
+          Master the "Curve + Side" rule to distinguish statistical errors.<br>
+          <strong>Phase 1:</strong> Identify the Regions.<br>
+          <strong>Phase 2:</strong> Map Real Scenarios.<br>
+          <strong>Phase 3:</strong> Dynamic Changes.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <button onclick="prepareGame(15)" class="btn-neon bg-green-900/40 border border-green-500 text-green-400 hover:bg-green-500 hover:text-black font-bold py-4 rounded">
+            <div>STUDENT</div><div class="text-xs opacity-75">15 Mins</div>
+          </button>
+          <button onclick="prepareGame(10)" class="btn-neon bg-blue-900/40 border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-black font-bold py-4 rounded">
+            <div>RESEARCHER</div><div class="text-xs opacity-75">10 Mins</div>
+          </button>
+          <button onclick="prepareGame(5)" class="btn-neon bg-purple-900/40 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black font-bold py-4 rounded">
+            <div>SIGMA</div><div class="text-xs opacity-75">5 Mins</div>
+          </button>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+          <button onclick="startGuide()" class="text-yellow-400 hover:text-white underline text-sm flex items-center justify-center transition-colors font-bold">
+            <i data-lucide="play-circle" class="w-4 h-4 mr-2"></i> INTERACTIVE MINI-GUIDE
+          </button>
+          <button onclick="showLibrary()" class="text-slate-500 hover:text-white underline text-sm flex items-center justify-center transition-colors">
+            <i data-lucide="book-open" class="w-4 h-4 mr-2"></i> Open Research Manual
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: MINI-GUIDE (Scrollable) --- -->
+    <div id="guide-screen" class="hidden flex flex-col gap-4 w-full h-full overflow-y-auto">
+      <div class="flex items-center justify-between bg-slate-900 p-3 rounded border border-slate-700 shrink-0">
+        <h2 class="text-lg font-bold text-yellow-400 flex items-center">
+          <i data-lucide="compass" class="w-5 h-5 mr-2"></i> Calibration Training
+        </h2>
+        <button onclick="showScreen('start-screen')" class="text-slate-400 hover:text-white bg-slate-800 p-1 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 pb-4">
+        <!-- Left: Canvas -->
+        <div class="lg:col-span-2 space-y-4">
+
+          <!-- UPDATE 1: Reframed Picture / Primer -->
+          <div class="bg-slate-800 p-4 rounded border border-slate-600 text-sm text-slate-200 shadow-md">
+            <h3 class="font-bold text-white mb-2 flex items-center gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-cyan-300"></i> The Test Statistic (T)
+            </h3>
+            <div class="space-y-2 leading-relaxed">
+              <p><strong>T = test statistic.</strong></p>
+              <p class="pl-2 border-l-2 border-slate-600">
+                <span class="text-slate-400 font-bold">Grey curve:</span> distribution of <strong>T if H0 is true</strong>.<br>
+                <span class="text-blue-400 font-bold">Blue curve:</span> distribution of <strong>T if H1 is true</strong>.
+              </p>
+              <p>
+                The <span class="text-yellow-400 font-bold">Yellow line</span> is the <strong>critical value (c)</strong>. If <strong>T is beyond c</strong>, we <strong>reject H0</strong>.
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-700">
+                <p class="font-bold text-purple-300">Distance Δ = μ1 − μ0</p>
+                <p class="text-xs text-slate-400">This horizontal distance measures how much the test statistic tends to shift when H1 is true. Bigger Δ (relative to spread) means less overlap → β goes down → power goes up.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-800 p-2 rounded border border-slate-600 relative h-80">
+              <!-- UPDATE 2: Persistent Area Rule -->
+            <div class="text-center bg-slate-900/80 border border-slate-700 rounded p-1 mb-2">
+               <p class="text-xs font-bold text-green-300">✅ Probability = shaded area under a curve (not curve height). Total area = 1.</p>
+            </div>
+
+            <!-- View Mode Toggle (Default Split) -->
+            <div class="absolute top-10 right-2 z-10 flex bg-slate-900 rounded p-1 border border-slate-700 shadow-xl">
+              <button onclick="setGuideView('split')" id="btn-view-split" class="px-3 py-1 text-xs rounded transition-colors text-white bg-slate-700 font-bold">Split View</button>
+              <button onclick="setGuideView('combined')" id="btn-view-combined" class="px-3 py-1 text-xs rounded transition-colors text-slate-400 hover:text-white">Combined</button>
+            </div>
+            
+            <canvas id="guide-canvas" class="sigma-canvas w-full h-full"></canvas>
+            <div id="guide-tooltip" class="absolute top-4 left-4 bg-slate-900/90 text-white text-xs p-2 rounded border border-yellow-500 hidden pointer-events-none z-50 shadow-lg"></div>
+          </div>
+
+          <!-- Live probabilities -->
+          <div class="bg-slate-900 border border-slate-700 p-4 rounded text-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="activity" class="w-4 h-4 text-green-300"></i> Live probabilities
+              </h3>
+              <div class="text-xs text-slate-400">Move the slider → see α/β change</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--neon-gold)"></span><span class="text-yellow-300 font-bold">1−α</span></span>
+                <span id="prob-one-alpha" class="text-slate-200 font-mono">—</span>
+              </div>
+              <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--neon-red)"></span><span class="text-red-300 font-bold">α</span></span>
+                <span id="prob-alpha" class="text-slate-200 font-mono">—</span>
+              </div>
+              <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: #60a5fa"></span><span class="text-blue-300 font-bold">β</span></span>
+                <span id="prob-beta" class="text-slate-200 font-mono">—</span>
+              </div>
+              <div class="bg-slate-800/60 border border-slate-700 rounded p-2 flex items-center justify-between">
+                <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--neon-green)"></span><span class="text-green-300 font-bold">1−β</span></span>
+                <span id="prob-one-beta" class="text-slate-200 font-mono">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Explainer Panel -->
+          <div id="guide-explainer" class="bg-slate-900 border border-slate-600 p-4 rounded text-sm relative explainer-enter min-h-[170px]">
+            <div class="absolute top-0 left-0 w-1 h-full bg-blue-500" id="explainer-bar"></div>
+            <h3 class="font-bold text-white text-lg mb-1" id="explainer-title">Select a Region</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-slate-400 text-xs uppercase font-bold mb-1">What you’re looking at</p>
+                <p id="explainer-context" class="text-slate-200">Click the matrix, graph, or buttons to learn.</p>
+                <div class="mt-2 text-xs font-mono text-yellow-400 whitespace-pre-line" id="explainer-math"></div>
+              </div>
+              <div class="border-l border-slate-700 pl-4">
+                <p class="text-slate-400 text-xs uppercase font-bold mb-1">Meaning (plain English)</p>
+                <p id="explainer-desc" class="text-slate-300 text-xs whitespace-pre-line">Waiting for input...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quiz Section -->
+          <div class="bg-slate-900 p-4 rounded border border-slate-700 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
+            <p class="text-slate-300 mb-3 text-sm" id="quiz-instruction">
+              Use the matrix to explore. Then <span class="font-bold text-white">Click a Region</span> on the graph.
+            </p>
+            <div id="quiz-feedback" class="h-6 text-sm font-bold mb-2"></div>
+            <div class="flex justify-center gap-2 flex-wrap">
+              <button onclick="startGuideQuiz()" id="btn-start-quiz" class="btn-neon bg-yellow-700/50 text-yellow-200 text-xs font-bold py-2 px-6 rounded hover:bg-yellow-600">
+                START REGION QUIZ
+              </button>
+              <button id="btn-start-from-guide" disabled onclick="prepareGame(10)" class="btn-neon bg-slate-800 text-slate-600 text-xs font-bold py-2 px-6 rounded opacity-50 cursor-not-allowed">
+                GAME LOCKED
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Controls & Matrix -->
+        <div class="space-y-3">
+
+          <!-- Matrix Widget -->
+          <div class="bg-slate-800 p-3 rounded border border-slate-600">
+            <h3 class="font-bold text-xs text-slate-400 uppercase mb-2">The Decision Matrix (Truth × Decision)</h3>
+            <div class="text-[11px] text-slate-300 mb-2 leading-snug">
+              <span class="text-slate-100 font-bold">Rows</span> = what’s true in reality.
+              <span class="text-slate-100 font-bold">Columns</span> = what your test decides.
+            </div>
+
+            <div class="grid grid-cols-3 gap-1 text-[10px] text-center font-bold text-white">
+              <div></div>
+              <div class="bg-slate-700 py-1 rounded">Fail to Reject</div>
+              <div class="bg-slate-700 py-1 rounded">Reject H0</div>
+
+              <!-- Row 1 -->
+              <div class="bg-slate-700 flex items-center justify-center rounded text-slate-300">H0 True<br><span class="text-slate-500 font-normal">(Null)</span></div>
+              <div onclick="matrixClick('h0', 'fail')" id="mat-h0-fail" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-yellow-300 flex flex-col justify-center items-center h-16">
+                <span>Correct</span>
+                <span id="matval-one-alpha" class="text-[9px] text-slate-400 font-normal">1 − α</span>
+              </div>
+              <div onclick="matrixClick('h0', 'reject')" id="mat-h0-reject" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-red-300 flex flex-col justify-center items-center h-16">
+                <span>Type I</span>
+                <span id="matval-alpha" class="text-[9px] text-slate-400 font-normal">α</span>
+              </div>
+
+              <!-- Row 2 -->
+              <div class="bg-slate-700 flex items-center justify-center rounded text-slate-300">H1 True<br><span class="text-slate-500 font-normal">(Alt)</span></div>
+              <div onclick="matrixClick('h1', 'fail')" id="mat-h1-fail" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-blue-300 flex flex-col justify-center items-center h-16">
+                <span>Type II</span>
+                <span id="matval-beta" class="text-[9px] text-slate-400 font-normal">β</span>
+              </div>
+              <div onclick="matrixClick('h1', 'reject')" id="mat-h1-reject" class="matrix-cell bg-slate-900 border border-slate-600 rounded p-2 text-green-300 flex flex-col justify-center items-center h-16">
+                <span>Power</span>
+                <span id="matval-one-beta" class="text-[9px] text-slate-400 font-normal">1 − β</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manual Controls -->
+          <div class="bg-slate-800 p-3 rounded border border-slate-600 text-sm">
+            <h3 class="font-bold text-xs text-slate-400 uppercase mb-2">Manual Override</h3>
+
+            <div class="mb-3">
+              <div class="flex justify-between text-xs mb-1"><span>Focus Region</span></div>
+              <div class="grid grid-cols-5 gap-1">
+                <button onclick="highlightGuide('correct')" class="p-1 bg-yellow-900/25 border border-yellow-900 text-yellow-200 text-xs rounded hover:bg-yellow-900/40">1−α</button>
+                <button onclick="highlightGuide('alpha')" class="p-1 bg-red-900/30 border border-red-900 text-red-200 text-xs rounded hover:bg-red-900/50">α</button>
+                <button onclick="highlightGuide('beta')" class="p-1 bg-blue-900/30 border border-blue-900 text-blue-200 text-xs rounded hover:bg-blue-900/50">β</button>
+                <button onclick="highlightGuide('power')" class="p-1 bg-green-900/30 border border-green-900 text-green-200 text-xs rounded hover:bg-green-900/50">1−β</button>
+                <button onclick="resetGuide()" class="p-1 bg-slate-700 text-slate-300 text-xs rounded px-2">Reset</button>
+              </div>
+
+              <label class="mt-3 flex items-center gap-2 text-xs text-slate-300 select-none">
+                <input type="checkbox" checked onchange="toggleGuideLabels(this.checked)" class="accent-yellow-400">
+                Show formula labels on the graph
+              </label>
+            </div>
+
+            <div class="border-t border-slate-700 pt-3">
+              <div class="flex justify-between text-xs mb-1"><span>Critical Value Position (c)</span><span class="text-slate-400" id="crit-readout">50</span></div>
+              <input id="crit-slider" type="range" min="0" max="100" value="50"
+                class="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                oninput="updateGuideParams(this.value)">
+            </div>
+            
+            <!-- UPDATE 5: Dynamic Z-score Readout -->
+            <div class="mt-4 bg-slate-900 p-2 rounded border border-slate-700 text-xs font-mono space-y-1">
+               <div class="flex justify-between"><span class="text-slate-400">Pos relative to H0 (z0):</span> <span class="text-slate-200" id="readout-z0">0.0</span></div>
+               <div class="flex justify-between"><span class="text-slate-400">Pos relative to H1 (z1):</span> <span class="text-blue-300" id="readout-z1">0.0</span></div>
+               <p class="text-[10px] text-slate-500 font-sans mt-1 pt-1 border-t border-slate-800">
+                 Same cutoff (c), but measured from different "world means." That’s why α and β differ.
+               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: BATTLE (Locked Layout) --- -->
+    <div id="battle-screen" class="hidden flex flex-col h-full gap-2 w-full max-w-4xl mx-auto overflow-hidden pb-2">
+      <!-- HUD (Fixed Top) -->
+      <div class="shrink-0 flex flex-wrap justify-between items-center bg-slate-900/80 border-b-2 border-slate-700 p-2 z-30 backdrop-blur-md rounded-b-xl shadow-lg">
+        <div class="flex items-center gap-2 w-1/4" id="lives-container"></div>
+        <div id="timer-display" class="font-mono text-xl text-yellow-400 border border-yellow-600/50 bg-yellow-900/20 px-3 py-1 rounded">00:00</div>
+        <div class="w-1/4 flex items-center justify-end gap-2">
+          <div class="hidden sm:flex flex-col items-end mr-1">
+            <span class="text-[10px] text-slate-500 uppercase tracking-widest">Grant $</span>
+            <span class="text-lg font-bold text-blue-400" id="score-display">0</span>
+          </div>
+          <button onclick="confirmAction('restart')" class="p-2 bg-slate-800 rounded hover:bg-slate-700 text-blue-400 border border-slate-600" title="Restart Run"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+          <button onclick="confirmAction('end')" class="p-2 bg-slate-800 rounded hover:bg-red-900 text-red-400 border border-slate-600" title="End Study"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+        </div>
+        <div id="time-warning" class="hidden absolute top-full left-0 w-full text-center bg-red-900/90 text-red-200 text-xs font-bold py-1 animate-pulse">DEADLINE APPROACHING</div>
+      </div>
+
+      <!-- MIDDLE: Game Card (FLEXIBLE HEIGHT) -->
+      <!-- 'flex-1 min-h-0' makes this section grow to fill available space, but allows children (canvas) to shrink if space is tight -->
+      <div id="game-card" class="flex-1 min-h-0 bg-slate-800/50 border border-slate-600 p-3 rounded-xl relative overflow-hidden flex flex-col transition-all duration-300">
+        
+        <div class="shrink-0 flex justify-between items-start mb-1">
+          <span id="diff-badge" class="text-[10px] font-bold text-purple-400 border border-purple-500/50 px-2 py-0.5 rounded">LEVEL 1</span>
+          <span class="text-[10px] text-slate-500">Visual Analysis</span>
+        </div>
+
+        <!-- CANVAS: Flex-grow to fill vertical space -->
+        <div id="canvas-container" class="flex-1 min-h-[120px] rounded border border-slate-700/50 relative overflow-hidden bg-slate-900 shadow-inner w-full">
+          <canvas id="viz-canvas" class="sigma-canvas w-full h-full"></canvas>
+          <div id="debug-overlay" class="hidden"></div>
+        </div>
+
+        <!-- Instructions: Shrinkable -->
+        <div class="shrink-0 bg-slate-900/50 p-1.5 rounded border border-slate-700 my-2 flex justify-around text-[9px] md:text-[10px] text-slate-400">
+          <div id="check-1" class="check-item">1. Identify Curve (H0/H1)</div>
+          <div id="check-2" class="check-item border-l border-slate-700 pl-2">2. Check Side (Reject/Fail)</div>
+          <div id="check-3" class="check-item border-l border-slate-700 pl-2">3. Name Error (α/β)</div>
+        </div>
+
+        <!-- Question: Shrinkable -->
+        <div class="shrink-0 flex flex-col items-center justify-center text-center z-10 relative mb-1">
+          <h2 class="text-sm md:text-base font-bold text-white mb-1" id="scenario-title">Question</h2>
+          <p class="text-blue-100 text-sm md:text-base leading-snug font-medium line-clamp-3" id="scenario-desc">Loading...</p>
+        </div>
+
+        <div id="reaction-overlay" class="hidden absolute inset-0 bg-slate-950/95 z-40 flex flex-col items-center justify-center p-4 cursor-auto pointer-events-auto"></div>
+      </div>
+
+      <!-- BOTTOM: Interaction Panel (Compressed) -->
+      <!-- Uses grid for layout, shrink-0 ensures it stays visible at bottom -->
+      <div class="shrink-0 grid grid-cols-1 lg:grid-cols-3 gap-2">
+        
+        <!-- Left: Tactics (Horizontal Row on Mobile to save space) -->
+        <div class="lg:col-span-1 bg-slate-800 border border-slate-600 rounded p-2 flex flex-col gap-2 justify-center">
+           <div class="grid grid-cols-2 gap-1">
+              <button onclick="buyHint(1)" id="btn-hint-1" class="btn-neon flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-slate-300 px-2 py-1 rounded text-[10px] border border-slate-600">
+                <span><i data-lucide="search" class="w-3 h-3 inline mr-1 text-blue-400"></i> Hint 1 ($10)</span>
+              </button>
+              <button onclick="buyHint(2)" id="btn-hint-2" disabled class="btn-neon flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-slate-300 px-2 py-1 rounded text-[10px] border border-slate-600 opacity-50">
+                <span><i data-lucide="map" class="w-3 h-3 inline mr-1 text-yellow-400"></i> Hint 2 ($20)</span>
+              </button>
+              <button onclick="buyHint(3)" id="btn-hint-3" disabled class="btn-neon flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-slate-300 px-2 py-1 rounded text-[10px] border border-slate-600 opacity-50">
+                <span><i data-lucide="tag" class="w-3 h-3 inline mr-1 text-purple-400"></i> Hint 3 ($30)</span>
+              </button>
+              <button onclick="pulseRegion()" id="btn-pulse" class="btn-neon flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-400 px-2 py-1 rounded text-[10px] border border-slate-700">
+                <span><i data-lucide="zap" class="w-3 h-3 inline mr-1 text-red-400"></i> Pulse ($15)</span>
+              </button>
+           </div>
+           <div class="flex gap-1">
+             <button onclick="revealDeepLogic()" id="btn-deep-logic" class="flex-1 btn-neon flex items-center justify-center bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 px-2 py-1 rounded text-[10px]">
+               <span><i data-lucide="brain-circuit" class="w-3 h-3 inline mr-1"></i> Logic ($20)</span>
+             </button>
+             <button onclick="openReveal()" id="btn-reveal" class="flex-1 btn-neon flex items-center justify-center bg-red-900/20 hover:bg-red-900/35 border border-red-800/60 text-red-200 px-2 py-1 rounded text-[10px]">
+               <span><i data-lucide="key" class="w-3 h-3 inline mr-1"></i> Key ($40)</span>
+             </button>
+           </div>
+        </div>
+
+        <!-- Right: Options (Main Answer Grid) -->
+        <div class="lg:col-span-2 bg-slate-800 border border-slate-600 p-2 rounded-xl relative">
+          <div class="absolute top-0 right-0 bg-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-bl text-white">SELECT ANSWER</div>
+
+          <div id="spell-tooltip" class="mb-1 min-h-[1.5rem] flex items-center justify-center text-center text-[10px] text-blue-200 italic bg-slate-900/50 rounded border border-blue-900/30 p-1">
+            <div id="tooltip-locked" class="flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i><span>Data Obscured. <button onclick="unlockTooltips()" class="underline text-blue-400 hover:text-blue-300">Identify (-20)</button></span></div>
+            <div id="tooltip-active" class="hidden w-full">Hover to define concept...</div>
+          </div>
+
+          <div id="options-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-1">
+             <!-- JS injects buttons here -->
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-deep-logic" class="hidden bg-purple-900/20 border border-purple-500/30 p-2 rounded absolute bottom-20 left-4 right-4 z-50 shadow-2xl backdrop-blur-md">
+        <h4 class="text-purple-400 font-bold text-xs mb-1"><i data-lucide="cpu" class="w-3 h-3 inline mr-1"></i> LOGIC CORE ANALYSIS <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="float-right text-slate-400">x</button></h4>
+        <div id="deep-logic-text" class="text-xs text-slate-300 space-y-1 max-h-32 overflow-y-auto">...</div>
+      </div>
+
+      <div id="panel-hint-ladder" class="hidden bg-yellow-900/20 border border-yellow-500/30 p-2 rounded absolute bottom-20 left-4 right-4 z-50 shadow-2xl backdrop-blur-md">
+        <h4 class="text-yellow-400 font-bold text-xs mb-1"><i data-lucide="zap" class="w-3 h-3 inline mr-1"></i> HINT FEED <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="float-right text-slate-400">x</button></h4>
+        <div id="hint-ladder-content" class="space-y-1 text-xs text-slate-300"></div>
+      </div>
+
+      <div id="grimoire-container" class="hidden absolute inset-4 bg-slate-900 border border-slate-500 p-4 rounded z-50 overflow-y-auto text-sm force-scroll shadow-2xl">
+         <div class="flex justify-between mb-4 border-b border-slate-700 pb-2">
+            <h2 class="font-bold text-white">Manual</h2>
+            <button onclick="toggleGrimoire()" class="text-red-400">Close</button>
+         </div>
+         <div id="grimoire-content-body"></div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: REVEAL MODAL --- -->
+    <div id="reveal-modal" class="hidden fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center p-4">
+      <div class="bg-slate-900 border-2 border-red-500 rounded-lg p-6 max-w-lg w-full shadow-2xl relative animate-pop flex flex-col max-h-[80vh] min-h-[60vh]">
+        <button onclick="closeReveal()" class="absolute top-2 right-2 text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <div class="flex-shrink-0 mb-4 text-center">
+          <h2 class="text-3xl font-bold text-red-500 flex items-center justify-center gap-3 border-b border-slate-800 pb-2">
+            <i data-lucide="alert-triangle" class="w-8 h-8"></i> ANSWER KEY
+          </h2>
+          <p class="text-xs text-slate-400 mt-2">This shows the correct concept + the reasoning chain for this question.</p>
+        </div>
+        <div class="flex-1 min-h-0 overflow-y-auto force-scroll space-y-6 pr-2">
+          <div class="bg-slate-800 p-4 rounded border border-slate-700">
+            <p class="text-xs text-slate-500 uppercase tracking-widest mb-2">Correct Concept:</p>
+            <p id="reveal-correct-dist" class="text-2xl font-bold text-white"></p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-widest mb-2">Deep Logic:</p>
+            <div id="reveal-explanation" class="text-blue-200 text-sm leading-relaxed"></div>
+          </div>
+        </div>
+        <div class="flex-shrink-0 mt-6">
+          <button onclick="finishReveal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded border border-slate-600 shadow-lg">Close & Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: GAME OVER --- -->
+    <div id="gameover-screen" class="hidden flex flex-col items-center justify-center h-full space-y-6 text-center animate-in zoom-in">
+      <i data-lucide="ban" class="w-20 h-20 text-red-500"></i>
+      <h1 class="text-5xl font-bold text-white">FUNDING CUT</h1>
+      <p class="text-xl text-red-400 font-mono" id="gameover-reason">LIVES DEPLETED</p>
+      <div class="flex gap-4">
+        <button onclick="resetGame()" class="btn-neon bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded">RESTART RUN</button>
+        <button onclick="returnToStart()" class="btn-neon bg-slate-700 hover:bg-slate-600 text-white py-3 px-6 rounded">MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: VICTORY --- -->
+    <div id="victory-screen" class="hidden flex flex-col items-center justify-center h-full space-y-6 text-center animate-in zoom-in">
+      <div class="text-6xl animate-bounce">🏆</div>
+      <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">PAPER PUBLISHED</h1>
+      <p id="victory-msg" class="text-lg text-slate-300 max-w-md">Your findings are robust and replicable.</p>
+      <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+        <div class="bg-slate-800 p-4 rounded border border-slate-700"><div class="text-slate-500 text-xs uppercase">Funding Secured</div><div class="text-3xl font-bold text-white" id="final-score">0</div></div>
+        <div class="bg-slate-800 p-4 rounded border border-slate-700"><div class="text-slate-500 text-xs uppercase">Time Left</div><div class="text-3xl font-bold text-green-400" id="final-time">00:00</div></div>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="resetGame()" class="btn-neon bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-10 rounded shadow-[0_0_15px_rgba(37,99,235,0.5)]">NEW STUDY</button>
+        <button onclick="returnToStart()" class="btn-neon bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-10 rounded">MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- --- SCREEN: LIBRARY --- -->
+    <div id="library-screen" class="hidden w-full h-full pt-4 flex flex-col">
+      <div class="flex items-center gap-4 mb-6 border-b border-slate-700 pb-4 px-4">
+        <button onclick="returnToStart()" class="p-2 bg-slate-800 rounded hover:bg-slate-700 text-white"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+        <h1 class="text-2xl font-bold text-white">The Research Manual</h1>
+      </div>
+      <div id="library-content" class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-y-auto px-4 pb-4"></div>
+    </div>
+
+    <!-- --- MODAL OVERLAY --- -->
+    <div id="modal-overlay" class="hidden fixed inset-0 bg-slate-950/90 z-[60] flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-600 p-6 rounded shadow-2xl max-w-sm w-full text-center">
+        <h3 id="modal-title" class="text-xl font-bold text-white mb-2">Confirm</h3>
+        <p id="modal-msg" class="text-slate-300 mb-6 text-sm">Are you sure?</p>
+        <div class="flex gap-4 justify-center">
+          <button id="modal-btn-no" onclick="closeModal()" class="px-4 py-2 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
+          <button id="modal-btn-yes" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-500 font-bold">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOGIC -->
+  <script>
+    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+    function normalCDF(z) {
+      const t = 1 / (1 + 0.2316419 * Math.abs(z));
+      const d = 0.398942280401432678 * Math.exp(-z * z / 2);
+      const prob = d * t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+      if (z > 0) return 1 - prob;
+      return prob;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    /* --- AUDIO SYNTHESIS ENGINE (NEW) --- */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // SAFE AUDIO: Wraps audio calls to prevent crashes if context is blocked
+    function playSound(type) {
+      try {
+        if(audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(() => {}); // catch resume errors
+        }
+        
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        const now = audioCtx.currentTime;
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, now);
+            osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'click') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(800, now);
+            gainNode.gain.setValueAtTime(0.02, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        }
+      } catch(e) {
+        console.warn("Audio Error:", e);
+      }
+    }
+
+    const concepts = [
+      { id: 'h0', name: "Null Hypothesis (H0)", desc: "The 'Status Quo'. No effect/Difference.", tooltip: "Assume H0 is true until proven otherwise." },
+      { id: 'h1', name: "Alt Hypothesis (H1)", desc: "The claim of an Effect or Difference.", tooltip: "What you are trying to find evidence for." },
+      { id: 'p_val', name: "P-value", desc: "Probability (under H0) of observing a result at least as extreme as the one observed.", tooltip: "Low P = Surprise! (Reject H0)." },
+      { id: 'alpha', name: "Alpha (α)", desc: "Threshold for significance (usually 0.05).", tooltip: "The cut-off point. If p < α, we reject." },
+      { id: 'type1', name: "Type I Error (α)", desc: "False Positive. Rejecting H0 when it's TRUE.", tooltip: "Crying wolf when there is no wolf." },
+      { id: 'type2', name: "Type II Error (β)", desc: "False Negative. Failing to Reject H0 when FALSE.", tooltip: "Missing a discovery that is actually there." },
+      { id: 'power', name: "Power", desc: "Prob. of finding an effect if it exists.", tooltip: "Power = 1 - Beta. Increases with Sample Size." },
+      { id: 'reject', name: "Reject Null", desc: "Decision when p < α.", tooltip: "Statistically Significant result." },
+      { id: 'fail_reject', name: "Fail to Reject", desc: "Decision when p > α.", tooltip: "Not enough evidence. (Never 'Accept' H0)." },
+      { id: 'n', name: "Sample Size (n)", desc: "Number of observations.", tooltip: "More n = More Power, narrower curves." }
+    ];
+
+    const level1 = [
+      { text: "Analyze the graph. What statistical error does the <span class='text-red-400 font-bold'>RED ZONE</span> represent?", answer: 'type1', diff: 'Level 1', clue: "It is under the H0 curve (Gray), right of the critical value.", logic: "1. The region is under the H0 curve (Status Quo).\n2. It lies in the 'Reject H0' zone.\n3. H0 is true, but we rejected it.\n→ **Type I Error (False Positive)**.", graph: { dist: 2.0, highlight: 'alpha' } },
+      { text: "Analyze the graph. What statistical error does the <span class='text-blue-400 font-bold'>BLUE ZONE</span> represent?", answer: 'type2', diff: 'Level 1', clue: "It is under the H1 curve (Blue), left of the critical value.", logic: "1. The region is under the H1 curve (Effect exists).\n2. It lies in the 'Fail to Reject' zone.\n3. We failed to find the effect.\n→ **Type II Error (False Negative)**.", graph: { dist: 2.0, highlight: 'beta' } },
+      { text: "Analyze the graph. What does the <span class='text-green-400 font-bold'>GREEN ZONE</span> represent?", answer: 'power', diff: 'Level 1', clue: "Correctly rejecting H0 when H1 is true.", logic: "1. Under H1 curve (Effect exists).\n2. In the 'Reject H0' zone (Correct).\n3. We found the effect!\n→ **Statistical Power**.", graph: { dist: 2.0, highlight: 'power' } },
+      { text: "What does the <span class='text-slate-400 font-bold'>GRAY CURVE</span> represent?", answer: 'h0', diff: 'Level 1', clue: "The distribution of 'No Effect'.", logic: "1. Centered at μ0.\n2. Represents the world where nothing happened.\n→ **Null Hypothesis (H0)**.", graph: { dist: 2.0, highlight: 'none' } }
+    ];
+
+    const level2 = [
+      { text: "<strong>Scenario:</strong> A fire alarm rings (Reject H0), but there is NO fire (H0 True).<br>Look at the graph. Which zone represents this mistake?", answer: 'type1', diff: 'Level 2', clue: "False Alarm.", logic: "1. Reality: H0 is True (No Fire).\n2. Decision: Reject H0 (Alarm rings).\n3. This is a False Positive.\n4. Visually: The area under H0, right of the line.\n→ **Type I Error (Red Zone)**.", graph: { dist: 2.0, highlight: 'alpha' } },
+      { text: "<strong>Scenario:</strong> A pregnancy test is Negative (Fail to Reject), but the patient IS pregnant (H1 True).<br>Which zone represents this mistake?", answer: 'type2', diff: 'Level 2', clue: "Missed Detection.", logic: "1. Reality: H1 is True (Pregnant).\n2. Decision: Fail to Reject.\n3. This is a False Negative.\n4. Visually: The area under H1, left of the line.\n→ **Type II Error (Blue Zone)**.", graph: { dist: 2.0, highlight: 'beta' } },
+      { text: "<strong>Scenario:</strong> A court convicts a defendant who is actually Guilty.<br>Which zone represents this outcome?", answer: 'power', diff: 'Level 2', clue: "Correct conviction.", logic: "1. Reality: H1 is True (Guilty).\n2. Decision: Reject H0 (Convict).\n3. Correct outcome.\n4. Visually: The Green area.\n→ **Power**.", graph: { dist: 2.0, highlight: 'power' } },
+      { text: "<strong>Scenario:</strong> We set a strict threshold (α = 0.05).<br>What concept determines where the <strong>Vertical Dotted Line</strong> is placed?", answer: 'alpha', diff: 'Level 2', clue: "The probability used to set the cutoff.", logic: "1. This line is the critical value / decision threshold.\n2. Its position is determined by our chosen Alpha level.\n→ **Alpha**.", graph: { dist: 2.0, highlight: 'none' } }
+    ];
+
+    const level3 = [
+      { text: "<strong>Dynamics:</strong> We increase sample size (N=1000) and the curves separate. The <span class='text-green-400 font-bold'>GREEN ZONE</span> dominates. What desirable statistical property is being maximized?", answer: 'power', diff: 'Level 3', clue: "Precision makes it easier to tell them apart.", logic: "1. Narrow curves overlap less.\n2. Separation (Effect Size / SD) increases effectively.\n3. We almost never miss the effect.\n→ **Power Increases**.", graph: { dist: 2.0, highlight: 'power', narrow: true } },
+      { text: "<strong>Dynamics:</strong> We move the threshold LEFT (strict against H0). The <span class='text-blue-400 font-bold'>BLUE ZONE</span> shrinks. Which specific error type are we actively reducing?", answer: 'type2', diff: 'Level 3', clue: "Look at the Blue area size.", logic: "1. Threshold moves left.\n2. We reject more easily.\n3. We miss fewer real effects.\n4. Visually: The Blue area shrinks.\n→ **Type II Error Decreases**.", graph: { dist: 2.0, highlight: 'beta', shiftAlpha: -30 } },
+      { text: "<strong>Dynamics:</strong> The effect is very weak (Curves Overlap Heavily). We almost exclusively land in the <span class='text-blue-400 font-bold'>BLUE ZONE</span>. What specific error is now the dominant outcome?", answer: 'type2', diff: 'Level 3', clue: "Hard to distinguish.", logic: "1. Curves overlap.\n2. Signal is hidden in noise.\n3. We will likely miss it.\n4. Visually: The Blue area is huge.\n→ **Type II Error Increases**.", graph: { dist: 0.8, highlight: 'beta' } }
+    ];
+
+    let state = {
+      screen: 'start', lives: 3, score: 500, index: 0,
+      initialTime: 300, timeLeft: 300, timerId: null,
+      currentRun: [], tooltipsUnlocked: false, processing: false, debugMode: false,
+      hintsUnlocked: 0, pulseTarget: null,
+      revealUsed: false,
+      // NEW: High Score
+      highScore: parseInt(localStorage.getItem('sigma_highscore') || '0')
+    };
+
+    let guideState = {
+      world: 'h0',
+      critPos: 50,
+      highlight: null,
+      quizStep: 0,
+      active: false,
+      showLabels: true,
+      viewMode: 'split'
+    };
+
+    const els = {};
+    let guideRAF = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const screenIds = ['start', 'battle', 'gameover', 'victory', 'library', 'guide'];
+      screenIds.forEach(id => els[id] = document.getElementById(`${id}-screen`));
+
+      const mapId = (key, id) => { const el = document.getElementById(id); if(el) els[key] = el; };
+      mapId('vizCanvas', 'viz-canvas'); mapId('guideCanvas', 'guide-canvas'); mapId('lives', 'lives-container');
+      mapId('timer', 'timer-display'); mapId('score', 'score-display'); mapId('hudQCurrent', 'hud-q-current');
+      mapId('diffBadge', 'diff-badge'); mapId('cardTitle', 'scenario-title'); mapId('cardDesc', 'scenario-desc');
+      mapId('overlay', 'reaction-overlay'); mapId('gameCard', 'game-card'); mapId('btnDeep', 'btn-deep-logic');
+      mapId('btnReveal', 'btn-reveal');
+      mapId('btnHint1', 'btn-hint-1'); mapId('btnHint2', 'btn-hint-2');
+      mapId('btnHint3', 'btn-hint-3'); mapId('panelDeep', 'panel-deep-logic'); mapId('panelHint', 'panel-hint-ladder');
+      mapId('revealModal', 'reveal-modal'); mapId('revealCorrectDist', 'reveal-correct-dist'); mapId('revealExplanation', 'reveal-explanation');
+      mapId('grimoireStatus', 'grimoire-status'); mapId('grimoireContainer', 'grimoire-container'); 
+      mapId('grimoireContentBody', 'grimoire-content-body');
+      mapId('optionsGrid', 'options-grid');
+      mapId('tooltipLocked', 'tooltip-locked'); mapId('tooltipActive', 'tooltip-active'); mapId('hintContent', 'hint-ladder-content');
+      mapId('quizFeedback', 'quiz-feedback'); mapId('quizInstruction', 'quiz-instruction');
+      mapId('btnStartGuideQuiz', 'btn-start-quiz'); mapId('btnStartFromGuide', 'btn-start-from-guide');
+      mapId('explainerContext', 'explainer-context'); mapId('explainerDesc', 'explainer-desc'); mapId('explainerTitle', 'explainer-title');
+      mapId('explainerMath', 'explainer-math'); mapId('explainerBar', 'explainer-bar');
+      mapId('btnViewSplit', 'btn-view-split'); mapId('btnViewCombined', 'btn-view-combined');
+      mapId('matrixContainer', 'matrix-container');
+      mapId('canvasContainer', 'canvas-container');
+
+      lucide.createIcons();
+      buildLibrary(); buildGrimoire(); buildOptionButtons();
+      updateHighScoreDisplay();
+
+      // Keyboard Listener (Patch)
+      window.addEventListener('keydown', (e) => {
+        const key = e.key.toLowerCase();
+        
+        // 1. GLOBAL HOTKEYS
+        if(key === 'd') toggleDebugMode();
+
+        // 2. OVERLAY NAVIGATION (HIGHEST PRIORITY - Ignores processing flag)
+        if(!els.battle.classList.contains('hidden') && !els.overlay.classList.contains('hidden')) {
+           if(key === 'enter' || key === ' ') {
+             e.preventDefault(); // Stop scrolling
+             nextLevel();
+           }
+           return;
+        }
+
+        // 3. GAMEPLAY INPUTS (Blocked by processing flag)
+        if (state.processing) return;
+
+        if(!els.battle.classList.contains('hidden')) {
+           if(key === 'h') buyHint(state.hintsUnlocked + 1);
+           
+           if ((key >= '1' && key <= '9') || key === '0') {
+             const btns = document.querySelectorAll('#options-grid button');
+             let idx = -1;
+             if (key === '0') idx = 9;
+             else idx = parseInt(key) - 1;
+             
+             if(btns[idx]) btns[idx].click();
+           }
+        }
+      });
+
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if(!els.battle?.classList.contains('hidden')) {
+            const sc = state.currentRun[state.index];
+            if(sc) drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, state.pulseTarget);
+          }
+          if(!els.guide?.classList.contains('hidden')) updateGuideCanvas();
+        }, 120);
+      });
+
+      if(els.guideCanvas) {
+        els.guideCanvas.addEventListener('mousedown', handleGuideClick);
+        els.guideCanvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleGuideClick(e.touches[0]); }, {passive:false});
+      }
+    });
+
+    // --- HELPER FUNCTIONS ---
+    function showScreen(screenId) {
+      ['start', 'battle', 'gameover', 'victory', 'library', 'guide'].forEach(id => els[id]?.classList.add('hidden'));
+      els[screenId.replace('-screen','')]?.classList.remove('hidden');
+      if(screenId !== 'guide-screen') guideState.active = false;
+    }
+
+    function showLibrary() { showScreen('library-screen'); }
+
+    function resetGame() { clearInterval(state.timerId); showScreen('start-screen'); guideState.active = false; }
+    function returnToStart() { resetGame(); }
+    
+    function closeModal() { document.getElementById('modal-overlay')?.classList.add('hidden'); }
+
+    function confirmAction(action) {
+      const overlay = document.getElementById('modal-overlay');
+      const btnYes = document.getElementById('modal-btn-yes');
+      if(overlay) overlay.classList.remove('hidden');
+      if(action === 'end') {
+        document.getElementById('modal-title').innerText = "End Study?";
+        btnYes.onclick = () => { closeModal(); returnToStart(); };
+      } else if(action === 'restart') {
+        document.getElementById('modal-title').innerText = "Restart Run?";
+        btnYes.onclick = () => { closeModal(); prepareGame(state.initialTime/60); };
+      }
+    }
+
+    function victory() {
+      clearInterval(state.timerId);
+      saveHighScore(); // Save score on victory
+      const fs = document.getElementById('final-score');
+      if(fs) fs.innerText = state.score;
+      const ft = document.getElementById('final-time');
+      if(ft) {
+        const m = Math.floor(state.timeLeft / 60);
+        const s = (state.timeLeft % 60).toString().padStart(2, '0');
+        ft.innerText = `${m}:${s}`;
+      }
+      playSound('correct');
+      showScreen('victory-screen');
+    }
+
+    function gameOver(reason) {
+      clearInterval(state.timerId);
+      playSound('wrong');
+      const r = document.getElementById('gameover-reason');
+      if(r) r.innerText = reason;
+      showScreen('gameover-screen');
+    }
+
+    // --- HIGH SCORE SYSTEM ---
+    function updateHighScoreDisplay() {
+      const el = document.getElementById('high-score-display');
+      const val = document.getElementById('high-score-val');
+      if(state.highScore > 0 && el && val) {
+        el.classList.remove('hidden');
+        val.innerText = state.highScore;
+      }
+    }
+    
+    function saveHighScore() {
+      if(state.score > state.highScore) {
+        state.highScore = state.score;
+        localStorage.setItem('sigma_highscore', state.score.toString());
+        updateHighScoreDisplay();
+      }
+    }
+
+    // --- EXPLAINER LOGIC ---
+    function updateGuideExplainer(data) {
+      if(!els.explainerTitle) return;
+      const { focus, world, decision, alphaP, betaP, powerP } = data;
+
+      let title = "The Distribution";
+      let context = "Gray = H0 (no effect). Blue = H1 (real effect).";
+      let desc = "Click a coloured area (or matrix cell) to see what it means.\n\nProbability = shaded area under a curve.";
+      let math = "";
+      let color = "bg-slate-500";
+
+      const oneAlpha = 1 - alphaP;
+      const oneBeta = powerP;
+      const pct = (p) => `${(p*100).toFixed(1)}%`;
+
+      if (focus === 'alpha' || (world === 'h0' && decision === 'reject')) {
+        title = "α (Type I Error) — False Alarm";
+        context = "Truth world: <strong>H0 is true</strong> (no effect)\nDecision: <strong>Reject H0</strong> (you claim effect)";
+        desc = "**α (false alarm)**: grey area in the Reject zone.\n\"We rejected H0 even though H0 was true.\"";
+        math = `α = P(Reject H0 | H0)\n≈ ${pct(alphaP)}`;
+        color = "bg-red-500";
+      } else if (focus === 'correct') {
+        title = "1−α — Correct (No False Alarm)";
+        context = "Truth world: <strong>H0 is true</strong> (no effect)\nDecision: <strong>Fail to Reject</strong> (you don’t claim effect)";
+        desc = "**1−α**: grey area left of (c).\n\"Correct silence\". We correctly ignore noise.";
+        math = `1−α = P(Fail to Reject | H0)\n≈ ${pct(oneAlpha)}`;
+        color = "bg-yellow-400";
+      } else if (focus === 'beta' || (world === 'h1' && decision === 'fail')) {
+        title = "β (Type II Error) — Missed Detection";
+        context = "Truth world: <strong>H1 is true</strong> (real effect)\nDecision: <strong>Fail to Reject</strong> (you miss it)";
+        desc = "**β (missed detection)**: blue area in the Fail-to-Reject zone.\n\"A real effect existed, but we didn’t detect it.\"";
+        math = `β = P(Fail to Reject | H1)\n≈ ${pct(betaP)}`;
+        color = "bg-blue-500";
+      } else if (focus === 'power' || (world === 'h1' && decision === 'reject')) {
+        title = "1−β (Power) — You Catch the Effect";
+        context = "Truth world: <strong>H1 is true</strong> (real effect)\nDecision: <strong>Reject H0</strong> (you detect it)";
+        desc = "**Power** is the blue area in the Reject zone.\n\"When H1 is true, how often do we successfully reject H0?\"";
+        math = `1−β = P(Reject H0 | H1)\n≈ ${pct(oneBeta)}`;
+        color = "bg-green-500";
+      }
+
+      els.explainerTitle.innerText = title;
+      els.explainerContext.innerHTML = context.replace(/\n/g, "<br>");
+      els.explainerDesc.innerText = desc;
+      els.explainerMath.innerText = math;
+      els.explainerBar.className = `absolute top-0 left-0 w-1 h-full ${color}`;
+
+      const panel = document.getElementById('guide-explainer');
+      if(panel) {
+          panel.classList.remove('explainer-enter');
+          void panel.offsetWidth;
+          panel.classList.add('explainer-enter');
+      }
+    }
+
+    // --- GAME ACTIONS ---
+    function spend(cost) {
+      if(state.score < cost) { playSound('wrong'); return false; }
+      state.score -= cost;
+      updateHUD();
+      playSound('click');
+      return true;
+    }
+
+    function updateHUD() {
+      if(els.score) {
+        els.score.innerText = state.score;
+        els.score.className = state.score < 0 ? "text-lg font-bold text-red-400" : "text-lg font-bold text-blue-400";
+      }
+      const m = Math.floor(state.timeLeft / 60);
+      const s = (state.timeLeft % 60).toString().padStart(2, '0');
+      if(els.timer) els.timer.innerText = `${m}:${s}`;
+      if(els.lives) els.lives.innerHTML = Array(3).fill(0).map((_, i) =>
+        `<i data-lucide="heart" class="w-6 h-6 ${i < state.lives ? 'text-red-500 fill-red-500' : 'text-slate-700 fill-slate-800'}"></i>`
+      ).join('');
+      lucide.createIcons();
+    }
+
+    function buyHint(level) {
+      if(state.hintsUnlocked >= level) return;
+      if(spend(level * 10)) {
+        state.hintsUnlocked = level;
+        updateHintPanel();
+      }
+    }
+
+    function getHintsForScenario(sc) {
+      let h1 = "Check the shaded area's parent curve.";
+      let h2 = "Check if it is Reject or Fail region.";
+      let h3 = "Identify the definition.";
+      if(sc.answer === 'type1') { h1 = "Look under <strong>H0 (Gray)</strong>."; h2 = "Right of line (Reject)."; h3 = "Rejecting True H0 = Type I."; }
+      else if(sc.answer === 'type2') { h1 = "Look under <strong>H1 (Blue)</strong>."; h2 = "Left of line (Fail)."; h3 = "Missed effect = Type II."; }
+      else if(sc.answer === 'power') { h1 = "Look under <strong>H1 (Blue)</strong>."; h2 = "Right of line (Reject)."; h3 = "Found effect = Power."; }
+      return [h1, h2, h3];
+    }
+
+    function updateHintPanel() {
+      if(els.btnHint1) els.btnHint1.disabled = state.hintsUnlocked >= 1;
+      if(els.btnHint2) { els.btnHint2.disabled = state.hintsUnlocked < 1 || state.hintsUnlocked >= 2; els.btnHint2.classList.toggle('opacity-50', state.hintsUnlocked < 1); }
+      if(els.btnHint3) { els.btnHint3.disabled = state.hintsUnlocked < 2 || state.hintsUnlocked >= 3; els.btnHint3.classList.toggle('opacity-50', state.hintsUnlocked < 2); }
+
+      if(state.hintsUnlocked > 0 && els.panelHint) {
+        const sc = state.currentRun[state.index];
+        if(sc) {
+          const texts = getHintsForScenario(sc);
+          els.panelHint.classList.remove('hidden');
+          let html = "";
+          for(let i=0; i<state.hintsUnlocked; i++) html += `<div class="p-2 bg-slate-800 rounded border border-slate-700 mb-1"><strong class="text-yellow-500">Hint ${i+1}:</strong> ${texts[i]}</div>`;
+          if(els.hintContent) els.hintContent.innerHTML = html;
+        }
+      } else if(els.panelHint) els.panelHint.classList.add('hidden');
+    }
+
+    function pulseRegion() {
+      const sc = state.currentRun[state.index];
+      let target = sc.graph.highlight;
+      
+      // Fallback: If no explicit highlight region, infer from answer
+      if (target === 'none' || !target) {
+         if (sc.answer === 'type1') target = 'alpha';
+         else if (sc.answer === 'type2') target = 'beta';
+         else if (sc.answer === 'power') target = 'power';
+         else if (sc.answer === 'h0') target = 'h0_curve'; 
+         else if (sc.answer === 'h1') target = 'h1_curve'; 
+      }
+
+      if(spend(15)) {
+        state.pulseTarget = target;
+        
+        const container = document.getElementById('canvas-container');
+        if(container) {
+            container.classList.remove('animate-pulse-ring');
+            void container.offsetWidth; 
+            container.classList.add('animate-pulse-ring');
+        }
+
+        // Use requestAnimationFrame to ensure draw happens after any layout thrash
+        requestAnimationFrame(() => {
+            drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, state.pulseTarget);
+        });
+        
+        setTimeout(() => {
+          state.pulseTarget = null;
+          if(container) container.classList.remove('animate-pulse-ring');
+          if(!els.battle?.classList.contains('hidden')) {
+             requestAnimationFrame(() => {
+                drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, null);
+             });
+          }
+        }, 2000);
+      }
+    }
+
+    function revealDeepLogic() {
+      if(spend(20)) {
+        els.panelDeep?.classList.remove('hidden');
+        if(els.btnDeep) { els.btnDeep.disabled = true; els.btnDeep.classList.add('opacity-50'); }
+      }
+    }
+
+    function toggleGrimoire() {
+      const grim = document.getElementById('grimoire-container');
+      if(grim?.classList.contains('hidden')) {
+        if(spend(50)) {
+          grim.classList.remove('hidden');
+          if(els.grimoireStatus) els.grimoireStatus.innerText = "Close";
+        }
+      } else {
+        grim?.classList.add('hidden');
+        if(els.grimoireStatus) els.grimoireStatus.innerText = "Manual (-50)";
+      }
+    }
+
+    function unlockTooltips() {
+      if(spend(20)) {
+        state.tooltipsUnlocked = true;
+        els.tooltipLocked?.classList.add('hidden');
+        els.tooltipActive?.classList.remove('hidden');
+      }
+    }
+
+    function startGuide() {
+      showScreen('guide-screen');
+      guideState.active = true;
+      guideState.quizStep = 0;
+      guideState.highlight = null;
+      guideState.viewMode = 'split'; 
+      setGuideView('split');
+      
+      const slider = document.getElementById('crit-slider');
+      if(slider) slider.value = 50;
+      updateGuideParams(50);
+      updateQuizUI();
+    }
+
+    function startGuideQuiz() { guideState.quizStep = 1; updateQuizUI(); }
+    function setGuideWorld(w) { guideState.world = w; updateGuideCanvas(); }
+
+    function updateGuideParams(val) {
+      guideState.critPos = parseInt(val);
+      const readout = document.getElementById('crit-readout');
+      if(readout) readout.innerText = String(guideState.critPos);
+      if(guideRAF) cancelAnimationFrame(guideRAF);
+      guideRAF = requestAnimationFrame(() => {
+        updateGuideCanvas();
+        guideRAF = null;
+      });
+    }
+
+    function toggleGuideLabels(on) { guideState.showLabels = !!on; updateGuideCanvas(); }
+    function highlightGuide(type) { guideState.highlight = type; updateGuideCanvas(); }
+    
+    function resetGuide() {
+      guideState.highlight = null;
+      guideState.critPos = 50;
+      guideState.world = 'h0'; 
+      const slider = document.getElementById('crit-slider');
+      if(slider) { slider.value = 50; }
+      const readout = document.getElementById('crit-readout');
+      if(readout) readout.innerText = "50";
+      document.querySelectorAll('.matrix-cell').forEach(el => el.classList.remove('active'));
+      updateGuideCanvas();
+    }
+    
+    function setGuideView(mode) {
+      guideState.viewMode = mode;
+      const bSplit = document.getElementById('btn-view-split');
+      const bComb = document.getElementById('btn-view-combined');
+      if(mode === 'split') {
+        bSplit.classList.add('bg-slate-700','text-white'); bSplit.classList.remove('text-slate-400');
+        bComb.classList.remove('bg-slate-700','text-white'); bComb.classList.add('text-slate-400');
+      } else {
+        bComb.classList.add('bg-slate-700','text-white'); bComb.classList.remove('text-slate-400');
+        bSplit.classList.remove('bg-slate-700','text-white'); bSplit.classList.add('text-slate-400');
+      }
+      updateGuideCanvas();
+    }
+
+    function matrixClick(world, decision) {
+      setGuideWorld(world);
+      playSound('click');
+      let focus = null;
+      if(world === 'h0' && decision === 'reject') focus = 'alpha';
+      else if(world === 'h1' && decision === 'fail') focus = 'beta';
+      else if(world === 'h1' && decision === 'reject') focus = 'power';
+      else focus = 'correct';
+
+      highlightGuide(focus);
+      document.querySelectorAll('.matrix-cell').forEach(el => el.classList.remove('active'));
+      const id = `mat-${world}-${decision}`;
+      const cell = document.getElementById(id);
+      if(cell) {
+        cell.classList.add('active');
+        cell.classList.remove('soft-pulse'); void cell.offsetWidth; cell.classList.add('soft-pulse');
+      }
+    }
+
+    function updateGuideCanvas() {
+      const shift = (guideState.critPos - 50) * 2;
+      if(els.guideCanvas) drawDistribution(els.guideCanvas, 2.5, guideState.highlight, false, shift, true, null, guideState.viewMode);
+      updateGuideNumbers();
+    }
+
+    function updateGuideNumbers() {
+      if(!els.guideCanvas) return;
+      const rect = els.guideCanvas.getBoundingClientRect();
+      const w = rect.width;
+
+      const mean1 = w * 0.35;
+      const baseSd = w * 0.12;
+      const shift = (guideState.critPos - 50) * 2;
+      const criticalX = clamp((mean1 + (1.645 * baseSd)) + shift, 0, w);
+      const mean2 = mean1 + (2.5 * baseSd);
+
+      const zAlpha = (criticalX - mean1) / baseSd;
+      const zBeta = (criticalX - mean2) / baseSd;
+
+      const alphaP = 1 - normalCDF(zAlpha);
+      const betaP  = normalCDF(zBeta);
+      const oneAlpha = 1 - alphaP;
+      const oneBeta = 1 - betaP;
+
+      const pct = (p) => `${(p*100).toFixed(1)}%`;
+
+      const pa = document.getElementById('prob-alpha');
+      const poa = document.getElementById('prob-one-alpha');
+      const pb = document.getElementById('prob-beta');
+      const pob = document.getElementById('prob-one-beta');
+
+      if(pa) pa.innerText = pct(alphaP);
+      if(poa) poa.innerText = pct(oneAlpha);
+      if(pb) pb.innerText = pct(betaP);
+      if(pob) pob.innerText = pct(oneBeta);
+
+      const m1 = document.getElementById('matval-alpha');
+      const m2 = document.getElementById('matval-one-alpha');
+      const m3 = document.getElementById('matval-beta');
+      const m4 = document.getElementById('matval-one-beta');
+
+      if(m1) m1.innerText = `α ≈ ${pct(alphaP)}`;
+      if(m2) m2.innerText = `1−α ≈ ${pct(oneAlpha)}`;
+      if(m3) m3.innerText = `β ≈ ${pct(betaP)}`;
+      if(m4) m4.innerText = `1−β ≈ ${pct(oneBeta)}`;
+      
+      const elZ0 = document.getElementById('readout-z0');
+      const elZ1 = document.getElementById('readout-z1');
+      if(elZ0) elZ0.innerText = zAlpha.toFixed(2);
+      if(elZ1) elZ1.innerText = zBeta.toFixed(2);
+
+      const focus = guideState.highlight;
+      let world = guideState.world, decision = null;
+
+      if(focus === 'alpha') { world='h0'; decision='reject'; }
+      else if(focus === 'correct') { world='h0'; decision='fail'; }
+      else if(focus === 'beta') { world='h1'; decision='fail'; }
+      else if(focus === 'power') { world='h1'; decision='reject'; }
+
+      updateGuideExplainer({
+        focus: focus,
+        world,
+        decision,
+        alphaP, betaP, powerP: oneBeta
+      });
+    }
+
+    function handleGuideClick(e) {
+      const rect = els.guideCanvas.getBoundingClientRect();
+      const clientX = e.clientX || e.changedTouches?.[0]?.clientX;
+      const clientY = e.clientY || e.changedTouches?.[0]?.clientY;
+      const x = (clientX - rect.left) * (els.guideCanvas.width / rect.width);
+      const y = (clientY - rect.top) * (els.guideCanvas.height / rect.height);
+      const w = els.guideCanvas.width;
+      const h = els.guideCanvas.height;
+      const axisY = h - 30;
+
+      const mean1 = w * 0.35;
+      const baseSd = w * 0.12;
+      const shift = (guideState.critPos - 50) * 2;
+      const criticalX = clamp((mean1 + (1.645 * baseSd)) + shift, 0, w);
+      const mean2 = mean1 + (2.5 * baseSd);
+      const gaussian = (vx, mu, sigma) => Math.exp(-0.5 * Math.pow((vx - mu) / sigma, 2));
+
+      let clickedRegion = 'none';
+
+      if (guideState.viewMode === 'split') {
+        const topH = h / 2;
+        const axisYTop = topH - 20;
+        const axisYBot = h - 20;
+        if (y < topH) {
+           const curveY = axisYTop - (gaussian(x, mean1, baseSd) * (h * 0.35));
+           const isUnderCurve = y > curveY && y < axisYTop;
+           if (isUnderCurve) { if (x > criticalX) clickedRegion = 'alpha'; else clickedRegion = 'correct'; }
+        } else {
+           const curveY = axisYBot - (gaussian(x, mean2, baseSd) * (h * 0.35));
+           const isUnderCurve = y > curveY && y < axisYBot;
+           if (isUnderCurve) { if (x > criticalX) clickedRegion = 'power'; else clickedRegion = 'beta'; }
+        }
+      } else {
+        const yH0 = axisY - (gaussian(x, mean1, baseSd) * (h * 0.7));
+        const yH1 = axisY - (gaussian(x, mean2, baseSd) * (h * 0.7));
+        const isRight = x > criticalX;
+        const underH0 = y < axisY && y > yH0;
+        const underH1 = y < axisY && y > yH1;
+        const distToH0 = Math.abs(y - yH0);
+        const distToH1 = Math.abs(y - yH1);
+        const closerToH0 = distToH0 < distToH1;
+
+        if (isRight) {
+          if (underH1 && (!underH0 || !closerToH0)) clickedRegion = 'power';
+          else if (underH0) clickedRegion = 'alpha';
+        } else {
+          if (underH1 && (!underH0 || !closerToH0)) clickedRegion = 'beta';
+          else if (underH0) clickedRegion = 'correct';
+        }
+      }
+
+      if (clickedRegion !== 'none') { highlightGuide(clickedRegion); playSound('click'); }
+
+      if(guideState.quizStep > 0 && guideState.quizStep < 4) {
+        let required = '';
+        if(guideState.quizStep === 1) required = 'alpha';
+        else if(guideState.quizStep === 2) required = 'beta';
+        else if(guideState.quizStep === 3) required = 'power';
+
+        const fb = els.quizFeedback;
+        if(clickedRegion === required) {
+          fb.innerText = "Correct! Next...";
+          fb.className = "text-green-400 font-bold mb-2";
+          playSound('correct');
+          guideState.quizStep++;
+          if(guideState.quizStep === 4) {
+            fb.innerText = "TRAINING COMPLETE. GAME UNLOCKED.";
+            if(els.btnStartFromGuide) {
+              els.btnStartFromGuide.disabled = false;
+              els.btnStartFromGuide.classList.remove('bg-slate-800', 'text-slate-600', 'opacity-50', 'cursor-not-allowed');
+              els.btnStartFromGuide.classList.add('bg-green-600', 'text-white', 'animate-pulse');
+              els.btnStartFromGuide.innerText = "ENTER DUNGEON";
+            }
+            if(els.btnStartGuideQuiz) els.btnStartGuideQuiz.style.display = 'none';
+          }
+          updateQuizUI();
+        } else {
+          fb.innerText = `Missed! You clicked ${clickedRegion}. Try again.`;
+          fb.className = "text-red-400 font-bold mb-2";
+          playSound('wrong');
+        }
+      } else {
+        const tt = document.getElementById('guide-tooltip');
+        if(tt) {
+          const labelMap = { alpha: "α (Type I / False Alarm)", beta: "β (Type II / Missed Effect)", power: "1−β (Power / Detect Effect)", correct: "1−α (Correct / No False Alarm)" };
+          tt.style.left = (clientX - rect.left + 15) + 'px';
+          tt.style.top = (clientY - rect.top - 15) + 'px';
+          tt.innerHTML = `Zone: <strong>${labelMap[clickedRegion] || 'Outside curves'}</strong>`;
+          tt.classList.remove('hidden');
+          setTimeout(() => tt.classList.add('hidden'), 2200);
+        }
+      }
+    }
+
+    function updateQuizUI() {
+      const instr = els.quizInstruction;
+      if(!instr) return;
+      if(guideState.quizStep === 0) instr.innerHTML = "Explore mode active. Click 'START REGION QUIZ' when ready.";
+      else if(guideState.quizStep === 1) { instr.innerHTML = "Quiz 1/3: Click <span class='text-red-400 font-bold'>α (Type I)</span>."; guideState.world='h0'; highlightGuide('alpha'); }
+      else if(guideState.quizStep === 2) { instr.innerHTML = "Quiz 2/3: Click <span class='text-blue-400 font-bold'>β (Type II)</span>."; guideState.world='h1'; highlightGuide('beta'); }
+      else if(guideState.quizStep === 3) { instr.innerHTML = "Quiz 3/3: Click <span class='text-green-400 font-bold'>1−β (Power)</span>."; guideState.world='h1'; highlightGuide('power'); }
+      else instr.innerHTML = "Great job. Your eye is calibrated.";
+    }
+
+    function showReaction(correct, msg) {
+      try {
+        const overlay = els.overlay;
+        if(!overlay) {
+            // CRITICAL FAILSAFE: If overlay is missing, force next level immediately
+            if(correct) nextLevel(); 
+            return;
+        }
+        overlay.classList.remove('hidden');
+        const tone = correct ? "text-green-300" : "text-red-300";
+        const icon = correct ? "check-circle" : "x-circle";
+        playSound(correct ? 'correct' : 'wrong');
+        
+        // Use safer innerHTML injection
+        overlay.innerHTML = `
+          <div class="max-w-md w-full bg-slate-900 border border-slate-700 rounded-xl p-5 text-center shadow-2xl pointer-events-auto">
+            <div class="flex items-center justify-center gap-2 mb-2 ${tone}"><i data-lucide="${icon}" class="w-6 h-6"></i><div class="text-lg font-bold">${correct ? "Correct!" : "Not quite."}</div></div>
+            <div class="text-slate-300 text-sm mb-4">${msg}</div>
+            <div class="flex gap-2 justify-center flex-wrap">
+              <button onclick="nextLevel()" class="btn-neon bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-xs py-2 px-5 rounded">Continue (Space)</button>
+              <button onclick="openReveal()" class="btn-neon bg-red-900/20 hover:bg-red-900/35 border border-red-800/60 text-red-200 text-xs py-2 px-5 rounded">Answer Key (-40$)</button>
+            </div>
+          </div>`;
+        
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+      } catch(e) {
+        console.error("Reaction Error", e);
+        // Fallback if visual reaction fails
+        if(correct) nextLevel();
+        else state.processing = false;
+      }
+    }
+
+    function nextLevel() {
+      try {
+        els.overlay?.classList.add('hidden');
+        state.index++;
+        if(state.index >= state.currentRun.length) { victory(); } else { loadLevel(); updateHUD(); }
+      } catch(e) {
+        console.error("Level Transition Error", e);
+        resetGame(); // Last resort
+      }
+    }
+
+    function handleAnswer(id) {
+      // 1. SAFETY CHECK
+      if(state.processing) return;
+
+      try {
+          const sc = state.currentRun[state.index];
+          if(!sc) { console.error("No Scenario Data"); return; } // Should not happen
+          
+          const answerKey = sc.answer;
+
+          // SYNONYM MAPPING
+          const synonyms = {
+            'type1': ['alpha', 'reject'],
+            'type2': ['beta', 'fail_reject'],
+            'power': ['reject'],
+            'alpha': ['type1']
+          };
+
+          // 2. Exact Match
+          if(id === answerKey) {
+            state.processing = true;
+            state.score += 200; 
+            updateHUD(); 
+            showReaction(true, "Correct analysis. Your inference engine is warming up.");
+            return;
+          }
+
+          // 3. Check Synonyms (Soft Fail - No Life Lost)
+          if (synonyms[answerKey] && synonyms[answerKey].includes(id)) {
+            playSound('wrong');
+            els.gameCard?.classList.remove('animate-shake'); 
+            void els.gameCard?.offsetWidth; 
+            els.gameCard?.classList.add('animate-shake');
+            
+            const btn = document.querySelector(`button[onclick="handleAnswer('${id}')"]`);
+            if(btn) {
+                const originalText = btn.innerHTML;
+                btn.classList.add('bg-red-900', 'border-red-500');
+                btn.innerHTML = "<span class='text-red-200'>Precise Terminology Needed!</span>";
+                setTimeout(() => { 
+                    btn.classList.remove('bg-red-900', 'border-red-500'); 
+                    btn.innerHTML = originalText; 
+                }, 1200);
+            }
+            return;
+          }
+
+          // 4. Hard Fail
+          state.processing = true;
+          state.lives--; 
+          updateHUD();
+          els.gameCard?.classList.remove('animate-shake'); 
+          void els.gameCard?.offsetWidth; 
+          els.gameCard?.classList.add('animate-shake');
+          
+          if(state.lives <= 0) setTimeout(() => gameOver("TOO MANY ERRORS"), 350); 
+          else showReaction(false, "Incorrect. Use Curve + Side, then name the zone.");
+      } catch(e) {
+          console.error("Game Logic Crash:", e);
+          state.processing = false; // Emergency reset
+          alert("System Error. Resetting input state.");
+      }
+    }
+    
+    function prepareGame(minutes) {
+      state.initialTime = minutes * 60;
+      state.timeLeft = state.initialTime;
+      state.lives = 3;
+      state.score = 500;
+      state.index = 0;
+      state.hintsUnlocked = 0;
+      state.tooltipsUnlocked = false;
+      state.revealUsed = false;
+      state.processing = false;
+
+      // Build run
+      const run = [
+        ...shuffleArray([...level1]).slice(0, 3),
+        ...shuffleArray([...level2]).slice(0, 3),
+        ...shuffleArray([...level3]).slice(0, 3)
+      ];
+      state.currentRun = run;
+
+      updateHUD();
+      updateHintPanel();
+      
+      if(els.tooltipLocked) els.tooltipLocked.classList.remove('hidden');
+      if(els.tooltipActive) els.tooltipActive.classList.add('hidden');
+      
+      showScreen('battle-screen');
+      loadLevel();
+      playSound('click');
+      
+      clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        state.timeLeft--;
+        updateHUD();
+        if(state.timeLeft <= 0) gameOver("TIME EXPIRED");
+        else if(state.timeLeft <= 30) {
+            const w = document.getElementById('time-warning');
+            if(w) w.classList.remove('hidden');
+        }
+      }, 1000);
+    }
+
+    function loadLevel() {
+      state.processing = false;
+      state.hintsUnlocked = 0;
+      updateHintPanel();
+      
+      if(els.panelDeep) els.panelDeep.classList.add('hidden');
+      if(els.btnDeep) { els.btnDeep.disabled = false; els.btnDeep.classList.remove('opacity-50'); }
+      if(els.gameCard) els.gameCard.className = "flex-1 min-h-0 bg-slate-800/50 border border-slate-600 p-3 rounded-xl relative overflow-hidden flex flex-col transition-all duration-300";
+
+      const sc = state.currentRun[state.index];
+      if(!sc) return victory();
+
+      if(els.cardTitle) els.cardTitle.innerHTML = `Subject #${state.index + 1}`;
+      if(els.cardDesc) els.cardDesc.innerHTML = sc.text;
+      if(els.diffBadge) {
+        els.diffBadge.innerText = sc.diff.toUpperCase();
+        els.diffBadge.className = `text-[10px] font-bold px-2 py-0.5 rounded border ${sc.diff === 'Level 1' ? 'text-blue-400 border-blue-500/50' : sc.diff === 'Level 2' ? 'text-purple-400 border-purple-500/50' : 'text-red-400 border-red-500/50'}`;
+      }
+      
+      const logicText = document.getElementById('deep-logic-text');
+      if(logicText) logicText.innerHTML = (sc.logic || "No data").replace(/\n/g, '<br>');
+      
+      const revDist = document.getElementById('reveal-correct-dist');
+      if(revDist) revDist.innerText = concepts.find(c => c.id === sc.answer)?.name || sc.answer;
+      const revExp = document.getElementById('reveal-explanation');
+      if(revExp) revExp.innerHTML = (sc.logic || "").replace(/\n/g, '<br>');
+
+      // IMPORTANT: Need a small delay or check to ensure canvas has size
+      setTimeout(() => {
+         drawDistribution(els.vizCanvas, sc.graph.dist, sc.graph.highlight, sc.graph.narrow, sc.graph.shiftAlpha, false, null);
+      }, 50);
+    }
+    
+    function finishReveal() { closeReveal(); nextLevel(); }
+    
+    function openReveal() {
+        if(spend(40)) {
+            const modal = document.getElementById('reveal-modal');
+            if(modal) modal.classList.remove('hidden');
+        }
+    }
+    
+    function closeReveal() {
+        const modal = document.getElementById('reveal-modal');
+        if(modal) modal.classList.add('hidden');
+    }
+
+    // --- DRAWING ---
+    function drawDistribution(canvas, dist, highlight, narrow, shiftAlpha, isGuide, pulseTarget, viewMode = 'combined') {
+      if(!canvas) return;
+      
+      // FIX: Force resize check on every draw
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      
+      // Ensure canvas matches container size
+      if(canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(1, 0, 0, 1, 0, 0); 
+      ctx.scale(dpr, dpr);
+      
+      const w = rect.width; 
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const mean1 = w * 0.35;
+      const baseSd = w * 0.12;
+      const sd = narrow ? baseSd * 0.5 : baseSd;
+      const mean2 = mean1 + (dist * baseSd);
+      const criticalX = clamp((mean1 + (1.645 * sd)) + (shiftAlpha || 0), 0, w);
+      const gaussian = (x, mu, sigma) => Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+
+      // SPLIT VIEW RENDERING
+      if (isGuide && viewMode === 'split') {
+        const topH = h / 2;
+        const axisYTop = topH - 20;
+        const axisYBot = h - 20;
+
+        // Draw H0 Top
+        ctx.save();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-one-alpha');
+        ctx.beginPath(); ctx.moveTo(0, axisYTop);
+        for(let x = 0; x <= criticalX; x+=2) ctx.lineTo(x, axisYTop - (gaussian(x, mean1, sd) * (h * 0.35)));
+        ctx.lineTo(criticalX, axisYTop); ctx.fill();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-alpha');
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYTop);
+        for(let x = criticalX; x <= w; x+=2) ctx.lineTo(x, axisYTop - (gaussian(x, mean1, sd) * (h * 0.35)));
+        ctx.lineTo(w, axisYTop); ctx.fill();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.beginPath();
+        for(let x=0; x<w; x+=2) { const y = axisYTop - (gaussian(x, mean1, sd) * (h * 0.35)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, axisYTop); ctx.lineTo(w, axisYTop); ctx.strokeStyle = '#475569'; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYTop); ctx.lineTo(criticalX, 20); ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText('H0 World (Null)', 10, 20);
+        ctx.restore();
+
+        // Draw H1 Bottom
+        ctx.save();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-beta');
+        ctx.beginPath(); ctx.moveTo(0, axisYBot);
+        for(let x = 0; x <= criticalX; x+=2) ctx.lineTo(x, axisYBot - (gaussian(x, mean2, sd) * (h * 0.35)));
+        ctx.lineTo(criticalX, axisYBot); ctx.fill();
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-one-beta');
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYBot);
+        for(let x = criticalX; x <= w; x+=2) ctx.lineTo(x, axisYBot - (gaussian(x, mean2, sd) * (h * 0.35)));
+        ctx.lineTo(w, axisYBot); ctx.fill();
+        ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.beginPath();
+        for(let x=0; x<w; x+=2) { const y = axisYBot - (gaussian(x, mean2, sd) * (h * 0.35)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, axisYBot); ctx.lineTo(w, axisYBot); ctx.strokeStyle = '#475569'; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(criticalX, axisYBot); ctx.lineTo(criticalX, topH + 20); ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#60a5fa'; ctx.fillText('H1 World (Alt)', 10, topH + 20);
+        ctx.restore();
+        return;
+      }
+
+      // COMBINED VIEW
+      const axisY = h - 30;
+      // Default to visible but not highlighted
+      let dimOneAlpha = 1, dimAlpha = 1, dimBeta = 1, dimOneBeta = 1, dimH0 = 1, dimH1 = 1;
+      const activeHighlight = pulseTarget || (isGuide ? guideState.highlight : highlight);
+
+      if(activeHighlight && activeHighlight !== 'none') {
+        // Dim everything to near-invisible
+        dimOneAlpha = dimAlpha = dimBeta = dimOneBeta = 0.05; 
+        dimH0 = dimH1 = 0.05;
+
+        // Bring target back to full brightness
+        if(activeHighlight === 'correct') { dimOneAlpha = 1; dimH0 = 1; }
+        else if(activeHighlight === 'alpha')   { dimAlpha = 1;   dimH0 = 1; }
+        else if(activeHighlight === 'beta')    { dimBeta = 1;    dimH1 = 1; }
+        else if(activeHighlight === 'power')   { dimOneBeta = 1; dimH1 = 1; }
+        else if(activeHighlight === 'h0_curve') { dimOneAlpha = 1; dimAlpha = 1; dimH0 = 1; } 
+        else if(activeHighlight === 'h1_curve') { dimBeta = 1; dimOneBeta = 1; dimH1 = 1; }   
+      }
+
+      ctx.fillStyle = "rgba(51, 65, 85, 0.10)"; ctx.fillRect(0, 0, criticalX, axisY);
+      ctx.fillStyle = "rgba(127, 29, 29, 0.08)"; ctx.fillRect(criticalX, 0, w - criticalX, axisY);
+
+      const drawArea = (mu, startX, endX, rgbaColor, baseOpacity) => {
+        ctx.save(); ctx.globalAlpha = baseOpacity; ctx.fillStyle = rgbaColor; ctx.beginPath(); ctx.moveTo(startX, axisY);
+        for(let x = startX; x <= endX; x += 2) ctx.lineTo(x, axisY - (gaussian(x, mu, sd) * (h * 0.7)));
+        ctx.lineTo(endX, axisY); ctx.fill(); ctx.restore();
+      };
+
+      drawArea(mean1, 0, criticalX, getComputedStyle(document.documentElement).getPropertyValue('--c-one-alpha'), dimOneAlpha);
+      drawArea(mean1, criticalX, w, getComputedStyle(document.documentElement).getPropertyValue('--c-alpha'), dimAlpha);
+      drawArea(mean2, 0, criticalX, getComputedStyle(document.documentElement).getPropertyValue('--c-beta'), dimBeta);
+      drawArea(mean2, criticalX, w, getComputedStyle(document.documentElement).getPropertyValue('--c-one-beta'), dimOneBeta);
+
+      const drawCurve = (mu, color, opacity) => {
+        ctx.save(); ctx.globalAlpha = opacity; ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 3;
+        for(let x=0; x<w; x+=2) { const y = axisY - (gaussian(x, mu, sd) * (h * 0.7)); if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+        ctx.stroke(); ctx.restore();
+      };
+      drawCurve(mean1, '#94a3b8', dimH0); drawCurve(mean2, '#60a5fa', dimH1);
+
+      ctx.beginPath(); ctx.moveTo(0, axisY); ctx.lineTo(w, axisY); ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.stroke();
+      
+      if(isGuide && viewMode === 'combined') {
+        const drawMeanMarker = (x, label, color) => {
+          ctx.save(); ctx.strokeStyle = color; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, axisY); ctx.lineTo(x, 20); ctx.stroke();
+          ctx.setLineDash([]); ctx.fillStyle = color; ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center"; ctx.fillText(label, x, axisY + 14); ctx.restore();
+        };
+        drawMeanMarker(mean1, "μ0", "#94a3b8"); drawMeanMarker(mean2, "μ1", "#60a5fa");
+
+        const yB = 40; const ah = 6;
+        ctx.save(); ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(mean1, yB); ctx.lineTo(mean2, yB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(mean1, yB); ctx.lineTo(mean1 + ah, yB - ah); ctx.lineTo(mean1 + ah, yB + ah); ctx.closePath(); ctx.fillStyle = "#a78bfa"; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(mean2, yB); ctx.lineTo(mean2 - ah, yB - ah); ctx.lineTo(mean2 - ah, yB + ah); ctx.closePath(); ctx.fill();
+        ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center"; ctx.fillText("Δ = μ1 − μ0", (mean1 + mean2)/2, yB - 10); ctx.restore();
+      }
+
+      ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center";
+      ctx.fillStyle = "#94a3b8"; ctx.fillText("Fail to Reject", clamp(criticalX/2, 40, criticalX-10), h - 10);
+      ctx.fillStyle = "#f87171"; ctx.fillText("Reject H0", clamp((criticalX+w)/2, criticalX+10, w-40), h - 10);
+
+      ctx.beginPath(); ctx.moveTo(criticalX, axisY); ctx.lineTo(criticalX, 20); ctx.strokeStyle = '#facc15'; ctx.setLineDash([5, 3]); ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = "#facc15"; ctx.fillText("Crit Val", clamp(criticalX, 60, w-60), 15);
+
+      // Label Drawing Logic - Fixed to show during Pulse
+      if(!isGuide) {
+        // Draw label if it's the static highlight OR if it's the active Pulse Target
+        const target = pulseTarget || highlight;
+        
+        if (target && target !== 'none') {
+            ctx.font = "bold 14px sans-serif";
+            if(target === 'alpha') { ctx.fillStyle = '#f87171'; ctx.textAlign = "left"; ctx.fillText("α / Type I", clamp(criticalX + 10, 0, w-120), axisY - 30); }
+            else if(target === 'beta') { ctx.fillStyle = '#60a5fa'; ctx.textAlign = "right"; ctx.fillText("β / Type II", clamp(criticalX - 10, 120, w), axisY - 30); }
+            else if(target === 'power') { ctx.fillStyle = '#4ade80'; ctx.textAlign = "left"; ctx.fillText("1−β (Power)", clamp(criticalX + 10, 0, w-140), axisY - 50); }
+            else if(target === 'h0_curve') { ctx.fillStyle = '#94a3b8'; ctx.textAlign = "center"; ctx.fillText("H0 (Null Hypothesis)", mean1, axisY - 80); }
+            else if(target === 'h1_curve') { ctx.fillStyle = '#60a5fa'; ctx.textAlign = "center"; ctx.fillText("H1 (Alt Hypothesis)", mean2, axisY - 80); }
+        }
+      }
+
+      if(isGuide && guideState.showLabels) {
+        const labelBox = (tx, ty, text, strokeColor) => {
+          ctx.save(); ctx.font = "10px sans-serif"; ctx.textAlign = "left"; const pad = 5; const metrics = ctx.measureText(text); const bw = metrics.width + pad*2; const bh = 16;
+          ctx.fillStyle = "rgba(2,6,23,0.75)"; ctx.strokeStyle = strokeColor; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(tx, ty, bw, bh, 5); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#e5e7eb"; ctx.fillText(text, tx + pad, ty + 11); ctx.restore();
+        };
+        const yAt = (x, mu) => axisY - (gaussian(x, mu, sd) * (h * 0.7));
+        const xOneAlpha = clamp(mean1 - sd, 10, criticalX-10);
+        const xAlpha = clamp(criticalX + sd, criticalX+10, w-10);
+        const xBeta = clamp(criticalX - sd, 10, criticalX-10);
+        const xOneBeta = clamp(mean2 + sd, criticalX+10, w-10);
+        labelBox(xOneAlpha, yAt(xOneAlpha, mean1) - 22, "1−α = P(Fail | H0)", "#facc15");
+        labelBox(xAlpha,    yAt(xAlpha, mean1) - 22,    "α = P(Reject | H0)", "#f87171");
+        labelBox(xBeta,     yAt(xBeta, mean2) - 22,     "β = P(Fail | H1)", "#60a5fa");
+        labelBox(xOneBeta,  yAt(xOneBeta, mean2) - 22,  "1−β = P(Reject | H1)", "#4ade80");
+      }
+    }
+
+    function buildOptionButtons() {
+      if(els.optionsGrid) els.optionsGrid.innerHTML = concepts.map((c, i) => `
+        <button onclick="handleAnswer('${c.id}')" onmouseenter="updateHover('${c.id}')" onmouseleave="resetHover()"
+          class="btn-neon bg-slate-700 hover:bg-blue-600 text-white text-[10px] sm:text-xs py-2 px-1 rounded border border-slate-600 hover:border-blue-400 transition-all flex flex-col items-center justify-center h-12">
+          <span class="text-slate-400 font-bold mb-0.5">${i+1}</span>
+          <span class="leading-none text-center">${c.name}</span>
+        </button>`).join('');
+    }
+
+    function buildGrimoire() {
+      if(els.grimoireContainer) {
+         const body = document.getElementById('grimoire-content-body');
+         if(body) body.innerHTML = concepts.map(c => `
+        <div class="mb-3 border-b border-slate-800 pb-2">
+          <strong class="text-blue-400">${c.name}</strong>
+          <p class="text-xs text-slate-400">${c.desc}</p>
+        </div>`).join('');
+      }
+    }
+
+    function buildLibrary() {
+      const el = document.getElementById('library-content');
+      if(el) el.innerHTML = concepts.map(c => `
+        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+          <h3 class="text-lg font-bold text-white mb-2">${c.name}</h3>
+          <p class="text-sm text-slate-300 mb-2">${c.desc}</p>
+        </div>`).join('');
+    }
+
+    function updateHover(id) {
+      if(!state.tooltipsUnlocked) return;
+      const c = concepts.find(x => x.id === id);
+      if(c && els.tooltipActive) els.tooltipActive.innerHTML = `<span class="text-blue-300 font-bold">${c.name}:</span> ${c.desc}`;
+    }
+    function resetHover() {
+      if(!state.tooltipsUnlocked) return;
+      if(els.tooltipActive) els.tooltipActive.innerHTML = "Hover to define concept...";
+    }
+
+    function toggleDebugMode() {
+      state.debugMode = !state.debugMode;
+      document.getElementById('debug-overlay')?.classList.toggle('hidden', !state.debugMode);
+    }
+  </script>
+</body>
+</html>

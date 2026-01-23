@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Econometrics Arcade: Sigma Labs (v5.12 Stability Patch)</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- React & ReactDOM -->
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<!-- Prop Types -->
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+<!-- Recharts -->
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.2/Recharts.min.js"></script>
+<!-- Babel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+<!-- Custom Styles -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+body {
+font-family: 'JetBrains Mono', monospace;
+background-color: #020408;
+color: #e2e8f0;
+overflow-x: hidden;
+touch-action: manipulation;
+background-image: 
+    linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+background-size: 40px 40px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0f172a; }
+::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #22d3ee; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); } 20%, 40%, 60%, 80% { transform: translateX(10px); } }
+@keyframes glow { 0%, 100% { box-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4; } 50% { box-shadow: 0 0 20px #06b6d4, 0 0 30px #06b6d4; } }
+
+.animate-in { animation: fadeIn 0.5s ease-out; }
+.slide-in { animation: slideUp 0.5s ease-out; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-shake { animation: shake 0.5s ease-in-out; }
+.animate-glow { animation: glow 3s infinite; }
+
+/* Overlay Tutorial */
+.tutorial-overlay {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+}
+
+/* Screen Reader Only Class */
+.sr-only {
+position: absolute;
+width: 1px;
+height: 1px;
+padding: 0;
+margin: -1px;
+overflow: hidden;
+clip: rect(0, 0, 0, 0);
+white-space: nowrap;
+border-width: 0;
+}
+
+button:focus-visible {
+outline: 2px solid #06b6d4;
+outline-offset: 2px;
+}
+
+@keyframes progressFill { from { width: 0%; } to { width: 100%; } }
+.progress-bar { animation: progressFill 0.8s ease-out; }
+
+/* Particle Effects */
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
+.floating { animation: float 3s ease-in-out infinite; }
+
+#confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+const { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } = Recharts;
+
+// --- FIX 15: DEBUG LOGGING ---
+const DEBUG_MODE = false;
+const log = (message, data = null) => {
+  if (DEBUG_MODE) {
+    console.log(`[Sigma Labs] ${message}`, data || '');
+  }
+};
+
+// --- FIX 2: ERROR BOUNDARY ---
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error) { return { hasError: true }; }
+  componentDidCatch(error, errorInfo) { console.error('Error caught:', error, errorInfo); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="text-center p-8 text-red-400 bg-slate-900 min-h-screen flex flex-col justify-center items-center">
+          <h2 className="text-2xl font-bold mb-4">Protocol Malfunction Detected</h2>
+          <button onClick={() => window.location.reload()} className="px-6 py-3 bg-cyan-600 rounded text-white font-bold hover:bg-cyan-500 transition-all">Reinitialize System</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// --- FIX 8: CONFETTI ENGINE (FIXED MEMORY LEAK) ---
+const FireConfetti = () => {
+    // Clean up previous canvas if it exists
+    let existingCanvas = document.getElementById('confetti-canvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+        existingCanvas = null;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'confetti-canvas';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const colors = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444'];
+
+    for (let i = 0; i < 150; i++) {
+        particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            vx: (Math.random() - 0.5) * 20,
+            vy: (Math.random() - 0.5) * 20,
+            life: 100 + Math.random() * 50,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 8 + 4
+        });
+    }
+
+    const animate = () => {
+        if (!document.body.contains(canvas)) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+            if (p.life > 0) {
+                active = true;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // Gravity
+                p.life--;
+                p.size *= 0.99;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            }
+        });
+        if (active) requestAnimationFrame(animate);
+        else canvas.remove();
+    };
+    animate();
+
+    // Safety cleanup
+    setTimeout(() => {
+        if (document.body.contains(canvas)) canvas.remove();
+    }, 5000);
+};
+
+// --- FIX 4: SOUND MANAGER (SINGLETON PATTERN) ---
+let audioContextInstance = null;
+const getAudioContext = () => {
+    if (!audioContextInstance) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        audioContextInstance = new AudioCtx();
+    }
+    if (audioContextInstance.state === 'suspended') {
+        audioContextInstance.resume();
+    }
+    return audioContextInstance;
+};
+
+const playTone = (frequency, duration, ctx) => {
+    try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + duration);
+    } catch(e) { console.warn(e); }
+};
+
+const SoundManager = {
+  correct: () => { 
+      const ctx = getAudioContext();
+      if(ctx) playTone(880, 0.2, ctx);
+  },
+  wrong: () => { 
+      const ctx = getAudioContext();
+      if(!ctx) return;
+      try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = 220;
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+      } catch(e){}
+  },
+  streak: () => { 
+      const ctx = getAudioContext();
+      if(!ctx) return;
+      [880, 1100, 1320].forEach((freq, i) => {
+        try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.15);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + i * 0.1);
+            osc.stop(ctx.currentTime + i * 0.1 + 0.15);
+        } catch(e){}
+      });
+  },
+  achievement: () => { 
+      const ctx = getAudioContext();
+      if(!ctx) return;
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + i * 0.15);
+            osc.stop(ctx.currentTime + i * 0.15 + 0.3);
+        } catch(e){}
+      });
+  }
+};
+
+// --- DATA & CONFIG ---
+const MAX_LEVEL = 10; 
+const STARTING_SCORE = 200;
+const COLORS = ['#22d3ee', '#a78bfa', '#34d399', '#facc15', '#f472b6', '#60a5fa', '#c084fc', '#4ade80', '#fbbf24', '#e879f9'];
+const getColor = (i) => COLORS[i % COLORS.length];
+
+const ACHIEVEMENTS = [
+  { id: 'first_correct', name: 'First Steps', description: 'Answer your first question correctly', icon: 'CheckCircle', unlocked: false },
+  { id: 'streak_3', name: 'Hot Streak', description: 'Get 3 correct answers in a row', icon: 'Flame', unlocked: false },
+  { id: 'streak_5', name: 'On Fire', description: 'Get 5 correct answers in a row', icon: 'Flame', unlocked: false },
+  { id: 'analyst', name: 'Lead Analyst', description: 'Complete Module 1', icon: 'Terminal', unlocked: false },
+  { id: 'detective', name: 'Anomaly Detective', description: 'Complete Module 2', icon: 'Search', unlocked: false },
+  { id: 'time_lord', name: 'Time Lord', description: 'Complete Module 3', icon: 'Clock', unlocked: false },
+  { id: 'master', name: 'Sigma Master', description: 'Complete all levels with A+ grade', icon: 'Brain', unlocked: false }
+];
+
+const PROFESSOR_NOTES = {
+    OVB: { title: "Omitted Variable Bias (OVB)", text: "You missed a key variable (like 'Ability') that drives both X and Y. Because you can't measure it, it hides in the error term and correlates with X. FE fixes this by controlling for *all* time-invariant traits." },
+    SELECTION: { title: "Selection Bias", text: "The subjects weren't assigned randomly—they 'selected' into the treatment based on hidden traits. This breaks the Random Effects assumption." },
+    EFFICIENCY: { title: "Efficiency vs. Robustness", text: "Random Effects is 'Efficient'—it uses data better. But it's risky! If there's any correlation, it's wrong. Fixed Effects is 'Robust' but throws away data." },
+    HETEROGENEITY: { title: "Unobserved Heterogeneity", text: "Every unit (person, company) has unique, unmeasured quirks. If these quirks are linked to your variables, you MUST use Fixed Effects." },
+    REVERSE: { title: "Simultaneity / Reverse Causality", text: "X causes Y, but Y also causes X (e.g., Police & Crime). This circular logic biases standard regression. You need an instrument (IV)." },
+    ERROR: { title: "Measurement Error", text: "Your data for X isn't the true value (e.g., guessing income). This noise pushes your estimate towards zero (Attenuation Bias)." },
+    TIME_FE: { title: "Time Fixed Effects (Two-Way FE)", text: "A global shock (like a recession or pandemic) affected EVERYONE at the same time. Individual FE isn't enough; you need Time Dummies to control for these common shocks." },
+    DYNAMIC: { title: "Dynamic Panel Bias (Nickell Bias)", text: "The outcome depends on the past (Y_t-1). In a short panel, standard FE is biased because the lagged variable is correlated with the error term. Use Arellano-Bond (GMM)." },
+    CLUSTER: { title: "Clustered Standard Errors", text: "Errors are not independent! If a firm has a high error in 2020, it likely has one in 2021. You must Cluster SEs to avoid false positives (Type I errors)." }
+};
+
+const SCENARIO_DB_MOD1 = [
+{ id: 'n1', text: "Tracking 'Fun Factor' of games. The unobserved 'Nostalgia' factor is fixed for each franchise (Mario vs Zelda) and drives sales (X).", hint: "Fixed trait (Nostalgia) -> Correlated with X -> FE.", logic: "Since 'Nostalgia' is a fixed trait of the game and it affects Sales (X), you have Correlation. You MUST use Fixed Effects.", type: 'NARRATIVE', correctModel: 'FE', isCorrelated: true, concept: "OVB", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+{ id: 'n2', text: "Studying impact of 'Study Hours' on grades. Unobserved 'Innate Ability' makes smart students study less.", hint: "Ability -> Correlated with Study Hours -> FE.", logic: "Unobserved Ability is linked to Study Hours (the X variable). This is textbook Endogeneity. Fixed Effects is required.", type: 'NARRATIVE', correctModel: 'FE', isCorrelated: true, concept: "SELECTION", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+{ id: 'n5', text: "Testing 500 random controllers. We want to see if 'Button Click Speed' affects win rates. 'Manufacturing Defect' is random noise.", hint: "Random sample -> No correlation -> RE.", logic: "The controllers are random draws. The defects are random noise. No correlation means Random Effects is safe and more efficient.", type: 'NARRATIVE', correctModel: 'RE', isCorrelated: false, concept: "EFFICIENCY", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+{ id: 'n3', text: "Estimating impact of 'Fertilizer' on crop yield. 'Soil Quality' is unobserved but farmers know it and adjust fertilizer accordingly.", hint: "Soil Quality -> Affects Decision -> Correlated -> FE.", logic: "The unobserved soil quality influences the farmer's decision (X). This creates correlation between the error term and X. Use Fixed Effects.", type: 'NARRATIVE', correctModel: 'FE', isCorrelated: true, concept: "SELECTION", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+{ id: 'n10', text: "Testing 'Battery Life' of phones from a factory line. 'Chemical Purity' varies slightly per batch but is purely random noise.", hint: "Random variation -> No bias -> RE.", logic: "Since the chemical purity is random noise and not systematic, we can assume orthogonality. Random Effects is more efficient.", type: 'NARRATIVE', correctModel: 'RE', isCorrelated: false, concept: "EFFICIENCY", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+{ id: 'n11', text: "Studying restaurant ratings vs price. Unobserved 'Chef Skill' is fixed per restaurant and skilled chefs charge more.", hint: "Chef skill -> Fixed trait -> Affects pricing -> FE.", logic: "Chef skill is a time-invariant restaurant characteristic that influences both quality and pricing decisions. This creates endogeneity requiring Fixed Effects.", type: 'NARRATIVE', correctModel: 'FE', isCorrelated: true, concept: "OVB", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+{ id: 'n7', text: "Clinical trial: Patients assigned randomly to Drug A or B. We measure recovery time. 'Metabolism' varies but is random across groups.", hint: "Random assignment -> No bias -> RE.", logic: "Random assignment breaks the link between unobserved traits and the treatment. Random Effects is best.", type: 'NARRATIVE', correctModel: 'RE', isCorrelated: false, concept: "SELECTION", options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}] },
+];
+
+const SCENARIO_DB_MOD2 = [
+{ id: 'c1', text: "A study compares wages of workers. We don't measure 'Grit' or 'Ambition', but these traits are constant for each person and affect their career choices.", hint: "Constant traits unmeasured.", logic: "Unobserved Heterogeneity refers to variables (like grit) that are specific to a unit and constant over time, but not measured.", type: 'NARRATIVE', correctModel: 'HETEROGENEITY', concept: "HETEROGENEITY", options: [{label: 'Unobserved Heterogeneity', value: 'HETEROGENEITY'}, {label: 'Reverse Causality', value: 'REVERSE'}, {label: 'Measurement Error', value: 'ERROR'}, {label: 'Selection Bias', value: 'SELECTION'}] },
+{ id: 'c2', text: "We want to know if more Police reduces Crime. However, cities with high crime rates tend to hire more police.", hint: "X causes Y, but Y also causes X.", logic: "This is Reverse Causality (Simultaneity). Police affect crime, but crime also affects police hiring.", type: 'NARRATIVE', correctModel: 'REVERSE', concept: "REVERSE", options: [{label: 'Unobserved Heterogeneity', value: 'HETEROGENEITY'}, {label: 'Reverse Causality', value: 'REVERSE'}, {label: 'Measurement Error', value: 'ERROR'}, {label: 'Selection Bias', value: 'SELECTION'}] },
+{ id: 'c3', text: "Evaluating a voluntary job training program. Only highly motivated people sign up for the program.", hint: "Participants choose to join.", logic: "This is Selection Bias. The participants 'selected' themselves, meaning the treatment group is fundamentally different from the control group.", type: 'NARRATIVE', correctModel: 'SELECTION', concept: "SELECTION", options: [{label: 'Unobserved Heterogeneity', value: 'HETEROGENEITY'}, {label: 'Reverse Causality', value: 'REVERSE'}, {label: 'Measurement Error', value: 'ERROR'}, {label: 'Selection Bias', value: 'SELECTION'}] },
+{ id: 'c4', text: "Surveying household income. Respondents often guess their annual income or round it to the nearest $5,000.", hint: "Data is not precise.", logic: "This is Measurement Error. The variable used in the regression does not perfectly match the true value.", type: 'NARRATIVE', correctModel: 'ERROR', concept: "ERROR", options: [{label: 'Unobserved Heterogeneity', value: 'HETEROGENEITY'}, {label: 'Reverse Causality', value: 'REVERSE'}, {label: 'Measurement Error', value: 'ERROR'}, {label: 'Selection Bias', value: 'SELECTION'}] },
+{ id: 'c5', text: "Analyzing the effect of school spending on test scores. Wealthy districts spend more, but wealthy students also have more home resources (unmeasured).", hint: "Missing variable Z affects X and Y.", logic: "This is Omitted Variable Bias (OVB), driven by Unobserved Heterogeneity (Family Wealth/Resources).", type: 'NARRATIVE', correctModel: 'HETEROGENEITY', concept: "HETEROGENEITY", options: [{label: 'Unobserved Heterogeneity', value: 'HETEROGENEITY'}, {label: 'Reverse Causality', value: 'REVERSE'}, {label: 'Measurement Error', value: 'ERROR'}, {label: 'Selection Bias', value: 'SELECTION'}] },
+{ id: 'c6', text: "Estimating the demand curve. Price affects Quantity, but Quantity demand also pushes Price up.", hint: "Simultaneous determination.", logic: "This is Simultaneity (Reverse Causality). Price and Quantity are determined at the same time in the market.", type: 'NARRATIVE', correctModel: 'REVERSE', concept: "REVERSE", options: [{label: 'Unobserved Heterogeneity', value: 'HETEROGENEITY'}, {label: 'Reverse Causality', value: 'REVERSE'}, {label: 'Measurement Error', value: 'ERROR'}, {label: 'Selection Bias', value: 'SELECTION'}] },
+];
+
+const SCENARIO_DB_MOD3 = [
+{ id: 't1', text: "Analyzing consumption in 2020. A global pandemic hit, causing everyone's spending to drop regardless of income.", hint: "Global shock affects all units.", logic: "This is a Time Fixed Effect. A global event (pandemic) caused a shock to all units. You must include Time Dummies.", type: 'NARRATIVE', correctModel: 'TIME_FE', concept: "TIME_FE", options: [{label: 'Time Fixed Effects', value: 'TIME_FE'}, {label: 'Dynamic Panel (GMM)', value: 'DYNAMIC'}, {label: 'Cluster SE', value: 'CLUSTER'}] },
+{ id: 't2', text: "Studying cigarette addiction. A person's smoking today is heavily influenced by how much they smoked yesterday.", hint: "Current Y depends on Past Y.", logic: "This is a Dynamic Panel. The presence of the lagged dependent variable (Y_t-1) creates Nickell Bias in standard FE. Use GMM.", type: 'NARRATIVE', correctModel: 'DYNAMIC', concept: "DYNAMIC", options: [{label: 'Time Fixed Effects', value: 'TIME_FE'}, {label: 'Dynamic Panel (GMM)', value: 'DYNAMIC'}, {label: 'Cluster SE', value: 'CLUSTER'}] },
+{ id: 't3', text: "Tracking stock prices. If a stock is high variance today, it's likely high variance tomorrow. Errors are correlated over time for the same firm.", hint: "Errors track each other over time.", logic: "This is Serial Correlation. You must Cluster your Standard Errors at the firm level to avoid underestimating the error (and getting false positives).", type: 'NARRATIVE', correctModel: 'CLUSTER', concept: "CLUSTER", options: [{label: 'Time Fixed Effects', value: 'TIME_FE'}, {label: 'Dynamic Panel (GMM)', value: 'DYNAMIC'}, {label: 'Cluster SE', value: 'CLUSTER'}] },
+{ id: 't4', text: "Evaluating a national tax cut in 2018. It affected every company in the dataset simultaneously.", hint: "Policy hit everyone at t=2018.", logic: "This requires Time Fixed Effects. Without controlling for the tax cut year, you might wrongly attribute the growth to other factors.", type: 'NARRATIVE', correctModel: 'TIME_FE', concept: "TIME_FE", options: [{label: 'Time Fixed Effects', value: 'TIME_FE'}, {label: 'Dynamic Panel (GMM)', value: 'DYNAMIC'}, {label: 'Cluster SE', value: 'CLUSTER'}] },
+{ id: 't5', text: "Modeling employment levels. Hiring is costly, so companies tend to keep current employee counts similar to last year's counts.", hint: "State dependence / Inertia.", logic: "This implies a Dynamic Panel (State Dependence). Previous employment determines current employment. Use Arellano-Bond.", type: 'NARRATIVE', correctModel: 'DYNAMIC', concept: "DYNAMIC", options: [{label: 'Time Fixed Effects', value: 'TIME_FE'}, {label: 'Dynamic Panel (GMM)', value: 'DYNAMIC'}, {label: 'Cluster SE', value: 'CLUSTER'}] }
+];
+
+const CURRICULUM_MOD1 = [
+{ type: 'NARRATIVE', narrativeId: 'n1', objective: "Recognise when αᵢ is correlated with X (OVB).", concept: "OVB" },
+{ type: 'VISUAL', isCorrelated: true, objective: "Spot correlation: groups separate along X → FE.", concept: "HETEROGENEITY" },
+{ type: 'NARRATIVE', narrativeId: 'n5', objective: "Recognise when αᵢ is random noise (orthogonal).", concept: "EFFICIENCY" },
+{ type: 'HAUSMAN', isCorrelated: true, objective: "Use Hausman: p < 0.05 → choose FE.", concept: "EFFICIENCY" },
+{ type: 'NARRATIVE', narrativeId: 'n2', objective: "Understand Selection Bias causing endogeneity.", concept: "SELECTION" },
+{ type: 'VISUAL', isCorrelated: false, objective: "Spot no correlation: colors mixed → RE plausible.", concept: "HETEROGENEITY" },
+{ type: 'NARRATIVE', narrativeId: 'n10', objective: "Identify pure noise/measurement error contexts.", concept: "EFFICIENCY" },
+{ type: 'HAUSMAN', isCorrelated: false, objective: "Use Hausman: p > 0.05 → keep RE.", concept: "EFFICIENCY" },
+{ type: 'NARRATIVE', narrativeId: 'n3', objective: "Complex Selection: Behavioral adjustment.", concept: "SELECTION" },
+{ type: 'NARRATIVE', narrativeId: 'n11', objective: "Complex OVB: Business strategy.", concept: "OVB" }
+];
+
+const CURRICULUM_MOD2 = [
+{ type: 'NARRATIVE', narrativeId: 'c1', objective: "Define Unobserved Heterogeneity.", concept: "HETEROGENEITY" },
+{ type: 'NARRATIVE', narrativeId: 'c2', objective: "Identify Reverse Causality.", concept: "REVERSE" },
+{ type: 'NARRATIVE', narrativeId: 'c3', objective: "Identify Selection Bias.", concept: "SELECTION" },
+{ type: 'NARRATIVE', narrativeId: 'c4', objective: "Identify Measurement Error.", concept: "ERROR" },
+{ type: 'NARRATIVE', narrativeId: 'c5', objective: "Link OVB to Heterogeneity.", concept: "HETEROGENEITY" },
+{ type: 'NARRATIVE', narrativeId: 'c6', objective: "Link Market Forces to Simultaneity.", concept: "REVERSE" },
+{ type: 'NARRATIVE', narrativeId: 'c1', objective: "Reinforcement: Heterogeneity.", concept: "HETEROGENEITY" },
+{ type: 'NARRATIVE', narrativeId: 'c3', objective: "Reinforcement: Selection.", concept: "SELECTION" }
+];
+
+const CURRICULUM_MOD3 = [
+{ type: 'NARRATIVE', narrativeId: 't1', objective: "Identify Global Time Shocks.", concept: "TIME_FE" },
+{ type: 'NARRATIVE', narrativeId: 't2', objective: "Identify Dynamic Dependence (Inertia).", concept: "DYNAMIC" },
+{ type: 'NARRATIVE', narrativeId: 't3', objective: "Identify Serial Correlation in Errors.", concept: "CLUSTER" },
+{ type: 'NARRATIVE', narrativeId: 't4', objective: "Apply Time FE to Policy Changes.", concept: "TIME_FE" },
+{ type: 'NARRATIVE', narrativeId: 't5', objective: "Recognize Adjustment Costs (Dynamics).", concept: "DYNAMIC" },
+];
+
+const EDUCATIONAL_MODULES = [
+{ id: 'omitted_bias', title: 'Omitted Variable Bias (OVB)', content: `When you exclude an important variable (Z) that is correlated with X and affects Y, your estimate of X is biased. Example: Wage = f(Education). If you ignore "Ability" (which drives both education and wage), you overstate the return to education. FE fixes this by controlling for time-invariant traits.`, icon: 'AlertTriangle', color: 'red' },
+{ id: 'within_between', title: 'Within vs Between Variation', content: `WITHIN: How does Y change for the SAME unit as X changes over time? (FE exploits this). BETWEEN: How do units DIFFER in average Y and X? (RE exploits this). If you only care about differences *across* countries, FE might kill your variation.`, icon: 'Activity', color: 'cyan' },
+{ id: 'hausman_deep', title: 'Hausman Test Intuition', content: `Think of FE as "Consistent but Expensive" and RE as "Efficient but Risky". The Hausman test asks: "Are the FE and RE estimates significantly different?" If YES (p < 0.05), the risky RE assumption failed → Use FE. If NO (p > 0.05), both work → Use RE (it's cheaper/efficient).`, icon: 'Scale', color: 'yellow' },
+{ id: 'heterogeneity', title: 'Unobserved Heterogeneity', content: `Variables that differ between units but stay constant over time (like 'Culture', 'Genetics', 'Brand Reputation'). If these affect your X variable, you have an endogeneity problem that FE can solve.`, icon: 'Eye', color: 'purple' },
+{ id: 'simultaneity', title: 'Simultaneity (Reverse Causality)', content: `When X causes Y, but Y also causes X. E.g., More Police -> Less Crime, but High Crime -> More Police. This creates a loop that biases standard regressions. You need Instrumental Variables (IV) or natural experiments.`, icon: 'RefreshCw', color: 'blue' },
+{ id: 'time_shocks', title: 'Time Fixed Effects (Global Shocks)', content: `Events that hit EVERY unit at the same time (e.g., 2008 Crisis, Covid-19, National Laws). If you don't control for Time (Time Dummies), you might mistake a global trend for a specific effect.`, icon: 'Clock', color: 'orange' },
+{ id: 'dynamics', title: 'Dynamic Panels (Inertia)', content: `When your current status depends on your past status (e.g., Smoking, Employment, Wealth). Using standard FE with a lagged dependent variable creates "Nickell Bias" in short panels. You need GMM estimators (Arellano-Bond).`, icon: 'Zap', color: 'pink' }
+];
+
+// --- ICONS ---
+const Icon = ({ path, color = "currentColor", size = 24, className = "" }) => (
+<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+{path}
+</svg>
+);
+
+const Icons = {
+Clock: (props) => <Icon {...props} path={<React.Fragment><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></React.Fragment>} />,
+Flame: (props) => <Icon {...props} path={<React.Fragment><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.2.5-3.3.3-1.1 1-2.3 2.5-3.2"/></React.Fragment>} />,
+XCircle: (props) => <Icon {...props} path={<React.Fragment><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></React.Fragment>} />,
+CheckCircle: (props) => <Icon {...props} path={<React.Fragment><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></React.Fragment>} />,
+AlertTriangle: (props) => <Icon {...props} path={<React.Fragment><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></React.Fragment>} />,
+Brain: (props) => <Icon {...props} path={<React.Fragment><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></React.Fragment>} />,
+Activity: (props) => <Icon {...props} path={<React.Fragment><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></React.Fragment>} />,
+Terminal: (props) => <Icon {...props} path={<React.Fragment><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></React.Fragment>} />,
+Zap: (props) => <Icon {...props} path={<React.Fragment><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></React.Fragment>} />,
+ChevronRight: (props) => <Icon {...props} path={<React.Fragment><polyline points="9 18 15 12 9 6"/></React.Fragment>} />,
+Search: (props) => <Icon {...props} path={<React.Fragment><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></React.Fragment>} />,
+HelpCircle: (props) => <Icon {...props} path={<React.Fragment><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></React.Fragment>} />,
+Eye: (props) => <Icon {...props} path={<React.Fragment><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></React.Fragment>} />,
+RefreshCw: (props) => <Icon {...props} path={<React.Fragment><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></React.Fragment>} />,
+ArrowRight: (props) => <Icon {...props} path={<React.Fragment><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></React.Fragment>} />,
+Scale: (props) => <Icon {...props} path={<React.Fragment><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2v2"/><path d="M17 7h2v2"/></React.Fragment>} />,
+Trophy: (props) => <Icon {...props} path={<React.Fragment><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></React.Fragment>} />,
+BookOpen: (props) => <Icon {...props} path={<React.Fragment><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></React.Fragment>} />,
+Star: (props) => <Icon {...props} path={<React.Fragment><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></React.Fragment>} />,
+Target: (props) => <Icon {...props} path={<React.Fragment><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></React.Fragment>} />
+};
+
+// --- THEME ---
+const theme = {
+bg: "min-h-screen bg-[#020408] font-mono text-slate-200 pb-12",
+container: "max-w-6xl mx-auto p-3 md:p-6",
+card: "bg-slate-900/80 backdrop-blur-md rounded-xl border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.15)] p-4 md:p-6 mb-6 transition-all duration-300 relative overflow-hidden",
+header: "text-2xl md:text-5xl font-bold text-white tracking-tighter mb-2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]",
+subHeader: "text-cyan-400 tracking-widest uppercase text-[10px] md:text-sm mb-6 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]",
+buttonPrimary: "w-full md:w-auto group relative px-6 py-4 md:py-3 bg-cyan-900/30 hover:bg-cyan-500/40 text-cyan-300 hover:text-white border border-cyan-400 hover:border-cyan-300 rounded-lg transition-all duration-200 uppercase tracking-widest font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500",
+buttonSecondary: "px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border border-purple-500/30 hover:border-purple-400 rounded-lg transition-all text-xs uppercase tracking-wide flex items-center justify-center gap-2 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]",
+lifelineBtn: "flex items-center justify-between w-full p-3 mb-2 rounded border border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:border-cyan-500 transition-all text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed group active:bg-slate-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500 hover:shadow-[0_0_10px_rgba(6,182,212,0.2)]",
+tabContainer: "flex border-b border-slate-700 mb-6 overflow-x-auto",
+tabActive: "flex-1 py-3 text-center border-b-2 border-cyan-500 text-cyan-400 font-bold bg-cyan-900/10 transition-all text-xs md:text-sm whitespace-nowrap px-4 cursor-pointer focus:outline-none shadow-[inset_0_-10px_20px_rgba(6,182,212,0.1)]",
+tabInactive: "flex-1 py-3 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all text-xs md:text-sm whitespace-nowrap px-4 cursor-pointer focus:outline-none",
+mathBlock: "font-mono text-center block my-2 text-cyan-300 bg-cyan-900/10 p-2 rounded border border-cyan-500/30 text-xs md:text-sm tracking-wide shadow-[0_0_10px_rgba(6,182,212,0.1)]",
+hintPanel: "mt-4 bg-yellow-900/10 border border-yellow-500/50 p-3 rounded animate-in ring-1 ring-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.2)]",
+achievementCard: "bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/50 p-4 rounded-lg mb-3 transition-all duration-300 hover:border-yellow-400/70 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]",
+achievementUnlocked: "bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]",
+progressBar: "w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700",
+progressFill: "h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 transition-all duration-500 progress-bar shadow-[0_0_10px_rgba(168,85,247,0.5)]",
+moduleCard: "p-6 rounded-xl border-2 border-slate-700 bg-slate-900/50 hover:bg-slate-800 transition-all cursor-pointer group relative overflow-hidden h-full flex flex-col items-center text-center hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
+};
+
+// --- FIX 11: DATA GENERATION (Seeded Variability - Enhanced for Clarity) ---
+const generatePanelData = (nGroups, tPeriods, correlated, seed = Math.random()) => {
+    const data = [];
+    const groups = [];
+    
+    // Define a slope for the individual regressions
+    const beta = 1.5; 
+
+    for (let i = 0; i < nGroups; i++) {
+        // Seeded random for consistency
+        const pseudoRandom = Math.sin(seed * 12.9898 + i * 78.233) * 43758.5453;
+        const normalizedRandom = (pseudoRandom % 1 + 1) % 1; // 0 to 1
+
+        // 1. Assign a distinct average X for this group
+        const groupMeanX = 2 + (normalizedRandom * 12); 
+
+        let groupEffect;
+        if (correlated) {
+            // FE: STRONG POSITIVE CORRELATION
+            // Groups with higher X mean get strictly higher intercepts
+            // This creates a distinct "diagonal ladder" visual pattern
+            groupEffect = (groupMeanX - 8) * 4; 
+        } else {
+            // RE: RANDOM SCATTER
+            // Intercepts are completely independent of X position
+            // Use a different seed component to ensure orthogonality
+            const effectRandom = Math.sin(seed * i * 99.99 + 123.45); 
+            groupEffect = (effectRandom * 20); // Large variance to show scatter
+        }
+        
+        groups.push({ 
+            id: i, 
+            name: `Subject_${(i+1).toString().padStart(2, '0')}`, 
+            effect: groupEffect,
+            meanX: groupMeanX 
+        });
+    }
+
+    groups.forEach(group => {
+        for (let t = 0; t < tPeriods; t++) {
+            // X is centered around the group mean with some variation
+            const x = group.meanX + (Math.random() * 3 - 1.5); 
+            
+            // Random noise epsilon
+            const epsilon = (Math.random() * 3) - 1.5;
+
+            // Y = Beta*X + Alpha_i + Epsilon
+            const y = (beta * x) + group.effect + epsilon;
+
+            data.push({
+                groupId: group.id,
+                name: group.name,
+                x: parseFloat(x.toFixed(2)),
+                y: parseFloat(y.toFixed(2)),
+            });
+        }
+    });
+
+    return { data, groups };
+};
+
+const generateTimeSeriesData = (hasShock) => {
+    const data = [];
+    for (let t = 0; t < 10; t++) {
+        const shock = hasShock && t >= 5 ? -15 : 0;
+        data.push({
+            time: t,
+            g1: 10 + t * 2 + shock + Math.random() * 2,
+            g2: 15 + t * 2 + shock + Math.random() * 2,
+            g3: 20 + t * 2 + shock + Math.random() * 2
+        });
+    }
+    return data;
+};
+
+// --- FIX FOR UNDEFINED SCENARIOS ---
+const buildScenarioFromBlueprint = (blueprint, module) => {
+    // Safety check for blueprint
+    if (!blueprint) return { type: 'ERROR', text: "Protocol Complete", options: [] };
+    
+    // 1. Handle Generative Types (VISUAL / HAUSMAN) FIRST
+    // These do NOT need a database ID lookup
+    if (blueprint.type === 'VISUAL' && module === 'fe_re') {
+        const isCorrelated = blueprint.isCorrelated;
+        return {
+            ...generatePanelData(5, 8, isCorrelated),
+            type: 'VISUAL',
+            question: "Scan the data. Does group identity appear related to X (horizontal)?",
+            logic: isCorrelated ? "Groups separate along X: this suggests unit effects are correlated with X → RE is biased → choose FE." : "Colors are mixed: X shows no systematic relation to group identity → RE assumption is plausible.",
+            correctModel: isCorrelated ? 'FE' : 'RE',
+            isCorrelated,
+            objective: blueprint.objective,
+            concept: blueprint.concept,
+            options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}]
+        };
+    }
+    
+    if (blueprint.type === 'HAUSMAN' && module === 'fe_re') {
+        const isCorrelated = blueprint.isCorrelated;
+        const pValue = isCorrelated ? (Math.random() * 0.04).toFixed(4) : (0.10 + Math.random() * 0.8).toFixed(4);
+        const chi2 = isCorrelated ? (20 + Math.random() * 50).toFixed(2) : (Math.random() * 2).toFixed(2);
+        return {
+            type: 'HAUSMAN',
+            pValue,
+            chi2,
+            question: "Interpret the Hausman Test result.",
+            hint: isCorrelated ? "P < 0.05 → reject RE." : "P > 0.05 → keep RE.",
+            logic: isCorrelated ? `P-value (${pValue}) < 0.05 → reject Null → RE inconsistent → use FE.` : `P-value (${pValue}) > 0.05 → fail to reject Null → RE is plausible.`,
+            correctModel: isCorrelated ? 'FE' : 'RE',
+            isCorrelated,
+            objective: blueprint.objective,
+            concept: blueprint.concept,
+            options: [{label: 'Fixed Effects', value: 'FE'}, {label: 'Random Effects', value: 'RE'}]
+        };
+    }
+
+    // 2. Handle Narrative Types (Database Lookup)
+    let db = SCENARIO_DB_MOD1;
+    if (module === 'concepts') db = SCENARIO_DB_MOD2;
+    if (module === 'dynamics') db = SCENARIO_DB_MOD3;
+
+    // Safety check for DB
+    if (!db) return { type: 'ERROR', text: "Module Database Not Found", options: [] };
+
+    const scenario = db.find(s => s.id === blueprint.narrativeId);
+    
+    // Safety check if scenario ID not found in DB
+    if (!scenario) {
+        return { 
+            type: 'ERROR', 
+            text: `Scenario data missing for ID: ${blueprint.narrativeId}`, 
+            options: [] 
+        };
+    }
+    
+    return { ...scenario, objective: blueprint.objective };
+};
+
+// --- COMPONENTS ---
+const MathBlock = ({ children }) => <div className={theme.mathBlock}>{children}</div>;
+
+const ExplanationCard = ({ title, type, children }) => {
+    let colorClass = "border-slate-700 bg-slate-800/50 text-slate-200";
+    let iconColor = "text-slate-400";
+    let IconCmp = Icons.Activity;
+    if (type === 'FE') { colorClass = "border-cyan-500/30 bg-cyan-900/10 text-cyan-200 shadow-[0_0_15px_rgba(6,182,212,0.1)]"; iconColor = "text-cyan-400"; IconCmp = Icons.Terminal; } 
+    else if (type === 'RE') { colorClass = "border-purple-500/30 bg-purple-900/10 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.1)]"; iconColor = "text-purple-400"; IconCmp = Icons.Brain; } 
+    else if (type === 'HAUSMAN') { colorClass = "border-yellow-500/30 bg-yellow-900/10 text-yellow-200 shadow-[0_0_15px_rgba(234,179,8,0.1)]"; iconColor = "text-yellow-400"; IconCmp = Icons.Scale; }
+    else if (type === 'TIME') { colorClass = "border-orange-500/30 bg-orange-900/10 text-orange-200 shadow-[0_0_15px_rgba(249,115,22,0.1)]"; iconColor = "text-orange-400"; IconCmp = Icons.Clock; }
+    
+    return (
+        <div className={`p-4 rounded border ${colorClass} mb-4 relative overflow-hidden group transition-all duration-300 hover:border-opacity-100 h-full`}>
+            <div className={`absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-40 transition-opacity ${iconColor}`}><IconCmp size={32} /></div>
+            <h3 className={`font-bold text-base md:text-lg mb-2 flex items-center gap-2 ${iconColor} uppercase tracking-wider`}><IconCmp size={16}/>{title}</h3>
+            <div className="space-y-3 leading-relaxed text-xs md:text-sm opacity-90">{children}</div>
+        </div>
+    );
+};
+
+// --- FIX 3: RESPONSIVE CHART CONTAINER ---
+const ChartContainer = ({ children, title, description }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return (
+    <div 
+      className="bg-slate-900/80 rounded-lg border border-cyan-500/30 p-2 relative overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] w-full focus:ring-2 focus:ring-cyan-500 outline-none"
+      style={{ height: isMobile ? '300px' : '400px' }}
+      tabIndex="0" 
+      aria-label={title}
+    >
+      {description && <div className="sr-only">{description}</div>}
+      <div className="absolute inset-0 opacity-20 pointer-events-none" style={{backgroundImage: 'radial-gradient(#22d3ee 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+      {title && <div className="absolute top-2 right-3 text-[10px] text-cyan-500 uppercase tracking-widest font-bold z-10 drop-shadow-[0_0_2px_rgba(6,182,212,0.8)]" aria-hidden="true">{title}</div>}
+      <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>
+    </div>
+  );
+};
+
+const AchievementNotification = ({ achievement, onClose }) => {
+    useEffect(() => { const timer = setTimeout(onClose, 3000); return () => clearTimeout(timer); }, [onClose]);
+    const IconComp = Icons[achievement.icon] || Icons.Star;
+    return (
+        <div className="fixed top-4 right-4 z-50 animate-bounce">
+            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black p-4 rounded-lg shadow-[0_0_20px_rgba(234,179,8,0.5)] border-2 border-yellow-300 flex items-center gap-3">
+                <IconComp size={24} className="text-black" />
+                <div><div className="font-bold text-sm">Achievement Unlocked!</div><div className="text-xs">{achievement.name}</div></div>
+            </div>
+        </div>
+    );
+};
+
+const ProgressBar = ({ current, total, label }) => {
+    const percentage = Math.min((current / total) * 100, 100);
+    return (
+        <div className="mb-4">
+            <div className="flex justify-between text-xs text-cyan-400 mb-1 font-bold tracking-wider"><span>{label}</span><span>{current}/{total}</span></div>
+            <div className={theme.progressBar}><div className={theme.progressFill} style={{ width: `${percentage}%` }}></div></div>
+        </div>
+    );
+};
+
+// --- NEW TUTORIAL OVERLAY ---
+const TutorialOverlay = ({ onDismiss }) => {
+    const [step, setStep] = useState(0);
+    const steps = [
+        { title: "Protocol Initiated", text: "Welcome to Sigma Labs. Your objective is to correctly identify econometric specifications and anomalies.", highlight: null },
+        { title: "The Mission Clock", text: "Time is money. You have 30 seconds per scenario. Speed bonuses apply for rapid correct answers.", highlight: "timer-deck" },
+        { title: "The Data Stream", text: "Read the scenario text or analyze the charts displayed here carefully. Look for keywords like 'unobserved', 'random assignment', or 'selection'.", highlight: "scenario-deck" },
+        { title: "Control Interface", text: "Select the correct model or concept from the options below. In Module 2, you must identify specific anomaly types.", highlight: "control-deck" },
+        { title: "Lifelines", text: "Stuck? Purchase hints or tests using your score points. Be wise; they cost you grade potential.", highlight: "lifeline-deck" }
+    ];
+
+    // --- FIX 7: MODAL ESCAPE KEY ---
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onDismiss();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onDismiss]);
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 tutorial-overlay animate-in">
+            <div className="bg-slate-900/90 border-2 border-cyan-500 rounded-xl p-8 max-w-lg w-full relative shadow-[0_0_50px_rgba(6,182,212,0.5)]">
+                <div className="absolute -top-3 -left-3 bg-cyan-500 text-black font-bold px-3 py-1 rounded-full text-xs uppercase tracking-widest shadow-[0_0_10px_rgba(6,182,212,0.8)]">Tutorial</div>
+                <h3 className="text-2xl font-bold text-white mb-2">{steps[step].title}</h3>
+                <p className="text-slate-300 mb-8 leading-relaxed">{steps[step].text}</p>
+                <div className="flex justify-between items-center">
+                    <div className="flex gap-1">
+                        {steps.map((_, i) => <div key={i} className={`h-1.5 w-8 rounded-full ${i === step ? 'bg-cyan-400 shadow-[0_0_5px_rgba(34,211,238,0.8)]' : 'bg-slate-700'}`}></div>)}
+                    </div>
+                    <button onClick={() => {
+                        if (step < steps.length - 1) setStep(step + 1);
+                        else onDismiss();
+                    }} className={theme.buttonPrimary}>
+                        {step < steps.length - 1 ? "Next" : "Start Simulation"} <Icons.ArrowRight size={16}/>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- RESTORED LAB MODE (The "Look and Feel" Fix) ---
+const LabMode = ({ onComplete, module }) => {
+    const [activeTab, setActiveTab] = useState('fe');
+    const [simulation, setSimulation] = useState(generatePanelData(3, 10, true));
+    const [timeData, setTimeData] = useState(generateTimeSeriesData(false));
+    
+    // Auto-regenerate simulation when tab changes
+    useEffect(() => {
+        if (module === 'fe_re') {
+            const isCorr = activeTab === 'fe' || activeTab === 'hausman';
+            // Increase group count to 5 for better visualization
+            setSimulation(generatePanelData(5, 10, isCorr));
+        } else if (module === 'dynamics') {
+            setTimeData(generateTimeSeriesData(activeTab === 'shock'));
+        }
+    }, [activeTab, module]);
+
+    // Module 2: Concepts
+    if (module === 'concepts') {
+        return (
+            <div className={`${theme.container} pt-8 md:pt-12 animate-in`}>
+                <div className="text-center mb-6 md:mb-10">
+                    <h1 className={theme.header}>PROTOCOL BETA: CONCEPTS</h1>
+                    <p className={theme.subHeader}>Structural Anomaly Database</p>
+                </div>
+                <div className={theme.card}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {EDUCATIONAL_MODULES.map(mod => (
+                            <div key={mod.id} className="bg-slate-900/50 p-4 rounded border border-purple-500/30 hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all cursor-default">
+                                <div className="flex items-center gap-2 mb-2 font-bold text-white">
+                                    {Icons[mod.icon] ? React.createElement(Icons[mod.icon], {size: 18, className: "text-purple-400"}) : null}
+                                    {mod.title}
+                                </div>
+                                <p className="text-sm text-slate-400">{mod.content}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-8 flex justify-end border-t border-slate-800 pt-6">
+                        <button onClick={onComplete} className={theme.buttonPrimary}>Begin Diagnostics <Icons.ArrowRight size={16} /></button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Module 3: Dynamics (New)
+    if (module === 'dynamics') {
+        return (
+            <div className={`${theme.container} pt-8 md:pt-12 animate-in`}>
+                <div className="text-center mb-6 md:mb-10">
+                    <div className="inline-block relative">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg blur opacity-25 animate-pulse"></div>
+                        <h1 className={theme.header}>PROTOCOL GAMMA: DYNAMICS</h1>
+                    </div>
+                    <p className={theme.subHeader}>Time Series & Global Shocks</p>
+                </div>
+
+                <div className={theme.card}>
+                    <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                        <div className={theme.tabContainer + " mb-0 border-0"}>
+                            <button onClick={() => setActiveTab('normal')} className={activeTab === 'normal' ? theme.tabActive : theme.tabInactive}>NORMAL TREND</button>
+                            <button onClick={() => setActiveTab('shock')} className={activeTab === 'shock' ? theme.tabActive : theme.tabInactive}>GLOBAL SHOCK (RE)</button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 pt-4">
+                        <div className="space-y-4">
+                            <ExplanationCard title="Time Fixed Effects" type="TIME">
+                                <p>Sometimes, events happen that affect <strong>everyone</strong> at once (e.g., a recession).</p>
+                                <div className="bg-orange-900/20 p-3 mt-2 text-xs rounded border border-orange-500/30">
+                                    <strong>The Logic:</strong> If Y drops for all units at T=5, you need a Time Dummy ($\lambda_t$) to capture it.
+                                </div>
+                            </ExplanationCard>
+                            <button onClick={() => setTimeData(generateTimeSeriesData(activeTab === 'shock'))} className={theme.buttonSecondary + " w-full"}><Icons.RefreshCw size={14} /> Simulate New Timeline</button>
+                        </div>
+                        <div>
+                            <ChartContainer title="Time Series Visualization">
+                                <LineChart data={timeData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                                    <XAxis dataKey="time" stroke="#94a3b8" />
+                                    <YAxis stroke="#94a3b8" />
+                                    {/* FIX 1: TOOLTIP STYLING */}
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#f97316', color: '#f8fafc', borderRadius: '6px', maxWidth: '200px' }}
+                                        formatter={(value) => value?.toFixed(2)}
+                                    />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="g1" stroke="#22d3ee" strokeWidth={2} dot={false} />
+                                    <Line type="monotone" dataKey="g2" stroke="#a78bfa" strokeWidth={2} dot={false} />
+                                    <Line type="monotone" dataKey="g3" stroke="#34d399" strokeWidth={2} dot={false} />
+                                </LineChart>
+                            </ChartContainer>
+                        </div>
+                    </div>
+                    <div className="mt-8 flex justify-end border-t border-slate-800 pt-6">
+                        <button onClick={onComplete} className={theme.buttonPrimary}>Begin Diagnostics <Icons.ArrowRight size={16} /></button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Default Lab for FE/RE (Protocol Alpha)
+    return (
+        <div className={`${theme.container} pt-8 md:pt-12 animate-in`}>
+            <div className="text-center mb-6 md:mb-10">
+                <div className="inline-block relative">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg blur opacity-25 animate-pulse"></div>
+                    <h1 className="text-5xl md:text-7xl font-bold text-white relative z-10 tracking-tighter drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">PROTOCOL ALPHA: LAB</h1>
+                </div>
+                <p className="text-cyan-400 tracking-[0.2em] uppercase text-sm font-bold shadow-cyan-500/50">Interactive Simulation Environment</p>
+            </div>
+
+            <div className={theme.card}>
+                <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                    <div className={theme.tabContainer + " mb-0 border-0"}>
+                        {['fe', 're', 'hausman'].map(tab => (
+                            <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? theme.tabActive : theme.tabInactive}>
+                                {tab === 'fe' ? 'FIXED EFFECTS' : tab === 're' ? 'RANDOM EFFECTS' : 'HAUSMAN TEST'}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 pt-4">
+                    <div className="space-y-4">
+                        {activeTab === 'fe' && (
+                            <ExplanationCard title="The 'Unique Character' Approach (FE)" type="FE">
+                                <p>Imagine playing Mario Kart. <strong>Bowser</strong> is always heavy. These traits are <strong>Fixed</strong>.</p>
+                                <MathBlock>y<sub>it</sub> = βx<sub>it</sub> + α<sub>i</sub> + ε<sub>it</sub></MathBlock>
+                                <div className="bg-cyan-900/20 p-3 mt-2 text-xs rounded border border-cyan-500/30"><strong>Trade-off:</strong> SAFE but EXPENSIVE.</div>
+                            </ExplanationCard>
+                        )}
+                        {activeTab === 're' && (
+                            <ExplanationCard title="The 'Loot Box' Approach (RE)" type="RE">
+                                <p>Imagine loot boxes. Random luck. We care about the <strong>Random Distribution</strong>.</p>
+                                <MathBlock>y<sub>it</sub> = βx<sub>it</sub> + α + (u<sub>i</sub> + ε<sub>it</sub>)</MathBlock>
+                                <div className="bg-purple-900/20 p-3 mt-2 text-xs rounded border border-purple-500/30"><strong>Trade-off:</strong> EFFICIENT but RISKY.</div>
+                            </ExplanationCard>
+                        )}
+                        {activeTab === 'hausman' && (
+                            <ExplanationCard title="The Hausman Protocol" type="HAUSMAN">
+                                <p>A "Lie Detector" test. P &lt; 0.05 implies RE is lying (biased).</p>
+                                <div className="bg-yellow-900/20 border-l-4 border-yellow-500 p-3 mt-2 text-xs">P &lt; 0.05 → USE FE.</div>
+                            </ExplanationCard>
+                        )}
+                        <button onClick={() => setSimulation(generatePanelData(5, 10, activeTab === 'fe' || activeTab === 'hausman'))} className={theme.buttonSecondary + " w-full"}><Icons.RefreshCw size={14} /> Reshuffle Data</button>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        {activeTab === 'hausman' ? (
+                            <div className="h-56 md:h-80 bg-black border border-slate-700 rounded-lg p-6 font-mono text-sm flex flex-col justify-center items-center shadow-inner">
+                                <div className="w-full max-w-sm"><p className="text-green-500 mb-4">$ hausman fixed random</p><p className="text-slate-200 text-xs mb-4">chi2(1) = 45.21</p><div className="bg-yellow-900/30 border border-yellow-500/50 p-4 rounded text-center"><p className="text-yellow-500 font-bold text-lg">Prob &gt; chi2 = 0.0000</p></div></div>
+                            </div>
+                        ) : (
+                            <ChartContainer title="Data Visualization">
+                                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                                    <XAxis type="number" dataKey="x" stroke="#94a3b8" tickLine={false} />
+                                    <YAxis type="number" dataKey="y" stroke="#94a3b8" tickLine={false} />
+                                    {/* FIX 1: TOOLTIP STYLING */}
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#06b6d4', color: '#f8fafc', borderRadius: '6px', maxWidth: '200px' }}
+                                        formatter={(value) => value?.toFixed(2)}
+                                    />
+                                    {simulation.groups.map((g, idx) => (<Scatter key={g.id} name={g.name} data={simulation.data.filter(d => d.groupId === g.id)} fill={getColor(idx)} shape="circle" />))}
+                                </ScatterChart>
+                            </ChartContainer>
+                        )}
+                    </div>
+                </div>
+                <div className="mt-8 flex justify-end border-t border-slate-800 pt-6">
+                    <button onClick={onComplete} className={theme.buttonPrimary}>Initiate Simulation <Icons.ArrowRight size={16} /></button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- MAIN MENU (RESTORED) ---
+const MainMenu = ({ onSelectModule, achievements }) => {
+    const unlockedCount = achievements.filter(ach => ach.unlocked).length;
+
+    return (
+        <div className={`${theme.container} pt-12 md:pt-20 animate-in`}>
+            <div className="text-center mb-12">
+                <div className="inline-block relative mb-4">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg blur opacity-50 animate-pulse"></div>
+                    <h1 className="text-5xl md:text-7xl font-bold text-white relative z-10 tracking-tighter drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">SIGMA LABS</h1>
+                </div>
+                <p className="text-cyan-400 tracking-[0.2em] uppercase text-sm font-bold shadow-cyan-500/50">Econometric Simulation Hub v5.9</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+                <div onClick={() => onSelectModule('fe_re')} className={theme.moduleCard + " border-cyan-500/30 hover:border-cyan-400"}>
+                    <div className="bg-cyan-900/30 p-4 rounded-full mb-4 text-cyan-400 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(34,211,238,0.3)]"><Icons.Terminal size={48}/></div>
+                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-cyan-300 transition-colors">Protocol Alpha</h2>
+                    <p className="text-xs text-cyan-400 font-bold uppercase tracking-widest mb-4">FE vs RE Specification</p>
+                    <p className="text-slate-400 text-xs leading-relaxed">The classic protocol. Analyze panel data scenarios and determine whether Fixed Effects or Random Effects is the optimal specification.</p>
+                </div>
+
+                <div onClick={() => onSelectModule('concepts')} className={theme.moduleCard + " border-purple-500/30 hover:border-purple-400"}>
+                    <div className="bg-purple-900/30 p-4 rounded-full mb-4 text-purple-400 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.3)]"><Icons.Search size={48}/></div>
+                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">Protocol Beta</h2>
+                    <p className="text-xs text-purple-400 font-bold uppercase tracking-widest mb-4">Structural Anomalies</p>
+                    <p className="text-slate-400 text-xs leading-relaxed">Advanced diagnostics. Identify specific sources of endogeneity: Unobserved Heterogeneity, Simultaneity, and Selection Bias.</p>
+                </div>
+
+                <div onClick={() => onSelectModule('dynamics')} className={theme.moduleCard + " border-orange-500/30 hover:border-orange-400"}>
+                    <div className="bg-orange-900/30 p-4 rounded-full mb-4 text-orange-400 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(249,115,22,0.3)]"><Icons.Clock size={48}/></div>
+                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-orange-300 transition-colors">Protocol Gamma</h2>
+                    <p className="text-xs text-orange-400 font-bold uppercase tracking-widest mb-4">Time & Dynamics</p>
+                    <p className="text-slate-400 text-xs leading-relaxed">Temporal Analysis. Master Time Fixed Effects, Dynamic Panel Bias (Nickell Bias), and Clustered Standard Errors.</p>
+                </div>
+            </div>
+
+            <div className="max-w-2xl mx-auto bg-slate-900/80 border border-slate-700 rounded-xl p-6 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-300 flex items-center gap-2"><Icons.Trophy size={16} className="text-yellow-500"/> Service Record</h3>
+                    <span className="text-xs text-slate-500 uppercase tracking-widest">{unlockedCount} / {achievements.length} Unlocked</span>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-yellow-500 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(234,179,8,0.5)]" style={{width: `${(unlockedCount / achievements.length) * 100}%`}}></div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- GAME ENGINE (RESTORED) ---
+const GameMode = ({ onQuit, achievements, unlockAchievement, module }) => {
+    const [level, setLevel] = useState(1);
+    const [score, setScore] = useState(STARTING_SCORE);
+    const [streak, setStreak] = useState(0);
+    const [gameState, setGameState] = useState('playing');
+    const [currentScenario, setCurrentScenario] = useState(null);
+    const [feedback, setFeedback] = useState(null);
+    const [timeLeft, setTimeLeft] = useState(30);
+    const [timerActive, setTimerActive] = useState(true);
+    const [hintVisible, setHintVisible] = useState(false);
+    const [isRevealModalOpen, setIsRevealModalOpen] = useState(false);
+    const [gameHistory, setGameHistory] = useState([]);
+    const [perfectLevel, setPerfectLevel] = useState(true);
+    const [shakeAnimation, setShakeAnimation] = useState(false);
+    const [showTutorial, setShowTutorial] = useState(true);
+
+    // Determine curriculum based on selected module
+    let curriculum = CURRICULUM_MOD1;
+    if (module === 'concepts') curriculum = CURRICULUM_MOD2;
+    if (module === 'dynamics') curriculum = CURRICULUM_MOD3;
+
+    // --- FIX 15: DEBUG LOGGING ---
+    useEffect(() => {
+        log('Game state changed', { gameState, level, score });
+    }, [gameState, level, score]);
+
+    useEffect(() => {
+        if (gameState === 'playing') {
+            if (level > curriculum.length) { setGameState('gameover'); return; }
+            const blueprint = curriculum[level - 1];
+            if (!blueprint) { setGameState('gameover'); return; }
+            const newScenario = buildScenarioFromBlueprint(blueprint, module);
+            setCurrentScenario(newScenario);
+            setTimeLeft(30);
+            setTimerActive(true);
+            setHintVisible(false);
+            setIsRevealModalOpen(false);
+            setPerfectLevel(true);
+        }
+    }, [gameState, level, module]);
+
+    // --- FIX 7: TIMER ACCURACY & CLEANUP ---
+    const handleTimerDecrement = useCallback(() => {
+        setTimeLeft(prev => {
+            if (prev <= 1) {
+                setTimerActive(false);
+                return 0;
+            }
+            return prev - 1;
+        });
+    }, []);
+
+    useEffect(() => {
+        if (!timerActive || gameState !== 'playing' || showTutorial) return;
+        const interval = setInterval(handleTimerDecrement, 1000);
+        return () => clearInterval(interval);
+    }, [timerActive, gameState, showTutorial, handleTimerDecrement]);
+
+    // Trigger timeout when timeLeft hits 0 (separate effect to avoid closure staleness)
+    useEffect(() => {
+        if (timeLeft === 0 && timerActive && gameState === 'playing' && !showTutorial) {
+            handleAnswer('TIMEOUT');
+        }
+    }, [timeLeft, timerActive, gameState, showTutorial]);
+
+    // --- FIX 5: CLEANUP FOR GAMEOVER ---
+    useEffect(() => {
+        if (gameState === 'gameover') { 
+            FireConfetti(); 
+            SoundManager.achievement(); 
+        }
+    }, [gameState]);
+
+    const handleAnswer = (choice) => {
+        if (!currentScenario || gameState !== 'playing') return;
+        
+        log('Answer submitted', { choice, correctAnswer: currentScenario.correctModel });
+
+        setTimerActive(false);
+        const isCorrect = choice === currentScenario.correctModel;
+        const isTimeout = choice === 'TIMEOUT';
+        let points = isCorrect && !isTimeout ? 50 + (timeLeft * 2) + (streak * 10) : -30;
+        let newStreak = isCorrect && !isTimeout ? streak + 1 : 0;
+        
+        if (isCorrect && !isTimeout) {
+            if (newStreak === 1 && gameHistory.length === 0) unlockAchievement('first_correct');
+            if (newStreak === 3) unlockAchievement('streak_3');
+            if (newStreak === 5) unlockAchievement('streak_5');
+            if (perfectLevel) unlockAchievement('perfectionist');
+            newStreak >= 3 ? SoundManager.streak() : SoundManager.correct();
+        } else {
+            SoundManager.wrong();
+            setShakeAnimation(true);
+            setTimeout(() => setShakeAnimation(false), 500);
+        }
+
+        const newScore = Math.max(0, score + points);
+        const conceptInfo = PROFESSOR_NOTES[currentScenario.concept] || PROFESSOR_NOTES.OVB;
+        
+        setGameHistory(prev => [...prev, { level, isCorrect, points }]);
+        setScore(newScore);
+        setStreak(newStreak);
+        
+        // Show feedback without auto-advance
+        setFeedback({
+            isCorrect, isTimeout, points,
+            correctAnswer: currentScenario.correctModel,
+            conceptTitle: conceptInfo.title,
+            conceptText: conceptInfo.text,
+            explanation: currentScenario.logic || "Analysis complete."
+        });
+    };
+
+    // --- FIX 10: LEVEL PROGRESSION EDGE CASE ---
+    const handleNextLevel = () => {
+        setFeedback(null);
+        // Safety check: if score depleted or no more levels
+        if (score <= 0 || level >= curriculum.length) {
+            setGameState('gameover');
+        } else {
+            setLevel(prev => prev + 1);
+        }
+    };
+
+    // --- RENDERERS ---
+    if (gameState === 'gameover') {
+        const finalGrade = score >= 250 ? 'A+' : score >= 150 ? 'A' : score >= 100 ? 'B' : 'C';
+        if (finalGrade === 'A+') unlockAchievement('master');
+        if (module === 'fe_re') unlockAchievement('analyst');
+        if (module === 'concepts') unlockAchievement('detective');
+        if (module === 'dynamics') unlockAchievement('time_lord');
+
+        return (
+            <div className={`${theme.container} pt-12 animate-in text-center`}>
+                <div className="max-w-2xl mx-auto">
+                    <Icons.Trophy size={64} className="mx-auto mb-4 text-yellow-400 floating drop-shadow-[0_0_15px_rgba(234,179,8,0.8)]" />
+                    <h1 className="text-4xl font-bold text-white mb-2">SIMULATION COMPLETE</h1>
+                    <div className={theme.card + " mt-8"}>
+                        <div className="grid grid-cols-2 gap-6 mb-6">
+                            <div><div className="text-3xl font-bold text-cyan-400">{score}</div><div className="text-xs text-slate-400">SCORE</div></div>
+                            <div><div className="text-3xl font-bold text-purple-400">{finalGrade}</div><div className="text-xs text-slate-400">GRADE</div></div>
+                        </div>
+                        <button onClick={onQuit} className={theme.buttonPrimary}>Return to Hub <Icons.ArrowRight size={16} /></button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (feedback) {
+        return (
+            <div className={`${theme.container} pt-12 animate-in text-center`}>
+                <div className="max-w-2xl mx-auto">
+                    {feedback.isCorrect ? 
+                        <Icons.CheckCircle size={80} className="mx-auto mb-4 text-green-400 animate-bounce drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]" /> : 
+                        <Icons.XCircle size={80} className="mx-auto mb-4 text-red-400 animate-shake drop-shadow-[0_0_15px_rgba(248,113,113,0.8)]" />
+                    }
+                    <h1 className="text-3xl font-bold text-white mb-6 tracking-widest">{feedback.isCorrect ? "CORRECT DIAGNOSIS" : "DIAGNOSIS FAILED"}</h1>
+                    
+                    <div className="bg-slate-900/90 p-6 rounded-lg text-left border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.2)] mb-8">
+                        <div className="flex items-center gap-2 mb-3 text-yellow-400">
+                            <Icons.BookOpen size={20}/>
+                            <span className="font-bold text-sm uppercase tracking-widest">Professor's Note: {feedback.conceptTitle}</span>
+                        </div>
+                        <p className="text-slate-200 text-sm leading-relaxed mb-4 border-l-2 border-yellow-500 pl-4">{feedback.conceptText}</p>
+                        <div className="text-xs text-cyan-400 italic bg-cyan-900/20 p-2 rounded">Case Logic: {feedback.explanation}</div>
+                    </div>
+
+                    <button onClick={handleNextLevel} className={theme.buttonPrimary + " w-full md:w-2/3 mx-auto text-lg py-4"}>
+                        {level >= curriculum.length ? "Finish Simulation" : "Next Mission"} <Icons.ArrowRight size={20}/>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!currentScenario) return <div className="text-center pt-20 text-cyan-500 font-bold animate-pulse">Initializing Protocol...</div>;
+
+    return (
+        <div className={`${theme.container} pt-8 animate-in relative ${shakeAnimation ? 'animate-shake' : ''}`}>
+            {showTutorial && <TutorialOverlay onDismiss={() => setShowTutorial(false)} />}
+            
+            <div className="flex justify-between items-center mb-6">
+                <button onClick={onQuit} className={theme.buttonSecondary}><Icons.ChevronRight className="rotate-180" size={16} /> Abort</button>
+                <div className="text-center"><div className="text-xl font-bold text-white">Lvl {level}</div><div className="text-xs text-cyan-400">{module === 'fe_re' ? 'Protocol Alpha' : module === 'concepts' ? 'Protocol Beta' : 'Protocol Gamma'}</div></div>
+                <div className="text-right"><div className="text-xl font-bold text-cyan-400">{score}</div><div className="text-xs text-slate-400">PTS</div></div>
+            </div>
+
+            <div id="timer-deck" className="flex justify-between items-center mb-6 p-4 bg-slate-900/50 rounded-lg border border-slate-700 shadow-inner">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2"><Icons.Clock size={16} className={timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-cyan-400"} /><span className={`font-mono text-lg ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</span></div>
+                    {streak > 0 && <div className="flex items-center gap-2"><Icons.Flame size={16} className="text-orange-400 animate-pulse" /><span className="font-mono text-lg text-orange-400">{streak}</span></div>}
+                </div>
+                <div className="w-1/3"><ProgressBar current={level - 1} total={curriculum.length} label="" /></div>
+            </div>
+
+            <div id="scenario-deck" className={theme.card}>
+                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    {currentScenario.type === 'VISUAL' ? <Icons.Activity size={20} className="text-cyan-400"/> : <Icons.Terminal size={20} className="text-purple-400"/>}
+                    {currentScenario.type === 'NARRATIVE' ? 'Scenario Analysis' : currentScenario.type === 'VISUAL' ? 'Pattern Recognition' : 'Statistical Test'}
+                </h2>
+                
+                {currentScenario.type === 'NARRATIVE' && <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700 mb-4"><p className="text-slate-200 leading-relaxed text-sm md:text-base font-medium">{currentScenario.text}</p></div>}
+                
+                {currentScenario.type === 'VISUAL' && <ChartContainer title="Panel Visualization"><ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#334155" /><XAxis type="number" dataKey="x" stroke="#94a3b8" tickLine={false} /><YAxis type="number" dataKey="y" stroke="#94a3b8" tickLine={false} />
+                {/* FIX 1: TOOLTIP STYLING */}
+                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#06b6d4', color: '#f8fafc', borderRadius: '6px', maxWidth: '200px' }} formatter={(value) => value?.toFixed(2)}/>
+                {currentScenario.groups.map((g, idx) => (<Scatter key={g.id} name={g.name} data={currentScenario.data.filter(d => d.groupId === g.id)} fill={getColor(idx)} shape="circle" />))}</ScatterChart></ChartContainer>}
+                
+                {currentScenario.type === 'HAUSMAN' && <div className="bg-black border-2 border-slate-700 rounded-lg p-6 font-mono text-sm mb-4 shadow-inner"><p className="text-green-500 mb-2">$ hausman fixed random</p><p className="text-slate-200 text-xs mb-4">chi2(1) = {currentScenario.chi2}</p><div className="bg-yellow-900/30 border border-yellow-500/50 p-4 rounded text-center"><p className="text-yellow-500 font-bold text-lg">Prob &gt; chi2 = {currentScenario.pValue}</p></div></div>}
+                
+                {hintVisible && currentScenario.hint && <div className={theme.hintPanel}><div className="flex items-center gap-2 mb-2"><Icons.HelpCircle size={16} className="text-yellow-400" /><span className="text-yellow-400 font-bold text-xs uppercase tracking-widest">Analysis Hint</span></div><p className="text-yellow-200 text-sm">{currentScenario.hint}</p></div>}
+            </div>
+
+            {/* FIX 6 & 13: RESPONSIVE & ACCESSIBLE BUTTONS */}
+            <div id="control-deck" className={`grid gap-4 mb-6 ${currentScenario.options?.length > 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-2'}`}>
+                {currentScenario.options?.map((opt, idx) => (
+                    <button 
+                        key={idx} 
+                        onClick={() => handleAnswer(opt.value)} 
+                        aria-label={`Select ${opt.label} as your answer`}
+                        className={`p-6 bg-slate-800/80 hover:bg-slate-700 border-2 ${idx % 2 === 0 ? 'border-cyan-500/30 hover:border-cyan-400' : 'border-purple-500/30 hover:border-purple-400'} rounded-lg transition-all text-center group active:scale-95 flex flex-col items-center justify-center h-full shadow-lg hover:shadow-xl relative overflow-hidden`}
+                    >
+                        <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity ${idx % 2 === 0 ? 'bg-cyan-400' : 'bg-purple-400'}`}></div>
+                        <div className="font-bold text-sm md:text-lg mb-1 text-white relative z-10">{opt.label}</div>
+                    </button>
+                ))}
+            </div>
+
+            <div id="lifeline-deck" className="border-t border-slate-700 pt-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button onClick={() => { setHintVisible(true); setScore(s => Math.max(0, s-15)); setPerfectLevel(false); }} disabled={hintVisible} className={theme.lifelineBtn}>Hint <span className="text-red-400">-15</span></button>
+                    <button onClick={() => { setIsRevealModalOpen(true); setScore(s => Math.max(0, s-40)); setPerfectLevel(false); }} disabled={isRevealModalOpen} className={theme.lifelineBtn}>Reveal <span className="text-red-400">-40</span></button>
+                </div>
+            </div>
+
+            {/* FIX 9: REVEAL MODAL VISIBILITY & ACCESSIBILITY */}
+            {isRevealModalOpen && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in" role="dialog" aria-modal="true">
+                    <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(6,182,212,0.4)] animate-in">
+                        <div className="text-xs text-cyan-400 mb-2 uppercase tracking-widest font-bold">Solution Override</div>
+                        <div className="text-xl font-bold text-white mb-3">{currentScenario.options.find(o => o.value === currentScenario.correctModel)?.label}</div>
+                        <p className="text-slate-300 text-sm border-t border-slate-700 pt-2">{currentScenario.logic}</p>
+                        <button onClick={() => setIsRevealModalOpen(false)} className={theme.buttonPrimary + " w-full mt-4"}>Close</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// --- APP ROOT ---
+const App = () => {
+    const [phase, setPhase] = useState('hub');
+    const [selectedModule, setSelectedModule] = useState(null);
+    const [achievements, setAchievements] = useState(ACHIEVEMENTS);
+    const [showAchievement, setShowAchievement] = useState(null);
+    
+    // --- FIX 12: LOCAL STORAGE PERSISTENCE (Initial Load) ---
+    useEffect(() => {
+      const saved = localStorage.getItem('sigma_labs_progress');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (new Date() - new Date(data.timestamp) < 86400000) { // 24 hours
+             if (data.achievements) setAchievements(data.achievements);
+          }
+        } catch(e) { console.warn("Load failed", e); }
+      }
+    }, []);
+
+    // --- FIX 12: LOCAL STORAGE PERSISTENCE (Save) ---
+    useEffect(() => {
+        const gameData = { achievements, timestamp: new Date().toISOString() };
+        localStorage.setItem('sigma_labs_progress', JSON.stringify(gameData));
+    }, [achievements]);
+
+    const unlockAchievement = useCallback((id) => {
+        setAchievements(prev => {
+            if (prev.find(a => a.id === id && a.unlocked)) return prev;
+            const updated = prev.map(a => a.id === id ? { ...a, unlocked: true } : a);
+            const ach = updated.find(a => a.id === id);
+            setShowAchievement(ach);
+            return updated;
+        });
+    }, []);
+
+    // --- FIX 14: MODULE NAVIGATION STATE RESET ---
+    const handleModuleSelect = (mod) => {
+        setSelectedModule(mod);
+        setPhase('lab');
+    };
+
+    return (
+        <ErrorBoundary>
+            <div className={theme.bg}>
+                {showAchievement && <AchievementNotification achievement={showAchievement} onClose={() => setShowAchievement(null)} />}
+                
+                {phase === 'hub' && <MainMenu onSelectModule={handleModuleSelect} achievements={achievements} />}
+                
+                {phase === 'lab' && <LabMode onComplete={() => setPhase('game')} module={selectedModule} />}
+                
+                {phase === 'game' && <GameMode 
+                    onQuit={() => setPhase('hub')} 
+                    achievements={achievements} 
+                    unlockAchievement={unlockAchievement}
+                    module={selectedModule}
+                />}
+            </div>
+        </ErrorBoundary>
+    );
+};
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>

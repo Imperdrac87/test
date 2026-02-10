@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FluxReader 3.5 | Pure Sigma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;700&family=Roboto+Slab:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --orp-color: #ef4444; --highlight-color: #fef08a; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+        /* Font Classes */
+        .font-sans-read { font-family: 'Inter', sans-serif; }
+        .font-serif-read { font-family: 'Roboto Slab', serif; }
+        .font-mono-read { font-family: 'Roboto Mono', monospace; }
+
+        /* RSVP Focus Notch */
+        .orp-notch::before, .orp-notch::after {
+            content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+            width: 2px; height: 35px; background-color: #94a3b8; transition: background-color 0.3s; z-index: 10;
+        }
+        .orp-notch::before { top: 0; } .orp-notch::after { bottom: 0; }
+        .dark .orp-notch::before, .dark .orp-notch::after { background-color: #475569; }
+
+        /* RSVP Display */
+        #word-display { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding-bottom: 20px; overflow: visible; }
+
+        /* Stream Styling */
+        .stream-word { padding: 4px 2px; margin: 0 2px; border-radius: 4px; transition: background-color 0.1s; cursor: pointer; display: inline-block; }
+        .stream-active { background-color: var(--highlight-color); color: #0f172a !important; font-weight: 700; position: relative; }
+        
+        /* Tony Buzan: Visual Pacer (Underline Pointer) */
+        .pacer-active .stream-active::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px;
+            background: #3b82f6; border-radius: 2px; animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        /* Tony Buzan: Peripheral Soft Focus */
+        .soft-focus #stream-content {
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+        }
+
+        .bionic-bold { font-weight: 800; }
+        .view-transition { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Sliders */
+        input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; background: #3b82f6; border: 3px solid white; margin-top: -9px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; }
+        .dark input[type=range]::-webkit-slider-runnable-track { background: #334155; }
+
+        /* Notification Toast */
+        #toast {
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        #toast.visible { transform: translateY(0); }
+    </style>
+</head>
+<body id="app-body" class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+
+    <header class="w-full h-16 px-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">Σ</div>
+            <h1 class="font-bold text-xl tracking-tight hidden sm:block">FluxReader <span class="text-blue-600 font-medium text-xs ml-1 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded border border-blue-100 dark:border-blue-800">3.5</span></h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="help-btn" class="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-90" title="User Guide">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
+            <button id="advanced-toggle" class="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-90" title="Reader Config">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1-1 1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button id="font-toggle" class="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-90" title="Change Font">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+            </button>
+            <button id="theme-toggle" class="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-90">
+                <svg id="icon-sun" class="hidden" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden">
+        <!-- Toast Warning -->
+        <div id="toast" class="absolute top-0 left-0 right-0 z-[60] p-3 flex justify-center pointer-events-none">
+            <div class="bg-slate-800/95 text-white px-4 py-2 rounded-full text-xs font-bold shadow-xl border border-slate-700 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span id="toast-text">Feature only works in Stream mode</span>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <section id="input-view" class="absolute inset-0 flex flex-col p-6 view-transition z-30 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
+            <div class="max-w-4xl w-full mx-auto flex flex-col h-full gap-5 pb-10">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Scholar's Workspace</h2>
+                        <p class="text-slate-500 text-sm">Paste text for Ph.D. level analysis and reading.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="paste-btn" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-semibold hover:bg-blue-200 transition-colors">Paste</button>
+                        <button id="clear-btn" class="px-4 py-2 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 rounded-lg text-sm font-semibold hover:bg-rose-200 transition-colors">Clear</button>
+                    </div>
+                </div>
+                <textarea id="text-input" class="flex-1 w-full p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner outline-none resize-none text-lg leading-relaxed bg-white dark:bg-slate-900 dark:text-slate-200 placeholder-slate-400 font-sans-read" placeholder="Enter text here..."></textarea>
+                <button id="start-btn" class="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-2xl shadow-xl transform active:scale-95 transition-all">Begin Reading Session</button>
+            </div>
+        </section>
+
+        <!-- Reader Section -->
+        <section id="reader-view" class="absolute inset-0 translate-x-full view-transition bg-white dark:bg-slate-950 flex flex-col z-40">
+            <nav class="px-6 h-14 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center w-full shrink-0">
+                <button id="back-btn" class="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-semibold active:scale-95 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg><span>Back</span>
+                </button>
+                <div class="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
+                    <button id="mode-rsvp" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95">FOCUS</button>
+                    <button id="mode-stream" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95">STREAM</button>
+                </div>
+                <div id="read-stats" class="text-xs font-mono font-bold text-slate-400 min-w-[80px] text-right">0m left</div>
+            </nav>
+
+            <div class="flex-1 relative w-full overflow-hidden flex flex-col items-center">
+                <div id="rsvp-container" class="absolute inset-0 flex flex-col items-center justify-center p-4">
+                    <div class="w-full max-w-4xl h-80 relative orp-notch flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-visible">
+                        <div id="word-display" class="font-mono-read text-5xl md:text-8xl text-slate-800 dark:text-white select-none">
+                            <span id="word-start" class="text-right flex-1 pr-[2px] opacity-70">Flux</span>
+                            <span id="word-pivot" class="text-red-500 font-black shrink-0">R</span>
+                            <span id="word-end" class="text-left flex-1 pl-[2px] opacity-70">eader</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="stream-container" class="absolute inset-0 p-8 md:p-20 overflow-y-auto hidden">
+                    <div id="stream-content" class="text-2xl md:text-4xl leading-relaxed text-slate-300 dark:text-slate-700 font-serif-read text-justify select-none max-w-4xl mx-auto"></div>
+                    <div class="h-64"></div> 
+                </div>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-6 sm:p-8 shrink-0">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-xs font-black uppercase tracking-widest text-slate-400">
+                            <span id="progress-current">0%</span><span id="progress-total">0 / 0</span>
+                        </div>
+                        <input type="range" id="progress-slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <button id="bionic-toggle" class="p-3 text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:text-blue-600 transition-all active:scale-95" title="Bionic snapshots">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H7"/></svg>
+                            </button>
+                            <button id="chunk-toggle" class="p-3 text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:text-blue-600 transition-all active:scale-95" title="Phrase Mode">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="2" y="4" rx="1"/><rect width="8" height="4" x="14" y="10" rx="1"/><rect width="8" height="4" x="2" y="16" rx="1"/></svg>
+                            </button>
+                            <button id="pacer-toggle" class="p-3 text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:text-blue-600 transition-all active:scale-95" title="Visual Pacer (Buzan Finger)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10H7z"/><path d="M7 1h10v2H7z"/><path d="M7 21h10v2H7z"/></svg>
+                            </button>
+                            <button id="soft-focus-toggle" class="p-3 text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:text-blue-600 transition-all active:scale-95" title="Soft Focus (Peripheral Training)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button id="rewind-btn" class="p-2 text-slate-400 hover:text-blue-600 transition-all active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/></svg></button>
+                            <button id="play-pause-btn" class="w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-xl flex items-center justify-center transform active:scale-90 transition-transform shadow-blue-500/30">
+                                <svg id="icon-play" class="ml-1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="icon-pause" class="hidden" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                            <button id="forward-btn" class="p-2 text-slate-400 hover:text-blue-600 transition-all active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 17 5-5-5-5"/><path d="m6 17 5-5-5-5"/></svg></button>
+                        </div>
+                        <div class="flex flex-col items-center min-w-[60px]">
+                            <span id="wpm-display" class="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono">300</span>
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">WPM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Help Guide Modal -->
+        <aside id="help-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-6">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl space-y-6">
+                <div class="flex justify-between items-center border-b pb-4 dark:border-slate-800">
+                    <h3 class="text-2xl font-bold">The Scholar's Manual</h3>
+                    <button id="close-help-btn" class="p-2 text-slate-400 hover:text-rose-500 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                </div>
+                <div class="space-y-6 text-sm leading-relaxed overflow-y-auto max-h-[55vh] pr-2">
+                    <!-- RSVP Section -->
+                    <section class="space-y-2">
+                        <h4 class="font-bold text-blue-600 uppercase tracking-widest text-xs flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span> FOCUS: The RSVP Method
+                        </h4>
+                        <p><strong>Rapid Serial Visual Presentation (RSVP)</strong> is the core engine. By displaying words one-at-a-time at high speed, it eliminates <em>Subvocalization</em> (speaking in your head) and eye movement. Focus strictly on the <strong>Red Pivot</strong> character to absorb information directly into your short-term memory.</p>
+                    </section>
+
+                    <!-- Bionic Section -->
+                    <section class="space-y-2 border-t pt-4 dark:border-slate-800">
+                        <h4 class="font-bold text-blue-600 uppercase tracking-widest text-xs flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span> Bionic Snapshots
+                        </h4>
+                        <p><strong>Bionic Reading</strong> bolds the initial parts of words. This acts as a <em>Visual Fixation Point</em>. Instead of your eye scanning the whole word, your brain takes a "snapshot" of the bolded section and automatically identifies the rest. This significantly reduces cognitive load during long PhD-level papers.</p>
+                    </section>
+                    
+                    <!-- Buzan Section -->
+                    <section class="space-y-2 border-t pt-4 dark:border-slate-800">
+                        <h4 class="font-bold text-blue-600 uppercase tracking-widest text-xs flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span> The Buzan Techniques
+                        </h4>
+                        <div class="pl-3 space-y-3 border-l-2 border-slate-100 dark:border-slate-800">
+                            <p><strong>The Visual Pacer:</strong> Inspired by Tony Buzan's pointer technique. In Stream mode, the "Pacer" adds a moving underline. This simulates a finger leading the eye, maintaining a constant forward rhythm and preventing <em>Regression</em> (the habit of re-reading previous lines).</p>
+                            <p><strong>Soft Focus Training:</strong> This mode fades the text margins. It trains your <em>Peripheral Vision</em> to capture the overall structure and context while your central focus stays on the "center-line" of information, maximizing "eye-brain" intake.</p>
+                        </div>
+                    </section>
+
+                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
+                        <h4 class="font-bold mb-1">Quick Controls:</h4>
+                        <ul class="list-disc list-inside space-y-1 opacity-80">
+                            <li><strong>Space:</strong> Play / Stop Reading</li>
+                            <li><strong>J / L:</strong> Skip forward/back 10 words</li>
+                            <li><strong>Arrows Up/Down:</strong> Speed Control</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Advanced Config -->
+        <aside id="advanced-panel" class="absolute right-0 top-0 h-full w-80 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 z-[60] shadow-2xl translate-x-full p-8 space-y-8 overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg uppercase tracking-widest text-slate-400">Engine Pacing</h3>
+                <button id="close-advanced" class="p-2 text-slate-400 hover:text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <label class="flex justify-between text-xs font-bold text-slate-500 uppercase mb-2">Sentence Pause <span id="sentence-val">2.2x</span></label>
+                    <input type="range" id="sentence-pause" min="1" max="5" step="0.1" value="2.2">
+                </div>
+                <div>
+                    <label class="flex justify-between text-xs font-bold text-slate-500 uppercase mb-2">Comma Pause <span id="comma-val">1.6x</span></label>
+                    <input type="range" id="comma-pause" min="1" max="5" step="0.1" value="1.6">
+                </div>
+                <div>
+                    <label class="flex justify-between text-xs font-bold text-slate-500 uppercase mb-2">Long Word Factor <span id="longword-val">1.2x</span></label>
+                    <input type="range" id="longword-pause" min="1" max="2" step="0.1" value="1.2">
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        class FluxCore {
+            constructor() {
+                this.words = []; this.index = 0; this.wpm = 300; this.playing = false; this.timer = null;
+                this.mode = 'rsvp'; this.bionic = false; this.chunkMode = false; this.softFocus = false; this.pacer = false;
+                this.fontIndex = 0; this.fonts = ['font-sans-read', 'font-serif-read', 'font-mono-read'];
+                this.pacing = { sentence: 2.2, comma: 1.6, longWord: 1.2 };
+                this.toastTimer = null;
+                this.init();
+            }
+
+            init() {
+                this.cacheElements();
+                this.bindEvents();
+                this.loadSettings();
+                this.updateThemeUI();
+                if (this.els.inputView) this.els.inputView.classList.remove('-translate-x-full');
+            }
+
+            cacheElements() {
+                this.els = {
+                    html: document.documentElement,
+                    inputView: document.getElementById('input-view'),
+                    readerView: document.getElementById('reader-view'),
+                    textInput: document.getElementById('text-input'),
+                    startBtn: document.getElementById('start-btn'),
+                    backBtn: document.getElementById('back-btn'),
+                    playPauseBtn: document.getElementById('play-pause-btn'),
+                    wordDisplay: document.getElementById('word-display'),
+                    wordStart: document.getElementById('word-start'),
+                    wordPivot: document.getElementById('word-pivot'),
+                    wordEnd: document.getElementById('word-end'),
+                    progressSlider: document.getElementById('progress-slider'),
+                    wpmDisplay: document.getElementById('wpm-display'),
+                    readStats: document.getElementById('read-stats'),
+                    progressCurrent: document.getElementById('progress-current'),
+                    progressTotal: document.getElementById('progress-total'),
+                    streamContainer: document.getElementById('stream-container'),
+                    rsvpContainer: document.getElementById('rsvp-container'),
+                    streamContent: document.getElementById('stream-content'),
+                    btnFocus: document.getElementById('mode-rsvp'),
+                    btnStream: document.getElementById('mode-stream'),
+                    bionicBtn: document.getElementById('bionic-toggle'),
+                    chunkBtn: document.getElementById('chunk-toggle'),
+                    pacerBtn: document.getElementById('pacer-toggle'),
+                    softFocusBtn: document.getElementById('soft-focus-toggle'),
+                    helpModal: document.getElementById('help-modal'),
+                    helpBtn: document.getElementById('help-btn'),
+                    advancedPanel: document.getElementById('advanced-panel'),
+                    toast: document.getElementById('toast'),
+                    toastText: document.getElementById('toast-text')
+                };
+            }
+
+            bindEvents() {
+                const add = (id, type, fn) => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener(type, fn);
+                };
+
+                add('start-btn', 'click', () => this.startReader());
+                add('back-btn', 'click', () => this.stopReader());
+                add('play-pause-btn', 'click', () => this.togglePlay());
+                add('theme-toggle', 'click', () => this.toggleTheme());
+                add('font-toggle', 'click', () => this.cycleFont());
+                add('help-btn', 'click', () => this.toggleHelp(true));
+                add('close-help-btn', 'click', () => this.toggleHelp(false));
+                add('advanced-toggle', 'click', () => this.els.advancedPanel.classList.toggle('translate-x-full'));
+                add('close-advanced', 'click', () => this.els.advancedPanel.classList.add('translate-x-full'));
+                add('clear-btn', 'click', () => this.els.textInput.value = "");
+                add('paste-btn', 'click', () => this.handlePaste());
+                add('progress-slider', 'input', (e) => this.seek(e.target.value));
+                add('mode-rsvp', 'click', () => this.setMode('rsvp'));
+                add('mode-stream', 'click', () => this.setMode('stream'));
+                add('bionic-toggle', 'click', () => this.toggleBionic());
+                add('chunk-toggle', 'click', () => this.toggleChunk());
+                add('pacer-toggle', 'click', () => this.togglePacer());
+                add('soft-focus-toggle', 'click', () => this.toggleSoftFocus());
+                add('rewind-btn', 'click', () => this.step(-10));
+                add('forward-btn', 'click', () => this.step(10));
+
+                ['sentence', 'comma', 'longword'].forEach(key => {
+                    add(`${key}-pause`, 'input', (e) => {
+                        const val = parseFloat(e.target.value);
+                        this.pacing[key === 'longword' ? 'longWord' : key] = val;
+                        document.getElementById(`${key}-val`).textContent = val.toFixed(1) + 'x';
+                        this.saveSettings();
+                    });
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (this.els.readerView.classList.contains('translate-x-full')) return;
+                    if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); }
+                    if (e.code === 'ArrowRight') this.step(1);
+                    if (e.code === 'ArrowLeft') this.step(-1);
+                    if (e.code === 'KeyJ') this.step(-10);
+                    if (e.code === 'KeyL') this.step(10);
+                    if (e.code === 'ArrowUp') this.adjustWPM(25);
+                    if (e.code === 'ArrowDown') this.adjustWPM(-25);
+                });
+            }
+
+            showToast(msg) {
+                clearTimeout(this.toastTimer);
+                this.els.toastText.textContent = msg;
+                this.els.toast.classList.add('visible');
+                this.toastTimer = setTimeout(() => this.els.toast.classList.remove('visible'), 3000);
+            }
+
+            async handlePaste() {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (text) this.els.textInput.value = text;
+                } catch (e) { this.els.textInput.focus(); }
+            }
+
+            startReader() {
+                let raw = this.els.textInput.value.trim();
+                if (!raw) return;
+
+                // --- STAGE 1: GLOBAL NOISE REMOVAL ---
+                // URLs
+                raw = raw.replace(/https?:\/\/[^\s]+|www\.[^\s]+/g, "");
+                // Emails
+                raw = raw.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "");
+                // Markdown chars (*, _, #, `, ~)
+                raw = raw.replace(/[\*_#`~]/g, "");
+                // Square bracket citations [12]
+                raw = raw.replace(/\[\s*\d+(?:,\s*\d+)*\s*\]/g, "");
+
+                // --- STAGE 2: ROBUST TOKENIZATION ---
+                let tokens = raw.split(/\s+/);
+
+                this.words = tokens.map(w => {
+                    // Trim outlying non-alphanumeric chars EXCEPT common reading punctuation
+                    // This regex allows letters, numbers, currency, %, and common punctuation .,:;!?'"-
+                    // It strips brackets, braces, slashes, etc. from start/end
+                    return w.replace(/^[^a-zA-Z0-9$£€]+|[^a-zA-Z0-9%.,:;!?'"]+$/g, "");
+                }).filter(w => {
+                    // Must contain at least one alphanumeric char
+                    return /[a-zA-Z0-9]/.test(w);
+                });
+
+                if (this.words.length === 0) return alert("No readable text found after cleaning.");
+
+                this.index = 0;
+                this.renderStream();
+                this.els.inputView.classList.add('-translate-x-full');
+                this.els.readerView.classList.remove('translate-x-full');
+                this.setMode(this.mode);
+                this.render();
+            }
+
+            stopReader() { this.pause(); this.els.inputView.classList.remove('-translate-x-full'); this.els.readerView.classList.add('translate-x-full'); }
+            togglePlay() { this.playing ? this.pause() : this.play(); }
+            play() { if (!this.words.length) return; this.playing = true; this.updatePlayUI(); this.loop(); }
+            pause() { this.playing = false; clearTimeout(this.timer); this.updatePlayUI(); }
+            toggleHelp(show) { this.els.helpModal.classList.toggle('hidden', !show); if(show) this.els.helpModal.classList.add('flex'); }
+
+            loop() {
+                if (!this.playing) return;
+                this.render();
+                const count = this.chunkMode ? this.getChunkSize() : 1;
+                if (this.index >= this.words.length - 1) return this.pause();
+                const word = this.words[this.index];
+                const base = 60000 / this.wpm;
+                let mult = 1.0;
+                if (/[.!?]/.test(word)) mult = this.pacing.sentence;
+                else if (/[,;:]/.test(word)) mult = this.pacing.comma;
+                else if (word.length > 10) mult = this.pacing.longWord;
+                this.timer = setTimeout(() => {
+                    this.index += count;
+                    if (this.index >= this.words.length) this.index = this.words.length - 1;
+                    this.loop();
+                }, base * mult * count);
+            }
+
+            getChunkSize() {
+                let chars = 0, count = 0;
+                for (let i = this.index; i < this.words.length && count < 3; i++) {
+                    chars += this.words[i].length + 1;
+                    if (chars > 18 && count > 0) break;
+                    count++;
+                }
+                return count;
+            }
+
+            render() {
+                if (!this.words.length) return;
+                const word = this.words[this.index] || "";
+                const progress = ((this.index + 1) / this.words.length) * 100;
+                this.els.progressSlider.value = progress;
+                this.els.progressCurrent.textContent = `${Math.round(progress)}%`;
+                this.els.progressTotal.textContent = `${this.index + 1} / ${this.words.length}`;
+                this.els.readStats.textContent = `${Math.ceil((this.words.length - this.index) / this.wpm)}m left`;
+
+                if (this.chunkMode) {
+                    const c = this.getChunkSize();
+                    const phrase = this.words.slice(this.index, this.index + c).join(' ');
+                    this.els.wordStart.textContent = "";
+                    this.els.wordPivot.textContent = phrase;
+                    this.els.wordPivot.className = "text-center text-3xl md:text-6xl font-bold leading-tight";
+                    this.els.wordEnd.textContent = "";
+                } else {
+                    this.els.wordPivot.className = "text-red-500 font-black shrink-0";
+                    const clean = word.replace(/[^\w]/g, "");
+                    const pIdx = this.getPivotIdx(clean || word);
+                    const start = word.substring(0, pIdx);
+                    const pivot = word[pIdx] || "";
+                    const end = word.substring(pIdx + 1);
+                    if (this.bionic) {
+                        const mid = Math.ceil(start.length / 2);
+                        const b = document.createElement('b'); b.className = 'bionic-bold'; b.textContent = start.substring(0, mid);
+                        this.els.wordStart.textContent = ""; this.els.wordStart.append(b, document.createTextNode(start.substring(mid)));
+                    } else { this.els.wordStart.textContent = start; }
+                    this.els.wordPivot.textContent = pivot; this.els.wordEnd.textContent = end;
+                }
+
+                if (this.mode === 'stream' && this.els.streamContent) {
+                    const prev = this.els.streamContent.querySelector('.stream-active');
+                    if (prev) prev.classList.remove('stream-active');
+                    const curr = this.els.streamContent.children[this.index];
+                    if (curr) { 
+                        curr.classList.add('stream-active'); 
+                        curr.scrollIntoView({ behavior: this.playing ? 'auto' : 'smooth', block: 'center' }); 
+                    }
+                }
+            }
+
+            renderStream() {
+                if(!this.els.streamContent) return;
+                this.els.streamContent.innerHTML = '';
+                const frag = document.createDocumentFragment();
+                this.words.forEach((w, i) => {
+                    const span = document.createElement('span'); span.className = 'stream-word'; span.dataset.index = i;
+                    if (this.bionic && w.length > 2) {
+                        const bl = Math.ceil(w.length * 0.45); const b = document.createElement('b'); b.className = 'bionic-bold'; b.textContent = w.substring(0, bl);
+                        span.append(b, document.createTextNode(w.substring(bl)));
+                    } else { span.textContent = w; }
+                    frag.appendChild(span);
+                });
+                this.els.streamContent.appendChild(frag);
+            }
+
+            getPivotIdx(w) { const l = w.length; if (l <= 1) return 0; if (l <= 5) return 1; if (l <= 9) return 2; if (l <= 13) return 3; return 4; }
+            adjustWPM(d) { this.wpm = Math.max(50, Math.min(1200, this.wpm + d)); this.updateWPMDisplay(); this.saveSettings(); }
+            seek(p) { this.pause(); this.index = Math.floor((p / 100) * (this.words.length - 1)); this.render(); }
+            step(d) { this.pause(); this.index = Math.max(0, Math.min(this.words.length - 1, this.index + d)); this.render(); }
+
+            setMode(m) {
+                this.mode = m;
+                const act = "bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white";
+                const inact = "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200";
+                if (m === 'rsvp') {
+                    this.els.rsvpContainer.classList.remove('hidden'); this.els.streamContainer.classList.add('hidden');
+                    if(this.els.btnFocus) this.els.btnFocus.className = `px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${act}`;
+                    if(this.els.btnStream) this.els.btnStream.className = `px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${inact}`;
+                } else {
+                    this.els.rsvpContainer.classList.add('hidden'); this.els.streamContainer.classList.remove('hidden');
+                    if(this.els.btnStream) this.els.btnStream.className = `px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${act}`;
+                    if(this.els.btnFocus) this.els.btnFocus.className = `px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${inact}`;
+                    this.renderStream(); 
+                }
+                this.render();
+            }
+
+            updatePlayUI() {
+                if (this.playing) { document.getElementById('icon-play').classList.add('hidden'); document.getElementById('icon-pause').classList.remove('hidden'); }
+                else { document.getElementById('icon-play').classList.remove('hidden'); document.getElementById('icon-pause').classList.add('hidden'); }
+            }
+            updateWPMDisplay() { if(this.els.wpmDisplay) this.els.wpmDisplay.textContent = this.wpm; }
+            toggleTheme() { this.els.html.classList.toggle('dark'); this.updateThemeUI(); this.saveSettings(); }
+            updateThemeUI() { const isDark = this.els.html.classList.contains('dark'); document.getElementById('icon-sun').classList.toggle('hidden', !isDark); document.getElementById('icon-moon').classList.toggle('hidden', isDark); }
+            cycleFont() { this.fontIndex = (this.fontIndex + 1) % this.fonts.length; this.applyFontStyle(); this.saveSettings(); }
+            applyFontStyle() {
+                const f = this.fonts[this.fontIndex];
+                this.fonts.forEach(c => { this.els.wordDisplay.classList.remove(c); this.els.streamContent.classList.remove(c); this.els.textInput.classList.remove(c); });
+                this.els.wordDisplay.classList.add(f); this.els.streamContent.classList.add(f); this.els.textInput.classList.add(f);
+            }
+            toggleBionic() { this.bionic = !this.bionic; this.updateBionicUI(); if (this.words.length) { this.renderStream(); this.render(); } this.saveSettings(); }
+            updateBionicUI() { this.els.bionicBtn.classList.toggle('text-blue-600', this.bionic); this.els.bionicBtn.classList.toggle('bg-blue-50', this.bionic); this.els.bionicBtn.classList.toggle('dark:bg-blue-900/30', this.bionic); }
+            toggleChunk() { this.chunkMode = !this.chunkMode; this.updateChunkUI(); this.render(); this.saveSettings(); }
+            updateChunkUI() { this.els.chunkBtn.classList.toggle('text-blue-600', this.chunkMode); this.els.chunkBtn.classList.toggle('bg-blue-50', this.chunkMode); this.els.chunkBtn.classList.toggle('dark:bg-blue-900/30', this.chunkMode); }
+            
+            togglePacer() { 
+                if (this.mode !== 'stream') return this.showToast("Visual Pacer requires STREAM mode");
+                this.pacer = !this.pacer; 
+                this.els.pacerBtn.classList.toggle('text-blue-600', this.pacer); 
+                this.els.pacerBtn.classList.toggle('bg-blue-50', this.pacer); 
+                this.els.streamContainer.classList.toggle('pacer-active', this.pacer); 
+                this.saveSettings(); 
+            }
+            
+            toggleSoftFocus() { 
+                if (this.mode !== 'stream') return this.showToast("Soft Focus requires STREAM mode");
+                this.softFocus = !this.softFocus; 
+                this.els.softFocusBtn.classList.toggle('text-blue-600', this.softFocus); 
+                this.els.softFocusBtn.classList.toggle('bg-blue-50', this.softFocus); 
+                this.els.readerView.classList.toggle('soft-focus', this.softFocus); 
+                this.saveSettings(); 
+            }
+
+            loadSettings() {
+                try {
+                    const data = JSON.parse(localStorage.getItem('flux_v34_settings') || '{}');
+                    if (data.wpm) this.wpm = data.wpm;
+                    if (data.theme === 'dark') this.els.html.classList.add('dark');
+                    this.updateWPMDisplay(); this.applyFontStyle();
+                } catch(e) {}
+            }
+            saveSettings() {
+                localStorage.setItem('flux_v34_settings', JSON.stringify({ wpm: this.wpm, theme: this.els.html.classList.contains('dark') ? 'dark' : 'light' }));
+            }
+        }
+        window.addEventListener('DOMContentLoaded', () => { window.Flux = new FluxCore(); });
+    </script>
+</body>
+</html>

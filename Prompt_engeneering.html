@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Builder v9.8 (Extra Details)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root { --primary: #4f46e5; --bg: #f8fafc; --panel: #ffffff; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #0f172a; }
+    .mono-font { font-family: 'JetBrains Mono', monospace; }
+    
+    /* Layout Utilities */
+    .glass-panel { 
+        background: var(--panel); 
+        border: 1px solid #e2e8f0; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Input Styling */
+    .input-base {
+        font-size: 0.85rem; padding: 0.6rem; border-radius: 0.375rem; 
+        border: 1px solid #cbd5e1; width: 100%; transition: all 0.2s;
+        background-color: #fff;
+    }
+    .input-base:focus { 
+        outline: none; border-color: var(--primary); 
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); 
+    }
+    
+    /* Section Headers */
+    .section-header {
+        font-size: 0.7rem; font-weight: 700; text-transform: uppercase; 
+        letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.75rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn-action {
+        text-align: left; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; 
+        border: 1px solid #e2e8f0; background: white; transition: all 0.15s;
+        cursor: pointer; position: relative; overflow: hidden;
+    }
+    .btn-action:hover { border-color: #94a3b8; background: #f1f5f9; }
+    .btn-action.active { 
+        background: #eef2ff; border-color: var(--primary); 
+        color: var(--primary); font-weight: 600; 
+    }
+
+    /* Scrollbars */
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+
+<body class="h-screen overflow-hidden flex flex-col xl:flex-row p-4 gap-4">
+
+  <!-- LEFT: CONFIGURATION (Scrollable) -->
+  <div class="flex-1 flex flex-col gap-4 overflow-y-auto custom-scroll pr-2 h-full">
+    
+    <!-- HEADER -->
+    <div class="glass-panel p-4 rounded-lg flex justify-between items-center shrink-0">
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-slate-900 leading-none">
+          PROMPT<span class="text-indigo-600">BUILDER</span>
+        </h1>
+        <div class="text-[10px] font-mono text-slate-400 mt-1 flex gap-2">
+          <span>v9.8 ENGINE</span>
+          <span class="text-indigo-600 font-bold">• EXTRA OPTIONS</span>
+        </div>
+      </div>
+      <button id="btn-reset" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-3 py-1 rounded hover:bg-rose-50 border border-transparent hover:border-rose-100 transition">
+        Reset All
+      </button>
+    </div>
+
+    <!-- 1. INTENT & STRATEGY -->
+    <div class="glass-panel p-5 rounded-lg border-l-4 border-indigo-500 shrink-0">
+      <div class="section-header text-indigo-600">
+        <span>01</span> Choose a Task
+      </div>
+
+      <!-- Quick Actions (Packs) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-2 mb-4" id="pack-container">
+        <!-- Packs injected via JS -->
+      </div>
+
+      <!-- Advanced Router -->
+      <div class="relative group">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <input type="text" id="intent-router" class="input-base pl-9 border-indigo-100 focus:border-indigo-500 font-medium text-slate-700" 
+               placeholder="Or describe what you want to do here (e.g. 'Fix this Python code')...">
+        <div id="router-loading" class="absolute right-3 top-3 hidden">
+            <div class="animate-spin h-3 w-3 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+        </div>
+      </div>
+      <p class="text-[10px] text-indigo-400 mt-1 ml-1">Typing here will auto-select the right tool and set your goal.</p>
+    </div>
+
+    <!-- 2. DATA INGESTION -->
+    <div class="glass-panel p-5 rounded-lg border-l-4 border-slate-400 shrink-0">
+      <div class="section-header text-slate-600 flex justify-between items-center">
+        <span>02</span> The Details
+        <label class="flex items-center cursor-pointer">
+            <input type="checkbox" id="use-council" class="w-3 h-3 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500">
+            <span class="ml-1.5 text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Use Council of Experts?</span>
+        </label>
+      </div>
+      
+      <div class="grid gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="col-span-1">
+                <!-- SINGLE EXPERT VIEW -->
+                <div id="role-single-view">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Act as... (Single Expert)</label>
+                    <input type="text" id="role" class="input-base bg-slate-50" placeholder="e.g. Expert Statistician">
+                </div>
+                
+                <!-- COUNCIL VIEW -->
+                <div id="role-council-view" class="hidden">
+                    <div class="flex gap-2 mb-2">
+                        <div class="w-1/2">
+                            <label class="text-[9px] font-bold text-indigo-400 uppercase block mb-1">Size</label>
+                            <select id="council-size" class="w-full text-xs border border-indigo-200 rounded px-2 py-1.5 bg-indigo-50 text-indigo-700 font-bold focus:outline-none focus:border-indigo-500">
+                                <option value="small">Small (3)</option>
+                                <option value="large">Large (5)</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="text-[9px] font-bold text-indigo-400 uppercase block mb-1">Mode</label>
+                            <select id="council-style" class="w-full text-xs border border-indigo-200 rounded px-2 py-1.5 bg-indigo-50 text-indigo-700 font-bold focus:outline-none focus:border-indigo-500">
+                                <option value="cooperative">Cooperative</option>
+                                <option value="adversarial">Adversarial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="text-[10px] font-bold text-indigo-500 uppercase block mb-1">Council Members</label>
+                    <!-- DYNAMIC INPUTS CONTAINER -->
+                    <div id="council-inputs" class="space-y-1.5 max-h-[150px] overflow-y-auto custom-scroll pr-1">
+                        <!-- Inputs injected via JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-1 md:col-span-2">
+                 <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">My Goal</label>
+                <input type="text" id="objective" class="input-base font-medium" placeholder="What exactly do you want to achieve?">
+            </div>
+        </div>
+
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase">Paste your text / data here</label>
+                <span class="text-[9px] text-slate-400 font-mono" id="ctx-count">0 chars</span>
+            </div>
+            <!-- Expanded Context Area -->
+            <textarea id="context" class="input-base mono-font text-xs leading-relaxed custom-scroll" 
+                      style="min-height: 120px; max-height: 400px; height: 120px;" 
+                      placeholder="Paste large documents, code files, or extensive data here. (Capacity: High)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. CONFIGURATION (Dynamic Module) -->
+    <div id="module-container" class="glass-panel p-5 rounded-lg border-l-4 border-amber-500 shrink-0 hidden">
+      <div class="section-header text-amber-600 flex justify-between">
+        <span>03</span> <span id="module-title">Settings</span>
+      </div>
+      <div id="module-area" class="grid grid-cols-1 gap-3"></div>
+    </div>
+
+    <!-- 4. OUTPUT CONTROLS -->
+    <div class="glass-panel p-5 rounded-lg border-l-4 border-emerald-500 shrink-0">
+      <div class="section-header text-emerald-600">
+        <span>04</span> Final Polish
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-3">
+        <div>
+          <label class="text-[10px] uppercase font-bold text-slate-400 mb-1 block">Output Style</label>
+          <select id="format" class="input-base cursor-pointer">
+            <option value="markdown">Report (Markdown)</option>
+            <option value="bullets">Bullet Points</option>
+            <option value="table">Table</option>
+            <option value="json">JSON (Data)</option>
+            <option value="code">Code Block</option>
+            <option value="plain">Plain Text</option>
+          </select>
+        </div>
+        <div class="flex flex-col justify-center gap-2">
+           <label class="flex items-center cursor-pointer p-2 hover:bg-slate-50 rounded border border-transparent hover:border-slate-100 transition">
+            <input type="checkbox" id="uk-spelling" class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500">
+            <span class="ml-2 text-xs font-medium text-slate-600">Use British English</span>
+          </label>
+          <label class="flex items-center cursor-pointer p-2 hover:bg-slate-50 rounded border border-transparent hover:border-slate-100 transition">
+            <input type="checkbox" id="no-yapping" class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500">
+            <span class="ml-2 text-xs font-medium text-slate-600">Just the answer (No fluff)</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="border-t border-slate-100 pt-3">
+        <button id="btn-toggle-adv" class="text-[10px] font-bold text-slate-400 hover:text-indigo-600 uppercase tracking-wide flex items-center gap-1 transition">
+          <span>More Options</span>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div id="advanced-area" class="hidden mt-3 grid gap-3">
+            <input id="must-include" class="input-base" placeholder="Make sure to include... (e.g. 'dates', 'citations')">
+            <input id="must-avoid" class="input-base" placeholder="Do NOT include... (e.g. 'jargon', 'marketing speak')">
+            <div class="flex gap-4">
+                <label class="flex items-center"><input type="checkbox" id="chain-of-thought" class="w-3 h-3 text-indigo-600"><span class="ml-2 text-xs text-slate-500">Think step-by-step</span></label>
+                <label class="flex items-center"><input type="checkbox" id="safe-mode" class="w-3 h-3 text-indigo-600"><span class="ml-2 text-xs text-slate-500">Ask if unsure</span></label>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="h-8"></div> <!-- Spacer -->
+  </div>
+
+  <!-- RIGHT: PREVIEW (Sticky) -->
+  <div class="w-full xl:w-[45%] h-[300px] xl:h-full flex flex-col glass-panel rounded-lg shadow-xl overflow-hidden border-slate-300">
+    <div class="bg-slate-900 px-4 py-3 flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-2">
+        <div id="status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+        <span class="text-xs font-bold text-slate-300 uppercase tracking-widest font-mono">Prompt Preview</span>
+      </div>
+      <button id="btn-copy" class="group flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95">
+        <span>Copy to Clipboard</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+      </button>
+    </div>
+
+    <div class="relative flex-grow bg-[#0f1117] group">
+      <textarea id="output" readonly 
+        class="w-full h-full p-4 bg-transparent text-slate-300 mono-font text-[11px] leading-relaxed resize-none focus:outline-none custom-scroll select-all spellcheck-false"></textarea>
+      
+      <!-- Copy Overlay Feedback -->
+      <div id="copy-feedback" class="absolute inset-0 bg-indigo-900/90 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="text-center">
+            <div class="text-4xl mb-2">📋</div>
+            <div class="text-white font-bold text-lg">COPIED</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border-t border-slate-800 p-2 px-4 flex justify-between items-center shrink-0">
+       <div class="flex gap-4">
+           <span class="text-[10px] text-slate-500 font-mono">TOKENS: <span id="token-est">0</span> (Est)</span>
+           <span class="text-[10px] text-slate-500 font-mono">CLEAN MARKDOWN FORMAT</span>
+       </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * PROMPT BUILDER v9.8
+     * Features: Council Individual Seats, Consensus Logic, CLEAN OUTPUT, EXTRA HIDDEN OPTIONS
+     */
+
+    // --- CONFIGURATION ---
+    const INTENTS = {
+      generic: { 
+          label: "Custom Task", 
+          icon: "⚡", 
+          dynamic: true, 
+          schema: [], 
+          extraSchema: [], // Generic uses dynamic list instead
+          council: [] 
+      },
+      summarize: { 
+          label: "Summarise", 
+          icon: "📝", 
+          schema: [{id:'audience', label:'Who is this summary for?'}], 
+          extraSchema: [{id:'focus', label:'Key Focus Area (e.g. Financial)'}, {id:'length', label:'Approx Length (words)'}],
+          council: ["Distinguished Research Fellow", "Senior Editor", "Logic Auditor", "Context Analyst", "Fact Checker"] 
+      },
+      extract: { 
+          label: "Pull Out Data", 
+          icon: "🔍", 
+          schema: [{id:'fields', label:'What fields do you want? (e.g. Name, Date)', type:'textarea'}], 
+          extraSchema: [{id:'missing_data', label:'If data is missing...'}, {id:'source_fmt', label:'Source Format Description'}],
+          council: ["Lead Data Scientist", "Database Architect", "QA Specialist", "Information Architect", "Schema Specialist"] 
+      },
+      rewrite: { 
+          label: "Rewrite/Edit", 
+          icon: "✨", 
+          schema: [{id:'tone', label:'Tone (e.g. Polite, Urgent)'}, {id:'audience', label:'Audience (e.g. Students)'}], 
+          extraSchema: [{id:'keywords', label:'Keywords to Include'}, {id:'perspective', label:'Perspective (e.g. 1st Person)'}],
+          council: ["Communications Director", "PR Strategist", "Linguist", "Tone Calibration Expert", "Cultural Consultant"] 
+      },
+      code: { 
+          label: "Fix Code", 
+          icon: "💻", 
+          schema: [{id:'lang', label:'Language (e.g. Python)'}, {id:'platform', label:'Framework (e.g. Pandas)'}], 
+          extraSchema: [{id:'error_handling', label:'Error Handling Preference'}, {id:'comments', label:'Commenting Style'}],
+          council: ["Principal Software Architect", "Security Engineer", "Performance Specialist", "DevOps Engineer", "Algorithm Specialist"] 
+      },
+      analyze: { 
+          label: "Analyze", 
+          icon: "📊", 
+          schema: [{id:'framework', label:'Analysis Method (e.g. SWOT)'}], 
+          extraSchema: [{id:'depth', label:'Depth (High-level vs Detailed)'}, {id:'metrics', label:'Key Metrics to Watch'}],
+          council: ["Strategic Consultant", "Market Analyst", "Risk Assessor", "Data Visualizer", "Behavioral Economist"] 
+      },
+      plan: { 
+          label: "Make a Plan", 
+          icon: "🎯", 
+          schema: [{id:'timeline', label:'Timeline'}, {id:'resources', label:'Resources Available'}], 
+          extraSchema: [{id:'risks', label:'Risk Tolerance'}, {id:'success_metrics', label:'Success Metrics'}],
+          council: ["Project Manager", "Logistics Expert", "Financial Controller", "Risk Manager", "Resource Planner"] 
+      },
+      learn: { 
+          label: "Tutor Me", 
+          icon: "🎓", 
+          schema: [{id:'level', label:'My Level (e.g. Beginner)'}, {id:'style', label:'Teaching Style (e.g. Socratic)'}], 
+          extraSchema: [{id:'analogy', label:'Preferred Analogy Domain'}, {id:'quiz', label:'Include Quiz? (Yes/No)'}],
+          council: ["Tenured Professor", "Curriculum Designer", "Field Expert", "Cognitive Psychologist", "Industry Mentor"] 
+      }
+    };
+
+    const PACKS = [
+        { id: 'blank',      label: 'Start from Scratch',intent: 'generic' },
+        { id: 'email',      label: 'Pro Email',         intent: 'rewrite',   set: { role:'Executive Communications Director', objective:'Draft a professional email based on these notes.', tone:'Professional & Concise' } },
+        { id: 'summarize',  label: 'Summarise',         intent: 'summarize', set: { role:'Distinguished Research Fellow', objective:'Provide a concise summary of the attached text.' } },
+        { id: 'code_fix',   label: 'Fix Code',          intent: 'code',      set: { role:'Principal Software Architect', objective:'Analyze the code for bugs, inefficiencies, and security risks.', format:'code' } },
+        { id: 'data_clean', label: 'Clean Data',        intent: 'extract',   set: { role:'Lead Data Scientist', objective:'Extract the following fields into a clean JSON format.', format:'json' } },
+        { id: 'explain',    label: 'Explain It',        intent: 'learn',     set: { role:'Tenured Professor', objective:'Explain this concept simply using analogies.', level:'Beginner' } }
+    ];
+
+    // --- STATE MANAGEMENT ---
+    const state = {
+        intent: 'generic',
+        activePack: 'blank',
+        role: '',
+        useCouncil: false,
+        councilSize: 'small',       // 'small' | 'large'
+        councilStyle: 'cooperative', // 'cooperative' | 'adversarial'
+        councilMembers: [],          // Array of strings
+        objective: '',
+        context: '',
+        format: 'markdown',
+        ukSpelling: true,
+        noYapping: false,
+        advanced: {
+            mustInclude: '',
+            mustAvoid: '',
+            chainOfThought: false,
+            safeMode: false
+        },
+        moduleData: {}, // Fixed schema data
+        customFields: [] // Dynamic key-value pairs for generic mode
+    };
+
+    // --- DOM REFERENCES ---
+    const $ = (id) => document.getElementById(id);
+    const els = {
+        router: $('intent-router'),
+        packContainer: $('pack-container'),
+        role: $('role'),
+        councilInputs: $('council-inputs'),
+        useCouncil: $('use-council'),
+        councilSize: $('council-size'),
+        councilStyle: $('council-style'),
+        roleSingleView: $('role-single-view'),
+        roleCouncilView: $('role-council-view'),
+        objective: $('objective'),
+        context: $('context'),
+        format: $('format'),
+        ukSpelling: $('uk-spelling'),
+        noYapping: $('no-yapping'),
+        moduleContainer: $('module-container'),
+        moduleArea: $('module-area'),
+        output: $('output'),
+        ctxCount: $('ctx-count'),
+        tokenEst: $('token-est'),
+        advToggle: $('btn-toggle-adv'),
+        advArea: $('advanced-area'),
+        inputs: {
+            mustInclude: $('must-include'),
+            mustAvoid: $('must-avoid'),
+            chainOfThought: $('chain-of-thought'),
+            safeMode: $('safe-mode')
+        }
+    };
+
+    // --- INITIALIZATION ---
+    function init() {
+        renderPacks();
+        bindEvents();
+        state.customFields = [{key: '', value: ''}];
+        loadPack('blank'); 
+    }
+
+    // --- LOGIC HELPER ---
+    function getCouncilList(intentKey, size) {
+        // Return array of names
+        const fullList = INTENTS[intentKey]?.council || [];
+        const count = size === 'large' ? 5 : 3;
+        // If generic, return empty strings
+        if (intentKey === 'generic') {
+            return Array(count).fill('');
+        }
+        return fullList.slice(0, count);
+    }
+
+    function updateCouncilStateForSize(newSize) {
+        const targetCount = newSize === 'large' ? 5 : 3;
+        const currentMembers = [...state.councilMembers];
+        const defaultMembers = INTENTS[state.intent]?.council || [];
+
+        const newMembers = [];
+        for (let i = 0; i < targetCount; i++) {
+            // Priority: 1. Existing user edit (if exists) 2. Default for that slot 3. Empty
+            if (currentMembers[i] !== undefined && currentMembers[i] !== '') {
+                 newMembers.push(currentMembers[i]);
+            } else if (defaultMembers[i]) {
+                 newMembers.push(defaultMembers[i]);
+            } else {
+                 newMembers.push('');
+            }
+        }
+        state.councilMembers = newMembers;
+    }
+
+    // --- CORE LOGIC ---
+
+    function renderPacks() {
+        els.packContainer.innerHTML = PACKS.map(p => `
+            <button onclick="loadPack('${p.id}')" 
+                class="btn-action ${state.activePack === p.id ? 'active' : ''} flex items-center gap-2 justify-center">
+                <span>${INTENTS[p.intent]?.icon || '📄'}</span>
+                <span class="font-bold text-slate-600">${p.label}</span>
+            </button>
+        `).join('');
+    }
+
+    // Expose to window for HTML onclick
+    window.loadPack = function(packId) {
+        const pack = PACKS.find(p => p.id === packId);
+        if (!pack) return;
+
+        state.activePack = packId;
+        state.intent = pack.intent;
+        state.role = pack.set?.role || '';
+        state.objective = pack.set?.objective || '';
+        if (pack.set?.format) state.format = pack.set.format;
+        state.moduleData = {}; 
+        
+        if (state.intent === 'generic') {
+             state.customFields = [{key: '', value: ''}];
+        }
+
+        // Reset Council Logic based on Defaults
+        state.councilSize = 'small'; 
+        state.councilStyle = 'cooperative';
+        state.councilMembers = getCouncilList(state.intent, state.councilSize);
+
+        // Populate specific module defaults
+        if (pack.set) {
+            Object.keys(pack.set).forEach(k => {
+                if (!['role','objective','format'].includes(k)) {
+                    state.moduleData[k] = pack.set[k];
+                }
+            });
+        }
+
+        renderPacks();
+        renderUI();
+        compile();
+    }
+
+    function switchIntent(newIntent) {
+        if (!INTENTS[newIntent]) return;
+        state.intent = newIntent;
+        state.activePack = null;
+        state.moduleData = {}; 
+        
+        // Update council default
+        state.councilMembers = getCouncilList(newIntent, state.councilSize);
+
+        if (newIntent === 'generic' && state.customFields.length === 0) {
+            state.customFields = [{key: '', value: ''}];
+        }
+        renderPacks();
+        renderUI();
+        compile();
+    }
+
+    // --- RENDERING UI FROM STATE ---
+    function renderUI() {
+        // Sync Inputs
+        els.role.value = state.role;
+        els.objective.value = state.objective;
+        els.context.value = state.context;
+        els.format.value = state.format;
+        els.ukSpelling.checked = state.ukSpelling;
+        els.noYapping.checked = state.noYapping;
+        els.useCouncil.checked = state.useCouncil;
+        els.councilSize.value = state.councilSize;
+        els.councilStyle.value = state.councilStyle;
+
+        // Render Council Inputs
+        els.councilInputs.innerHTML = state.councilMembers.map((member, idx) => `
+            <div class="flex items-center gap-2">
+                <span class="text-[9px] font-bold text-indigo-300 w-4">${idx + 1}.</span>
+                <input type="text" class="input-base text-xs py-1 h-7 council-member-input" 
+                       value="${member}" 
+                       data-idx="${idx}"
+                       placeholder="Expert ${idx + 1} Role...">
+            </div>
+        `).join('');
+
+        // Re-bind listeners to new inputs
+        document.querySelectorAll('.council-member-input').forEach(el => {
+            el.addEventListener('input', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                state.councilMembers[idx] = e.target.value;
+                compile();
+            });
+        });
+
+        // Toggle Council View
+        if (state.useCouncil) {
+            els.roleSingleView.classList.add('hidden');
+            els.roleCouncilView.classList.remove('hidden');
+        } else {
+            els.roleSingleView.classList.remove('hidden');
+            els.roleCouncilView.classList.add('hidden');
+        }
+        
+        // Advanced
+        els.inputs.mustInclude.value = state.advanced.mustInclude;
+        els.inputs.mustAvoid.value = state.advanced.mustAvoid;
+        els.inputs.chainOfThought.checked = state.advanced.chainOfThought;
+        els.inputs.safeMode.checked = state.advanced.safeMode;
+
+        // Render Configuration Area
+        const def = INTENTS[state.intent];
+        const hasSchema = def.schema && def.schema.length > 0;
+        const extraSchema = def.extraSchema || [];
+        const isDynamic = !!def.dynamic;
+
+        if (hasSchema || isDynamic) {
+            els.moduleContainer.classList.remove('hidden');
+            $('module-title').innerText = def.label + " Options";
+            
+            let html = '';
+
+            // 1. Render Fixed Schema (Columns) - ALWAYS VISIBLE
+            if (hasSchema) {
+                html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">';
+                html += def.schema.map(field => {
+                    const val = state.moduleData[field.id] || '';
+                    if (field.type === 'textarea') {
+                        return `<div class="col-span-2">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">${field.label}</label>
+                            <textarea data-mod-id="${field.id}" rows="2" class="input-base mod-input">${val}</textarea>
+                        </div>`;
+                    }
+                    return `<div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">${field.label}</label>
+                        <input type="text" data-mod-id="${field.id}" value="${val}" class="input-base mod-input">
+                    </div>`;
+                }).join('');
+                html += '</div>';
+            }
+
+            // 2. EXTRA SETTINGS TOGGLE (COLLAPSIBLE)
+            // Includes: extraSchema fields AND Dynamic List for generic
+            html += `
+            <div class="border-t border-slate-100 pt-2">
+                <button id="btn-toggle-mod-extra" class="text-[10px] font-bold text-slate-400 hover:text-indigo-600 uppercase tracking-wide flex items-center gap-1 transition mb-2">
+                    <span>Extra Settings</span>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="mod-extra-area" class="hidden space-y-3">
+            `;
+
+            // 2a. Render Predefined Extra Schema (Hidden by default)
+            if (extraSchema.length > 0) {
+                 html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded border border-slate-100">';
+                 html += extraSchema.map(field => {
+                    const val = state.moduleData[field.id] || '';
+                    return `<div>
+                        <label class="text-[9px] font-bold text-slate-500 uppercase mb-1 block">${field.label}</label>
+                        <input type="text" data-mod-id="${field.id}" value="${val}" class="input-base mod-input text-xs">
+                    </div>`;
+                }).join('');
+                html += '</div>';
+            }
+
+            // 2b. Render Dynamic Fields (Rows) - Only show inside Extra for Generic
+            if (isDynamic) {
+                html += `<div class="">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Custom Parameters</label>
+                        <span class="text-[9px] text-indigo-400">Define blank fields</span>
+                    </div>
+                    <div class="space-y-2" id="dyn-list">`;
+                
+                state.customFields.forEach((field, idx) => {
+                    html += `
+                    <div class="flex gap-2 items-start">
+                        <input type="text" placeholder="Topic" 
+                               value="${field.key}" 
+                               class="input-base dyn-key bg-indigo-50/50 text-indigo-700 font-bold text-xs"
+                               style="width: 35%;"
+                               data-idx="${idx}">
+                        <textarea placeholder="Detail..." 
+                               class="input-base dyn-val text-xs"
+                               rows="1"
+                               style="flex: 1;"
+                               data-idx="${idx}">${field.value}</textarea>
+                        <button class="text-slate-300 hover:text-rose-500 p-2 transition btn-remove-dyn" data-idx="${idx}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>`;
+                });
+
+                html += `</div>
+                    <button id="btn-add-dyn" class="mt-3 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 px-3 py-1.5 rounded transition">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Add Rule
+                    </button>
+                </div>`;
+            }
+
+            html += `</div></div>`; // Close Extra Area & Container
+            
+            els.moduleArea.innerHTML = html;
+
+            // --- Re-bind Listeners for generated HTML ---
+
+            // Toggle Extra
+            const extraBtn = document.getElementById('btn-toggle-mod-extra');
+            const extraArea = document.getElementById('mod-extra-area');
+            if(extraBtn && extraArea) {
+                extraBtn.addEventListener('click', () => {
+                    extraArea.classList.toggle('hidden');
+                });
+            }
+
+            // Fixed Schema Inputs (Both Main and Extra use same class)
+            document.querySelectorAll('.mod-input').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    state.moduleData[e.target.dataset.modId] = e.target.value;
+                    compile();
+                });
+            });
+
+            // Dynamic Inputs
+            if (isDynamic) {
+                document.querySelectorAll('.dyn-key').forEach(el => {
+                    el.addEventListener('input', (e) => {
+                        state.customFields[e.target.dataset.idx].key = e.target.value;
+                        compile();
+                    });
+                });
+                document.querySelectorAll('.dyn-val').forEach(el => {
+                    el.addEventListener('input', (e) => {
+                        state.customFields[e.target.dataset.idx].value = e.target.value;
+                        // Auto-expand textarea
+                        e.target.style.height = 'auto';
+                        e.target.style.height = (e.target.scrollHeight) + 'px';
+                        compile();
+                    });
+                });
+                document.querySelectorAll('.btn-remove-dyn').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        const idx = parseInt(el.dataset.idx); 
+                        const btn = e.target.closest('button');
+                        if (btn) {
+                            const i = parseInt(btn.dataset.idx);
+                            state.customFields.splice(i, 1);
+                            renderUI();
+                            compile();
+                        }
+                    });
+                });
+                const addBtn = document.getElementById('btn-add-dyn');
+                if(addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        state.customFields.push({key: '', value: ''});
+                        renderUI(); // Re-render to show new field
+                    });
+                }
+            }
+
+        } else {
+            els.moduleContainer.classList.add('hidden');
+        }
+    }
+
+    // --- COMPILER ENGINE (STRUCTURED MARKDOWN) ---
+    function compile() {
+        const { role, useCouncil, councilMembers, councilStyle, objective, context, intent, format, advanced } = state;
+        
+        // Use a clean Markdown structure instead of XML
+        let p = "";
+
+        // 1. Role / Council Definition
+        if (useCouncil) {
+            p += `## ROLE: Council of Experts\n`;
+            
+            if (councilStyle === 'adversarial') {
+                p += `**Interaction Mode:** ADVERSARIAL DEBATE\n`;
+                p += `**Method:** Facilitate a rigorous debate. Each expert must critique others' viewpoints, exposing flaws and risks.\n\n`;
+            } else {
+                p += `**Interaction Mode:** COOPERATIVE SYNTHESIS\n`;
+                p += `**Method:** Synthesize insights from all experts into a coherent, expert-level response.\n\n`;
+            }
+
+            p += `### The Panel:\n`;
+            if (councilMembers.length > 0) {
+                councilMembers.forEach(m => {
+                    if (m && m.trim()) p += `- ${m.trim()}\n`;
+                });
+            } else {
+                p += `- [Panel members not specified]\n`;
+            }
+            p += `\n`; // Spacing
+        } else if (role) {
+            p += `## ROLE: ${role}\n\n`;
+        }
+
+        // 2. Main Instruction Block
+        p += `## THE TASK\n`;
+        // p += `**Task Type:** ${INTENTS[intent].label}\n`; // Maybe too technical to show label? 
+        p += `**Objective:** ${objective || "Process the input data as requested."}\n\n`;
+        
+        // Module specific instructions (Fixed Schema)
+        const modKeys = Object.keys(state.moduleData);
+        if (modKeys.length > 0) {
+            p += `### Specific Details\n`;
+            modKeys.forEach(k => {
+                // Convert camelCase or underscores to readable text if needed, or just use key
+                // For cleanliness, we'll uppercase the key first char
+                let label = k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ');
+                if(state.moduleData[k]) p += `- **${label}:** ${state.moduleData[k]}\n`;
+            });
+            p += `\n`;
+        }
+
+        // Dynamic Custom Fields
+        if (state.customFields.length > 0) {
+            const hasContent = state.customFields.some(f => f.value.trim());
+            if (hasContent) {
+                 // Only add header if we didn't just add one above, or merge them?
+                 // Let's keep them distinct for clarity
+                if (modKeys.length === 0) p += `### Additional Instructions\n`;
+                
+                state.customFields.forEach(f => {
+                    if (f.value.trim()) {
+                        let label = f.key.trim() ? f.key.trim() : "Note";
+                        p += `- **${label}:** ${f.value}\n`;
+                    }
+                });
+                p += `\n`;
+            }
+        }
+
+        // Constraints
+        p += `## CONSTRAINTS & SETTINGS\n`;
+        if (state.ukSpelling) p += `- Use British English spelling (e.g., colour, analyse).\n`;
+        if (state.noYapping) p += `- Strictly NO conversational filler. Return ONLY the result.\n`;
+        if (advanced.mustInclude) p += `- Must Include: ${advanced.mustInclude}\n`;
+        if (advanced.mustAvoid) p += `- Must Avoid: ${advanced.mustAvoid}\n`;
+        if (advanced.chainOfThought) p += `- Think step-by-step before generating the final output.\n`;
+        if (advanced.safeMode) p += `- If instructions are ambiguous, ask clarifying questions first.\n`;
+        
+        // Consensus requirement (if council)
+        if (useCouncil) {
+             p += `- **Consensus:** After the discussion, you MUST reach a consensus and provide a single, unique final answer.\n`;
+        }
+        
+        // Output Format
+        p += `\n## OUTPUT FORMAT\n`;
+        let fmtPretty = format.toUpperCase();
+        if (format === 'json') fmtPretty += " (Valid JSON only, no markdown blocks)";
+        p += `Provide the result in: **${fmtPretty}**\n\n`;
+
+        // 3. Data Context
+        p += `## CONTEXT / INPUT DATA\n`;
+        if (context) {
+            p += `${context}\n`;
+        } else {
+            p += `[PASTE YOUR CONTENT HERE]\n`;
+        }
+
+        // Update View
+        els.output.value = p;
+        els.ctxCount.innerText = context.length + " chars";
+        els.tokenEst.innerText = Math.ceil(p.length / 4); // Rough token est
+    }
+
+    // --- EVENT BINDING ---
+    function bindEvents() {
+        const debounce = (fn, delay) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn(...args), delay);
+            };
+        };
+
+        const routeIntent = debounce((text) => {
+            const t = text.toLowerCase();
+            $('router-loading').classList.add('hidden');
+            
+            let match = 'generic';
+            if (/(code|debug|function|script|python|js)/.test(t)) match = 'code';
+            else if (/(summar|shorten|tl;dr)/.test(t)) match = 'summarize';
+            else if (/(email|rewrite|draft|tone|polite)/.test(t)) match = 'rewrite';
+            else if (/(json|table|extract|data|field)/.test(t)) match = 'extract';
+            else if (/(teach|explain|how to|tutor)/.test(t)) match = 'learn';
+            else if (/(plan|strat|roadmap)/.test(t)) match = 'plan';
+
+            if (match !== state.intent) {
+                switchIntent(match);
+            }
+        }, 600);
+
+        els.router.addEventListener('input', (e) => {
+            $('router-loading').classList.remove('hidden');
+            state.objective = e.target.value;
+            els.objective.value = e.target.value;
+            compile();
+            routeIntent(e.target.value);
+        });
+
+        // Simple Inputs
+        ['role', 'objective'].forEach(id => {
+            els[id].addEventListener('input', (e) => {
+                state[id] = e.target.value;
+                compile();
+            });
+        });
+
+        els.useCouncil.addEventListener('change', (e) => {
+            state.useCouncil = e.target.checked;
+            renderUI();
+            compile();
+        });
+
+        els.councilSize.addEventListener('change', (e) => {
+            const newSize = e.target.value;
+            state.councilSize = newSize;
+            updateCouncilStateForSize(newSize);
+            renderUI();
+            compile();
+        });
+
+        els.councilStyle.addEventListener('change', (e) => {
+            state.councilStyle = e.target.value;
+            compile();
+        });
+
+        els.context.addEventListener('input', (e) => {
+            state.context = e.target.value;
+            compile();
+        });
+
+        ['format'].forEach(id => {
+            els[id].addEventListener('change', (e) => {
+                state[id] = e.target.value;
+                compile();
+            });
+        });
+
+        ['ukSpelling', 'noYapping'].forEach(id => {
+            els[id].addEventListener('change', (e) => {
+                state[e.target.id] = e.target.checked;
+                compile();
+            });
+        });
+
+        els.advToggle.addEventListener('click', () => {
+            els.advArea.classList.toggle('hidden');
+        });
+
+        Object.keys(els.inputs).forEach(key => {
+            const el = els.inputs[key];
+            const evt = el.type === 'checkbox' ? 'change' : 'input';
+            el.addEventListener(evt, (e) => {
+                state.advanced[key] = el.type === 'checkbox' ? el.checked : el.value;
+                compile();
+            });
+        });
+
+        $('btn-reset').addEventListener('click', () => {
+            if(confirm("Start over completely?")) {
+                loadPack('blank');
+                state.context = '';
+                state.objective = '';
+                state.role = '';
+                state.useCouncil = false;
+                els.router.value = '';
+                renderUI();
+                compile();
+            }
+        });
+
+        $('btn-copy').addEventListener('click', () => {
+            const textarea = els.output;
+            const copyFallback = () => {
+                textarea.select();
+                textarea.setSelectionRange(0, 99999); 
+                try {
+                    document.execCommand('copy');
+                    showCopyFeedback();
+                } catch (err) {
+                    console.error('Fallback copy failed', err);
+                    alert('Could not copy text. Please select all and copy manually.');
+                }
+            };
+            const showCopyFeedback = () => {
+                const fb = $('copy-feedback');
+                fb.classList.remove('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    fb.classList.add('opacity-0', 'pointer-events-none');
+                }, 1500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textarea.value)
+                    .then(showCopyFeedback)
+                    .catch(() => copyFallback());
+            } else {
+                copyFallback();
+            }
+        });
+    }
+
+    init();
+
+  </script>
+</body>
+</html>

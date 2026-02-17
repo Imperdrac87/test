@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Focus Anchor</title>
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --text-color: #e0e6ed;
+            --anchor-hue: 200; /* Light Blue */
+            --anchor-color: hsl(var(--anchor-hue), 70%, 60%);
+            --cooldown-color: hsl(45, 80%, 60%); /* Soft Gold */
+            --primed-color: hsl(160, 80%, 60%); /* Mint Green */
+            --checkin-color: hsl(270, 70%, 70%); /* Bright Lavender */
+            --drift-marker-color: #ff6b6b;
+            --dim-bg: #050505;
+            --dim-text: #666;
+        }
+
+        body.dim-mode {
+            --bg-color: var(--dim-bg);
+            --text-color: var(--dim-text);
+        }
+
+        body.dim-mode .anchor {
+            filter: brightness(0.6);
+        }
+        
+        /* Ensure check-in pops in dim mode */
+        body.dim-mode .anchor.soft-checkin {
+            filter: brightness(0.9);
+            box-shadow: 0 0 50px var(--checkin-color);
+        }
+
+        /* Reading Mode: Static Anchor (No Scaling) */
+        body.reading-mode .anchor {
+            animation: breathe-opacity 6s infinite ease-in-out !important;
+            transform: scale(1) !important; /* Force static size */
+        }
+        
+        /* Reading Mode: Neutralize Check-in Color (Stealth Mode) */
+        body.reading-mode .anchor.soft-checkin {
+            background-color: var(--anchor-color) !important;
+            box-shadow: 0 0 30px var(--anchor-color) !important;
+            filter: brightness(1.3) !important; /* Just a subtle brightness bump */
+        }
+        
+        /* In Reading Mode, hide the text check-in to avoid reading interference */
+        body.reading-mode .checkin-label {
+            display: none !important;
+        }
+
+        @keyframes breathe-opacity {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            z-index: 0;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+            visibility: visible;
+            z-index: 10;
+        }
+        
+        /* Removed touch-action: none from #session-screen to allow scrolling in split-screen */
+
+        /* --- ANCHOR --- */
+        .anchor-container {
+            position: relative;
+            /* Responsive Sizing for Split Screen */
+            width: min(70vw, 300px);
+            height: min(70vw, 300px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Keep touch-action none HERE to prevent scrolling while holding anchor */
+            touch-action: none;
+        }
+
+        .anchor {
+            width: 33%; /* Relative to container */
+            height: 33%;
+            min-width: 80px;
+            min-height: 80px;
+            border-radius: 50%;
+            background: var(--anchor-color);
+            box-shadow: 0 0 30px var(--anchor-color);
+            animation: breathe 8s infinite ease-in-out; 
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        background-color 0.5s ease,
+                        box-shadow 0.5s ease,
+                        opacity 0.3s ease,
+                        filter 0.5s ease;
+            will-change: transform, opacity;
+            cursor: pointer;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.4); opacity: 0.8; }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .anchor {
+                animation: breathe-opacity 8s infinite ease-in-out;
+            }
+        }
+
+        /* Interaction States */
+        .anchor.charging {
+            animation-play-state: paused !important;
+            transform: scale(0.8) !important;
+            background-color: white;
+            box-shadow: 0 0 40px rgba(255,255,255,0.5);
+            opacity: 1;
+        }
+
+        .anchor.primed {
+            animation-play-state: paused !important;
+            transform: scale(1.1) !important;
+            background-color: var(--primed-color);
+            box-shadow: 0 0 50px var(--primed-color);
+            opacity: 1;
+        }
+
+        .anchor.cooldown {
+            animation: pulse-cooldown 2s infinite ease-in-out !important;
+            background-color: var(--cooldown-color);
+            box-shadow: 0 0 20px var(--cooldown-color);
+            opacity: 0.8;
+            transform: scale(1) !important;
+            pointer-events: none;
+        }
+        
+        .anchor.soft-checkin {
+            background-color: var(--checkin-color);
+            box-shadow: 0 0 40px var(--checkin-color);
+            opacity: 0.9;
+        }
+
+        @keyframes pulse-cooldown {
+            0%, 100% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .charge-ring {
+            position: absolute;
+            width: 140%; /* Relative to anchor container */
+            height: 140%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: white;
+            opacity: 0;
+            transform: rotate(0deg);
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .anchor.charging ~ .charge-ring {
+            opacity: 1;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- TEXT & CONTROLS --- */
+        .title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 40px;
+            max-width: 300px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background: var(--anchor-color);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn-primary:active { transform: scale(0.95); }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-ghost:hover {
+            opacity: 1;
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .hint-text {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #888;
+            letter-spacing: 0.5px;
+            min-height: 1.2em;
+            transition: opacity 0.3s;
+        }
+
+        .checkin-label {
+            position: absolute;
+            top: 25%;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--checkin-color);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s, transform 0.5s;
+            pointer-events: none;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .checkin-label.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback-msg {
+            position: absolute;
+            top: 15%;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.5s;
+            color: var(--cooldown-color);
+            font-weight: 300;
+        }
+        
+        .feedback-msg.visible { opacity: 1; }
+
+        /* --- RESULTS --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timeline-container {
+            width: 100%;
+            max-width: 360px;
+            height: 60px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .timeline-line {
+            width: 100%;
+            height: 2px;
+            background: #333;
+            position: relative;
+        }
+
+        .drift-mark {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 3px;
+            background-color: var(--drift-marker-color);
+            border-radius: 2px;
+            opacity: 0.8;
+            height: 16px; 
+        }
+
+        /* Toggle Buttons Container */
+        .toggles {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            opacity: 0.5;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: opacity 0.3s, color 0.3s;
+            padding: 5px;
+        }
+        
+        .icon-btn:hover, .icon-btn.active {
+            opacity: 1;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        /* New "Dimmed" state for active sessions (instead of hidden) */
+        .toggles.dimmed {
+            opacity: 0.2;
+        }
+        
+        .toggles.dimmed:hover {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="toggles" class="toggles">
+        <button id="reading-btn" class="icon-btn" onclick="toggleReadingMode()" title="Reading Mode">📖</button>
+        <button id="dim-btn" class="icon-btn" onclick="toggleDimMode()" title="Dim Mode">☾</button>
+    </div>
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+        <div class="anchor" style="margin-bottom: 40px; animation-duration: 4s;"></div>
+        <h1 class="title">Tether</h1>
+        <p class="subtitle">Hold for 1.5s, then release to mark a drift.<br>Wait 8s to refocus.</p>
+        <button class="btn-primary" onclick="startSession()">Start Session</button>
+    </div>
+
+    <!-- SESSION SCREEN -->
+    <div id="session-screen" class="screen">
+        <div class="feedback-msg" id="feedback-msg">Refocus...</div>
+        
+        <div class="anchor-container" id="anchor-hitbox">
+            <div id="anchor" class="anchor"></div>
+            <div class="charge-ring"></div>
+            <div class="checkin-label" id="checkin-label">Still with me?</div>
+        </div>
+
+        <div style="position: absolute; bottom: 40px; text-align: center; width: 100%;">
+            <div class="hint-text" id="hint-text">Hold to mark drift</div>
+            <button class="btn-ghost" id="end-btn">End Session</button>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="screen">
+        <h2 class="title" style="font-size: 1.8rem; margin-bottom: 20px;">Insight</h2>
+        
+        <div class="timeline-container">
+            <div class="timeline-line" id="timeline-visual"></div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total-time">00:00</div>
+                <div class="stat-label">Duration</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-drift-count">0</div>
+                <div class="stat-label">Drifts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-longest-flow">0:00</div>
+                <div class="stat-label">Best Flow</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-dense-window" style="font-size: 1.1rem; padding-top:4px;">-</div>
+                <div class="stat-label">Worst 10m</div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="resetApp()">New Session</button>
+    </div>
+
+    <script>
+        // --- APP STATE ---
+        let sessionStartTime = null;
+        let sessionActive = false;
+        let driftData = [];
+        let isCooldown = false;
+        let pressTimer = null;
+        let softCheckInTimer = null;
+        let isPrimed = false; 
+        let cooldownTimer = null;
+        
+        const LONG_PRESS_DURATION = 1500; 
+        const COOLDOWN_DURATION = 8000;
+        const CHECK_IN_INTERVAL = 15 * 60 * 1000; 
+        
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const sessionScreen = document.getElementById('session-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const anchor = document.getElementById('anchor');
+        const hitbox = document.getElementById('anchor-hitbox');
+        const hintText = document.getElementById('hint-text');
+        const checkinLabel = document.getElementById('checkin-label');
+        const feedbackMsg = document.getElementById('feedback-msg');
+        const toggles = document.getElementById('toggles');
+        const endBtn = document.getElementById('end-btn');
+        const readingBtn = document.getElementById('reading-btn');
+        
+        // --- INITIALIZATION ---
+        window.addEventListener('load', () => {
+            const storedStart = localStorage.getItem('tether_start');
+            if (storedStart) {
+                const now = Date.now();
+                const start = parseInt(storedStart);
+                
+                if (now - start < 86400000) {
+                    sessionStartTime = start;
+                    const storedDrifts = localStorage.getItem('tether_drifts');
+                    driftData = storedDrifts ? JSON.parse(storedDrifts) : [];
+                    sessionActive = true;
+                    
+                    switchScreen(startScreen, sessionScreen, true);
+                    toggles.classList.add('dimmed'); // Dimmed instead of hidden
+                    
+                    // Restore Cooldown safely
+                    checkCooldownOnLoad(now);
+                } else {
+                    localStorage.clear();
+                }
+            }
+        });
+
+        // --- BACKGROUND VISIBILITY HANDLING ---
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && sessionActive && isCooldown) {
+                checkCooldownOnLoad(Date.now());
+            }
+        });
+
+        function checkCooldownOnLoad(now) {
+            const cooldownEnd = parseInt(localStorage.getItem('tether_cooldown_end') || '0');
+            if (cooldownEnd > now) {
+                resumeCooldown(cooldownEnd - now);
+            } else if (cooldownEnd > 0) {
+                clearCooldownState();
+            } else {
+                resetSoftCheckIn();
+            }
+        }
+
+        // --- NAVIGATION ---
+        function switchScreen(from, to, instant = false) {
+            from.classList.remove('active');
+            if (instant) {
+                to.classList.add('active');
+            } else {
+                setTimeout(() => {
+                    to.classList.add('active');
+                }, 300);
+            }
+        }
+
+        // --- SESSION LOGIC ---
+        function startSession() {
+            sessionStartTime = Date.now();
+            sessionActive = true;
+            driftData = [];
+            isCooldown = false;
+            isPrimed = false;
+            
+            localStorage.setItem('tether_start', sessionStartTime);
+            localStorage.setItem('tether_drifts', JSON.stringify(driftData));
+            localStorage.removeItem('tether_cooldown_end');
+            
+            switchScreen(startScreen, sessionScreen);
+            toggles.classList.add('dimmed'); // Dimmed
+            
+            resetSoftCheckIn();
+        }
+
+        function endSession(e) {
+            if (e) e.stopPropagation();
+            sessionActive = false;
+            clearTimeout(softCheckInTimer);
+            clearTimeout(cooldownTimer);
+            
+            localStorage.removeItem('tether_start');
+            localStorage.removeItem('tether_drifts');
+            localStorage.removeItem('tether_cooldown_end');
+            
+            const totalDuration = Date.now() - sessionStartTime;
+            calculateStats(totalDuration);
+            switchScreen(sessionScreen, resultsScreen);
+            toggles.classList.remove('dimmed'); // Restored
+        }
+
+        endBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        endBtn.addEventListener('click', endSession);
+
+        function resetApp() {
+            switchScreen(resultsScreen, startScreen);
+        }
+
+        function toggleDimMode() {
+            document.body.classList.toggle('dim-mode');
+        }
+        
+        function toggleReadingMode() {
+            document.body.classList.toggle('reading-mode');
+            readingBtn.classList.toggle('active');
+        }
+
+        // --- SOFT CHECK-IN ---
+        function resetSoftCheckIn() {
+            clearTimeout(softCheckInTimer);
+            anchor.classList.remove('soft-checkin');
+            checkinLabel.classList.remove('visible');
+            
+            softCheckInTimer = setTimeout(() => {
+                if(sessionActive && !isCooldown) {
+                    anchor.classList.add('soft-checkin');
+                    // Only show text if NOT in reading mode
+                    if (!document.body.classList.contains('reading-mode')) {
+                        checkinLabel.classList.add('visible');
+                    }
+                    
+                    setTimeout(() => {
+                         anchor.classList.remove('soft-checkin');
+                         checkinLabel.classList.remove('visible');
+                    }, 5000);
+                    resetSoftCheckIn();
+                }
+            }, CHECK_IN_INTERVAL);
+        }
+
+        // --- INTERACTION LOGIC ---
+
+        const handlePointerDown = (e) => {
+            if (!sessionActive || isCooldown) return;
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            
+            e.preventDefault();
+            
+            try {
+                hitbox.setPointerCapture(e.pointerId);
+            } catch (err) {
+                console.warn("Capture failed", err);
+            }
+            
+            anchor.classList.add('charging');
+            hintText.innerText = "Holding...";
+            
+            pressTimer = setTimeout(() => {
+                isPrimed = true;
+                anchor.classList.remove('charging');
+                anchor.classList.add('primed'); 
+                hintText.innerText = "Release to mark";
+                if (navigator.vibrate) navigator.vibrate(50);
+            }, LONG_PRESS_DURATION);
+        };
+
+        const handlePointerUp = (e) => {
+            if (!sessionActive) return;
+            
+            clearTimeout(pressTimer);
+            
+            try {
+                if(hitbox.hasPointerCapture(e.pointerId)) {
+                    hitbox.releasePointerCapture(e.pointerId);
+                }
+            } catch (err) { /* ignore */ }
+            
+            anchor.classList.remove('charging');
+            
+            // Geometric Check with Padding for forgiveness
+            const rect = hitbox.getBoundingClientRect();
+            const padding = 12; // 12px forgiveness buffer
+            const isInside = (
+                e.clientX >= rect.left - padding && 
+                e.clientX <= rect.right + padding && 
+                e.clientY >= rect.top - padding && 
+                e.clientY <= rect.bottom + padding
+            );
+
+            if (isPrimed) {
+                if (isInside) {
+                    triggerDriftLog();
+                } else {
+                    hintText.innerText = "Cancelled";
+                    setTimeout(() => { 
+                        if(!isCooldown) hintText.innerText = "Hold to mark drift"; 
+                    }, 1000);
+                }
+            } else {
+                hintText.innerText = "Hold to mark drift";
+            }
+            
+            isPrimed = false;
+            anchor.classList.remove('primed');
+        };
+        
+        const handlePointerCancel = (e) => {
+            clearTimeout(pressTimer);
+            try {
+                if(hitbox.hasPointerCapture(e.pointerId)) {
+                    hitbox.releasePointerCapture(e.pointerId);
+                }
+            } catch (err) { /* ignore */ }
+            
+            anchor.classList.remove('charging');
+            anchor.classList.remove('primed');
+            isPrimed = false;
+            hintText.innerText = "Hold to mark drift";
+        }
+
+        hitbox.addEventListener('pointerdown', handlePointerDown);
+        hitbox.addEventListener('pointerup', handlePointerUp);
+        hitbox.addEventListener('pointercancel', handlePointerCancel);
+
+        function triggerDriftLog() {
+            const now = Date.now();
+            driftData.push({ ts: now });
+            localStorage.setItem('tether_drifts', JSON.stringify(driftData));
+            
+            const cooldownRemaining = COOLDOWN_DURATION;
+            const cooldownEnd = now + cooldownRemaining;
+            localStorage.setItem('tether_cooldown_end', cooldownEnd);
+            
+            resumeCooldown(cooldownRemaining);
+        }
+
+        function resumeCooldown(duration) {
+            isCooldown = true;
+            clearTimeout(cooldownTimer);
+            
+            anchor.classList.add('cooldown');
+            feedbackMsg.classList.add('visible');
+            hintText.innerText = "Refocusing...";
+            
+            clearTimeout(softCheckInTimer);
+            anchor.classList.remove('soft-checkin');
+            checkinLabel.classList.remove('visible');
+
+            cooldownTimer = setTimeout(() => {
+                clearCooldownState();
+            }, duration);
+        }
+
+        function clearCooldownState() {
+            isCooldown = false;
+            anchor.classList.remove('cooldown');
+            feedbackMsg.classList.remove('visible');
+            hintText.innerText = "Hold to mark drift";
+            localStorage.removeItem('tether_cooldown_end');
+            resetSoftCheckIn();
+        }
+
+        // --- STATS LOGIC ---
+
+        function formatTime(ms) {
+            const totalSecs = Math.floor(ms / 1000);
+            const m = Math.floor(totalSecs / 60);
+            const s = totalSecs % 60;
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+        
+        function formatMinutes(ms) {
+            const m = Math.floor(ms / 60000);
+            const s = Math.floor((ms % 60000) / 1000);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function calculateStats(duration) {
+            document.getElementById('stat-total-time').innerText = formatTime(duration);
+            document.getElementById('stat-drift-count').innerText = driftData.length;
+
+            let longest = 0;
+            const timestamps = driftData.map(d => d.ts);
+            const points = [sessionStartTime, ...timestamps, sessionStartTime + duration];
+            for (let i = 1; i < points.length; i++) {
+                const diff = points[i] - points[i-1];
+                if (diff > longest) longest = diff;
+            }
+            document.getElementById('stat-longest-flow').innerText = formatMinutes(longest);
+
+            const windowSize = 10 * 60 * 1000;
+            let maxDrifts = 0;
+            let worstWindowStart = 0;
+
+            if (duration < windowSize) {
+                document.getElementById('stat-dense-window').innerText = "N/A";
+                document.getElementById('stat-dense-window').parentElement.querySelector('.stat-label').innerText = "Too Short";
+            } else {
+                let left = 0;
+                let currentMax = 0;
+                timestamps.sort((a,b) => a - b);
+                
+                for (let right = 0; right < timestamps.length; right++) {
+                    while (timestamps[right] - timestamps[left] >= windowSize) {
+                        left++;
+                    }
+                    let count = right - left + 1;
+                    if (count > currentMax) {
+                        currentMax = count;
+                        worstWindowStart = timestamps[left];
+                    }
+                }
+                
+                if (currentMax > 0) {
+                     const relativeStartMin = Math.floor((worstWindowStart - sessionStartTime) / 60000);
+                     document.getElementById('stat-dense-window').innerText = `${currentMax}`;
+                     document.getElementById('stat-dense-window').parentElement.querySelector('.stat-label').innerText = `Worst: Min ${relativeStartMin}-${relativeStartMin+10}`;
+                } else {
+                    document.getElementById('stat-dense-window').innerText = "0";
+                    document.getElementById('stat-dense-window').parentElement.querySelector('.stat-label').innerText = "Clean Sheet";
+                }
+            }
+            drawTimeline(duration);
+        }
+
+        function drawTimeline(duration) {
+            const container = document.getElementById('timeline-visual');
+            container.innerHTML = '';
+            
+            driftData.forEach(d => {
+                const pct = ((d.ts - sessionStartTime) / duration) * 100;
+                const mark = document.createElement('div');
+                mark.className = 'drift-mark';
+                mark.style.left = `${pct}%`;
+                container.appendChild(mark);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritual Ledger</title>
+    <style>
+        :root {
+            --paper: #f8f6f0;
+            --ink: #1c1b1a;
+            --muted-ink: #6b6862;
+            --audit-red: #b82828;
+            --seal-green: #2e593a;
+            --rule-line: rgba(107, 104, 98, 0.2);
+            --stamp-bg: #eae6db;
+            --focus: #0f4c81;
+            --font-heading: Georgia, serif;
+            --font-mono: "Courier New", monospace;
+            --font-body: system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body.ledger {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            background-image: repeating-linear-gradient(transparent, transparent 31px, var(--rule-line) 31px, var(--rule-line) 32px);
+            padding-bottom: 3rem;
+        }
+
+        body.ledger::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 3.8rem;
+            width: 2px;
+            background: rgba(184, 40, 40, 0.15);
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: normal; }
+
+        header#trialBalance {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--paper) 85%, transparent);
+            border-bottom: 2px solid var(--ink);
+            padding: 1.1rem 2rem 0.95rem 4.2rem;
+            margin-bottom: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .title-block h1 {
+            font-size: 1.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .title-block .date {
+            margin-top: 0.14rem;
+            font-family: var(--font-mono);
+            color: var(--muted-ink);
+            font-size: 0.8rem;
+        }
+
+        .closing-ritual {
+            margin-top: 0.7rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+        }
+
+        .closing-ritual label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+        }
+
+        .closing-ritual input[type="checkbox"] { accent-color: var(--seal-green); }
+        #closeBooks:disabled + span,
+        #closeBooks:disabled { opacity: 0.55; }
+
+        .status-plate { text-align: right; min-width: 290px; }
+
+        .badge {
+            display: none;
+            width: fit-content;
+            margin-left: auto;
+            border: 2px solid var(--muted-ink);
+            padding: 0.45rem 0.78rem;
+            font-family: var(--font-mono);
+            font-size: 0.77rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge--open { color: var(--muted-ink); border-color: var(--muted-ink); }
+        .badge--unreconciled { color: var(--audit-red); border-color: var(--audit-red); background: rgba(184, 40, 40, 0.06); }
+        .badge--balanced { color: var(--seal-green); border-color: var(--seal-green); background: rgba(46, 89, 58, 0.07); }
+
+        body.ledger-open .badge--open { display: block; }
+        body.ledger-unreconciled .badge--unreconciled { display: block; }
+        body.ledger-balanced .badge--balanced { display: block; }
+
+        .status-note {
+            margin-top: 0.42rem;
+            min-height: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.73rem;
+            color: var(--muted-ink);
+        }
+
+        main#layoutGrid {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section#journal {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .journalHeader {
+            border-bottom: 1px solid var(--muted-ink);
+            padding-bottom: 0.45rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .journalHeader .meta {
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            color: var(--muted-ink);
+        }
+
+        .entryControls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .miniBtn {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.34rem 0.52rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .miniBtn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .dangerBtn { border-color: var(--audit-red); color: var(--audit-red); }
+
+        #entryCountLabel {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--muted-ink);
+        }
+
+        ol.entries {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.95rem;
+        }
+
+        li.entry {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.8rem;
+            transition: border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+        }
+
+        li.entry.is-hidden { display: none; }
+
+        .entryMeta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .entryId {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--muted-ink);
+            text-transform: uppercase;
+        }
+
+        .entryStatus {
+            font-family: var(--font-mono);
+            font-size: 0.71rem;
+            text-transform: uppercase;
+            border: 1px dashed var(--rule-line);
+            padding: 0.22rem 0.35rem;
+            color: var(--muted-ink);
+        }
+
+        .entryStatus.pending { color: var(--audit-red); border-color: var(--audit-red); }
+        .entryStatus.posted { color: var(--seal-green); border-color: var(--seal-green); }
+
+        .entryBody { display: grid; gap: 0.66rem; }
+
+        .step {
+            border: 1px dashed var(--rule-line);
+            padding: 0.48rem;
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        .stepTitle {
+            font-family: var(--font-mono);
+            font-size: 0.73rem;
+            text-transform: uppercase;
+            margin-bottom: 0.42rem;
+            color: var(--muted-ink);
+        }
+
+        .subTitle {
+            margin-top: 0.34rem;
+            margin-bottom: 0.3rem;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+        }
+
+        .stampGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.45rem;
+        }
+
+        .stampGrid + .stampGrid,
+        .manualRow,
+        .metaBlock {
+            margin-top: 0.44rem;
+            padding-top: 0.44rem;
+            border-top: 1px dashed var(--rule-line);
+        }
+
+        .stampInput,
+        .metaInput {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .stamp,
+        .metaChip {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.45rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            min-height: 2.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+        }
+
+        .stamp:hover,
+        .metaChip:hover {
+            background: var(--stamp-bg);
+            transform: translate(-1px, -1px);
+        }
+
+        .stampInput:focus + .stamp,
+        .metaInput:focus + .metaChip {
+            outline: 2px solid var(--focus);
+            outline-offset: 1px;
+        }
+
+        .stampInput:checked + .stamp,
+        .metaInput:checked + .metaChip {
+            border-color: var(--ink);
+            background: rgba(0, 0, 0, 0.06);
+            font-weight: bold;
+        }
+
+        .stamp--clear { border-style: dashed; color: var(--muted-ink); }
+
+        .stamp--contra {
+            border-color: var(--audit-red);
+            color: #7f1919;
+            background-image: repeating-linear-gradient(-20deg, rgba(184, 40, 40, 0.06), rgba(184, 40, 40, 0.06) 5px, transparent 5px, transparent 10px);
+        }
+
+        .stamp--micro {
+            border-style: dashed;
+            border-radius: 7px;
+            color: #285137;
+        }
+
+        .entry.has-debit .debitChoices .stamp:not(.stamp--clear) {
+            pointer-events: none;
+            opacity: 0.42;
+        }
+
+        .step--credit .creditPrompt {
+            display: none;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--muted-ink);
+            border: 1px dashed var(--rule-line);
+            padding: 0.45rem;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .entry:not(.has-debit) .step--credit .creditChoices { display: none; }
+        .entry:not(.has-debit) .step--credit .creditPrompt { display: block; }
+
+        .entry.requires-stabilizer .creditChoices .stamp[data-credit-type]:not([data-credit-type="stabilizer"]):not(.stamp--clear) {
+            display: none;
+        }
+
+        .entry.requires-stabilizer .creditChoices .stamp[data-credit-type="stabilizer"] {
+            border-color: var(--seal-green);
+            background: rgba(46, 89, 58, 0.08);
+        }
+
+        .stabilizerNote {
+            display: none;
+            margin-top: 0.44rem;
+            font-family: var(--font-mono);
+            font-size: 0.69rem;
+            color: var(--seal-green);
+        }
+
+        .entry.requires-stabilizer .stabilizerNote { display: block; }
+
+        .manualRow {
+            display: flex;
+            gap: 0.38rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .manualInput,
+        .textInput {
+            min-width: 210px;
+            flex: 1;
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.6);
+            padding: 0.35rem 0.45rem;
+            font-size: 0.78rem;
+        }
+
+        .manualInput:focus,
+        .textInput:focus {
+            outline: 1px solid var(--focus);
+            border-color: var(--focus);
+        }
+
+        .manualBtn {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.34rem 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .metaBlockTitle {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--muted-ink);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+        }
+
+        .metaRow {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.42rem;
+        }
+
+        .metaRow + .metaRow { margin-top: 0.4rem; }
+
+        .qualityRow {
+            margin-top: 0.44rem;
+            padding-top: 0.44rem;
+            border-top: 1px dashed var(--rule-line);
+        }
+
+        .qualityNote {
+            margin-top: 0.3rem;
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            color: var(--muted-ink);
+        }
+
+        .entryExtras {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .narration {
+            border: none;
+            border-bottom: 1px solid var(--rule-line);
+            background: transparent;
+            padding: 0.34rem 0.12rem;
+            font-size: 0.84rem;
+            min-width: 250px;
+            flex: 1;
+        }
+
+        .narration:focus { outline: none; border-bottom-color: var(--ink); }
+
+        .clearEntry {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.3rem 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .entry.is-pending {
+            border-color: var(--audit-red);
+            background: rgba(184, 40, 40, 0.03);
+        }
+
+        .entry.is-posted {
+            border-color: var(--seal-green);
+            background: rgba(46, 89, 58, 0.03);
+        }
+
+        #historyStrip,
+        #graphsSection {
+            border-top: 2px solid var(--ink);
+            margin-top: 0.24rem;
+            padding-top: 0.62rem;
+        }
+
+        #historyStrip h3,
+        #graphsSection h3 {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            margin-bottom: 0.35rem;
+            color: var(--muted-ink);
+        }
+
+        .historyChips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .chip {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.24rem 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+        }
+
+        .chip.pending { border-color: var(--audit-red); color: var(--audit-red); }
+        .chip.posted { border-color: var(--seal-green); color: var(--seal-green); }
+        .chip.empty { color: var(--muted-ink); }
+
+        .summaryCards {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .summaryCard {
+            border: 1px dashed var(--rule-line);
+            background: rgba(255, 255, 255, 0.45);
+            padding: 0.4rem;
+            min-height: 68px;
+        }
+
+        .summaryCard .label {
+            font-family: var(--font-mono);
+            font-size: 0.64rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+            margin-bottom: 0.2rem;
+        }
+
+        .summaryCard .value {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .graphGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .graphPanel {
+            border: 1px dashed var(--rule-line);
+            background: rgba(255, 255, 255, 0.45);
+            padding: 0.48rem;
+        }
+
+        .graphPanel h4 {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+            margin-bottom: 0.38rem;
+        }
+
+        .barRow {
+            display: grid;
+            grid-template-columns: 116px 1fr 30px;
+            gap: 0.35rem;
+            align-items: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .barLabel {
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            color: var(--muted-ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .barTrack {
+            width: 100%;
+            height: 10px;
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .barFill {
+            height: 100%;
+            background: linear-gradient(to right, rgba(28, 27, 26, 0.25), rgba(28, 27, 26, 0.55));
+        }
+
+        .barValue {
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            text-align: right;
+            color: var(--muted-ink);
+        }
+
+        .barEmpty {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--muted-ink);
+        }
+
+        body.sealed { filter: grayscale(0.35) sepia(0.12); }
+
+        body.sealed main#layoutGrid {
+            pointer-events: none;
+            opacity: 0.95;
+        }
+
+        body.sealed::after {
+            content: "SEALED";
+            position: fixed;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-22deg);
+            font-family: var(--font-heading);
+            font-size: 10vw;
+            color: var(--muted-ink);
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        @media (max-width: 980px) {
+            body.ledger::before { left: 1rem; }
+
+            header#trialBalance {
+                padding: 1rem 1rem 0.85rem 1.35rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status-plate {
+                text-align: left;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .badge { margin-left: 0; }
+
+            main#layoutGrid { padding: 0 1rem; }
+
+            .stampGrid,
+            .metaRow { grid-template-columns: 1fr; }
+            .manualRow { flex-direction: column; align-items: stretch; }
+            .manualInput,
+            .textInput { min-width: 0; width: 100%; }
+            .entryExtras { flex-direction: column; align-items: stretch; }
+            .narration { min-width: 0; width: 100%; }
+
+            .summaryCards { grid-template-columns: 1fr 1fr; }
+            .graphGrid { grid-template-columns: 1fr; }
+            .barRow { grid-template-columns: 100px 1fr 28px; }
+        }
+    </style>
+</head>
+<body class="ledger ledger-open">
+    <header id="trialBalance">
+        <div class="title-block">
+            <h1>Ritual Ledger</h1>
+            <div class="date">v4 // <script>document.write(new Date().toLocaleDateString("en-GB"))</script></div>
+            <div class="closing-ritual">
+                <label>
+                    <input type="checkbox" id="closeBooks" disabled>
+                    <span>Close Books</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="status-plate">
+            <div class="badge badge--open">Open</div>
+            <div class="badge badge--unreconciled">Unreconciled</div>
+            <div class="badge badge--balanced">Balanced</div>
+            <div id="statusNote" class="status-note">Post one pair.</div>
+        </div>
+    </header>
+
+    <main id="layoutGrid">
+        <section id="journal">
+            <div class="journalHeader">
+                <div>
+                    <div>GENERAL JOURNAL</div>
+                    <div class="meta">Start with one entry. Add more only when needed.</div>
+                </div>
+                <div class="entryControls">
+                    <button id="removeEntryBtn" type="button" class="miniBtn">Remove Entry</button>
+                    <button id="addEntryBtn" type="button" class="miniBtn">Add Entry</button>
+                    <button id="resetDayBtn" type="button" class="miniBtn dangerBtn">Reset Day</button>
+                    <span id="entryCountLabel"></span>
+                </div>
+            </div>
+
+            <ol class="entries" id="entriesList"></ol>
+
+            <section id="historyStrip">
+                <h3>Receipts</h3>
+                <div id="historyChips" class="historyChips"></div>
+            </section>
+
+            <section id="graphsSection">
+                <h3>Daily Graphs</h3>
+                <div class="summaryCards">
+                    <div class="summaryCard"><div class="label">Started</div><div class="value" id="summaryStarted">0</div></div>
+                    <div class="summaryCard"><div class="label">Posted</div><div class="value" id="summaryPosted">0</div></div>
+                    <div class="summaryCard"><div class="label">Pending</div><div class="value" id="summaryPending">0</div></div>
+                    <div class="summaryCard"><div class="label">Completion Rate</div><div class="value" id="summaryCompletion">0%</div></div>
+                    <div class="summaryCard"><div class="label">Recovery Rate</div><div class="value" id="summaryRecovery">0%</div></div>
+                    <div class="summaryCard"><div class="label">Stressful Entries</div><div class="value" id="summaryStressful">0</div></div>
+                </div>
+                <div class="graphGrid">
+                    <div class="graphPanel">
+                        <h4>Effort Load vs Recovered Points</h4>
+                        <div id="loadBars"></div>
+                    </div>
+                    <div class="graphPanel">
+                        <h4>Recovery Quality Distribution</h4>
+                        <div id="qualityBars"></div>
+                    </div>
+                    <div class="graphPanel">
+                        <h4>Effort Type Distribution</h4>
+                        <div id="effortTypeBars"></div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const ENTRY_COUNT = 8;
+            const STORAGE_KEY = "ritual-ledger-v4-state";
+            const LEGACY_STORAGE_KEY = "ritual-ledger-v3-state";
+            let visibleEntryCount = 1;
+            let isRestoring = false;
+
+            const INTENSITY_WEIGHT = { low: 1, medium: 2, high: 3 };
+            const QUALITY_WEIGHT = { full: 1.0, half: 0.5, barely: 0.25 };
+
+            const DEBIT_NORMAL = [
+                { key: "deep-work", label: "Deep Work" },
+                { key: "admin", label: "Admin" },
+                { key: "cleaning", label: "Cleaning" },
+                { key: "social", label: "Social" },
+                { key: "exercise", label: "Exercise" },
+                { key: "errands", label: "Errands" }
+            ];
+
+            const DEBIT_ADJUSTMENT = [
+                { key: "fatigue", label: "Fatigue" },
+                { key: "pain", label: "Pain" },
+                { key: "interruption", label: "Interruption" },
+                { key: "bad-sleep", label: "Bad Sleep" }
+            ];
+
+            const DEBIT_ROUGH = [
+                { key: "anxiety-spike", label: "Anxiety Spike", contra: true },
+                { key: "ocd-loop", label: "OCD Loop", contra: true }
+            ];
+
+            const DEBIT_MANUAL = { key: "manual-debit", label: "Other (type below)" };
+
+            const CREDIT_OPTIONS = [
+                { key: "walk", label: "Walk", kind: "stabilizer" },
+                { key: "stretch", label: "Stretch", kind: "stabilizer" },
+                { key: "stillness", label: "Stillness", kind: "stabilizer" },
+                { key: "prayer", label: "Prayer", kind: "stabilizer" },
+                { key: "breathe-30", label: "30s Breathe", kind: "stabilizer" },
+                { key: "music", label: "Music", kind: "fun" },
+                { key: "tea", label: "Tea", kind: "fun" },
+                { key: "play", label: "Play", kind: "fun" },
+                { key: "switch", label: "Switch", kind: "fun" }
+            ];
+
+            const CREDIT_MANUAL = { key: "manual-credit", label: "Other (type below)", kind: "custom" };
+
+            const debitMeta = new Map();
+            const creditMeta = new Map();
+            [...DEBIT_NORMAL, ...DEBIT_ADJUSTMENT, ...DEBIT_ROUGH, DEBIT_MANUAL].forEach((item) => debitMeta.set(item.key, item));
+            [...CREDIT_OPTIONS, CREDIT_MANUAL].forEach((item) => creditMeta.set(item.key, item));
+
+            const body = document.body;
+            const entriesList = document.getElementById("entriesList");
+            const statusNote = document.getElementById("statusNote");
+            const closeBooks = document.getElementById("closeBooks");
+            const addEntryBtn = document.getElementById("addEntryBtn");
+            const removeEntryBtn = document.getElementById("removeEntryBtn");
+            const resetDayBtn = document.getElementById("resetDayBtn");
+            const entryCountLabel = document.getElementById("entryCountLabel");
+            const historyChips = document.getElementById("historyChips");
+
+            function idFor(entryId, group, key) {
+                return `e${entryId}-${group}-${key}`;
+            }
+
+            function escapeHtml(value) {
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function optionMarkup(entryId, group, item, extraClass = "") {
+                const id = idFor(entryId, group, item.key);
+                const classes = ["stamp", extraClass].filter(Boolean).join(" ");
+                const creditType = group === "cr" ? (item.kind || "custom") : "";
+                const extraAttr = group === "cr" ? ` data-credit-type="${creditType}"` : "";
+                return `
+                    <input class="stampInput" type="radio" name="e${entryId}-${group}" id="${id}" value="${escapeHtml(item.key)}">
+                    <label class="${classes}" for="${id}"${extraAttr}>${escapeHtml(item.label)}</label>
+                `;
+            }
+
+            function clearMarkup(entryId, group) {
+                const id = idFor(entryId, group, "none");
+                return `
+                    <input class="stampInput" type="radio" name="e${entryId}-${group}" id="${id}" value="none" checked>
+                    <label class="stamp stamp--clear" for="${id}">Clear</label>
+                `;
+            }
+
+            function metaOptionMarkup(entryId, group, key, label, checked = false) {
+                const id = idFor(entryId, group, key);
+                return `
+                    <input class="metaInput" type="radio" name="e${entryId}-${group}" id="${id}" value="${key}"${checked ? " checked" : ""}>
+                    <label class="metaChip" for="${id}">${label}</label>
+                `;
+            }
+
+            function buildEntry(entryNum) {
+                const entryId = String(entryNum).padStart(2, "0");
+                const debitNormalMarkup = [
+                    clearMarkup(entryId, "dr"),
+                    ...DEBIT_NORMAL.map((item) => optionMarkup(entryId, "dr", item)),
+                    optionMarkup(entryId, "dr", DEBIT_MANUAL)
+                ].join("");
+                const debitAdjustmentMarkup = DEBIT_ADJUSTMENT.map((item) => optionMarkup(entryId, "dr", item)).join("");
+                const debitRoughMarkup = DEBIT_ROUGH.map((item) => optionMarkup(entryId, "dr", item, "stamp--contra")).join("");
+                const creditMarkup = [
+                    clearMarkup(entryId, "cr"),
+                    ...CREDIT_OPTIONS.map((item) => optionMarkup(entryId, "cr", item, item.kind === "stabilizer" ? "stamp--micro" : "")),
+                    optionMarkup(entryId, "cr", CREDIT_MANUAL)
+                ].join("");
+                const qualityMarkup = [
+                    clearMarkup(entryId, "qual"),
+                    optionMarkup(entryId, "qual", { key: "full", label: "Full" }),
+                    optionMarkup(entryId, "qual", { key: "half", label: "Half" }),
+                    optionMarkup(entryId, "qual", { key: "barely", label: "Barely" })
+                ].join("");
+                const effortTypeMarkup = [
+                    metaOptionMarkup(entryId, "dtype", "chore", "Chore", true),
+                    metaOptionMarkup(entryId, "dtype", "fun", "Fun"),
+                    metaOptionMarkup(entryId, "dtype", "other", "Other")
+                ].join("");
+                const intensityMarkup = [
+                    metaOptionMarkup(entryId, "intensity", "low", "Low"),
+                    metaOptionMarkup(entryId, "intensity", "medium", "Medium", true),
+                    metaOptionMarkup(entryId, "intensity", "high", "High")
+                ].join("");
+
+                return `
+                    <li class="entry" data-entry="${entryId}" data-manual-debit="" data-manual-credit="" data-effort-other="">
+                        <div class="entryMeta">
+                            <span class="entryId">Entry ${entryId}</span>
+                            <span class="entryStatus">Open</span>
+                        </div>
+
+                        <div class="entryBody">
+                            <section class="step step--debit">
+                                <h3 class="stepTitle">Step 1 - Effort (Debit)</h3>
+                                <div class="debitChoices">
+                                    <h4 class="subTitle">Normal Day</h4>
+                                    <div class="stampGrid debitGrid">${debitNormalMarkup}</div>
+                                    <h4 class="subTitle">Adjustment</h4>
+                                    <div class="stampGrid">${debitAdjustmentMarkup}</div>
+                                    <h4 class="subTitle">Rough Day</h4>
+                                    <div class="stampGrid">${debitRoughMarkup}</div>
+                                </div>
+
+                                <div class="manualRow">
+                                    <input type="text" class="manualInput manualDebitInput" placeholder="Other effort activity...">
+                                    <button type="button" class="manualBtn addManualDebit">Use as Effort</button>
+                                </div>
+
+                                <div class="metaBlock">
+                                    <div class="metaBlockTitle">Effort Type</div>
+                                    <div class="metaRow">${effortTypeMarkup}</div>
+                                    <div class="manualRow">
+                                        <input type="text" class="textInput effortTypeOtherInput" placeholder="If Other, type effort type...">
+                                    </div>
+                                    <div class="metaRow">
+                                        <label><input type="checkbox" class="stressCheckbox"> Stressful</label>
+                                    </div>
+                                </div>
+
+                                <div class="metaBlock">
+                                    <div class="metaBlockTitle">Intensity</div>
+                                    <div class="metaRow">${intensityMarkup}</div>
+                                </div>
+                            </section>
+
+                            <section class="step step--credit">
+                                <h3 class="stepTitle">Step 2 - Recovery (Credit)</h3>
+                                <div class="creditPrompt">What recovery supports this effort?</div>
+                                <div class="creditChoices">
+                                    <div class="stampGrid creditGrid">${creditMarkup}</div>
+                                    <div class="stabilizerNote">Rough Day or Stressful selected: stabilizers only.</div>
+
+                                    <div class="manualRow">
+                                        <input type="text" class="manualInput manualCreditInput" placeholder="Other recovery activity...">
+                                        <button type="button" class="manualBtn addManualCredit">Use as Recovery</button>
+                                    </div>
+
+                                    <div class="qualityRow">
+                                        <div class="metaBlockTitle">Recovery Quality (Required)</div>
+                                        <div class="stampGrid qualityGrid">${qualityMarkup}</div>
+                                        <div class="qualityNote">Recovery Rate uses intensity x quality. Full=1.0, Half=0.5, Barely=0.25.</div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <div class="entryExtras">
+                                <input type="text" class="narration" placeholder="Narration (optional)">
+                                <button type="button" class="clearEntry">Clear Entry</button>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }
+
+            function renderEntries() {
+                const rows = [];
+                for (let i = 1; i <= ENTRY_COUNT; i += 1) rows.push(buildEntry(i));
+                entriesList.innerHTML = rows.join("");
+            }
+
+            function getEntries() {
+                return Array.from(document.querySelectorAll(".entry"));
+            }
+
+            function selectedValue(entry, group) {
+                const checked = entry.querySelector(`input[name="e${entry.dataset.entry}-${group}"]:checked`);
+                return checked ? checked.value : "none";
+            }
+
+            function setSelected(entry, group, key) {
+                const target = entry.querySelector(`#${idFor(entry.dataset.entry, group, key)}`);
+                if (target) target.checked = true;
+            }
+
+            function setManualLabel(entry, group, text) {
+                const key = group === "dr" ? "manual-debit" : "manual-credit";
+                const base = "Other (type below)";
+                const label = entry.querySelector(`label[for="${idFor(entry.dataset.entry, group, key)}"]`);
+                if (!label) return;
+                label.textContent = text ? `Other: ${text}` : base;
+            }
+
+            function labelFromChecked(entry, group) {
+                const checked = entry.querySelector(`input[name="e${entry.dataset.entry}-${group}"]:checked`);
+                if (!checked || checked.value === "none") return "-";
+                if (checked.value === "manual-debit") return entry.dataset.manualDebit ? `Other: ${entry.dataset.manualDebit}` : "Other";
+                if (checked.value === "manual-credit") return entry.dataset.manualCredit ? `Other: ${entry.dataset.manualCredit}` : "Other";
+                const label = entry.querySelector(`label[for="${checked.id}"]`);
+                return label ? label.textContent.trim() : checked.value;
+            }
+
+            function safeParseState(raw) {
+                try {
+                    return JSON.parse(raw);
+                } catch (_) {
+                    return null;
+                }
+            }
+
+            function getPersistedState() {
+                const direct = safeParseState(localStorage.getItem(STORAGE_KEY));
+                if (direct && typeof direct === "object") return direct;
+                const legacy = safeParseState(localStorage.getItem(LEGACY_STORAGE_KEY));
+                if (legacy && typeof legacy === "object") return legacy;
+                return null;
+            }
+
+            function getEntrySnapshot(entry) {
+                return {
+                    debitKey: selectedValue(entry, "dr"),
+                    creditKey: selectedValue(entry, "cr"),
+                    qualityKey: selectedValue(entry, "qual"),
+                    effortType: selectedValue(entry, "dtype"),
+                    intensity: selectedValue(entry, "intensity"),
+                    stressOn: entry.querySelector(".stressCheckbox").checked,
+                    manualDebit: entry.dataset.manualDebit || "",
+                    manualCredit: entry.dataset.manualCredit || "",
+                    effortOther: entry.dataset.effortOther || "",
+                    manualDebitInput: entry.querySelector(".manualDebitInput").value || "",
+                    manualCreditInput: entry.querySelector(".manualCreditInput").value || "",
+                    effortOtherInput: entry.querySelector(".effortTypeOtherInput").value || "",
+                    narration: entry.querySelector(".narration").value || ""
+                };
+            }
+
+            function saveState() {
+                if (isRestoring) return;
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                        version: 4,
+                        visibleEntryCount,
+                        closeBooks: closeBooks.checked,
+                        entries: getEntries().map((entry) => getEntrySnapshot(entry))
+                    }));
+                } catch (_) {
+                    // Ignore storage failures.
+                }
+            }
+
+            function applyEntrySnapshot(entry, snapshot) {
+                if (!snapshot) return;
+                entry.querySelector(".stressCheckbox").checked = Boolean(snapshot.stressOn);
+                entry.dataset.manualDebit = snapshot.manualDebit || "";
+                entry.dataset.manualCredit = snapshot.manualCredit || "";
+                entry.dataset.effortOther = snapshot.effortOther || "";
+
+                const manualDebitInput = entry.querySelector(".manualDebitInput");
+                const manualCreditInput = entry.querySelector(".manualCreditInput");
+                const effortOtherInput = entry.querySelector(".effortTypeOtherInput");
+                const narrationInput = entry.querySelector(".narration");
+
+                manualDebitInput.value = snapshot.manualDebitInput || snapshot.manualDebit || "";
+                manualCreditInput.value = snapshot.manualCreditInput || snapshot.manualCredit || "";
+                effortOtherInput.value = snapshot.effortOtherInput || snapshot.effortOther || "";
+                narrationInput.value = snapshot.narration || "";
+
+                setManualLabel(entry, "dr", entry.dataset.manualDebit || manualDebitInput.value || "");
+                setManualLabel(entry, "cr", entry.dataset.manualCredit || manualCreditInput.value || "");
+
+                const dr = snapshot.debitKey || "none";
+                const cr = snapshot.creditKey || "none";
+                const qual = snapshot.qualityKey || "none";
+                const dtype = snapshot.effortType || "chore";
+                const intensity = snapshot.intensity || "medium";
+
+                setSelected(entry, "dr", entry.querySelector(`#${idFor(entry.dataset.entry, "dr", dr)}`) ? dr : "none");
+                setSelected(entry, "cr", entry.querySelector(`#${idFor(entry.dataset.entry, "cr", cr)}`) ? cr : "none");
+                setSelected(entry, "qual", entry.querySelector(`#${idFor(entry.dataset.entry, "qual", qual)}`) ? qual : "none");
+                setSelected(entry, "dtype", entry.querySelector(`#${idFor(entry.dataset.entry, "dtype", dtype)}`) ? dtype : "chore");
+                setSelected(entry, "intensity", entry.querySelector(`#${idFor(entry.dataset.entry, "intensity", intensity)}`) ? intensity : "medium");
+            }
+
+            function loadState() {
+                isRestoring = true;
+                try {
+                    const parsed = getPersistedState();
+                    if (!parsed) return;
+
+                    const count = Number(parsed.visibleEntryCount);
+                    if (Number.isFinite(count)) {
+                        visibleEntryCount = Math.max(1, Math.min(ENTRY_COUNT, Math.trunc(count)));
+                    }
+
+                    if (typeof parsed.closeBooks === "boolean") {
+                        closeBooks.checked = parsed.closeBooks;
+                    }
+
+                    if (Array.isArray(parsed.entries)) {
+                        const entries = getEntries();
+                        entries.forEach((entry, index) => applyEntrySnapshot(entry, parsed.entries[index]));
+                    }
+                } finally {
+                    isRestoring = false;
+                }
+            }
+
+            function updateEntryState(entry) {
+                const stressOn = entry.querySelector(".stressCheckbox").checked;
+                const debit = selectedValue(entry, "dr");
+                const debitInfo = debitMeta.get(debit);
+                const contraChosen = Boolean(debitInfo && debitInfo.contra);
+                const requiresStabilizer = contraChosen || stressOn;
+
+                let credit = selectedValue(entry, "cr");
+                if (debit === "none" && credit !== "none") {
+                    setSelected(entry, "cr", "none");
+                    setSelected(entry, "qual", "none");
+                }
+
+                credit = selectedValue(entry, "cr");
+                if (requiresStabilizer && credit !== "none") {
+                    const cMeta = creditMeta.get(credit);
+                    if (cMeta && cMeta.kind !== "stabilizer") setSelected(entry, "cr", "none");
+                }
+
+                if (selectedValue(entry, "cr") === "none" && selectedValue(entry, "qual") !== "none") {
+                    setSelected(entry, "qual", "none");
+                }
+
+                const hasDebit = selectedValue(entry, "dr") !== "none";
+                const hasCredit = selectedValue(entry, "cr") !== "none";
+                const hasQuality = selectedValue(entry, "qual") !== "none";
+                const posted = hasDebit && hasCredit && hasQuality;
+                const pending = hasDebit && !posted;
+
+                entry.classList.toggle("has-debit", hasDebit);
+                entry.classList.toggle("requires-stabilizer", requiresStabilizer);
+                entry.classList.toggle("is-pending", pending);
+                entry.classList.toggle("is-posted", posted);
+
+                const status = entry.querySelector(".entryStatus");
+                status.classList.remove("pending", "posted");
+                if (posted) {
+                    status.textContent = "Posted";
+                    status.classList.add("posted");
+                } else if (pending) {
+                    status.textContent = "Pending";
+                    status.classList.add("pending");
+                } else {
+                    status.textContent = "Open";
+                }
+            }
+
+            function applyEntryVisibility() {
+                const entries = getEntries();
+                entries.forEach((entry, index) => entry.classList.toggle("is-hidden", index >= visibleEntryCount));
+                entryCountLabel.textContent = `Showing ${visibleEntryCount} / ${ENTRY_COUNT}`;
+                addEntryBtn.disabled = visibleEntryCount >= ENTRY_COUNT;
+                removeEntryBtn.disabled = visibleEntryCount <= 1;
+            }
+
+            function getTrackedEntries(allEntries = getEntries()) {
+                return allEntries.filter((entry) => !entry.classList.contains("is-hidden"));
+            }
+
+            function updateHistory(entries) {
+                historyChips.innerHTML = "";
+                const started = entries.filter((entry) => selectedValue(entry, "dr") !== "none");
+                if (!started.length) {
+                    const chip = document.createElement("span");
+                    chip.className = "chip empty";
+                    chip.textContent = "No receipts yet.";
+                    historyChips.appendChild(chip);
+                    return;
+                }
+
+                started.forEach((entry) => {
+                    const chip = document.createElement("span");
+                    chip.className = `chip ${entry.classList.contains("is-posted") ? "posted" : "pending"}`;
+                    const dr = labelFromChecked(entry, "dr");
+                    const cr = labelFromChecked(entry, "cr");
+                    const q = selectedValue(entry, "qual");
+                    chip.textContent = entry.classList.contains("is-posted")
+                        ? `Entry ${entry.dataset.entry}: ${dr} -> ${cr} (${q})`
+                        : `Entry ${entry.dataset.entry}: ${dr} -> ?`;
+                    historyChips.appendChild(chip);
+                });
+            }
+
+            function computeMetrics(entries) {
+                const startedEntries = entries.filter((entry) => selectedValue(entry, "dr") !== "none");
+                const postedEntries = startedEntries.filter((entry) => entry.classList.contains("is-posted"));
+                const pendingEntries = startedEntries.filter((entry) => entry.classList.contains("is-pending"));
+
+                let effortLoad = 0;
+                let recoveredPoints = 0;
+                let stressfulCount = 0;
+                const qualityCounts = new Map([["full", 0], ["half", 0], ["barely", 0]]);
+                const effortTypeLoad = new Map([["Chore", 0], ["Fun", 0], ["Other", 0]]);
+
+                startedEntries.forEach((entry) => {
+                    const intensity = INTENSITY_WEIGHT[selectedValue(entry, "intensity")] || INTENSITY_WEIGHT.medium;
+                    const qualityKey = selectedValue(entry, "qual");
+                    const qualityWeight = QUALITY_WEIGHT[qualityKey] || 0;
+                    const hasRecovery = selectedValue(entry, "cr") !== "none" && qualityKey !== "none";
+                    const effortTypeKey = selectedValue(entry, "dtype");
+
+                    effortLoad += intensity;
+                    recoveredPoints += hasRecovery ? (intensity * qualityWeight) : 0;
+                    if (entry.querySelector(".stressCheckbox").checked) stressfulCount += 1;
+                    if (hasRecovery && qualityCounts.has(qualityKey)) qualityCounts.set(qualityKey, qualityCounts.get(qualityKey) + 1);
+
+                    const typeLabel = effortTypeKey === "fun" ? "Fun" : effortTypeKey === "other" ? "Other" : "Chore";
+                    effortTypeLoad.set(typeLabel, effortTypeLoad.get(typeLabel) + intensity);
+                });
+
+                return {
+                    started: startedEntries.length,
+                    posted: postedEntries.length,
+                    pending: pendingEntries.length,
+                    completionRate: startedEntries.length ? (postedEntries.length / startedEntries.length) : 0,
+                    recoveryRate: effortLoad ? (recoveredPoints / effortLoad) : 0,
+                    effortLoad,
+                    recoveredPoints,
+                    stressfulCount,
+                    qualityCounts,
+                    effortTypeLoad
+                };
+            }
+
+            function renderBars(containerId, mapData) {
+                const root = document.getElementById(containerId);
+                root.innerHTML = "";
+                const rows = Array.from(mapData.entries()).sort((a, b) => b[1] - a[1]);
+                if (!rows.length || rows.every((item) => item[1] <= 0)) {
+                    const empty = document.createElement("div");
+                    empty.className = "barEmpty";
+                    empty.textContent = "No data yet.";
+                    root.appendChild(empty);
+                    return;
+                }
+
+                const max = Math.max(...rows.map((item) => item[1]), 1);
+                rows.forEach(([label, value]) => {
+                    const row = document.createElement("div");
+                    row.className = "barRow";
+                    const labelEl = document.createElement("div");
+                    labelEl.className = "barLabel";
+                    labelEl.textContent = label;
+                    const track = document.createElement("div");
+                    track.className = "barTrack";
+                    const fill = document.createElement("div");
+                    fill.className = "barFill";
+                    fill.style.width = `${Math.max(4, Math.round((value / max) * 100))}%`;
+                    track.appendChild(fill);
+                    const valueEl = document.createElement("div");
+                    valueEl.className = "barValue";
+                    valueEl.textContent = Number.isInteger(value) ? String(value) : value.toFixed(2);
+                    row.appendChild(labelEl);
+                    row.appendChild(track);
+                    row.appendChild(valueEl);
+                    root.appendChild(row);
+                });
+            }
+
+            function updateSummaryAndGraphs(entries) {
+                const metrics = computeMetrics(entries);
+                document.getElementById("summaryStarted").textContent = String(metrics.started);
+                document.getElementById("summaryPosted").textContent = String(metrics.posted);
+                document.getElementById("summaryPending").textContent = String(metrics.pending);
+                document.getElementById("summaryCompletion").textContent = `${Math.round(metrics.completionRate * 100)}%`;
+                document.getElementById("summaryRecovery").textContent = `${Math.round(metrics.recoveryRate * 100)}%`;
+                document.getElementById("summaryStressful").textContent = String(metrics.stressfulCount);
+
+                const loadMap = new Map([
+                    ["Effort Load", Number(metrics.effortLoad.toFixed(2))],
+                    ["Recovered", Number(metrics.recoveredPoints.toFixed(2))]
+                ]);
+                const qualityMap = new Map([
+                    ["Full", metrics.qualityCounts.get("full")],
+                    ["Half", metrics.qualityCounts.get("half")],
+                    ["Barely", metrics.qualityCounts.get("barely")]
+                ]);
+                renderBars("loadBars", loadMap);
+                renderBars("qualityBars", qualityMap);
+                renderBars("effortTypeBars", metrics.effortTypeLoad);
+            }
+
+            function updateGlobalState() {
+                const allEntries = getEntries();
+                allEntries.forEach((entry) => updateEntryState(entry));
+                const trackedEntries = getTrackedEntries(allEntries);
+                const startedEntries = trackedEntries.filter((entry) => selectedValue(entry, "dr") !== "none");
+                const pendingEntries = startedEntries.filter((entry) => entry.classList.contains("is-pending"));
+                const postedEntries = startedEntries.filter((entry) => entry.classList.contains("is-posted"));
+
+                body.classList.toggle("ledger-unreconciled", pendingEntries.length > 0);
+                body.classList.toggle("ledger-balanced", pendingEntries.length === 0 && postedEntries.length > 0);
+                body.classList.toggle("ledger-open", startedEntries.length === 0);
+
+                if (body.classList.contains("ledger-open")) {
+                    statusNote.textContent = "Post one pair.";
+                } else if (body.classList.contains("ledger-unreconciled")) {
+                    statusNote.textContent = "Pick a recovery and quality.";
+                } else {
+                    statusNote.textContent = "Closed.";
+                }
+
+                const balanced = body.classList.contains("ledger-balanced");
+                closeBooks.disabled = !balanced;
+                if (!balanced) {
+                    closeBooks.checked = false;
+                    body.classList.remove("sealed");
+                } else {
+                    body.classList.toggle("sealed", closeBooks.checked);
+                }
+
+                updateHistory(trackedEntries);
+                updateSummaryAndGraphs(trackedEntries);
+                saveState();
+            }
+
+            function handleManualEntry(entry, group) {
+                const input = entry.querySelector(group === "dr" ? ".manualDebitInput" : ".manualCreditInput");
+                const value = input.value.trim();
+                if (!value) return;
+
+                if (group === "dr") {
+                    const current = selectedValue(entry, "dr");
+                    if (current !== "none" && current !== "manual-debit") return;
+                    entry.dataset.manualDebit = value;
+                    setManualLabel(entry, "dr", value);
+                    setSelected(entry, "dr", "manual-debit");
+                } else {
+                    if (selectedValue(entry, "dr") === "none") return;
+                    entry.dataset.manualCredit = value;
+                    setManualLabel(entry, "cr", value);
+                    setSelected(entry, "cr", "manual-credit");
+                }
+                updateGlobalState();
+            }
+
+            function clearEntry(entry, suppressUpdate = false) {
+                setSelected(entry, "dr", "none");
+                setSelected(entry, "cr", "none");
+                setSelected(entry, "qual", "none");
+                setSelected(entry, "dtype", "chore");
+                setSelected(entry, "intensity", "medium");
+                entry.querySelector(".stressCheckbox").checked = false;
+                entry.dataset.manualDebit = "";
+                entry.dataset.manualCredit = "";
+                entry.dataset.effortOther = "";
+                setManualLabel(entry, "dr", "");
+                setManualLabel(entry, "cr", "");
+                entry.querySelector(".manualDebitInput").value = "";
+                entry.querySelector(".manualCreditInput").value = "";
+                entry.querySelector(".effortTypeOtherInput").value = "";
+                entry.querySelector(".narration").value = "";
+                if (!suppressUpdate) updateGlobalState();
+            }
+
+            function setupEntry(entry) {
+                entry.querySelectorAll('input[type="radio"]').forEach((radio) => radio.addEventListener("change", updateGlobalState));
+                entry.querySelector(".stressCheckbox").addEventListener("change", updateGlobalState);
+                entry.querySelector(".addManualDebit").addEventListener("click", () => handleManualEntry(entry, "dr"));
+                entry.querySelector(".addManualCredit").addEventListener("click", () => handleManualEntry(entry, "cr"));
+
+                entry.querySelector(".manualDebitInput").addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleManualEntry(entry, "dr");
+                    }
+                });
+                entry.querySelector(".manualCreditInput").addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleManualEntry(entry, "cr");
+                    }
+                });
+
+                entry.querySelector(".manualDebitInput").addEventListener("input", () => {
+                    if (selectedValue(entry, "dr") === "manual-debit") {
+                        entry.dataset.manualDebit = entry.querySelector(".manualDebitInput").value.trim();
+                        setManualLabel(entry, "dr", entry.dataset.manualDebit);
+                        updateGlobalState();
+                        return;
+                    }
+                    saveState();
+                });
+                entry.querySelector(".manualCreditInput").addEventListener("input", () => {
+                    if (selectedValue(entry, "cr") === "manual-credit") {
+                        entry.dataset.manualCredit = entry.querySelector(".manualCreditInput").value.trim();
+                        setManualLabel(entry, "cr", entry.dataset.manualCredit);
+                        updateGlobalState();
+                        return;
+                    }
+                    saveState();
+                });
+
+                entry.querySelector(".effortTypeOtherInput").addEventListener("input", () => {
+                    entry.dataset.effortOther = entry.querySelector(".effortTypeOtherInput").value.trim();
+                    saveState();
+                });
+                entry.querySelector(".narration").addEventListener("input", saveState);
+                entry.querySelector(".clearEntry").addEventListener("click", () => clearEntry(entry));
+            }
+
+            function setupEntryCountControls() {
+                addEntryBtn.addEventListener("click", () => {
+                    visibleEntryCount = Math.min(ENTRY_COUNT, visibleEntryCount + 1);
+                    applyEntryVisibility();
+                    updateGlobalState();
+                });
+                removeEntryBtn.addEventListener("click", () => {
+                    visibleEntryCount = Math.max(1, visibleEntryCount - 1);
+                    applyEntryVisibility();
+                    updateGlobalState();
+                });
+            }
+
+            function setupSealToggle() {
+                closeBooks.addEventListener("change", () => {
+                    body.classList.toggle("sealed", closeBooks.checked);
+                    saveState();
+                });
+            }
+
+            function resetAll() {
+                visibleEntryCount = 1;
+                closeBooks.checked = false;
+                body.classList.remove("sealed");
+                getEntries().forEach((entry) => clearEntry(entry, true));
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(LEGACY_STORAGE_KEY);
+                } catch (_) {
+                    // Ignore storage failures.
+                }
+                applyEntryVisibility();
+                updateGlobalState();
+            }
+
+            function setupResetControl() {
+                resetDayBtn.addEventListener("click", () => {
+                    if (!window.confirm("Reset all entries for this day?")) return;
+                    resetAll();
+                });
+            }
+
+            function boot() {
+                renderEntries();
+                getEntries().forEach((entry) => {
+                    setupEntry(entry);
+                    setManualLabel(entry, "dr", "");
+                    setManualLabel(entry, "cr", "");
+                });
+                loadState();
+                setupEntryCountControls();
+                setupSealToggle();
+                setupResetControl();
+                applyEntryVisibility();
+                updateGlobalState();
+            }
+
+            boot();
+        })();
+    </script>
+</body>
+</html>

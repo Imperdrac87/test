@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritual Ledger</title>
+    <style>
+        :root {
+            --paper: #f8f6f0;
+            --ink: #1c1b1a;
+            --muted-ink: #4f4b46;
+            --audit-red: #b82828;
+            --seal-green: #2e593a;
+            --rule-line: rgba(107, 104, 98, 0.12);
+            --stamp-bg: #eae6db;
+            --focus: #0f4c81;
+            --font-heading: Georgia, serif;
+            --font-mono: "Courier New", monospace;
+            --font-body: system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body.ledger {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            background-image: repeating-linear-gradient(transparent, transparent 39px, var(--rule-line) 39px, var(--rule-line) 40px);
+            padding-bottom: 3rem;
+        }
+
+        body.ledger::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 3.8rem;
+            width: 2px;
+            background: rgba(184, 40, 40, 0.15);
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: normal; }
+
+        header#trialBalance {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--paper) 85%, transparent);
+            border-bottom: 2px solid var(--ink);
+            padding: 1.1rem 2rem 0.95rem 4.2rem;
+            margin-bottom: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .title-block h1 {
+            font-size: 1.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .title-block .date {
+            margin-top: 0.14rem;
+            font-family: var(--font-mono);
+            color: var(--muted-ink);
+            font-size: 0.8rem;
+        }
+
+        .closing-ritual {
+            margin-top: 0.7rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+        }
+
+        .closing-ritual label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+        }
+
+        .closing-ritual input[type="checkbox"] { accent-color: var(--seal-green); }
+        #closeBooks:disabled + span,
+        #closeBooks:disabled { opacity: 0.55; }
+
+        .status-plate { text-align: right; min-width: 290px; }
+
+        .badge {
+            display: none;
+            width: fit-content;
+            margin-left: auto;
+            border: 2px solid var(--muted-ink);
+            padding: 0.45rem 0.78rem;
+            font-family: var(--font-mono);
+            font-size: 0.77rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge--open { color: var(--muted-ink); border-color: var(--muted-ink); }
+        .badge--unreconciled { color: var(--audit-red); border-color: var(--audit-red); background: rgba(184, 40, 40, 0.06); }
+        .badge--balanced { color: var(--seal-green); border-color: var(--seal-green); background: rgba(46, 89, 58, 0.07); }
+
+        body.ledger-open .badge--open { display: block; }
+        body.ledger-unreconciled .badge--unreconciled { display: block; }
+        body.ledger-balanced .badge--balanced { display: block; }
+
+        .status-note {
+            margin-top: 0.42rem;
+            min-height: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.73rem;
+            color: var(--muted-ink);
+        }
+
+        main#layoutGrid {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section#journal {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .journalHeader {
+            border-bottom: 1px solid var(--muted-ink);
+            padding-bottom: 0.45rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .journalHeader .meta {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--muted-ink);
+        }
+
+        .entryControls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .miniBtn {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.34rem 0.52rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .miniBtn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .dangerBtn { border-color: var(--audit-red); color: var(--audit-red); }
+
+        #entryCountLabel {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--muted-ink);
+        }
+
+        #flowHint {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--muted-ink);
+        }
+
+        ol.entries {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.95rem;
+        }
+
+        li.entry {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.8rem;
+            transition: border-color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+        }
+
+        li.entry.is-hidden { display: none; }
+
+        .entryMeta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .entryId {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--muted-ink);
+            text-transform: uppercase;
+        }
+
+        .entryStatus {
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            border: 1px solid var(--rule-line);
+            padding: 0.22rem 0.35rem;
+            color: var(--muted-ink);
+        }
+
+        .entryStatus.pending { color: var(--audit-red); border-color: var(--audit-red); }
+        .entryStatus.posted { color: var(--seal-green); border-color: var(--seal-green); }
+
+        .entryBody { display: grid; gap: 0.66rem; }
+
+        .wizardPane { display: none; }
+        .entry.stage-welcome .pane-welcome { display: block; }
+        .entry.stage-effort .pane-effort { display: block; }
+        .entry.stage-recovery .pane-recovery { display: block; }
+        .entry.stage-quality .pane-quality { display: block; }
+        .entry.stage-posted .pane-posted { display: block; }
+
+        .entryGuide {
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            color: var(--muted-ink);
+            padding: 0.45rem 0.5rem;
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        .entry.stage-welcome .entryProgress,
+        .entry.stage-welcome .entryGuide {
+            display: none;
+        }
+
+        .welcomePane {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.8rem;
+        }
+
+        .welcomeTitle {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 0.28rem;
+        }
+
+        .welcomeCopy {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--muted-ink);
+            margin-bottom: 0.62rem;
+        }
+
+        .startEntryBtn {
+            border: 1px solid var(--ink);
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.5rem 0.7rem;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .entryProgress {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.35rem;
+        }
+
+        .progressPill {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.45);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            text-align: center;
+            padding: 0.35rem 0.25rem;
+            color: var(--muted-ink);
+            text-transform: uppercase;
+        }
+
+        .progressPill.is-current {
+            border-color: var(--ink);
+            color: var(--ink);
+            background: rgba(0, 0, 0, 0.04);
+            font-weight: bold;
+        }
+
+        .progressPill.is-done {
+            border-color: var(--seal-green);
+            color: var(--seal-green);
+            background: rgba(46, 89, 58, 0.08);
+            font-weight: bold;
+        }
+
+        .step {
+            border: 1px solid var(--rule-line);
+            padding: 0.55rem;
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        .stepTitle {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+            color: var(--muted-ink);
+        }
+
+        .stepQuestion {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--ink);
+            margin-bottom: 0.42rem;
+        }
+
+        .stepLegend {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.46rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .legendTitle {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+            margin-bottom: 0.28rem;
+        }
+
+        .legendLine {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--muted-ink);
+            margin-bottom: 0.18rem;
+        }
+
+        .subTitle {
+            margin-top: 0.34rem;
+            margin-bottom: 0.3rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+        }
+
+        .stampGrid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.45rem;
+        }
+
+        .stampGrid + .stampGrid,
+        .manualRow,
+        .metaBlock {
+            margin-top: 0.44rem;
+            padding-top: 0.44rem;
+            border-top: 1px solid var(--rule-line);
+        }
+
+        .stampInput,
+        .metaInput {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .stamp,
+        .metaChip {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            min-height: 2.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+        }
+
+        .stamp:hover,
+        .metaChip:hover {
+            background: var(--stamp-bg);
+            transform: translate(-1px, -1px);
+        }
+
+        .stampInput:focus + .stamp,
+        .metaInput:focus + .metaChip {
+            outline: 2px solid var(--focus);
+            outline-offset: 1px;
+        }
+
+        .stampInput:checked + .stamp,
+        .metaInput:checked + .metaChip {
+            border-color: var(--ink);
+            background: rgba(0, 0, 0, 0.06);
+            font-weight: bold;
+        }
+
+        .stamp--contra {
+            border-color: var(--audit-red);
+            color: #7f1919;
+            background-image: repeating-linear-gradient(-20deg, rgba(184, 40, 40, 0.06), rgba(184, 40, 40, 0.06) 5px, transparent 5px, transparent 10px);
+        }
+
+        .stamp--micro {
+            border-style: dashed;
+            border-radius: 7px;
+            color: #285137;
+        }
+
+        .stamp--clear {
+            border-style: dashed;
+            color: var(--muted-ink);
+            opacity: 0.9;
+        }
+
+        .manualHiddenChoices {
+            display: none;
+        }
+
+        .entry.requires-stabilizer .creditChoices .stamp[data-credit-type]:not([data-credit-type="stabilizer"]):not(.stamp--clear) {
+            display: none;
+        }
+
+        .entry.requires-stabilizer .creditChoices .stamp[data-credit-type="stabilizer"] {
+            border-color: var(--seal-green);
+            background: rgba(46, 89, 58, 0.08);
+        }
+
+        .stabilizerNote {
+            display: none;
+            margin-top: 0.44rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            color: var(--seal-green);
+        }
+
+        .entry.requires-stabilizer .stabilizerNote { display: block; }
+
+        .optionDrawer {
+            margin-top: 0.44rem;
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .optionDrawer > summary {
+            cursor: pointer;
+            padding: 0.38rem 0.46rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+        }
+
+        .drawerBody {
+            padding: 0 0.46rem 0.5rem;
+        }
+
+        .metaStack {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .manualRow {
+            display: flex;
+            gap: 0.38rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .manualInput,
+        .textInput {
+            min-width: 210px;
+            flex: 1;
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.6);
+            padding: 0.35rem 0.45rem;
+            font-size: 0.84rem;
+        }
+
+        .manualInput:focus,
+        .textInput:focus {
+            outline: 1px solid var(--focus);
+            border-color: var(--focus);
+        }
+
+        .manualBtn {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.34rem 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .metaBlockTitle {
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            color: var(--muted-ink);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+        }
+
+        .metaRow {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.42rem;
+        }
+
+        .metaRow + .metaRow { margin-top: 0.4rem; }
+
+        .qualityRow {
+            margin-top: 0.44rem;
+            padding-top: 0.44rem;
+            border-top: 1px solid var(--rule-line);
+        }
+
+        .qualityNote {
+            margin-top: 0.3rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            color: var(--muted-ink);
+        }
+
+        .entryExtras {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .entryExtras .optionDrawer {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .postedPane {
+            border: 1px solid var(--seal-green);
+            background: rgba(46, 89, 58, 0.06);
+            padding: 0.7rem;
+        }
+
+        .postedTitle {
+            font-family: var(--font-mono);
+            font-size: 0.84rem;
+            text-transform: uppercase;
+            color: var(--seal-green);
+            margin-bottom: 0.34rem;
+        }
+
+        .postedSummary {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--muted-ink);
+            margin-bottom: 0.52rem;
+        }
+
+        .narration {
+            border: none;
+            border-bottom: 1px solid var(--rule-line);
+            background: transparent;
+            padding: 0.34rem 0.12rem;
+            font-size: 0.84rem;
+            min-width: 250px;
+            flex: 1;
+        }
+
+        .narration:focus { outline: none; border-bottom-color: var(--ink); }
+
+        .clearEntry {
+            border: 1px solid var(--muted-ink);
+            background: transparent;
+            padding: 0.3rem 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .entry.is-pending {
+            border-color: var(--audit-red);
+            background: rgba(184, 40, 40, 0.03);
+        }
+
+        .entry.is-posted {
+            border-color: var(--seal-green);
+            background: rgba(46, 89, 58, 0.03);
+        }
+
+        #historyStrip,
+        #graphsSection {
+            border-top: 2px solid var(--ink);
+            margin-top: 0.24rem;
+            padding-top: 0.62rem;
+        }
+
+        #analyticsDrawer {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.4);
+            padding: 0.15rem 0.45rem 0.5rem;
+        }
+
+        #analyticsDrawer > summary {
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+            padding: 0.28rem 0;
+        }
+
+        #historyStrip h3,
+        #graphsSection h3 {
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            margin-bottom: 0.35rem;
+            color: var(--muted-ink);
+        }
+
+        .historyChips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .chip {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.24rem 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+        }
+
+        .chip.pending { border-color: var(--audit-red); color: var(--audit-red); }
+        .chip.posted { border-color: var(--seal-green); color: var(--seal-green); }
+        .chip.empty { color: var(--muted-ink); }
+
+        .summaryCards {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .summaryCard {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.45);
+            padding: 0.4rem;
+            min-height: 68px;
+        }
+
+        .summaryCard .label {
+            font-family: var(--font-mono);
+            font-size: 0.64rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+            margin-bottom: 0.2rem;
+        }
+
+        .summaryCard .value {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .graphGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .graphPanel {
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.45);
+            padding: 0.48rem;
+        }
+
+        .graphPanel h4 {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--muted-ink);
+            margin-bottom: 0.38rem;
+        }
+
+        .barRow {
+            display: grid;
+            grid-template-columns: 116px 1fr 30px;
+            gap: 0.35rem;
+            align-items: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .barLabel {
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            color: var(--muted-ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .barTrack {
+            width: 100%;
+            height: 10px;
+            border: 1px solid var(--rule-line);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .barFill {
+            height: 100%;
+            background: linear-gradient(to right, rgba(28, 27, 26, 0.25), rgba(28, 27, 26, 0.55));
+        }
+
+        .barValue {
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            text-align: right;
+            color: var(--muted-ink);
+        }
+
+        .barEmpty {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--muted-ink);
+        }
+
+        body.sealed { filter: grayscale(0.35) sepia(0.12); }
+
+        body.sealed main#layoutGrid {
+            pointer-events: none;
+            opacity: 0.95;
+        }
+
+        body.sealed::after {
+            content: "SEALED";
+            position: fixed;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-22deg);
+            font-family: var(--font-heading);
+            font-size: 10vw;
+            color: var(--muted-ink);
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        @media (max-width: 980px) {
+            body.ledger::before { left: 1rem; }
+
+            header#trialBalance {
+                padding: 1rem 1rem 0.85rem 1.35rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status-plate {
+                text-align: left;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .badge { margin-left: 0; }
+
+            main#layoutGrid { padding: 0 1rem; }
+
+            .stampGrid,
+            .metaRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .qualityGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .manualRow { flex-direction: column; align-items: stretch; }
+            .manualInput,
+            .textInput { min-width: 0; width: 100%; }
+            .entryExtras { flex-direction: column; align-items: stretch; }
+            .narration { min-width: 0; width: 100%; }
+
+            .summaryCards { grid-template-columns: 1fr 1fr; }
+            .graphGrid { grid-template-columns: 1fr; }
+            .barRow { grid-template-columns: 100px 1fr 28px; }
+        }
+
+        @media (max-width: 560px) {
+            body.ledger::before { display: none; }
+            header#trialBalance {
+                position: static;
+                padding: 0.72rem 0.72rem 0.65rem;
+                margin-bottom: 0.65rem;
+            }
+            .title-block h1 {
+                font-size: 1.55rem;
+                letter-spacing: 1px;
+            }
+            .status-note { font-size: 0.8rem; }
+            main#layoutGrid { padding: 0 0.65rem; }
+            .journalHeader { align-items: flex-start; }
+            .entryControls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                width: 100%;
+                gap: 0.4rem;
+            }
+            .entryControls .miniBtn {
+                width: 100%;
+                min-height: 2.3rem;
+                font-size: 0.78rem;
+            }
+            #entryCountLabel,
+            #flowHint { grid-column: 1 / -1; }
+            .step { padding: 0.5rem; }
+            .optionDrawer > summary { padding: 0.56rem 0.5rem; }
+            .stamp,
+            .metaChip {
+                min-height: 2.75rem;
+                font-size: 0.9rem;
+            }
+            .entryProgress { grid-template-columns: 1fr; }
+            .stampGrid,
+            .metaRow,
+            .qualityGrid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="ledger ledger-open">
+    <header id="trialBalance">
+        <div class="title-block">
+            <h1>Ritual Ledger</h1>
+            <div class="date">v4 // <script>document.write(new Date().toLocaleDateString("en-GB"))</script></div>
+            <div class="closing-ritual">
+                <label>
+                    <input type="checkbox" id="closeBooks" disabled>
+                    <span>Close Books</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="status-plate">
+            <div class="badge badge--open">Open</div>
+            <div class="badge badge--unreconciled">Unreconciled</div>
+            <div class="badge badge--balanced">Balanced</div>
+            <div id="statusNote" class="status-note">Post one pair.</div>
+        </div>
+    </header>
+
+    <main id="layoutGrid">
+        <section id="journal">
+            <div class="journalHeader">
+                <div>
+                    <div>GENERAL JOURNAL</div>
+                    <div class="meta">Simple flow: Effort -> Recovery -> Quality. Add more entries only when needed.</div>
+                </div>
+                <div class="entryControls">
+                    <button id="removeEntryBtn" type="button" class="miniBtn">Remove Entry</button>
+                    <button id="addEntryBtn" type="button" class="miniBtn">Add Entry</button>
+                    <button id="resetDayBtn" type="button" class="miniBtn dangerBtn">Reset Day</button>
+                    <span id="entryCountLabel"></span>
+                    <span id="flowHint"></span>
+                </div>
+            </div>
+
+            <ol class="entries" id="entriesList"></ol>
+
+            <section id="historyStrip">
+                <h3>Receipts</h3>
+                <div id="historyChips" class="historyChips"></div>
+            </section>
+
+            <section id="graphsSection">
+                <h3>Daily Graphs</h3>
+                <details id="analyticsDrawer">
+                    <summary>Open daily summary and graphs</summary>
+                    <div class="summaryCards">
+                        <div class="summaryCard"><div class="label">Started</div><div class="value" id="summaryStarted">0</div></div>
+                        <div class="summaryCard"><div class="label">Posted</div><div class="value" id="summaryPosted">0</div></div>
+                        <div class="summaryCard"><div class="label">Pending</div><div class="value" id="summaryPending">0</div></div>
+                        <div class="summaryCard"><div class="label">Completion Rate</div><div class="value" id="summaryCompletion">0%</div></div>
+                        <div class="summaryCard"><div class="label">Recovery Rate</div><div class="value" id="summaryRecovery">0%</div></div>
+                        <div class="summaryCard"><div class="label">Stressful Entries</div><div class="value" id="summaryStressful">0</div></div>
+                    </div>
+                    <div class="graphGrid">
+                        <div class="graphPanel">
+                            <h4>Effort Load vs Recovered Points</h4>
+                            <div id="loadBars"></div>
+                        </div>
+                        <div class="graphPanel">
+                            <h4>Recovery Quality Distribution</h4>
+                            <div id="qualityBars"></div>
+                        </div>
+                        <div class="graphPanel">
+                            <h4>Effort Type Distribution</h4>
+                            <div id="effortTypeBars"></div>
+                        </div>
+                    </div>
+                </details>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        (() => {
+            const ENTRY_COUNT = 8;
+            const STORAGE_KEY = "ritual-ledger-v4-state";
+            const LEGACY_STORAGE_KEY = "ritual-ledger-v3-state";
+            let visibleEntryCount = 1;
+            let isRestoring = false;
+
+            const INTENSITY_WEIGHT = { low: 1, medium: 2, high: 3 };
+            const QUALITY_WEIGHT = { full: 1.0, half: 0.5, barely: 0.25 };
+
+            const DEBIT_PRIMARY = [
+                { key: "deep-work", label: "Deep Work" },
+                { key: "admin", label: "Admin" },
+                { key: "cleaning", label: "Cleaning" },
+                { key: "social", label: "Social" }
+            ];
+
+            const DEBIT_EXTRA = [
+                { key: "exercise", label: "Exercise" },
+                { key: "errands", label: "Errands" }
+            ];
+
+            const DEBIT_ADJUSTMENT = [
+                { key: "fatigue", label: "Fatigue" },
+                { key: "pain", label: "Pain" },
+                { key: "interruption", label: "Interruption" },
+                { key: "bad-sleep", label: "Bad Sleep" }
+            ];
+
+            const DEBIT_ROUGH = [
+                { key: "anxiety-spike", label: "Anxiety Spike", contra: true },
+                { key: "ocd-loop", label: "OCD Loop", contra: true }
+            ];
+
+            const DEBIT_MANUAL = { key: "manual-debit", label: "Other (type below)" };
+
+            const CREDIT_PRIMARY = [
+                { key: "walk", label: "Walk", kind: "stabilizer" },
+                { key: "stretch", label: "Stretch", kind: "stabilizer" },
+                { key: "stillness", label: "Stillness", kind: "stabilizer" },
+                { key: "tea", label: "Tea", kind: "fun" }
+            ];
+
+            const CREDIT_EXTRA = [
+                { key: "prayer", label: "Prayer", kind: "stabilizer" },
+                { key: "breathe-30", label: "30s Breathe", kind: "stabilizer" },
+                { key: "music", label: "Music", kind: "fun" },
+                { key: "play", label: "Play", kind: "fun" },
+                { key: "switch", label: "Switch", kind: "fun" }
+            ];
+
+            const CREDIT_MANUAL = { key: "manual-credit", label: "Other (type below)", kind: "custom" };
+
+            const debitMeta = new Map();
+            const creditMeta = new Map();
+            [...DEBIT_PRIMARY, ...DEBIT_EXTRA, ...DEBIT_ADJUSTMENT, ...DEBIT_ROUGH, DEBIT_MANUAL].forEach((item) => debitMeta.set(item.key, item));
+            [...CREDIT_PRIMARY, ...CREDIT_EXTRA, CREDIT_MANUAL].forEach((item) => creditMeta.set(item.key, item));
+
+            const body = document.body;
+            const entriesList = document.getElementById("entriesList");
+            const statusNote = document.getElementById("statusNote");
+            const closeBooks = document.getElementById("closeBooks");
+            const addEntryBtn = document.getElementById("addEntryBtn");
+            const removeEntryBtn = document.getElementById("removeEntryBtn");
+            const resetDayBtn = document.getElementById("resetDayBtn");
+            const entryCountLabel = document.getElementById("entryCountLabel");
+            const flowHint = document.getElementById("flowHint");
+            const historyChips = document.getElementById("historyChips");
+            const analyticsDrawer = document.getElementById("analyticsDrawer");
+
+            function idFor(entryId, group, key) {
+                return `e${entryId}-${group}-${key}`;
+            }
+
+            function escapeHtml(value) {
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function optionMarkup(entryId, group, item, extraClass = "") {
+                const id = idFor(entryId, group, item.key);
+                const classes = ["stamp", extraClass].filter(Boolean).join(" ");
+                const creditType = group === "cr" ? (item.kind || "custom") : "";
+                const extraAttr = group === "cr" ? ` data-credit-type="${creditType}"` : "";
+                return `
+                    <input class="stampInput" type="radio" name="e${entryId}-${group}" id="${id}" value="${escapeHtml(item.key)}">
+                    <label class="${classes}" for="${id}"${extraAttr}>${escapeHtml(item.label)}</label>
+                `;
+            }
+
+            function clearMarkup(entryId, group) {
+                const id = idFor(entryId, group, "none");
+                return `
+                    <input class="stampInput" type="radio" name="e${entryId}-${group}" id="${id}" value="none" checked>
+                    <label class="stamp stamp--clear" for="${id}">Clear</label>
+                `;
+            }
+
+            function metaOptionMarkup(entryId, group, key, label, checked = false) {
+                const id = idFor(entryId, group, key);
+                return `
+                    <input class="metaInput" type="radio" name="e${entryId}-${group}" id="${id}" value="${key}"${checked ? " checked" : ""}>
+                    <label class="metaChip" for="${id}">${label}</label>
+                `;
+            }
+
+            function buildEntry(entryNum) {
+                const entryId = String(entryNum).padStart(2, "0");
+                const debitNormalMarkup = [
+                    ...DEBIT_PRIMARY.map((item) => optionMarkup(entryId, "dr", item)),
+                    clearMarkup(entryId, "dr")
+                ].join("");
+                const debitExtraMarkup = DEBIT_EXTRA.map((item) => optionMarkup(entryId, "dr", item)).join("");
+                const debitAdjustmentMarkup = DEBIT_ADJUSTMENT.map((item) => optionMarkup(entryId, "dr", item)).join("");
+                const debitRoughMarkup = DEBIT_ROUGH.map((item) => optionMarkup(entryId, "dr", item, "stamp--contra")).join("");
+                const creditPrimaryMarkup = [
+                    ...CREDIT_PRIMARY.map((item) => optionMarkup(entryId, "cr", item, item.kind === "stabilizer" ? "stamp--micro" : "")),
+                    clearMarkup(entryId, "cr")
+                ].join("");
+                const creditExtraMarkup = CREDIT_EXTRA.map((item) => optionMarkup(entryId, "cr", item, item.kind === "stabilizer" ? "stamp--micro" : "")).join("");
+                const manualDebitMarkup = optionMarkup(entryId, "dr", DEBIT_MANUAL);
+                const manualCreditMarkup = optionMarkup(entryId, "cr", CREDIT_MANUAL);
+                const qualityMarkup = [
+                    optionMarkup(entryId, "qual", { key: "full", label: "Full" }),
+                    optionMarkup(entryId, "qual", { key: "half", label: "Half" }),
+                    optionMarkup(entryId, "qual", { key: "barely", label: "Barely" }),
+                    clearMarkup(entryId, "qual")
+                ].join("");
+                const effortTypeMarkup = [
+                    metaOptionMarkup(entryId, "dtype", "chore", "Chore", true),
+                    metaOptionMarkup(entryId, "dtype", "fun", "Fun"),
+                    metaOptionMarkup(entryId, "dtype", "other", "Other")
+                ].join("");
+                const intensityMarkup = [
+                    metaOptionMarkup(entryId, "intensity", "low", "Low"),
+                    metaOptionMarkup(entryId, "intensity", "medium", "Medium", true),
+                    metaOptionMarkup(entryId, "intensity", "high", "High")
+                ].join("");
+
+                return `
+                    <li class="entry stage-welcome" data-entry="${entryId}" data-started="0" data-manual-debit="" data-manual-credit="" data-effort-other="">
+                        <div class="entryMeta">
+                            <span class="entryId">Entry ${entryId}</span>
+                            <span class="entryStatus">Open</span>
+                        </div>
+
+                        <div class="entryBody">
+                            <section class="wizardPane pane-welcome welcomePane">
+                                <h3 class="welcomeTitle">Welcome to Entry ${entryId}</h3>
+                                <p class="welcomeCopy">You will complete three short screens: Effort, Recovery, then Quality.</p>
+                                <button type="button" class="startEntryBtn">Start Entry</button>
+                            </section>
+
+                            <div class="manualHiddenChoices">
+                                ${manualDebitMarkup}
+                                ${manualCreditMarkup}
+                            </div>
+
+                            <div class="entryProgress">
+                                <span class="progressPill progressPill-effort is-current">1 Effort</span>
+                                <span class="progressPill progressPill-recovery">2 Recovery</span>
+                                <span class="progressPill progressPill-quality">3 Quality</span>
+                            </div>
+                            <div class="entryGuide">Complete one step at a time: 1) Effort, 2) Recovery, 3) Quality.</div>
+                            <section class="wizardPane pane-effort step step--debit">
+                                <h3 class="stepTitle">Step 1 - Effort</h3>
+                                <p class="stepQuestion">What drained you?</p>
+                                <div class="stepLegend">
+                                    <div class="legendTitle">How Effort Sections Work</div>
+                                    <div class="legendLine">Pick exactly one effort for this entry. All effort sections feed the same ledger step.</div>
+                                    <div class="legendLine">Common Efforts + More Effort Options: normal-day effort labels.</div>
+                                    <div class="legendLine">Rough / Adjustment: difficult contexts. Rough entries force stabilizer recovery.</div>
+                                    <div class="legendLine">Add Custom Effort: your own effort label in this same system.</div>
+                                    <div class="legendLine">Accuracy Settings: optional metadata for analytics (type, intensity, stress).</div>
+                                </div>
+                                <div class="debitChoices">
+                                    <h4 class="subTitle">Common Efforts</h4>
+                                    <div class="stampGrid debitGrid">${debitNormalMarkup}</div>
+                                </div>
+
+                                <details class="optionDrawer">
+                                    <summary>More effort options (same system)</summary>
+                                    <div class="drawerBody">
+                                        <h4 class="subTitle">Other common efforts</h4>
+                                        <div class="stampGrid">${debitExtraMarkup}</div>
+                                    </div>
+                                </details>
+
+                                <details class="optionDrawer">
+                                    <summary>Rough / Adjustment options (same system)</summary>
+                                    <div class="drawerBody">
+                                        <h4 class="subTitle">Rough Day</h4>
+                                        <div class="stampGrid">${debitRoughMarkup}</div>
+                                        <h4 class="subTitle">Adjustment</h4>
+                                        <div class="stampGrid">${debitAdjustmentMarkup}</div>
+                                    </div>
+                                </details>
+
+                                <details class="optionDrawer">
+                                    <summary>Add custom effort (same system)</summary>
+                                    <div class="drawerBody">
+                                        <div class="manualRow">
+                                            <input type="text" class="manualInput manualDebitInput" placeholder="Other effort activity...">
+                                            <button type="button" class="manualBtn addManualDebit">Use as Effort</button>
+                                        </div>
+                                    </div>
+                                </details>
+
+                                <details class="optionDrawer">
+                                    <summary>Accuracy settings (optional)</summary>
+                                    <div class="drawerBody metaStack">
+                                        <div class="metaBlock">
+                                            <div class="metaBlockTitle">Effort Type</div>
+                                            <div class="metaRow">${effortTypeMarkup}</div>
+                                            <div class="manualRow">
+                                                <input type="text" class="textInput effortTypeOtherInput" placeholder="If Other, type effort type...">
+                                            </div>
+                                        </div>
+
+                                        <div class="metaBlock">
+                                            <div class="metaBlockTitle">Intensity</div>
+                                            <div class="metaRow">${intensityMarkup}</div>
+                                        </div>
+
+                                        <div class="metaBlock">
+                                            <div class="metaBlockTitle">Stress Flag</div>
+                                            <label><input type="checkbox" class="stressCheckbox"> Mark this effort as stressful</label>
+                                        </div>
+                                    </div>
+                                </details>
+                            </section>
+
+                            <section class="wizardPane pane-recovery step step--recovery">
+                                <h3 class="stepTitle">Step 2 - Recovery</h3>
+                                <p class="stepQuestion">How are you recovering?</p>
+                                <div class="creditChoices">
+                                    <div class="stampGrid creditGrid">${creditPrimaryMarkup}</div>
+                                    <div class="stabilizerNote">Rough Day or Stressful selected: stabilizers only.</div>
+
+                                    <details class="optionDrawer">
+                                        <summary>More recovery options</summary>
+                                        <div class="drawerBody">
+                                            <div class="stampGrid creditGrid">${creditExtraMarkup}</div>
+                                            <div class="manualRow">
+                                                <input type="text" class="manualInput manualCreditInput" placeholder="Other recovery activity...">
+                                                <button type="button" class="manualBtn addManualCredit">Use as Recovery</button>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </section>
+
+                            <section class="wizardPane pane-quality step step--quality">
+                                <h3 class="stepTitle">Step 3 - Recovery Quality</h3>
+                                <p class="stepQuestion">How complete was that recovery?</p>
+                                <div class="qualityRow">
+                                    <div class="stampGrid qualityGrid">${qualityMarkup}</div>
+                                    <div class="qualityNote">Recovery Rate uses intensity x quality. Full=1.0, Half=0.5, Barely=0.25.</div>
+                                </div>
+                            </section>
+
+                            <section class="wizardPane pane-posted postedPane">
+                                <h3 class="postedTitle">Entry posted</h3>
+                                <p class="postedSummary">Receipt ready.</p>
+                                <div class="entryExtras">
+                                    <button type="button" class="miniBtn editQualityBtn">Edit Quality</button>
+                                    <button type="button" class="miniBtn addNextBtn">Add Next Entry</button>
+                                    <button type="button" class="clearEntry">Clear Entry</button>
+                                </div>
+                                <details class="optionDrawer">
+                                    <summary>Notes (optional)</summary>
+                                    <div class="drawerBody">
+                                        <input type="text" class="narration" placeholder="Narration (optional)">
+                                    </div>
+                                </details>
+                            </section>
+                        </div>
+                    </li>
+                `;
+            }
+
+            function renderEntries() {
+                const rows = [];
+                for (let i = 1; i <= ENTRY_COUNT; i += 1) rows.push(buildEntry(i));
+                entriesList.innerHTML = rows.join("");
+            }
+
+            function getEntries() {
+                return Array.from(document.querySelectorAll(".entry"));
+            }
+
+            function selectedValue(entry, group) {
+                const checked = entry.querySelector(`input[name="e${entry.dataset.entry}-${group}"]:checked`);
+                return checked ? checked.value : "none";
+            }
+
+            function setSelected(entry, group, key) {
+                const target = entry.querySelector(`#${idFor(entry.dataset.entry, group, key)}`);
+                if (target) target.checked = true;
+            }
+
+            function setManualLabel(entry, group, text) {
+                const key = group === "dr" ? "manual-debit" : "manual-credit";
+                const base = "Other (type below)";
+                const label = entry.querySelector(`label[for="${idFor(entry.dataset.entry, group, key)}"]`);
+                if (!label) return;
+                label.textContent = text ? `Other: ${text}` : base;
+            }
+
+            function hasCommittedDebit(entry) {
+                const key = selectedValue(entry, "dr");
+                if (key === "none") return false;
+                if (key !== "manual-debit") return true;
+                const value = (entry.dataset.manualDebit || entry.querySelector(".manualDebitInput").value || "").trim();
+                return value.length > 0;
+            }
+
+            function hasCommittedCredit(entry) {
+                const key = selectedValue(entry, "cr");
+                if (key === "none") return false;
+                if (key !== "manual-credit") return true;
+                const value = (entry.dataset.manualCredit || entry.querySelector(".manualCreditInput").value || "").trim();
+                return value.length > 0;
+            }
+
+            function closeDrawerForNode(node) {
+                const drawer = node.closest(".optionDrawer");
+                if (drawer) drawer.open = false;
+            }
+
+            function closeAllOptionDrawers(entry) {
+                entry.querySelectorAll(".optionDrawer").forEach((drawer) => {
+                    drawer.open = false;
+                });
+            }
+
+            function setStepProgress(entry, stage, hasDebit, hasCredit, hasQuality) {
+                const effort = entry.querySelector(".progressPill-effort");
+                const recovery = entry.querySelector(".progressPill-recovery");
+                const quality = entry.querySelector(".progressPill-quality");
+                if (!effort || !recovery || !quality) return;
+
+                effort.className = "progressPill progressPill-effort";
+                recovery.className = "progressPill progressPill-recovery";
+                quality.className = "progressPill progressPill-quality";
+
+                if (stage === "welcome" || !hasDebit) {
+                    effort.classList.add("is-current");
+                    return;
+                }
+                effort.classList.add("is-done");
+
+                if (!hasCredit) {
+                    recovery.classList.add("is-current");
+                    return;
+                }
+                recovery.classList.add("is-done");
+
+                if (!hasQuality) {
+                    quality.classList.add("is-current");
+                    return;
+                }
+                quality.classList.add("is-done");
+            }
+
+            function determineStage(entry, hasDebit, hasCredit, hasQuality) {
+                const startedFlag = entry.dataset.started === "1";
+                const started = startedFlag || hasDebit || hasCredit || hasQuality;
+                if (started) entry.dataset.started = "1";
+                if (!started) return "welcome";
+                if (!hasDebit) return "effort";
+                if (!hasCredit) return "recovery";
+                if (!hasQuality) return "quality";
+                return "posted";
+            }
+
+            function applyStageClass(entry, stage) {
+                entry.classList.remove("stage-welcome", "stage-effort", "stage-recovery", "stage-quality", "stage-posted");
+                entry.classList.add(`stage-${stage}`);
+            }
+
+            function updatePostedSummary(entry) {
+                const target = entry.querySelector(".postedSummary");
+                if (!target) return;
+                const dr = labelFromChecked(entry, "dr");
+                const cr = labelFromChecked(entry, "cr");
+                const q = selectedValue(entry, "qual");
+                target.textContent = `Receipt: ${dr} -> ${cr} (${q}).`;
+            }
+
+            function labelFromChecked(entry, group) {
+                const checked = entry.querySelector(`input[name="e${entry.dataset.entry}-${group}"]:checked`);
+                if (!checked || checked.value === "none") return "-";
+                if (checked.value === "manual-debit") return entry.dataset.manualDebit ? `Other: ${entry.dataset.manualDebit}` : "Other";
+                if (checked.value === "manual-credit") return entry.dataset.manualCredit ? `Other: ${entry.dataset.manualCredit}` : "Other";
+                const label = entry.querySelector(`label[for="${checked.id}"]`);
+                return label ? label.textContent.trim() : checked.value;
+            }
+
+            function safeParseState(raw) {
+                try {
+                    return JSON.parse(raw);
+                } catch (_) {
+                    return null;
+                }
+            }
+
+            function getPersistedState() {
+                const direct = safeParseState(localStorage.getItem(STORAGE_KEY));
+                if (direct && typeof direct === "object") return direct;
+                const legacy = safeParseState(localStorage.getItem(LEGACY_STORAGE_KEY));
+                if (legacy && typeof legacy === "object") return legacy;
+                return null;
+            }
+
+            function getEntrySnapshot(entry) {
+                return {
+                    started: entry.dataset.started === "1",
+                    debitKey: selectedValue(entry, "dr"),
+                    creditKey: selectedValue(entry, "cr"),
+                    qualityKey: selectedValue(entry, "qual"),
+                    effortType: selectedValue(entry, "dtype"),
+                    intensity: selectedValue(entry, "intensity"),
+                    stressOn: entry.querySelector(".stressCheckbox").checked,
+                    manualDebit: entry.dataset.manualDebit || "",
+                    manualCredit: entry.dataset.manualCredit || "",
+                    effortOther: entry.dataset.effortOther || "",
+                    manualDebitInput: entry.querySelector(".manualDebitInput").value || "",
+                    manualCreditInput: entry.querySelector(".manualCreditInput").value || "",
+                    effortOtherInput: entry.querySelector(".effortTypeOtherInput").value || "",
+                    narration: entry.querySelector(".narration").value || ""
+                };
+            }
+
+            function saveState() {
+                if (isRestoring) return;
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                        version: 4,
+                        visibleEntryCount,
+                        closeBooks: closeBooks.checked,
+                        entries: getEntries().map((entry) => getEntrySnapshot(entry))
+                    }));
+                } catch (_) {
+                    // Ignore storage failures.
+                }
+            }
+
+            function applyEntrySnapshot(entry, snapshot) {
+                if (!snapshot) return;
+                entry.dataset.started = snapshot.started ? "1" : "0";
+                entry.querySelector(".stressCheckbox").checked = Boolean(snapshot.stressOn);
+                entry.dataset.manualDebit = snapshot.manualDebit || "";
+                entry.dataset.manualCredit = snapshot.manualCredit || "";
+                entry.dataset.effortOther = snapshot.effortOther || "";
+
+                const manualDebitInput = entry.querySelector(".manualDebitInput");
+                const manualCreditInput = entry.querySelector(".manualCreditInput");
+                const effortOtherInput = entry.querySelector(".effortTypeOtherInput");
+                const narrationInput = entry.querySelector(".narration");
+
+                manualDebitInput.value = snapshot.manualDebitInput || snapshot.manualDebit || "";
+                manualCreditInput.value = snapshot.manualCreditInput || snapshot.manualCredit || "";
+                effortOtherInput.value = snapshot.effortOtherInput || snapshot.effortOther || "";
+                narrationInput.value = snapshot.narration || "";
+
+                setManualLabel(entry, "dr", entry.dataset.manualDebit || manualDebitInput.value || "");
+                setManualLabel(entry, "cr", entry.dataset.manualCredit || manualCreditInput.value || "");
+
+                const dr = snapshot.debitKey || "none";
+                const cr = snapshot.creditKey || "none";
+                const qual = snapshot.qualityKey || "none";
+                const dtype = snapshot.effortType || "chore";
+                const intensity = snapshot.intensity || "medium";
+
+                setSelected(entry, "dr", entry.querySelector(`#${idFor(entry.dataset.entry, "dr", dr)}`) ? dr : "none");
+                setSelected(entry, "cr", entry.querySelector(`#${idFor(entry.dataset.entry, "cr", cr)}`) ? cr : "none");
+                setSelected(entry, "qual", entry.querySelector(`#${idFor(entry.dataset.entry, "qual", qual)}`) ? qual : "none");
+                setSelected(entry, "dtype", entry.querySelector(`#${idFor(entry.dataset.entry, "dtype", dtype)}`) ? dtype : "chore");
+                setSelected(entry, "intensity", entry.querySelector(`#${idFor(entry.dataset.entry, "intensity", intensity)}`) ? intensity : "medium");
+            }
+
+            function loadState() {
+                isRestoring = true;
+                try {
+                    const parsed = getPersistedState();
+                    if (!parsed) return;
+
+                    const count = Number(parsed.visibleEntryCount);
+                    if (Number.isFinite(count)) {
+                        visibleEntryCount = Math.max(1, Math.min(ENTRY_COUNT, Math.trunc(count)));
+                    }
+
+                    if (typeof parsed.closeBooks === "boolean") {
+                        closeBooks.checked = parsed.closeBooks;
+                    }
+
+                    if (Array.isArray(parsed.entries)) {
+                        const entries = getEntries();
+                        entries.forEach((entry, index) => applyEntrySnapshot(entry, parsed.entries[index]));
+                    }
+                } finally {
+                    isRestoring = false;
+                }
+            }
+
+            function updateEntryState(entry) {
+                const stressBox = entry.querySelector(".stressCheckbox");
+                let stressOn = stressBox.checked;
+                const debit = selectedValue(entry, "dr");
+                const debitInfo = debitMeta.get(debit);
+                const contraChosen = Boolean(debitInfo && debitInfo.contra);
+                if (contraChosen && !stressOn) {
+                    stressBox.checked = true;
+                    stressOn = true;
+                }
+                const requiresStabilizer = contraChosen || stressOn;
+
+                let credit = selectedValue(entry, "cr");
+                if (!hasCommittedDebit(entry) && credit !== "none") {
+                    setSelected(entry, "cr", "none");
+                    setSelected(entry, "qual", "none");
+                }
+
+                credit = selectedValue(entry, "cr");
+                if (requiresStabilizer && credit !== "none") {
+                    const cMeta = creditMeta.get(credit);
+                    if (cMeta && cMeta.kind !== "stabilizer") setSelected(entry, "cr", "none");
+                }
+
+                if (selectedValue(entry, "cr") === "none" && selectedValue(entry, "qual") !== "none") {
+                    setSelected(entry, "qual", "none");
+                }
+
+                const hasDebit = hasCommittedDebit(entry);
+                const hasCredit = hasCommittedCredit(entry);
+                const hasQuality = selectedValue(entry, "qual") !== "none";
+                const posted = hasDebit && hasCredit && hasQuality;
+                const pending = hasDebit && !posted;
+                const stage = determineStage(entry, hasDebit, hasCredit, hasQuality);
+
+                entry.classList.toggle("has-debit", hasDebit);
+                entry.classList.toggle("has-credit", hasCredit);
+                entry.classList.toggle("requires-stabilizer", requiresStabilizer);
+                entry.classList.toggle("is-pending", pending);
+                entry.classList.toggle("is-posted", posted);
+                applyStageClass(entry, stage);
+                setStepProgress(entry, stage, hasDebit, hasCredit, hasQuality);
+                updatePostedSummary(entry);
+
+                const status = entry.querySelector(".entryStatus");
+                status.classList.remove("pending", "posted");
+                if (posted) {
+                    status.textContent = "Posted";
+                    status.classList.add("posted");
+                } else if (pending) {
+                    status.textContent = "Pending";
+                    status.classList.add("pending");
+                } else {
+                    status.textContent = "Open";
+                }
+            }
+
+            function applyEntryVisibility() {
+                const entries = getEntries();
+                entries.forEach((entry, index) => entry.classList.toggle("is-hidden", index >= visibleEntryCount));
+                entryCountLabel.textContent = `Showing ${visibleEntryCount} / ${ENTRY_COUNT}`;
+            }
+
+            function getTrackedEntries(allEntries = getEntries()) {
+                return allEntries.filter((entry) => !entry.classList.contains("is-hidden"));
+            }
+
+            function updateEntryControls(trackedEntries) {
+                const lastTracked = trackedEntries[trackedEntries.length - 1];
+                const lastPosted = Boolean(lastTracked && lastTracked.classList.contains("is-posted"));
+                const canAdd = visibleEntryCount < ENTRY_COUNT && lastPosted;
+
+                addEntryBtn.disabled = !canAdd;
+                removeEntryBtn.disabled = visibleEntryCount <= 1;
+
+                if (!lastTracked) {
+                    flowHint.textContent = "";
+                    return;
+                }
+
+                if (visibleEntryCount === 1 && !lastPosted) {
+                    const hasDebit = hasCommittedDebit(lastTracked);
+                    const hasCredit = hasCommittedCredit(lastTracked);
+                    if (!hasDebit) {
+                        flowHint.textContent = "Entry 01: Step 1 of 3 -> choose effort.";
+                    } else if (!hasCredit) {
+                        flowHint.textContent = "Entry 01: Step 2 of 3 -> choose recovery.";
+                    } else {
+                        flowHint.textContent = "Entry 01: Step 3 of 3 -> rate quality.";
+                    }
+                } else if (visibleEntryCount < ENTRY_COUNT && lastPosted) {
+                    flowHint.textContent = `Entry ${lastTracked.dataset.entry} posted. Add next entry if needed.`;
+                } else if (visibleEntryCount >= ENTRY_COUNT) {
+                    flowHint.textContent = "Maximum entries reached.";
+                } else {
+                    const hasDebit = hasCommittedDebit(lastTracked);
+                    const hasCredit = hasCommittedCredit(lastTracked);
+                    if (!hasDebit) {
+                        flowHint.textContent = `Entry ${lastTracked.dataset.entry}: Step 1 -> choose effort.`;
+                    } else if (!hasCredit) {
+                        flowHint.textContent = `Entry ${lastTracked.dataset.entry}: Step 2 -> choose recovery.`;
+                    } else {
+                        flowHint.textContent = `Entry ${lastTracked.dataset.entry}: Step 3 -> rate quality.`;
+                    }
+                }
+            }
+
+            function updateHistory(entries) {
+                historyChips.innerHTML = "";
+                const started = entries.filter((entry) => hasCommittedDebit(entry));
+                if (!started.length) {
+                    const chip = document.createElement("span");
+                    chip.className = "chip empty";
+                    chip.textContent = "No receipts yet.";
+                    historyChips.appendChild(chip);
+                    return;
+                }
+
+                started.forEach((entry) => {
+                    const chip = document.createElement("span");
+                    chip.className = `chip ${entry.classList.contains("is-posted") ? "posted" : "pending"}`;
+                    const dr = labelFromChecked(entry, "dr");
+                    const cr = labelFromChecked(entry, "cr");
+                    const q = selectedValue(entry, "qual");
+                    chip.textContent = entry.classList.contains("is-posted")
+                        ? `Entry ${entry.dataset.entry}: ${dr} -> ${cr} (${q})`
+                        : `Entry ${entry.dataset.entry}: ${dr} -> ?`;
+                    historyChips.appendChild(chip);
+                });
+            }
+
+            function computeMetrics(entries) {
+                const startedEntries = entries.filter((entry) => hasCommittedDebit(entry));
+                const postedEntries = startedEntries.filter((entry) => entry.classList.contains("is-posted"));
+                const pendingEntries = startedEntries.filter((entry) => entry.classList.contains("is-pending"));
+
+                let effortLoad = 0;
+                let recoveredPoints = 0;
+                let stressfulCount = 0;
+                const qualityCounts = new Map([["full", 0], ["half", 0], ["barely", 0]]);
+                const effortTypeLoad = new Map([["Chore", 0], ["Fun", 0], ["Other", 0]]);
+
+                startedEntries.forEach((entry) => {
+                    const intensity = INTENSITY_WEIGHT[selectedValue(entry, "intensity")] || INTENSITY_WEIGHT.medium;
+                    const qualityKey = selectedValue(entry, "qual");
+                    const qualityWeight = QUALITY_WEIGHT[qualityKey] || 0;
+                    const hasRecovery = hasCommittedCredit(entry) && qualityKey !== "none";
+                    const effortTypeKey = selectedValue(entry, "dtype");
+
+                    effortLoad += intensity;
+                    recoveredPoints += hasRecovery ? (intensity * qualityWeight) : 0;
+                    if (entry.querySelector(".stressCheckbox").checked) stressfulCount += 1;
+                    if (hasRecovery && qualityCounts.has(qualityKey)) qualityCounts.set(qualityKey, qualityCounts.get(qualityKey) + 1);
+
+                    const typeLabel = effortTypeKey === "fun" ? "Fun" : effortTypeKey === "other" ? "Other" : "Chore";
+                    effortTypeLoad.set(typeLabel, effortTypeLoad.get(typeLabel) + intensity);
+                });
+
+                return {
+                    started: startedEntries.length,
+                    posted: postedEntries.length,
+                    pending: pendingEntries.length,
+                    completionRate: startedEntries.length ? (postedEntries.length / startedEntries.length) : 0,
+                    recoveryRate: effortLoad ? (recoveredPoints / effortLoad) : 0,
+                    effortLoad,
+                    recoveredPoints,
+                    stressfulCount,
+                    qualityCounts,
+                    effortTypeLoad
+                };
+            }
+
+            function renderBars(containerId, mapData) {
+                const root = document.getElementById(containerId);
+                root.innerHTML = "";
+                const rows = Array.from(mapData.entries()).sort((a, b) => b[1] - a[1]);
+                if (!rows.length || rows.every((item) => item[1] <= 0)) {
+                    const empty = document.createElement("div");
+                    empty.className = "barEmpty";
+                    empty.textContent = "No data yet.";
+                    root.appendChild(empty);
+                    return;
+                }
+
+                const max = Math.max(...rows.map((item) => item[1]), 1);
+                rows.forEach(([label, value]) => {
+                    const row = document.createElement("div");
+                    row.className = "barRow";
+                    const labelEl = document.createElement("div");
+                    labelEl.className = "barLabel";
+                    labelEl.textContent = label;
+                    const track = document.createElement("div");
+                    track.className = "barTrack";
+                    const fill = document.createElement("div");
+                    fill.className = "barFill";
+                    fill.style.width = `${Math.max(4, Math.round((value / max) * 100))}%`;
+                    track.appendChild(fill);
+                    const valueEl = document.createElement("div");
+                    valueEl.className = "barValue";
+                    valueEl.textContent = Number.isInteger(value) ? String(value) : value.toFixed(2);
+                    row.appendChild(labelEl);
+                    row.appendChild(track);
+                    row.appendChild(valueEl);
+                    root.appendChild(row);
+                });
+            }
+
+            function updateSummaryAndGraphs(entries) {
+                const metrics = computeMetrics(entries);
+                document.getElementById("summaryStarted").textContent = String(metrics.started);
+                document.getElementById("summaryPosted").textContent = String(metrics.posted);
+                document.getElementById("summaryPending").textContent = String(metrics.pending);
+                document.getElementById("summaryCompletion").textContent = `${Math.round(metrics.completionRate * 100)}%`;
+                document.getElementById("summaryRecovery").textContent = `${Math.round(metrics.recoveryRate * 100)}%`;
+                document.getElementById("summaryStressful").textContent = String(metrics.stressfulCount);
+
+                const loadMap = new Map([
+                    ["Effort Load", Number(metrics.effortLoad.toFixed(2))],
+                    ["Recovered", Number(metrics.recoveredPoints.toFixed(2))]
+                ]);
+                const qualityMap = new Map([
+                    ["Full", metrics.qualityCounts.get("full")],
+                    ["Half", metrics.qualityCounts.get("half")],
+                    ["Barely", metrics.qualityCounts.get("barely")]
+                ]);
+                renderBars("loadBars", loadMap);
+                renderBars("qualityBars", qualityMap);
+                renderBars("effortTypeBars", metrics.effortTypeLoad);
+            }
+
+            function updateGlobalState() {
+                const allEntries = getEntries();
+                allEntries.forEach((entry) => updateEntryState(entry));
+
+                const firstNotPostedIndex = allEntries.findIndex((entry) => !entry.classList.contains("is-posted"));
+                const maxVisibleAllowed = firstNotPostedIndex === -1 ? ENTRY_COUNT : firstNotPostedIndex + 1;
+                if (visibleEntryCount > maxVisibleAllowed) {
+                    visibleEntryCount = maxVisibleAllowed;
+                    applyEntryVisibility();
+                }
+
+                const trackedEntries = getTrackedEntries(allEntries);
+                const startedEntries = trackedEntries.filter((entry) => hasCommittedDebit(entry));
+                const pendingEntries = startedEntries.filter((entry) => entry.classList.contains("is-pending"));
+                const postedEntries = startedEntries.filter((entry) => entry.classList.contains("is-posted"));
+
+                body.classList.toggle("ledger-unreconciled", pendingEntries.length > 0);
+                body.classList.toggle("ledger-balanced", pendingEntries.length === 0 && postedEntries.length > 0);
+                body.classList.toggle("ledger-open", startedEntries.length === 0);
+
+                if (body.classList.contains("ledger-open")) {
+                    statusNote.textContent = "Step 1: pick an effort.";
+                } else if (body.classList.contains("ledger-unreconciled")) {
+                    const firstPending = pendingEntries[0];
+                    if (firstPending && !hasCommittedCredit(firstPending)) {
+                        statusNote.textContent = "Step 2: pick recovery.";
+                    } else {
+                        statusNote.textContent = "Step 3: rate recovery quality.";
+                    }
+                } else {
+                    statusNote.textContent = visibleEntryCount < ENTRY_COUNT ? "Entry posted. Add another or Close Books." : "Closed.";
+                }
+
+                const balanced = body.classList.contains("ledger-balanced");
+                closeBooks.disabled = !balanced;
+                if (!balanced) {
+                    closeBooks.checked = false;
+                    body.classList.remove("sealed");
+                } else {
+                    body.classList.toggle("sealed", closeBooks.checked);
+                }
+
+                updateHistory(trackedEntries);
+                updateSummaryAndGraphs(trackedEntries);
+                updateEntryControls(trackedEntries);
+                saveState();
+            }
+
+            function handleManualEntry(entry, group) {
+                const input = entry.querySelector(group === "dr" ? ".manualDebitInput" : ".manualCreditInput");
+                const value = input.value.trim();
+                if (!value) return;
+
+                if (group === "dr") {
+                    const current = selectedValue(entry, "dr");
+                    if (current !== "none" && current !== "manual-debit") return;
+                    entry.dataset.manualDebit = value;
+                    setManualLabel(entry, "dr", value);
+                    setSelected(entry, "dr", "manual-debit");
+                } else {
+                    if (!hasCommittedDebit(entry)) return;
+                    entry.dataset.manualCredit = value;
+                    setManualLabel(entry, "cr", value);
+                    setSelected(entry, "cr", "manual-credit");
+                }
+                updateGlobalState();
+            }
+
+            function clearEntry(entry, suppressUpdate = false) {
+                setSelected(entry, "dr", "none");
+                setSelected(entry, "cr", "none");
+                setSelected(entry, "qual", "none");
+                setSelected(entry, "dtype", "chore");
+                setSelected(entry, "intensity", "medium");
+                entry.querySelector(".stressCheckbox").checked = false;
+                entry.dataset.started = "0";
+                entry.dataset.manualDebit = "";
+                entry.dataset.manualCredit = "";
+                entry.dataset.effortOther = "";
+                setManualLabel(entry, "dr", "");
+                setManualLabel(entry, "cr", "");
+                entry.querySelector(".manualDebitInput").value = "";
+                entry.querySelector(".manualCreditInput").value = "";
+                entry.querySelector(".effortTypeOtherInput").value = "";
+                entry.querySelector(".narration").value = "";
+                if (!suppressUpdate) updateGlobalState();
+            }
+
+            function setupEntry(entry) {
+                entry.querySelector(".startEntryBtn").addEventListener("click", () => {
+                    entry.dataset.started = "1";
+                    updateGlobalState();
+                });
+
+                entry.querySelectorAll('input[type="radio"]').forEach((radio) => {
+                    radio.addEventListener("change", () => {
+                        const keepOpenForTyping = radio.value === "manual-debit" || radio.value === "manual-credit";
+                        if (!keepOpenForTyping) closeDrawerForNode(radio);
+                        updateGlobalState();
+                    });
+                });
+                entry.querySelector(".stressCheckbox").addEventListener("change", () => {
+                    closeDrawerForNode(entry.querySelector(".stressCheckbox"));
+                    updateGlobalState();
+                });
+                entry.querySelector(".addManualDebit").addEventListener("click", () => {
+                    handleManualEntry(entry, "dr");
+                    closeDrawerForNode(entry.querySelector(".addManualDebit"));
+                });
+                entry.querySelector(".addManualCredit").addEventListener("click", () => {
+                    handleManualEntry(entry, "cr");
+                    closeDrawerForNode(entry.querySelector(".addManualCredit"));
+                });
+
+                entry.querySelector(".manualDebitInput").addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleManualEntry(entry, "dr");
+                        closeDrawerForNode(entry.querySelector(".manualDebitInput"));
+                    }
+                });
+                entry.querySelector(".manualCreditInput").addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleManualEntry(entry, "cr");
+                        closeDrawerForNode(entry.querySelector(".manualCreditInput"));
+                    }
+                });
+
+                entry.querySelector(".manualDebitInput").addEventListener("input", () => {
+                    if (selectedValue(entry, "dr") === "manual-debit") {
+                        entry.dataset.manualDebit = entry.querySelector(".manualDebitInput").value.trim();
+                        setManualLabel(entry, "dr", entry.dataset.manualDebit);
+                        updateGlobalState();
+                        return;
+                    }
+                    saveState();
+                });
+                entry.querySelector(".manualCreditInput").addEventListener("input", () => {
+                    if (selectedValue(entry, "cr") === "manual-credit") {
+                        entry.dataset.manualCredit = entry.querySelector(".manualCreditInput").value.trim();
+                        setManualLabel(entry, "cr", entry.dataset.manualCredit);
+                        updateGlobalState();
+                        return;
+                    }
+                    saveState();
+                });
+
+                entry.querySelector(".effortTypeOtherInput").addEventListener("input", () => {
+                    entry.dataset.effortOther = entry.querySelector(".effortTypeOtherInput").value.trim();
+                    saveState();
+                });
+                entry.querySelector(".narration").addEventListener("input", saveState);
+                entry.querySelector(".editQualityBtn").addEventListener("click", () => {
+                    setSelected(entry, "qual", "none");
+                    updateGlobalState();
+                });
+                entry.querySelector(".addNextBtn").addEventListener("click", () => {
+                    if (!addEntryBtn.disabled) addEntryBtn.click();
+                });
+                entry.querySelector(".clearEntry").addEventListener("click", () => {
+                    clearEntry(entry);
+                    closeAllOptionDrawers(entry);
+                });
+
+                closeAllOptionDrawers(entry);
+            }
+
+            function setupEntryCountControls() {
+                addEntryBtn.addEventListener("click", () => {
+                    visibleEntryCount = Math.min(ENTRY_COUNT, visibleEntryCount + 1);
+                    applyEntryVisibility();
+                    updateGlobalState();
+                });
+                removeEntryBtn.addEventListener("click", () => {
+                    visibleEntryCount = Math.max(1, visibleEntryCount - 1);
+                    applyEntryVisibility();
+                    updateGlobalState();
+                });
+            }
+
+            function setupSealToggle() {
+                closeBooks.addEventListener("change", () => {
+                    body.classList.toggle("sealed", closeBooks.checked);
+                    saveState();
+                });
+            }
+
+            function resetAll() {
+                visibleEntryCount = 1;
+                closeBooks.checked = false;
+                body.classList.remove("sealed");
+                getEntries().forEach((entry) => clearEntry(entry, true));
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(LEGACY_STORAGE_KEY);
+                } catch (_) {
+                    // Ignore storage failures.
+                }
+                applyEntryVisibility();
+                updateGlobalState();
+            }
+
+            function setupResetControl() {
+                resetDayBtn.addEventListener("click", () => {
+                    if (!window.confirm("Reset all entries for this day?")) return;
+                    resetAll();
+                });
+            }
+
+            function boot() {
+                renderEntries();
+                getEntries().forEach((entry) => {
+                    setupEntry(entry);
+                    setManualLabel(entry, "dr", "");
+                    setManualLabel(entry, "cr", "");
+                });
+                analyticsDrawer.open = false;
+                loadState();
+                setupEntryCountControls();
+                setupSealToggle();
+                setupResetControl();
+                applyEntryVisibility();
+                updateGlobalState();
+            }
+
+            boot();
+        })();
+    </script>
+</body>
+</html>

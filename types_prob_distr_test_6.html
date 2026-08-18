@@ -12,6 +12,92 @@
     <script src="https://unpkg.com/lucide@latest" defer></script>
 
     <style>:root { color-scheme: dark; --theme-body-bg: #0f172a; --theme-body-text: #e2e8f0; --theme-panel: rgba(30, 41, 59, 0.92); --theme-panel-deep: rgba(15, 23, 42, 0.96); --theme-panel-muted: rgba(51, 65, 85, 0.88); --theme-border: #475569; --theme-border-strong: #64748b; --theme-text: #e2e8f0; --theme-text-soft: #cbd5e1; --theme-text-muted: #94a3b8; --theme-text-subtle: #64748b; --theme-page-core: #1e293b; --theme-page-edge: #0f172a; --theme-glow-left: rgba(37, 99, 235, 0.28); --theme-glow-right: rgba(139, 92, 246, 0.24); --theme-ambient-particle: rgba(255, 255, 255, 0.05); --theme-scroll-track: #0f172a; --theme-scroll-thumb: #64748b; --theme-scroll-thumb-hover: #94a3b8; --theme-shadow: 0 20px 45px rgba(15, 23, 42, 0.28); --theme-shadow-hover: 0 24px 52px rgba(15, 23, 42, 0.38); --theme-input-bg: rgba(15, 23, 42, 0.88); --theme-accent-blue: #93c5fd; --theme-accent-purple: #c4b5fd; --theme-accent-amber: #fcd34d; --theme-accent-green: #86efac; --theme-accent-teal: #5eead4; --theme-accent-indigo: #818cf8; --theme-accent-rose: #fb7185; --theme-accent-success: #86efac; --theme-accent-danger: #fca5a5; --theme-kicker-accent: #67e8f9; --theme-display-start: #93c5fd; --theme-display-end: #c4b5fd; --theme-display-shadow: rgba(96, 165, 250, 0.24); --theme-archive-title: #fde047; } body[data-theme="light"] { color-scheme: light; --theme-body-bg: #eef4fb; --theme-body-text: #172554; --theme-panel: rgba(255, 255, 255, 0.92); --theme-panel-deep: rgba(248, 250, 252, 0.96); --theme-panel-muted: rgba(226, 232, 240, 0.94); --theme-border: #bfd0e2; --theme-border-strong: #8aa5c2; --theme-text: #172554; --theme-text-soft: #173a5e; --theme-text-muted: #36526f; --theme-text-subtle: #56718d; --theme-page-core: #dbe8f6; --theme-page-edge: #eef4fb; --theme-glow-left: rgba(59, 130, 246, 0.16); --theme-glow-right: rgba(20, 184, 166, 0.12); --theme-ambient-particle: rgba(37, 99, 235, 0.08); --theme-scroll-track: #e2e8f0; --theme-scroll-thumb: #94a3b8; --theme-scroll-thumb-hover: #64748b; --theme-shadow: 0 16px 34px rgba(148, 163, 184, 0.2); --theme-shadow-hover: 0 18px 38px rgba(71, 85, 105, 0.24); --theme-input-bg: #ffffff; --theme-accent-blue: #1d4ed8; --theme-accent-purple: #7c3aed; --theme-accent-amber: #b45309; --theme-accent-green: #15803d; --theme-accent-teal: #0f766e; --theme-accent-indigo: #4338ca; --theme-accent-rose: #be123c; --theme-accent-success: #166534; --theme-accent-danger: #b91c1c; --theme-kicker-accent: #0f766e; --theme-display-start: #1e3a8a; --theme-display-end: #6d28d9; --theme-display-shadow: rgba(30, 64, 175, 0.12); --theme-archive-title: #92400e; } body[data-theme="sepia"] { color-scheme: light; --theme-body-bg: #f3eadb; --theme-body-text: #4a3728; --theme-panel: rgba(252, 245, 233, 0.94); --theme-panel-deep: rgba(246, 237, 220, 0.97); --theme-panel-muted: rgba(229, 214, 187, 0.92); --theme-border: #c9b28e; --theme-border-strong: #a88456; --theme-text: #4a3728; --theme-text-soft: #5c4230; --theme-text-muted: #71553d; --theme-text-subtle: #907255; --theme-page-core: #e7d5b8; --theme-page-edge: #f3eadb; --theme-glow-left: rgba(180, 119, 60, 0.16); --theme-glow-right: rgba(120, 84, 54, 0.12); --theme-ambient-particle: rgba(154, 52, 18, 0.08); --theme-scroll-track: #eadcc4; --theme-scroll-thumb: #b79a73; --theme-scroll-thumb-hover: #8e6f45; --theme-shadow: 0 16px 34px rgba(120, 84, 54, 0.16); --theme-shadow-hover: 0 18px 38px rgba(120, 84, 54, 0.24); --theme-input-bg: #fdf6ea; --theme-accent-blue: #6b4b2b; --theme-accent-purple: #9a3412; --theme-accent-amber: #92400e; --theme-accent-green: #166534; --theme-accent-teal: #3f6f63; --theme-accent-indigo: #6d5b88; --theme-accent-rose: #a14f4a; --theme-accent-success: #2f6f3e; --theme-accent-danger: #9f2a12; --theme-kicker-accent: #8a5a2b; --theme-display-start: #6b4b2b; --theme-display-end: #9a3412; --theme-display-shadow: rgba(154, 52, 18, 0.12); --theme-archive-title: #7c3f10; } html { height: 100%; -webkit-text-size-adjust: 100%; } body { font-family: "JetBrains Mono", monospace; overflow-x: hidden; background-color: var(--theme-body-bg); color: var(--theme-body-text); transition: background-color 0.25s ease, color 0.25s ease; overscroll-behavior-x: none; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; } body.battle-lock-scroll { overflow: hidden; } body[data-theme] { background-color: var(--theme-body-bg) !important; color: var(--theme-body-text) !important; } body[data-theme="light"] [class*="bg-slate-"], body[data-theme="sepia"] [class*="bg-slate-"] { background-color: color-mix(in srgb, var(--theme-panel) 96%, transparent) !important; } body[data-theme="light"] [class*="border-slate-"], body[data-theme="sepia"] [class*="border-slate-"] { border-color: var(--theme-border) !important; } body[data-theme="light"] .text-white, body[data-theme="sepia"] .text-white { color: var(--theme-text) !important; } body[data-theme="light"] [class*="text-slate-1"], body[data-theme="light"] [class*="text-slate-2"], body[data-theme="light"] [class*="text-slate-3"], body[data-theme="sepia"] [class*="text-slate-1"], body[data-theme="sepia"] [class*="text-slate-2"], body[data-theme="sepia"] [class*="text-slate-3"] { color: var(--theme-text-soft) !important; } body[data-theme="light"] [class*="text-slate-4"], body[data-theme="light"] [class*="text-slate-5"], body[data-theme="sepia"] [class*="text-slate-4"], body[data-theme="sepia"] [class*="text-slate-5"] { color: var(--theme-text-muted) !important; } body[data-theme="light"] .arcade-board, body[data-theme="sepia"] .arcade-board { background: linear-gradient(180deg, color-mix(in srgb, var(--theme-panel-deep) 98%, transparent) 0%, color-mix(in srgb, var(--theme-panel) 98%, transparent) 100%); } body[data-theme="light"] .arcade-score-row, body[data-theme="sepia"] .arcade-score-row { background: color-mix(in srgb, var(--theme-panel-muted) 76%, transparent); } .battle-score-copy { color: color-mix(in srgb, var(--theme-display-start) 64%, var(--theme-text)) !important; } #timer-display:not(.text-red-500) { color: color-mix(in srgb, var(--theme-archive-title) 70%, var(--theme-text)); } .hud-progress-block { display: grid; gap: 0.3rem; margin-top: 0.45rem; min-width: min(15rem, 40vw); } .hud-progress-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; } .hud-progress-label { color: var(--theme-text-subtle); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; } .hud-progress-value { color: color-mix(in srgb, var(--theme-display-start) 62%, var(--theme-text)); font-size: 0.72rem; font-weight: 700; } .hud-progress-track { width: 100%; height: 0.48rem; border-radius: 999px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--theme-display-start) 20%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 94%, transparent); box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.18); } .hud-progress-fill { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, var(--theme-display-start) 0%, var(--theme-display-end) 100%); box-shadow: 0 0 18px color-mix(in srgb, var(--theme-display-start) 26%, transparent); transition: width 0.3s ease; } .battle-scenario-copy { color: color-mix(in srgb, var(--theme-display-start) 42%, var(--theme-text-soft)) !important; } .battle-warning-text { color: var(--theme-accent-danger) !important; } .battle-hint-panel { background: color-mix(in srgb, var(--theme-accent-amber) 12%, var(--theme-panel)) !important; border: 1px solid color-mix(in srgb, var(--theme-accent-amber) 40%, var(--theme-border)) !important; color: color-mix(in srgb, var(--theme-accent-amber) 64%, var(--theme-text)) !important; } .battle-rulebook-panel { background: color-mix(in srgb, var(--theme-accent-amber) 8%, var(--theme-panel)) !important; border-color: color-mix(in srgb, var(--theme-accent-amber) 32%, var(--theme-border)) !important; color: color-mix(in srgb, var(--theme-accent-amber) 68%, var(--theme-text)) !important; } .battle-tool { display: inline-flex; align-items: center; justify-content: center; gap: 0.32rem; border-radius: 0.55rem; border: 1px solid var(--theme-border); padding: 0.3rem 0.6rem; font-size: 0.75rem; font-weight: 700; transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease; } .battle-tool:hover { transform: translateY(-1px); } .battle-tool-warning { background: color-mix(in srgb, var(--theme-accent-amber) 12%, var(--theme-panel)); border-color: color-mix(in srgb, var(--theme-accent-amber) 36%, var(--theme-border)); color: color-mix(in srgb, var(--theme-accent-amber) 72%, var(--theme-text)); } .battle-tool-warning:hover { background: color-mix(in srgb, var(--theme-accent-amber) 18%, var(--theme-panel)); } .battle-tool-danger { background: color-mix(in srgb, var(--theme-accent-danger) 12%, var(--theme-panel)); border-color: color-mix(in srgb, var(--theme-accent-danger) 34%, var(--theme-border)); color: color-mix(in srgb, var(--theme-accent-danger) 76%, var(--theme-text)); } .battle-tool-danger:hover { background: color-mix(in srgb, var(--theme-accent-danger) 18%, var(--theme-panel)); } .battle-tool-info { background: color-mix(in srgb, var(--theme-display-start) 12%, var(--theme-panel)); border-color: color-mix(in srgb, var(--theme-display-start) 34%, var(--theme-border)); color: color-mix(in srgb, var(--theme-display-start) 76%, var(--theme-text)); } .battle-tool-info:hover { background: color-mix(in srgb, var(--theme-display-start) 18%, var(--theme-panel)); } .battle-tool-preview { background: color-mix(in srgb, var(--theme-accent-purple) 14%, var(--theme-panel)); border-color: color-mix(in srgb, var(--theme-accent-purple) 38%, var(--theme-border)); color: color-mix(in srgb, var(--theme-accent-purple) 74%, var(--theme-text)); } .battle-tool-preview:hover { background: color-mix(in srgb, var(--theme-accent-purple) 22%, var(--theme-panel)); } .battle-option-shell { --shape-start: var(--theme-display-start); --shape-end: var(--theme-display-end); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: stretch; } .battle-option-shell[data-group-id="trial_counts"] { --shape-start: var(--theme-display-start); --shape-end: var(--theme-accent-indigo); } .battle-option-shell[data-group-id="rate_counts"] { --shape-start: var(--theme-accent-amber); --shape-end: var(--theme-accent-rose); } .battle-option-shell[data-group-id="waiting_times"] { --shape-start: var(--theme-accent-green); --shape-end: var(--theme-accent-teal); } .battle-option-shell[data-group-id="continuous_shapes"] { --shape-start: var(--theme-accent-purple); --shape-end: var(--theme-accent-indigo); } .battle-option-shell[data-group-id="finite_sampling"] { --shape-start: var(--theme-kicker-accent); --shape-end: var(--theme-accent-blue); } .battle-option-button { background: color-mix(in srgb, var(--theme-panel-muted) 82%, transparent); border: 1px solid color-mix(in srgb, var(--shape-start) 24%, var(--theme-border)); color: var(--theme-text); box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08); width: 100%; min-height: 4.5rem; } .battle-preview-button { min-width: 3.6rem; padding: 0.55rem 0.45rem; border-radius: 1rem; border: 1px solid color-mix(in srgb, var(--shape-end) 30%, var(--theme-border)); background: linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 12%, var(--theme-panel-muted)) 0%, color-mix(in srgb, var(--shape-start) 9%, var(--theme-panel)) 100%); color: color-mix(in srgb, var(--shape-end) 54%, var(--theme-text)); display: grid; justify-items: center; align-content: center; gap: 0.22rem; transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease, opacity 0.18s ease; } .battle-preview-button:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--shape-end) 42%, var(--theme-border)); box-shadow: 0 10px 22px color-mix(in srgb, var(--shape-end) 12%, transparent); color: var(--theme-text); } .battle-preview-button.is-locked { opacity: 0.72; } .battle-option-button:hover { background: linear-gradient(150deg, color-mix(in srgb, var(--shape-start) 14%, transparent) 0%, transparent 54%), linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 12%, var(--theme-panel-muted)) 0%, color-mix(in srgb, var(--shape-start) 10%, var(--theme-panel)) 100%); border-color: color-mix(in srgb, var(--shape-start) 36%, var(--theme-border)); color: var(--theme-text); box-shadow: 0 12px 24px color-mix(in srgb, var(--shape-end) 12%, transparent); } .spell-tooltip-box { background: color-mix(in srgb, var(--theme-panel-deep) 94%, transparent) !important; border: 1px solid var(--theme-border) !important; } .spell-tooltip-box.is-highlighted { background: color-mix(in srgb, var(--theme-accent-purple) 12%, var(--theme-panel-deep)) !important; border-color: color-mix(in srgb, var(--theme-accent-purple) 42%, var(--theme-border)) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent-purple) 18%, transparent), 0 16px 28px color-mix(in srgb, var(--theme-accent-purple) 10%, transparent); } .spell-tooltip-emphasis { color: color-mix(in srgb, var(--theme-accent-amber) 56%, var(--theme-text)); } .spell-tooltip-copy { color: var(--theme-text-soft); } .spell-tooltip-compare { display: grid; gap: 0.55rem; margin-top: 0.45rem; } .spell-tooltip-row { border-radius: 0.85rem; border: 1px solid color-mix(in srgb, var(--theme-accent-purple) 20%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-muted) 62%, transparent); padding: 0.62rem 0.72rem; display: grid; gap: 0.2rem; } .spell-tooltip-row-label { color: var(--theme-text-subtle); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; } .spell-tooltip-row-value { color: var(--theme-text); font-size: 0.82rem; line-height: 1.45; } .spell-tooltip-cue { color: var(--theme-text-muted); font-size: 0.74rem; line-height: 1.45; border-top: 1px solid color-mix(in srgb, var(--theme-accent-purple) 18%, var(--theme-border)); padding-top: 0.55rem; margin-top: 0.1rem; } #theme-radial-bg { background: radial-gradient(circle at 50% 50%, var(--theme-page-core) 0%, var(--theme-page-edge) 100%); transition: background 0.25s ease; } #ambient-glow-left { background: var(--theme-glow-left); } #ambient-glow-right { background: var(--theme-glow-right); } .force-scroll::-webkit-scrollbar { width: 12px; height: 12px; } .force-scroll::-webkit-scrollbar-track { background: var(--theme-scroll-track); border-left: 1px solid rgba(100, 116, 139, 0.16); } .force-scroll::-webkit-scrollbar-thumb { background-color: var(--theme-scroll-thumb); border-radius: 999px; border: 3px solid var(--theme-scroll-track); } .force-scroll::-webkit-scrollbar-thumb:hover { background-color: var(--theme-scroll-thumb-hover); } .force-scroll { scrollbar-width: auto; scrollbar-color: var(--theme-scroll-thumb) var(--theme-scroll-track); } .interactive-surface { transition: box-shadow 0.32s ease, border-color 0.32s ease, background-color 0.32s ease; } .hover-surface { transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease, background-color 0.32s ease; } button:focus-visible, input:focus-visible { outline: none; border-color: color-mix(in srgb, var(--theme-display-start) 58%, var(--theme-border)) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-display-start) 22%, transparent) !important; } @media (hover: hover) and (pointer: fine) { .hover-surface:hover { transform: translateY(-1px); box-shadow: var(--theme-shadow-hover); border-color: var(--theme-border-strong) !important; } } @keyframes animate-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } } @keyframes fade-in-soft { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } } @keyframes pop-in { 0% { opacity: 0; transform: scale(0.96) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } } @keyframes pulse-alert { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } } @keyframes shake { 0%, 100% { transform: translateX(0); } 15%, 45%, 75% { transform: translateX(-5px); } 30%, 60%, 90% { transform: translateX(5px); } } @keyframes confetti-fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } } @keyframes float-up-fade { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-28px) scale(1.15); opacity: 0; } } .animate-float { animation: animate-float 11s ease-in-out infinite; } .fade-in { animation: fade-in-soft 0.45s ease forwards; } .modal-backdrop-open { animation: fade-in-soft 0.22s ease forwards; } .modal-panel-open { animation: pop-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .animate-shake { animation: shake 0.38s cubic-bezier(.36, .07, .19, .97) both; } .animate-pulse-red { animation: pulse-alert 0.9s ease-in-out infinite; } .floating-text { position: fixed; font-weight: 700; pointer-events: none; z-index: 90; animation: float-up-fade 0.9s ease-out forwards; } .confetti-piece { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 85; } .ambient-particles::before, .ambient-particles::after { content: ""; position: absolute; border-radius: 999px; background: var(--theme-ambient-particle); animation: animate-float 18s linear infinite; } .ambient-particles::before { width: 110px; height: 110px; top: 18%; left: 14%; } .ambient-particles::after { width: 64px; height: 64px; right: 16%; bottom: 18%; animation-duration: 24s; } .theme-dock { position: relative; z-index: 40; align-self: flex-end; width: min(13.5rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem); margin: 0 0 0.85rem; } body[data-screen="battle-screen"] .theme-dock { position: relative; top: auto; right: auto; width: min(13.5rem, calc(100vw - 2rem)); margin: 0 0 0.6rem auto; } .theme-dock-panel { display: grid; gap: 0.55rem; padding: 0.8rem 0.9rem; border-radius: 1.2rem; background: linear-gradient(180deg, color-mix(in srgb, rgba(255, 255, 255, 0.06) 100%, transparent) 0%, var(--theme-panel-deep) 100%); border: 1px solid color-mix(in srgb, var(--theme-display-start) 22%, var(--theme-border)); box-shadow: 0 18px 38px color-mix(in srgb, var(--theme-display-start) 8%, transparent), var(--theme-shadow); backdrop-filter: blur(14px); min-width: 0; width: 100%; overflow: hidden; isolation: isolate; } .theme-dock-label { color: var(--theme-text-subtle); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; } .theme-selector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; } .theme-button { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 999px; border: 1px solid var(--theme-border); background: var(--theme-panel-deep); color: var(--theme-text-soft); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; padding: 0.55rem 0.7rem; transition: transform 0.22s ease, border-color 0.22s ease, color 0.22s ease, background-color 0.22s ease; } .theme-button[aria-pressed="false"] { opacity: 0.78; } .theme-button:hover { transform: translateY(-1px); color: var(--theme-text); opacity: 1; } .theme-button.is-active { background: linear-gradient(145deg, color-mix(in srgb, rgba(255, 255, 255, 0.08) 100%, transparent) 0%, transparent 52%), linear-gradient(120deg, color-mix(in srgb, var(--theme-display-start) 28%, var(--theme-panel)) 0%, color-mix(in srgb, var(--theme-display-end) 24%, var(--theme-panel)) 100%); border-color: color-mix(in srgb, var(--theme-display-start) 64%, var(--theme-border)); color: var(--theme-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-display-start) 24%, transparent), 0 16px 30px color-mix(in srgb, var(--theme-display-start) 12%, transparent); transform: translateY(-1px); opacity: 1; font-weight: 800; } .theme-button.is-active::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: 0.24rem; height: 0.16rem; border-radius: 999px; background: linear-gradient(90deg, var(--theme-display-start) 0%, var(--theme-display-end) 100%); box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-display-start) 14%, transparent); } body[data-screen="battle-screen"] #battle-hud { padding-right: 0.75rem; } body[data-screen="battle-screen"] .theme-dock-panel { min-width: 11.35rem; padding: 0.6rem 0.7rem; border-radius: 1rem; } body[data-screen="battle-screen"] .theme-dock-label { font-size: 0.58rem; letter-spacing: 0.22em; } body[data-screen="battle-screen"] .theme-selector { gap: 0.32rem; } body[data-screen="battle-screen"] .theme-button { font-size: 0.67rem; padding: 0.46rem 0.56rem; } @media (max-width: 1280px) { body[data-screen="battle-screen"] #battle-hud { padding-right: 0.65rem; } body[data-screen="battle-screen"] .theme-dock-panel { min-width: 10.1rem; padding: 0.5rem 0.58rem; } body[data-screen="battle-screen"] .theme-button { font-size: 0.64rem; padding: 0.4rem 0.5rem; } } @media (max-width: 640px) { .hud-progress-block { min-width: 0; } } .start-hero { max-width: 78rem; margin: 0 auto 1.15rem; display: grid; gap: 0.65rem; text-align: left; } .start-eyebrow { color: var(--theme-kicker-accent); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.36em; text-transform: uppercase; } .start-title { font-size: clamp(2.5rem, 8vw, 4.8rem); font-weight: 700; letter-spacing: -0.06em; line-height: 0.96; color: var(--theme-display-start); background-image: linear-gradient(120deg, var(--theme-display-start) 0%, var(--theme-display-end) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 12px 24px var(--theme-display-shadow)); } .start-subtitle { color: var(--theme-text-soft); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; } .start-status-bar { display: flex; flex-wrap: wrap; gap: 0.55rem 1.2rem; align-items: center; padding-top: 0.8rem; border-top: 1px solid var(--theme-border); color: var(--theme-text-soft); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; } .start-status-bar span { position: relative; } .start-status-bar span + span::before { content: ""; position: absolute; left: -0.7rem; top: 50%; width: 0.22rem; height: 0.22rem; border-radius: 999px; background: var(--theme-text-subtle); transform: translateY(-50%); } .start-shell { background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), linear-gradient(180deg, var(--theme-panel-deep) 0%, var(--theme-panel) 100%); border: 1px solid var(--theme-border-strong); border-radius: 1.5rem; box-shadow: var(--theme-shadow); backdrop-filter: blur(14px); padding: 1.35rem 1.35rem 1rem; position: relative; overflow: hidden; } .start-shell::before, .archive-command-bar::before, .archive-nav::before, .archive-stage::before, .quiz-insight-card::before, .spellbook-shell::before, .archive-dossier::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, var(--theme-kicker-accent) 0%, color-mix(in srgb, var(--theme-display-end) 40%, transparent) 60%, transparent 100%); opacity: 0.8; pointer-events: none; } .start-briefing { display: grid; gap: 0.35rem; margin-bottom: 1.1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--theme-border); max-width: 48rem; } .start-briefing-kicker, .start-section-label, .start-console-kicker, .family-preview-kicker, .scan-card-kicker, .spellbook-tools-label, .spell-tooltip-kicker, .archive-eyebrow, .archive-search-kicker, .archive-stage-kicker, .archive-nav-kicker, .archive-block-kicker { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--theme-text-subtle); } .start-briefing-copy, .start-section-copy, .start-console-copy, .family-preview-copy, .archive-description, .archive-nav-copy, .archive-stage-summary, .archive-note-body { color: var(--theme-text-soft); line-height: 1.6; } .start-briefing-copy, .start-section-copy, .start-console-copy { font-size: 0.88rem; } .family-preview-copy { font-size: 0.84rem; line-height: 1.48; max-width: 28ch; } .start-setup-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.95fr); gap: 1.35rem; align-items: start; } .start-side-stack { display: flex; flex-direction: column; gap: 0.9rem; position: sticky; top: 0.75rem; } .family-preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; margin-top: 1rem; } .family-preview-card { --shape-start: var(--theme-display-start); --shape-end: var(--theme-display-end); position: relative; overflow: hidden; border: 1px solid color-mix(in srgb, var(--shape-start) 26%, var(--theme-border)); border-radius: 1rem; background: linear-gradient(150deg, color-mix(in srgb, var(--shape-start) 8%, transparent) 0%, transparent 52%), linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 5%, var(--theme-panel-muted)) 0%, var(--theme-panel) 100%); padding: 0.95rem 1rem; display: grid; gap: 0.35rem; text-align: left; transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease; } .family-preview-card[data-pack-id="balanced"] { --shape-start: var(--theme-kicker-accent); --shape-end: var(--theme-display-start); } .family-preview-card[data-pack-id="discrete"] { --shape-start: var(--theme-accent-indigo); --shape-end: var(--theme-accent-purple); } .family-preview-card[data-pack-id="continuous"] { --shape-start: var(--theme-accent-green); --shape-end: var(--theme-accent-teal); } .family-preview-card[data-pack-id="pressure"] { --shape-start: var(--theme-accent-amber); --shape-end: var(--theme-accent-rose); } .family-preview-card[aria-pressed="false"] { opacity: 0.84; } .family-preview-card:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--shape-start) 44%, var(--theme-border)); opacity: 1; } .family-preview-card.is-selected { border-width: 2px; border-color: color-mix(in srgb, var(--shape-start) 72%, var(--theme-border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--shape-start) 22%, transparent), 0 22px 44px color-mix(in srgb, var(--shape-end) 14%, transparent); background: linear-gradient(155deg, color-mix(in srgb, var(--shape-start) 18%, transparent) 0%, transparent 46%), linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 14%, var(--theme-panel-muted)) 0%, var(--theme-panel) 100%); transform: translateY(-2px); opacity: 1; } .family-preview-card.is-selected::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 0.42rem; background: linear-gradient(180deg, var(--shape-start) 0%, var(--shape-end) 100%); } .family-preview-card.is-selected::after { content: "Current pack"; position: absolute; top: 0.78rem; right: 0.78rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--shape-start) 48%, var(--theme-border)); background: color-mix(in srgb, var(--shape-start) 16%, var(--theme-panel)); color: color-mix(in srgb, var(--shape-start) 78%, var(--theme-text)); padding: 0.24rem 0.56rem; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; } .family-preview-card.is-selected .family-preview-kicker, .family-preview-card.is-selected .family-preview-meta { color: color-mix(in srgb, var(--shape-start) 58%, var(--theme-text-soft)); } .family-preview-card.is-selected .family-preview-title { color: color-mix(in srgb, var(--shape-start) 18%, var(--theme-text)); } .family-preview-card.is-selected .family-preview-copy { color: var(--theme-text); } .family-preview-meta { color: var(--theme-text-subtle); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; } .family-preview-title { color: var(--theme-text); font-size: 0.98rem; font-weight: 700; line-height: 1.35; } .start-console { display: grid; gap: 1rem; padding: 1rem; background: linear-gradient(180deg, var(--theme-panel-muted) 0%, var(--theme-panel) 100%); border: 1px solid var(--theme-border); border-radius: 1.25rem; } .start-console-head { display: grid; gap: 0.35rem; } .start-console-summary { display: grid; gap: 0.35rem; border: 1px solid var(--theme-border); border-radius: 1rem; padding: 0.95rem 1rem; background: rgba(37, 99, 235, 0.08); } .start-console-summary-title { color: var(--theme-text); font-size: 1rem; font-weight: 700; } .start-console-summary-meta { color: var(--theme-text-soft); font-size: 0.78rem; line-height: 1.6; } .start-console-summary-badges { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 0.2rem; } .start-console-summary-chip { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--theme-display-start) 24%, var(--theme-border)); background: color-mix(in srgb, var(--theme-display-start) 10%, var(--theme-panel)); color: color-mix(in srgb, var(--theme-display-start) 60%, var(--theme-text)); padding: 0.34rem 0.65rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.2; } .start-launch-panel { border-top: 1px solid var(--theme-border); padding-top: 1rem; text-align: left; } .start-time-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; } .start-time-button { --shape-start: var(--theme-display-start); --shape-end: var(--theme-display-end); position: relative; overflow: hidden; border-radius: 1rem; border: 1px solid color-mix(in srgb, var(--shape-start) 28%, var(--theme-border)); background: linear-gradient(150deg, color-mix(in srgb, var(--shape-start) 12%, transparent) 0%, transparent 56%), linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 10%, var(--theme-panel)) 0%, color-mix(in srgb, var(--shape-start) 7%, var(--theme-panel-muted)) 100%); padding: 0.95rem 0.8rem 0.9rem; text-align: left; font-weight: 700; color: var(--theme-text); transition: transform 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05); } .start-time-button::after { content: ""; position: absolute; inset: auto auto 0.55rem 0.8rem; width: 1.6rem; height: 2px; background: currentColor; opacity: 0.35; } .start-time-button:hover { transform: translateY(-1px); box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 16%, transparent), var(--theme-shadow); } .start-time-button.is-novice { --shape-start: var(--theme-accent-green); --shape-end: var(--theme-accent-teal); } .start-time-button.is-researcher { --shape-start: var(--theme-display-start); --shape-end: var(--theme-accent-indigo); } .start-time-button.is-expert { --shape-start: var(--theme-accent-purple); --shape-end: var(--theme-accent-rose); } .start-time-button-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; } .start-time-button-value { margin-top: 0.35rem; font-size: 0.8rem; opacity: 0.92; } .start-utility-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; } .start-utility-button { display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 999px; border: 1px solid var(--theme-border); background: var(--theme-panel); color: var(--theme-text-soft); padding: 0.75rem 1rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; transition: transform 0.22s ease, border-color 0.22s ease, color 0.22s ease, background-color 0.22s ease; } .start-utility-icon { width: 1rem; height: 1rem; flex-shrink: 0; stroke: currentColor; stroke-width: 1.9; fill: none; stroke-linecap: round; stroke-linejoin: round; } .start-utility-button:hover { transform: translateY(-1px); border-color: var(--theme-border-strong); color: var(--theme-text); } /* Staged start flow */ .start-hero { max-width: 42rem; margin: 0 auto 1.8rem; gap: 0.9rem; text-align: center; } .start-eyebrow { justify-self: center; } .start-subtitle { font-size: 0.8rem; letter-spacing: 0.3em; } .start-intro { color: var(--theme-text); font-size: clamp(1rem, 2.4vw, 1.15rem); line-height: 1.7; max-width: 34rem; margin: 0 auto; } .start-support-line { color: var(--theme-text-muted); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; } .start-flow-shell { display: grid; gap: 1.4rem; max-width: 56rem; padding: 1.55rem; } .start-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; counter-reset: start-step; padding-top: 0.35rem; } .start-progress-item { position: relative; display: flex; align-items: center; justify-content: center; gap: 0.48rem; min-height: 3.15rem; border-radius: 999px; border: 1px solid var(--theme-border); background: color-mix(in srgb, var(--theme-panel-muted) 62%, transparent); color: var(--theme-text-muted); padding: 0.72rem 0.9rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-align: center; text-transform: uppercase; transition: transform 0.22s ease, border-color 0.22s ease, color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease; } .start-progress-item::before { counter-increment: start-step; content: counter(start-step); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 1.35rem; height: 1.35rem; border-radius: 999px; border: 1px solid color-mix(in srgb, currentColor 42%, transparent); color: currentColor; font-size: 0.68rem; letter-spacing: 0; line-height: 1; } .start-progress-item.is-complete { border-color: color-mix(in srgb, var(--theme-accent-green) 50%, var(--theme-border)); color: color-mix(in srgb, var(--theme-accent-green) 78%, var(--theme-text)); background: color-mix(in srgb, var(--theme-accent-green) 14%, var(--theme-panel)); } .start-progress-item.is-current { z-index: 1; transform: translateY(-0.08rem); border-color: color-mix(in srgb, var(--theme-display-start) 88%, #ffffff); color: #ffffff; background: linear-gradient(120deg, color-mix(in srgb, var(--theme-display-start) 88%, #111827) 0%, color-mix(in srgb, var(--theme-display-end) 82%, #111827) 100%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-display-start) 24%, transparent), 0 14px 28px color-mix(in srgb, var(--theme-display-start) 22%, transparent); } .start-progress-item.is-current::before { background: rgba(255, 255, 255, 0.92); border-color: rgba(255, 255, 255, 0.92); color: color-mix(in srgb, var(--theme-display-start) 82%, #111827); } .start-progress-item.is-current::after { content: "Current"; position: absolute; top: -0.62rem; right: 1rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--theme-display-start) 70%, #ffffff); background: var(--theme-panel-deep); color: color-mix(in srgb, var(--theme-display-start) 82%, var(--theme-text)); padding: 0.18rem 0.48rem; font-size: 0.52rem; font-weight: 800; letter-spacing: 0.12em; line-height: 1; box-shadow: 0 6px 12px color-mix(in srgb, var(--theme-display-start) 14%, transparent); } .start-step { display: grid; gap: 1.2rem; } .start-step-head { display: grid; gap: 0.4rem; } .start-step-kicker { color: var(--theme-text-subtle); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; } .start-step-title { color: var(--theme-text); font-size: clamp(1.45rem, 3vw, 2rem); font-weight: 700; line-height: 1.08; } .start-step-copy { color: var(--theme-text-soft); font-size: 0.94rem; line-height: 1.65; max-width: 38rem; } .start-welcome-actions { display: grid; gap: 0.95rem; width: min(100%, 24rem); margin: 0 auto; padding: 0.35rem 0 0.15rem; } .start-welcome-actions .start-more-row, .start-welcome-actions .start-more-shell { width: 100%; } .start-welcome-actions .start-more-row { margin: 0; } .start-primary-button, .start-back-button, .start-secondary-link { appearance: none; border: 0; cursor: pointer; font: inherit; } .start-primary-button { display: inline-flex; align-items: center; justify-content: center; border-radius: 1rem; padding: 1rem 1.3rem; background: linear-gradient(120deg, var(--theme-display-start) 0%, var(--theme-display-end) 100%); color: #ffffff; font-size: 1rem; font-weight: 700; letter-spacing: 0.04em; box-shadow: 0 18px 34px color-mix(in srgb, var(--theme-display-start) 16%, transparent); transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease; } .start-primary-button:hover { transform: translateY(-1px); filter: brightness(1.04); box-shadow: 0 20px 40px color-mix(in srgb, var(--theme-display-start) 22%, transparent); } .start-back-button { display: inline-flex; align-items: center; justify-content: center; border-radius: 1rem; border: 1px solid var(--theme-border); background: color-mix(in srgb, var(--theme-panel-muted) 70%, transparent); color: var(--theme-text-soft); padding: 0.95rem 1.15rem; font-size: 0.92rem; font-weight: 700; transition: border-color 0.22s ease, color 0.22s ease, background-color 0.22s ease; } .start-back-button:hover { border-color: var(--theme-border-strong); color: var(--theme-text); background: color-mix(in srgb, var(--theme-panel) 88%, transparent); } .start-secondary-link { display: inline-flex; align-items: center; justify-content: center; color: var(--theme-text-soft); background: transparent; padding: 0.15rem; font-size: 0.9rem; font-weight: 700; text-decoration: underline; text-underline-offset: 0.22rem; transition: color 0.22s ease; } .start-secondary-link:hover { color: var(--theme-text); } .start-howto-details, .start-more-shell { display: grid; justify-items: center; } .start-howto-details summary, .start-more-shell summary { list-style: none; } .start-howto-details summary::-webkit-details-marker, .start-more-shell summary::-webkit-details-marker { display: none; } .start-howto-panel, .start-more-panel { width: 100%; margin-top: 0.75rem; border: 1px solid var(--theme-border); border-radius: 1rem; background: linear-gradient(180deg, color-mix(in srgb, var(--theme-panel-muted) 72%, transparent) 0%, var(--theme-panel) 100%); padding: 1rem 1.05rem; } .start-howto-copy { color: var(--theme-text-soft); font-size: 0.88rem; line-height: 1.65; } .start-howto-list { display: grid; gap: 0.6rem; margin-top: 0.9rem; } .start-howto-item { border-radius: 0.9rem; border: 1px solid color-mix(in srgb, var(--theme-display-start) 16%, var(--theme-border)); background: color-mix(in srgb, var(--theme-display-start) 8%, var(--theme-panel)); color: var(--theme-text-soft); padding: 0.75rem 0.85rem; font-size: 0.82rem; line-height: 1.55; } .start-step-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.85rem; margin-top: 0.15rem; } .family-preview-grid { margin-top: 0; gap: 1rem; } .family-preview-card { min-height: 100%; padding: 1.1rem 1.1rem 1rem; gap: 0.45rem; } .family-preview-card, .start-time-button { transition: transform 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease, filter 0.22s ease, color 0.22s ease; } .family-preview-card[aria-pressed="false"], .start-time-button[aria-pressed="false"] { opacity: 0.68; filter: saturate(0.78); } .family-preview-card[aria-pressed="false"] .family-preview-title, .start-time-button[aria-pressed="false"] .start-time-button-value { color: var(--theme-text-soft); } .family-preview-card[aria-pressed="false"] .family-preview-copy, .start-time-button[aria-pressed="false"] .start-time-button-copy { color: var(--theme-text-muted); } .family-preview-card:hover, .start-time-button:hover { opacity: 0.94; filter: saturate(0.98); } .family-preview-card:focus-visible, .start-time-button:focus-visible { outline: none; opacity: 1; filter: none; border-color: color-mix(in srgb, var(--theme-accent-amber) 74%, var(--theme-border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-accent-amber) 20%, transparent), 0 0 0 1px color-mix(in srgb, var(--theme-accent-amber) 86%, var(--theme-border)), var(--theme-shadow); } .family-preview-card.is-selected::after { content: "✓ Selected"; top: 0.72rem; right: 0.72rem; padding: 0.28rem 0.62rem; font-size: 0.58rem; letter-spacing: 0.14em; background: linear-gradient(120deg, color-mix(in srgb, var(--shape-start) 86%, #ffffff) 0%, color-mix(in srgb, var(--shape-end) 82%, #ffffff) 100%); color: var(--theme-panel-deep); border-color: color-mix(in srgb, var(--shape-start) 92%, #ffffff); box-shadow: 0 8px 18px color-mix(in srgb, var(--shape-end) 22%, transparent); } .family-preview-card.is-selected { border-width: 3px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--shape-start) 20%, transparent), 0 24px 42px color-mix(in srgb, var(--shape-end) 16%, transparent); transform: translateY(-3px); opacity: 1; filter: none; } .family-preview-card.is-selected .family-preview-title, .family-preview-card.is-selected .family-preview-copy { color: var(--theme-text); } .start-time-grid { gap: 0.85rem; } .start-time-button { min-height: 100%; padding: 1.05rem 0.95rem 1rem; } .start-time-button.is-relaxed { --shape-start: var(--theme-accent-green); --shape-end: var(--theme-accent-teal); } .start-time-button.is-standard { --shape-start: var(--theme-display-start); --shape-end: var(--theme-accent-indigo); } .start-time-button.is-challenge { --shape-start: var(--theme-accent-purple); --shape-end: var(--theme-accent-rose); } .start-time-button.is-selected { border-width: 3px; border-color: color-mix(in srgb, var(--shape-start) 72%, var(--theme-border)); background: linear-gradient(155deg, color-mix(in srgb, var(--shape-start) 22%, transparent) 0%, transparent 48%), linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 18%, var(--theme-panel-muted)) 0%, color-mix(in srgb, var(--shape-start) 12%, var(--theme-panel)) 100%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--shape-start) 20%, transparent), 0 22px 38px color-mix(in srgb, var(--shape-end) 16%, transparent); transform: translateY(-3px); opacity: 1; filter: none; } .start-time-button.is-selected::before { content: "✓ Selected"; position: absolute; top: 0.7rem; right: 0.72rem; border-radius: 999px; padding: 0.26rem 0.58rem; border: 1px solid color-mix(in srgb, var(--shape-start) 92%, #ffffff); background: linear-gradient(120deg, color-mix(in srgb, var(--shape-start) 86%, #ffffff) 0%, color-mix(in srgb, var(--shape-end) 82%, #ffffff) 100%); color: var(--theme-panel-deep); font-size: 0.56rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase; box-shadow: 0 8px 18px color-mix(in srgb, var(--shape-end) 20%, transparent); } .start-time-button.is-selected .start-time-button-value, .start-time-button.is-selected .start-time-button-copy { color: var(--theme-text); } .start-time-button-label { font-size: 0.72rem; } .start-time-button-value { margin-top: 0.3rem; font-size: 1rem; } .start-time-button-copy { margin-top: 0.55rem; color: var(--theme-text-soft); font-size: 0.79rem; line-height: 1.55; max-width: 24ch; } .start-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; } .start-summary-card { border: 1px solid var(--theme-border); border-radius: 1rem; background: linear-gradient(150deg, color-mix(in srgb, var(--theme-display-start) 10%, transparent) 0%, transparent 54%), linear-gradient(180deg, color-mix(in srgb, var(--theme-panel-muted) 74%, transparent) 0%, var(--theme-panel) 100%); padding: 1rem; display: grid; gap: 0.38rem; } .start-summary-label { color: var(--theme-text-subtle); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; } .start-summary-value { color: var(--theme-text); font-size: 1rem; font-weight: 700; line-height: 1.4; } .start-summary-copy { color: var(--theme-text-soft); font-size: 0.82rem; line-height: 1.58; } .start-more-row { display: flex; justify-content: center; margin: 1rem auto 0; } .start-more-shell { width: min(100%, 56rem); } .start-more-panel .start-utility-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; margin-top: 0; } .start-more-panel .start-utility-button { justify-content: center; border-radius: 1rem; background: color-mix(in srgb, var(--theme-panel-muted) 60%, transparent); color: var(--theme-text-muted); font-size: 0.72rem; letter-spacing: 0.12em; padding: 0.85rem 0.9rem; } .start-more-panel .start-utility-button:hover { color: var(--theme-text); } .arcade-board { background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.78) 100%); border: 1px solid var(--theme-border); box-shadow: var(--theme-shadow); } .arcade-led { color: var(--theme-archive-title); text-shadow: 0 0 18px color-mix(in srgb, var(--theme-archive-title) 22%, transparent); } .arcade-dim { color: var(--theme-text-muted); } .arcade-score-row { border: 1px solid var(--theme-border); background: rgba(15, 23, 42, 0.4); display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 0.85rem; align-items: center; } .manual-card { transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, background-color 0.24s ease; } @media (hover: hover) and (pointer: fine) { .manual-card:hover { transform: translateY(-1px); box-shadow: var(--theme-shadow-hover); } } .battle-workspace { display: grid; grid-template-columns: minmax(21rem, 0.92fr) minmax(0, 1.08fr); gap: 1rem; align-items: start; flex: 1; height: 100%; min-height: 0; overflow: hidden; } .battle-context { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 1rem; position: relative; top: auto; align-self: start; min-height: 0; height: 100%; max-height: none; overflow: hidden; } .battle-decision { min-width: 0; min-height: 0; height: 100%; max-height: none; overflow-y: auto; padding-right: 0.2rem; padding-bottom: 0.8rem; } #battle-screen { min-height: calc(100dvh - 2rem); height: calc(100dvh - 2rem); overflow: hidden; padding-bottom: 0 !important; } #battle-insight-grid { min-height: 0; height: 100%; max-height: 100%; overflow-y: auto; align-content: start; overscroll-behavior: contain; scrollbar-gutter: stable; padding-right: 0.2rem; padding-bottom: 1rem; } .quiz-insight-card { align-self: start; } .quiz-insight-card, .spellbook-shell { --shape-start: var(--theme-accent-amber); --shape-end: var(--theme-display-start); position: relative; border-color: color-mix(in srgb, var(--shape-start) 28%, var(--theme-border)) !important; background: linear-gradient(150deg, color-mix(in srgb, var(--shape-start) 10%, transparent) 0%, transparent 52%), linear-gradient(180deg, color-mix(in srgb, var(--shape-end) 6%, var(--theme-panel)) 0%, var(--theme-panel-deep) 100%) !important; box-shadow: var(--theme-shadow); overflow: hidden; } #data-card { --shape-start: var(--theme-kicker-accent); --shape-end: var(--theme-display-start); } #profile-card { --shape-start: var(--theme-accent-indigo); --shape-end: var(--theme-accent-purple); } .spellbook-shell { --shape-start: var(--theme-accent-amber); --shape-end: var(--theme-accent-rose); } .scan-card-head, .spellbook-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; } .scan-card-title, .spellbook-title, .spell-tooltip-title, .archive-title, .archive-nav-title, .archive-stage-title { color: var(--theme-text); font-weight: 700; line-height: 1.25; } .scan-card-title, .spellbook-title { font-size: 1.04rem; } .tutorial-guide-title, .tutorial-guide-section-title, .records-screen-title, .archive-group-heading { color: var(--theme-archive-title); } .archive-group-heading { border-bottom: 1px solid color-mix(in srgb, var(--theme-archive-title) 34%, var(--theme-border)); } .tutorial-guide-title { border-bottom: 2px solid color-mix(in srgb, var(--theme-archive-title) 56%, var(--theme-border)); } .battle-choice-title { color: color-mix(in srgb, var(--theme-display-end) 54%, var(--theme-text)); } .reveal-explanation-copy { color: color-mix(in srgb, var(--theme-display-start) 48%, var(--theme-text)); } .victory-title { background-image: linear-gradient(90deg, var(--theme-display-start) 0%, var(--theme-display-end) 100%); } .theme-icon-display { color: var(--theme-display-start); } .theme-icon-display-alt { color: var(--theme-display-end); } .theme-icon-kicker { color: var(--theme-kicker-accent); } .theme-icon-title { color: var(--theme-archive-title); } .theme-icon-support { color: var(--theme-accent-teal); } .theme-icon-rose { color: var(--theme-accent-rose); } .scan-card-placeholder { min-height: 4.25rem; border-radius: 0.95rem; border: 1px dashed color-mix(in srgb, var(--theme-accent-blue) 24%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-muted) 62%, transparent); padding: 0.95rem 1rem; color: var(--theme-text-muted); display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.65; } .scan-results-stack { display: grid; gap: 0.55rem; } .scan-result-row { display: grid; gap: 0.3rem; align-items: start; border-radius: 0.9rem; border: 1px solid var(--theme-border); background: color-mix(in srgb, var(--theme-panel-muted) 72%, transparent); padding: 0.75rem 0.9rem; } .scan-result-label { color: var(--theme-text-muted); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; } .scan-result-value { color: var(--theme-text); font-weight: 700; text-align: left; line-height: 1.45; } .scan-result-why { color: var(--theme-text-muted); font-size: 0.76rem; line-height: 1.5; } .scan-note-card { border-radius: 0.95rem; border: 1px solid color-mix(in srgb, var(--theme-accent-purple) 18%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-muted) 58%, transparent); padding: 0.95rem 1rem; color: var(--theme-text-soft); line-height: 1.65; font-size: 0.84rem; } .scan-chip-row, .archive-chip-row, .archive-stat-strip { display: flex; flex-wrap: wrap; gap: 0.55rem; } .scan-chip, .archive-chip, .archive-stat-chip { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--theme-accent-blue) 24%, var(--theme-border)); background: var(--theme-panel-deep); padding: 0.36rem 0.68rem; color: var(--theme-text-soft); font-size: 0.72rem; font-weight: 700; line-height: 1.2; } #analysis-checklist-card { --shape-start: var(--theme-display-start); --shape-end: var(--theme-kicker-accent); } .analysis-checklist-head { display: grid; gap: 0.35rem; margin-bottom: 1rem; } .analysis-checklist-subtitle { color: var(--theme-text-soft); font-size: 0.84rem; line-height: 1.55; } .analysis-checklist-stack { display: grid; gap: 0.8rem; } .analysis-checklist-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.85rem; align-items: start; border-radius: 1rem; border: 1px solid color-mix(in srgb, var(--theme-display-start) 18%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-muted) 58%, transparent); padding: 0.9rem; } .analysis-checklist-number { width: 2rem; height: 2rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--theme-display-start) 28%, var(--theme-border)); background: color-mix(in srgb, var(--theme-display-start) 16%, var(--theme-panel)); color: color-mix(in srgb, var(--theme-display-start) 82%, var(--theme-text)); font-size: 0.82rem; font-weight: 700; line-height: 1; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04); } .analysis-checklist-content { display: grid; gap: 0.62rem; min-width: 0; } .analysis-checklist-title { color: var(--theme-text); font-size: 0.96rem; font-weight: 700; line-height: 1.35; } .analysis-checklist-options { display: flex; flex-wrap: wrap; gap: 0.55rem; } .analysis-checklist-choice { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 2.6rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--theme-display-start) 16%, var(--theme-border)); background: var(--theme-panel); color: var(--theme-text-soft); padding: 0.62rem 0.92rem; font-size: 0.79rem; font-weight: 700; line-height: 1.3; text-align: center; transition: transform 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease, opacity 0.22s ease; } .analysis-checklist-choice:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--theme-display-start) 38%, var(--theme-border)); color: var(--theme-text); box-shadow: 0 8px 18px color-mix(in srgb, var(--theme-display-start) 10%, transparent); } .analysis-checklist-choice.is-selected { padding-left: 1.95rem; border-width: 2px; border-color: color-mix(in srgb, var(--theme-display-start) 70%, var(--theme-border)); background: linear-gradient(135deg, color-mix(in srgb, var(--theme-display-start) 20%, transparent) 0%, transparent 58%), linear-gradient(180deg, color-mix(in srgb, var(--theme-display-end) 12%, var(--theme-panel-muted)) 0%, var(--theme-panel) 100%); color: var(--theme-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-display-start) 18%, transparent), 0 14px 24px color-mix(in srgb, var(--theme-display-start) 10%, transparent); } .analysis-checklist-choice.is-selected::before { content: "•"; position: absolute; left: 0.72rem; top: 50%; width: 1rem; height: 1rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--theme-display-start) 24%, var(--theme-panel)); color: color-mix(in srgb, var(--theme-display-start) 92%, #ffffff); font-size: 0.9rem; font-weight: 900; transform: translateY(-50%); } .analysis-checklist-choice.is-selected.is-correct { border-color: color-mix(in srgb, var(--theme-accent-green) 72%, var(--theme-border)); background: linear-gradient(135deg, color-mix(in srgb, var(--theme-accent-green) 18%, transparent) 0%, transparent 58%), linear-gradient(180deg, color-mix(in srgb, var(--theme-accent-teal) 14%, var(--theme-panel-muted)) 0%, var(--theme-panel) 100%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-accent-green) 18%, transparent), 0 14px 24px color-mix(in srgb, var(--theme-accent-green) 12%, transparent); } .analysis-checklist-choice.is-selected.is-correct::before { content: "✓"; background: color-mix(in srgb, var(--theme-accent-green) 84%, #ffffff); color: var(--theme-panel-deep); font-size: 0.68rem; } .analysis-checklist-choice.is-selected.is-incorrect { border-color: color-mix(in srgb, var(--theme-accent-rose) 74%, var(--theme-border)); background: linear-gradient(135deg, color-mix(in srgb, var(--theme-accent-rose) 16%, transparent) 0%, transparent 58%), linear-gradient(180deg, color-mix(in srgb, var(--theme-accent-purple) 12%, var(--theme-panel-muted)) 0%, var(--theme-panel) 100%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-accent-rose) 18%, transparent), 0 14px 24px color-mix(in srgb, var(--theme-accent-rose) 12%, transparent); } .analysis-checklist-choice.is-selected.is-incorrect::before { content: "!"; background: color-mix(in srgb, var(--theme-accent-rose) 84%, #ffffff); color: var(--theme-panel-deep); font-size: 0.72rem; } .analysis-checklist-choice:focus-visible, .analysis-checklist-button:focus-visible { outline: none; border-color: color-mix(in srgb, var(--theme-accent-amber) 74%, var(--theme-border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-accent-amber) 18%, transparent), 0 0 0 1px color-mix(in srgb, var(--theme-accent-amber) 82%, var(--theme-border)); color: var(--theme-text); } .analysis-checklist-feedback { display: grid; gap: 0.35rem; margin-top: 0.6rem; padding: 0.72rem 0.8rem; border-radius: 0.88rem; border: 1px solid color-mix(in srgb, var(--theme-display-start) 16%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 60%, transparent); } .analysis-checklist-feedback.is-empty { display: none; } .analysis-checklist-feedback.is-correct { border-color: color-mix(in srgb, var(--theme-accent-green) 42%, var(--theme-border)); background: color-mix(in srgb, var(--theme-accent-green) 8%, var(--theme-panel-deep)); } .analysis-checklist-feedback.is-incorrect { border-color: color-mix(in srgb, var(--theme-accent-rose) 42%, var(--theme-border)); background: color-mix(in srgb, var(--theme-accent-rose) 8%, var(--theme-panel-deep)); } .analysis-checklist-feedback-status { display: inline-flex; width: fit-content; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.2rem 0.52rem; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; } .analysis-checklist-feedback-status::before { font-weight: 900; } .analysis-checklist-feedback-status.is-correct { background: color-mix(in srgb, var(--theme-accent-green) 14%, transparent); color: color-mix(in srgb, var(--theme-accent-green) 76%, #ffffff); } .analysis-checklist-feedback-status.is-correct::before { content: "✓"; } .analysis-checklist-feedback-status.is-incorrect { background: color-mix(in srgb, var(--theme-accent-rose) 14%, transparent); color: color-mix(in srgb, var(--theme-accent-rose) 78%, #ffffff); } .analysis-checklist-feedback-status.is-incorrect::before { content: "!"; } .analysis-checklist-feedback-copy { color: var(--theme-text-soft); font-size: 0.78rem; line-height: 1.5; } .analysis-checklist-prompts { display: grid; gap: 0.45rem; } .analysis-checklist-prompt { border-radius: 0.82rem; border: 1px solid color-mix(in srgb, var(--theme-display-start) 14%, var(--theme-border)); background: var(--theme-panel); color: var(--theme-text-soft); padding: 0.58rem 0.72rem; font-size: 0.8rem; line-height: 1.45; } .analysis-checklist-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; } .analysis-checklist-button { display: inline-flex; align-items: center; gap: 0.42rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--theme-display-start) 24%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 88%, transparent); color: var(--theme-text-soft); padding: 0.46rem 0.78rem; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.04em; transition: border-color 0.22s ease, color 0.22s ease, background-color 0.22s ease, transform 0.22s ease; } .analysis-checklist-button:hover { border-color: color-mix(in srgb, var(--theme-display-start) 42%, var(--theme-border)); color: var(--theme-text); background: color-mix(in srgb, var(--theme-panel) 96%, transparent); transform: translateY(-1px); } .analysis-checklist-placeholder { border-radius: 0.85rem; border: 1px dashed color-mix(in srgb, var(--theme-display-start) 22%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 54%, transparent); padding: 0.72rem 0.82rem; color: var(--theme-text-muted); font-size: 0.78rem; line-height: 1.55; } .analysis-checklist-reveal { display: grid; } .analysis-checklist-summary { display: grid; gap: 0.55rem; margin-top: 0.85rem; padding: 0.8rem 0.85rem; border-radius: 0.9rem; border: 1px solid color-mix(in srgb, var(--theme-display-start) 16%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 62%, transparent); } .analysis-checklist-summary.is-empty { color: var(--theme-text-muted); } .analysis-checklist-summary-label { color: var(--theme-text-subtle); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; } .analysis-checklist-summary-copy { color: var(--theme-text-muted); font-size: 0.76rem; line-height: 1.5; } .analysis-checklist-summary-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; } .analysis-checklist-summary-chip { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--theme-display-start) 24%, var(--theme-border)); background: color-mix(in srgb, var(--theme-display-start) 10%, var(--theme-panel)); color: var(--theme-text); padding: 0.35rem 0.66rem; font-size: 0.72rem; font-weight: 700; line-height: 1.25; } .analysis-checklist-summary-chip::before { content: "•"; color: color-mix(in srgb, var(--theme-display-start) 86%, #ffffff); font-weight: 900; } .analysis-checklist-summary-chip.is-correct { border-color: color-mix(in srgb, var(--theme-accent-green) 34%, var(--theme-border)); background: color-mix(in srgb, var(--theme-accent-green) 10%, var(--theme-panel)); } .analysis-checklist-summary-chip.is-correct::before { content: "✓"; color: color-mix(in srgb, var(--theme-accent-green) 80%, #ffffff); } .analysis-checklist-summary-chip.is-incorrect { border-color: color-mix(in srgb, var(--theme-accent-rose) 34%, var(--theme-border)); background: color-mix(in srgb, var(--theme-accent-rose) 10%, var(--theme-panel)); } .analysis-checklist-summary-chip.is-incorrect::before { content: "!"; color: color-mix(in srgb, var(--theme-accent-rose) 80%, #ffffff); } .analysis-checklist-footer { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid color-mix(in srgb, var(--theme-display-start) 18%, var(--theme-border)); color: var(--theme-text-soft); font-size: 0.82rem; line-height: 1.55; } .spellbook-tools { display: grid; gap: 0.35rem; justify-items: end; } .spellbook-guide { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.4rem; align-items: stretch; margin-bottom: 1rem; border-radius: 0.95rem; border: 1px solid color-mix(in srgb, var(--theme-accent-purple) 22%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-muted) 64%, transparent); padding: 0.72rem 0.85rem; } .spellbook-guide-intro { display: grid; gap: 0.32rem; align-content: start; padding-right: 0; } .spellbook-guide-item { border-radius: 1rem; border: 1px solid color-mix(in srgb, var(--theme-accent-purple) 24%, var(--theme-border)); background: var(--theme-panel); color: var(--theme-text); padding: 0.72rem 0.8rem; display: grid; gap: 0.32rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04); } .spellbook-guide-title { color: var(--theme-text); font-size: 0.78rem; font-weight: 700; line-height: 1.25; } .spellbook-guide-note { color: var(--theme-text-soft); font-size: 0.72rem; line-height: 1.45; } .spellbook-guide-label { color: var(--theme-text-subtle); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; } .spellbook-guide-copy { color: var(--theme-text-soft); font-size: 0.76rem; line-height: 1.5; } .spellbook-guide-item.is-pending { border-color: color-mix(in srgb, var(--theme-display-start) 18%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel) 88%, transparent); } .spellbook-guide-item.is-correct { border-color: color-mix(in srgb, var(--theme-accent-success) 42%, var(--theme-border)); background: color-mix(in srgb, var(--theme-accent-success) 10%, var(--theme-panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-success) 16%, transparent); } .spellbook-guide-item.is-incorrect { border-color: color-mix(in srgb, var(--theme-accent-danger) 42%, var(--theme-border)); background: color-mix(in srgb, var(--theme-accent-danger) 8%, var(--theme-panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-accent-danger) 14%, transparent); } @media (max-width: 960px) { .analysis-checklist-item { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; } .spellbook-guide { grid-template-columns: repeat(2, minmax(0, 1fr)); } .spellbook-guide-intro { grid-column: 1 / -1; padding-right: 0; } } @media (min-width: 1025px) and (max-width: 1440px), (min-width: 1025px) and (max-height: 860px) { body[data-screen="battle-screen"] { padding: 0.55rem; } body[data-screen="battle-screen"] #app { max-width: min(96vw, 84rem) !important; } body[data-screen="battle-screen"] .theme-dock { top: auto; right: auto; margin-bottom: 0.5rem; } body[data-screen="battle-screen"] .theme-dock-panel { min-width: 9rem; padding: 0.44rem 0.5rem; border-radius: 0.95rem; } body[data-screen="battle-screen"] .theme-dock-label { font-size: 0.54rem; letter-spacing: 0.18em; } body[data-screen="battle-screen"] .theme-selector { gap: 0.24rem; } body[data-screen="battle-screen"] .theme-button { font-size: 0.58rem; padding: 0.34rem 0.4rem; } body[data-screen="battle-screen"] #battle-screen { gap: 0.75rem; min-height: calc(100dvh - 1.1rem); height: calc(100dvh - 1.1rem); } body[data-screen="battle-screen"] #battle-hud { gap: 0.55rem 0.9rem; margin-bottom: 0; padding: 0.7rem 0.85rem; padding-right: 0.85rem; } body[data-screen="battle-screen"] #hud-meta { min-width: 0; gap: 0.7rem; } body[data-screen="battle-screen"] #timer-display { gap: 0.45rem; padding: 0.45rem 0.8rem; font-size: 1.45rem; } body[data-screen="battle-screen"] .hud-progress-block { min-width: min(11.75rem, 24vw); gap: 0.2rem; margin-top: 0.25rem; } body[data-screen="battle-screen"] .hud-progress-label, body[data-screen="battle-screen"] .hud-progress-value { font-size: 0.62rem; } body[data-screen="battle-screen"] .battle-workspace { grid-template-columns: minmax(18.5rem, 0.88fr) minmax(0, 1.12fr); gap: 0.8rem; } body[data-screen="battle-screen"] .battle-context, body[data-screen="battle-screen"] .battle-decision { gap: 0.8rem; } body[data-screen="battle-screen"] #game-card { min-height: clamp(13.5rem, 31vh, 17rem); padding: 1rem 1.1rem !important; } body[data-screen="battle-screen"] #monster-container { width: 4.4rem; height: 4.4rem; margin-bottom: 0.8rem; border-width: 3px; } body[data-screen="battle-screen"] #monster-icon { width: 2.25rem; height: 2.25rem; } body[data-screen="battle-screen"] #scenario-title { font-size: 1.05rem; margin-bottom: 0.45rem; } body[data-screen="battle-screen"] #scenario-desc { font-size: 0.88rem; line-height: 1.55; max-width: 28rem; } body[data-screen="battle-screen"] #clue-container { margin-top: 0.75rem; } body[data-screen="battle-screen"] #battle-insight-grid { gap: 0.75rem; padding-bottom: 0.65rem; } body[data-screen="battle-screen"] .quiz-insight-card, body[data-screen="battle-screen"] .spellbook-shell { padding: 0.9rem !important; } body[data-screen="battle-screen"] .scan-card-head, body[data-screen="battle-screen"] .spellbook-head { gap: 0.75rem; margin-bottom: 0.75rem !important; } body[data-screen="battle-screen"] .scan-card-title, body[data-screen="battle-screen"] .spellbook-title { font-size: 0.94rem; } body[data-screen="battle-screen"] .scan-card-placeholder { min-height: 3.7rem; padding: 0.75rem 0.85rem; line-height: 1.5; font-size: 0.78rem; } body[data-screen="battle-screen"] .scan-results-stack { gap: 0.45rem; } body[data-screen="battle-screen"] .scan-result-row { gap: 0.24rem; padding: 0.62rem 0.72rem; } body[data-screen="battle-screen"] .scan-result-label { font-size: 0.66rem; } body[data-screen="battle-screen"] .scan-result-value { font-size: 0.82rem; line-height: 1.4; } body[data-screen="battle-screen"] .scan-result-why { font-size: 0.72rem; line-height: 1.45; } body[data-screen="battle-screen"] .scan-note-card { padding: 0.72rem 0.82rem; font-size: 0.76rem; line-height: 1.55; } body[data-screen="battle-screen"] .analysis-checklist-head { margin-bottom: 0.8rem; } body[data-screen="battle-screen"] .analysis-checklist-subtitle { font-size: 0.78rem; line-height: 1.5; } body[data-screen="battle-screen"] .analysis-checklist-item { padding: 0.75rem; } body[data-screen="battle-screen"] .analysis-checklist-title { font-size: 0.88rem; } body[data-screen="battle-screen"] .analysis-checklist-options { gap: 0.45rem; } body[data-screen="battle-screen"] .analysis-checklist-choice { min-height: 2.35rem; padding: 0.5rem 0.76rem; font-size: 0.72rem; } body[data-screen="battle-screen"] .analysis-checklist-choice.is-selected { padding-left: 1.7rem; } body[data-screen="battle-screen"] .analysis-checklist-prompt, body[data-screen="battle-screen"] .analysis-checklist-placeholder { font-size: 0.74rem; line-height: 1.5; } body[data-screen="battle-screen"] .analysis-checklist-button { padding: 0.38rem 0.66rem; font-size: 0.68rem; } body[data-screen="battle-screen"] .analysis-checklist-feedback { padding: 0.62rem 0.7rem; } body[data-screen="battle-screen"] .analysis-checklist-feedback-copy { font-size: 0.74rem; } body[data-screen="battle-screen"] .analysis-checklist-summary { margin-top: 0.72rem; padding: 0.72rem; } body[data-screen="battle-screen"] .analysis-checklist-footer { margin-top: 0.75rem; padding-top: 0.75rem; font-size: 0.76rem; } body[data-screen="battle-screen"] .spellbook-tools { gap: 0.28rem; } body[data-screen="battle-screen"] .battle-tool { padding: 0.28rem 0.52rem; font-size: 0.68rem; } body[data-screen="battle-screen"] #battle-choice-copy { font-size: 0.78rem; margin-top: 0.35rem; line-height: 1.5; } body[data-screen="battle-screen"] .spellbook-guide { gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.62rem 0.7rem; } body[data-screen="battle-screen"] .spellbook-guide-item { padding: 0.58rem 0.66rem; border-radius: 0.88rem; } body[data-screen="battle-screen"] .spellbook-guide-title { font-size: 0.72rem; } body[data-screen="battle-screen"] .spellbook-guide-copy, body[data-screen="battle-screen"] .spellbook-guide-note { font-size: 0.66rem; line-height: 1.42; } body[data-screen="battle-screen"] .battle-option-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 0.75rem !important; } body[data-screen="battle-screen"] .battle-option-shell { grid-template-columns: minmax(0, 1fr) 2.5rem; gap: 0.35rem; } body[data-screen="battle-screen"] .battle-option-button { min-height: 3.55rem; padding: 0.72rem 0.72rem !important; } body[data-screen="battle-screen"] .battle-option-tag { font-size: 0.53rem; letter-spacing: 0.14em; } body[data-screen="battle-screen"] .battle-option-label { font-size: 0.92rem; line-height: 1.24; overflow-wrap: anywhere; } body[data-screen="battle-screen"] .battle-preview-button { min-width: 2.5rem; padding: 0.42rem 0.22rem; border-radius: 0.85rem; } body[data-screen="battle-screen"] .battle-preview-label { display: none; } body[data-screen="battle-screen"] #spell-tooltip-box { padding: 0.8rem !important; } body[data-screen="battle-screen"] .spell-tooltip-title { font-size: 0.9rem; } body[data-screen="battle-screen"] .spell-tooltip-copy { font-size: 0.74rem; line-height: 1.5; } } @media (max-width: 640px) { .spellbook-guide { grid-template-columns: minmax(0, 1fr); } } .battle-option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.6rem; } .battle-option-tag { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--theme-text-subtle); } .battle-option-label { font-weight: 700; line-height: 1.4; } .battle-preview-label { font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; line-height: 1; } .battle-option-shell.spell-preview-active .battle-option-button { background: linear-gradient(180deg, color-mix(in srgb, var(--theme-accent-purple) 18%, var(--theme-panel-muted)) 0%, color-mix(in srgb, var(--theme-accent-purple) 12%, var(--theme-panel)) 100%) !important; border-color: color-mix(in srgb, var(--theme-accent-purple) 48%, var(--theme-border)) !important; color: var(--theme-text) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent-purple) 20%, transparent), 0 16px 28px color-mix(in srgb, var(--theme-accent-purple) 12%, transparent); transform: translateY(-1px) scale(1.01); } .battle-option-shell.spell-preview-active .battle-preview-button { border-color: color-mix(in srgb, var(--theme-accent-purple) 48%, var(--theme-border)) !important; background: linear-gradient(180deg, color-mix(in srgb, var(--theme-accent-purple) 22%, var(--theme-panel-muted)) 0%, color-mix(in srgb, var(--theme-accent-purple) 14%, var(--theme-panel)) 100%) !important; color: var(--theme-text) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent-purple) 20%, transparent), 0 16px 28px color-mix(in srgb, var(--theme-accent-purple) 12%, transparent); } .spell-tooltip-panel { display: grid; gap: 0.35rem; text-align: left; } .logic-step { margin-bottom: 10px; padding-left: 12px; border-left: 3px solid color-mix(in srgb, var(--theme-accent-green) 72%, transparent); line-height: 1.6; color: var(--theme-text-soft); } .logic-step-main { color: var(--theme-text-soft); } .logic-step-why { margin-top: 6px; font-size: 0.94em; color: var(--theme-text-muted); } .logic-conclusion { margin-top: 14px; padding: 12px; background: color-mix(in srgb, var(--theme-accent-green) 12%, transparent); border-radius: 10px; border: 1px solid color-mix(in srgb, var(--theme-accent-green) 34%, var(--theme-border)); font-weight: 700; color: color-mix(in srgb, var(--theme-accent-green) 80%, #ffffff); text-align: center; } .tutor-scaffold-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; } .tutor-scaffold-card { border: 1px solid color-mix(in srgb, var(--theme-display-start) 18%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 88%, transparent); border-radius: 0.75rem; padding: 0.85rem; text-align: left; } .tutor-scaffold-kicker { color: var(--theme-text-subtle); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; } .tutor-scaffold-title { color: var(--theme-text); font-size: 0.94rem; font-weight: 800; margin-top: 0.3rem; } .tutor-scaffold-copy { color: var(--theme-text-soft); font-size: 0.84rem; line-height: 1.55; margin-top: 0.35rem; } .formula-scaffold { display: grid; gap: 0.52rem; margin-top: 0.45rem; } .formula-expression { display: block; width: 100%; overflow-x: auto; white-space: nowrap; border-radius: 0.72rem; border: 1px solid color-mix(in srgb, var(--theme-display-start) 24%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-muted) 76%, transparent); color: var(--theme-text); padding: 0.68rem 0.78rem; font-size: 0.94rem; line-height: 1.6; font-weight: 800; scrollbar-width: thin; } .formula-expression sup, .formula-expression sub { font-size: 0.72em; line-height: 0; } .formula-note, .formula-next { color: var(--theme-text-soft); font-size: 0.78rem; line-height: 1.5; } .formula-next { border-left: 3px solid color-mix(in srgb, var(--theme-display-start) 54%, transparent); padding-left: 0.62rem; } .formula-label { color: var(--theme-text-subtle); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; } .tutor-diagnosis-card { width: min(100%, 48rem); border: 1px solid color-mix(in srgb, var(--theme-display-start) 24%, var(--theme-border)); background: color-mix(in srgb, var(--theme-panel-deep) 88%, transparent); border-radius: 1rem; padding: 1rem; text-align: left; } .tutor-diagnosis-card .tutor-scaffold-grid { margin-top: 0.75rem; } @media (max-width: 640px) { .tutor-scaffold-grid { grid-template-columns: minmax(0, 1fr); } .formula-expression { white-space: normal; overflow-wrap: anywhere; font-size: 0.86rem; } } .mood-easy { box-shadow: 0 0 15px rgba(59, 130, 246, 0.16); } .mood-medium { box-shadow: 0 0 18px rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.45) !important; } .mood-hard { box-shadow: 0 0 22px rgba(248, 113, 113, 0.2); border-color: rgba(248, 113, 113, 0.42) !important; } .mood-boss { box-shadow: 0 0 26px rgba(168, 85, 247, 0.26); border-color: rgba(192, 132, 252, 0.46) !important; } @media (max-width: 1024px) { .battle-workspace, .start-setup-grid { grid-template-columns: minmax(0, 1fr); overflow: visible; } body.battle-lock-scroll { overflow-y: auto; } .battle-context, .start-side-stack { position: static; height: auto; max-height: none; overflow: visible; } .battle-decision, #battle-insight-grid { height: auto; max-height: none; overflow: visible; padding-right: 0; } #battle-screen { min-height: auto; height: auto; overflow: visible; } } @media (max-width: 768px) { #app { max-width: none; } .theme-dock { position: static; width: 100%; margin-bottom: 1rem; } .theme-dock-panel { min-width: 0; width: 100%; } .start-time-grid, .family-preview-grid { grid-template-columns: minmax(0, 1fr); } .start-flow-shell { padding: 1.2rem; } .start-progress, .start-summary-grid, .start-more-panel .start-utility-grid { grid-template-columns: minmax(0, 1fr); } .start-step-actions { flex-direction: column-reverse; align-items: stretch; } .start-step-actions .start-primary-button, .start-step-actions .start-back-button { width: 100%; } .scan-card-head, .spellbook-head { flex-direction: column; } #start-screen, #tutorial-screen, #gameover-screen, #victory-screen, #records-screen, #library-screen, #simulation-screen { padding-top: 1rem; padding-bottom: 1rem; } #tutorial-screen, #gameover-screen, #victory-screen { min-height: auto; } .archive-hero { grid-template-columns: minmax(0, 1fr); gap: 0.8rem; } .archive-back-btn { width: 2.75rem; height: 2.75rem; } .archive-title, .records-screen-title { flex-wrap: wrap; gap: 0.55rem; } .archive-command-bar, .archive-nav, .archive-stage { border-radius: 1.15rem; } .archive-command-bar, .archive-stage { padding: 0.9rem; } body[data-screen="battle-screen"] #battle-hud { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.75rem; padding: 0.78rem 0.85rem; padding-right: 0.85rem; } body[data-screen="battle-screen"] #timer-display { justify-content: center; min-width: 8.75rem; } body[data-screen="battle-screen"] #hud-meta { grid-column: 1 / -1; width: 100%; min-width: 0; justify-content: space-between; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap; text-align: left; } body[data-screen="battle-screen"] #hud-meta > div { flex: 1 1 11rem; min-width: 0; display: grid; gap: 0.2rem; } body[data-screen="battle-screen"] #streak-container { align-items: flex-start; } body[data-screen="battle-screen"] .hud-progress-block { width: 100%; min-width: 0; margin-top: 0.35rem; } body[data-screen="battle-screen"] .spellbook-tools { justify-items: start; } body[data-screen="battle-screen"] .spellbook-tools > div { justify-content: flex-start; } body[data-screen="battle-screen"] #grimoire-content, body[data-screen="battle-screen"] #spell-tooltip-box { max-height: none; } #gameover-screen h1, #victory-screen h1 { font-size: clamp(2.2rem, 9vw, 3rem); line-height: 1.05; } } @media (max-width: 640px) { body[data-screen="battle-screen"] #battle-hud { grid-template-columns: minmax(0, 1fr); } body[data-screen="battle-screen"] #lives-container { justify-content: center; } body[data-screen="battle-screen"] #timer-display { width: 100%; } body[data-screen="battle-screen"] #hud-meta { flex-direction: column; align-items: stretch; gap: 0.65rem; } body[data-screen="battle-screen"] #hud-meta > div, body[data-screen="battle-screen"] #hud-meta > button { width: 100%; } body[data-screen="battle-screen"] .battle-option-grid { grid-template-columns: minmax(0, 1fr); } body[data-screen="battle-screen"] .battle-option-shell { grid-template-columns: minmax(0, 1fr) 2.9rem; } body[data-screen="battle-screen"] .battle-option-button { min-height: 4rem; } body[data-screen="battle-screen"] .battle-preview-button { min-width: 2.9rem; } body[data-screen="battle-screen"] .analysis-checklist-options { display: grid; grid-template-columns: minmax(0, 1fr); } body[data-screen="battle-screen"] .analysis-checklist-choice { width: 100%; justify-content: flex-start; text-align: left; } body[data-screen="battle-screen"] .analysis-checklist-choice.is-selected { padding-left: 1.95rem; } } /* Final battle HUD stabilization: prevents timer, combo, score, progress, and quit controls from colliding. */ body[data-screen="battle-screen"] #battle-hud { display: grid !important; grid-template-columns: minmax(6.5rem, 0.75fr) minmax(8.6rem, auto) minmax(16rem, 1.25fr); align-items: center; gap: 0.75rem; overflow: visible; padding: 0.75rem 0.85rem !important; } body[data-screen="battle-screen"] #lives-container { min-width: 0; justify-content: flex-start; } body[data-screen="battle-screen"] #timer-display { grid-column: 2; justify-self: center; min-width: 8.6rem; width: auto; white-space: nowrap; } body[data-screen="battle-screen"] #hud-meta { grid-column: 3; display: grid !important; grid-template-columns: minmax(4rem, auto) minmax(10rem, 1fr) auto; align-items: center; justify-items: end; gap: 0.7rem; min-width: 0; width: 100%; text-align: right; } body[data-screen="battle-screen"] #streak-container { position: static; min-width: 4rem; align-items: flex-end; justify-self: end; } body[data-screen="battle-screen"] #hud-meta > div:not(#streak-container) { min-width: 0; width: 100%; } body[data-screen="battle-screen"] .hud-progress-block { width: 100%; max-width: 16rem; min-width: 0; justify-self: end; } body[data-screen="battle-screen"] #hud-meta > button { justify-self: end; white-space: nowrap; } @media (max-width: 1024px) { body[data-screen="battle-screen"] #battle-hud { grid-template-columns: minmax(0, 1fr) minmax(8.6rem, auto); } body[data-screen="battle-screen"] #timer-display { grid-column: 2; } body[data-screen="battle-screen"] #hud-meta { grid-column: 1 / -1; grid-template-columns: minmax(4rem, auto) minmax(12rem, 1fr) auto; align-items: center; text-align: left; } body[data-screen="battle-screen"] #streak-container { align-items: flex-start; justify-self: start; } body[data-screen="battle-screen"] .hud-progress-block { max-width: none; } } @media (max-width: 640px) { body[data-screen="battle-screen"] #battle-hud { grid-template-columns: minmax(0, 1fr); } body[data-screen="battle-screen"] #timer-display, body[data-screen="battle-screen"] #hud-meta { grid-column: 1; } body[data-screen="battle-screen"] #timer-display { width: 100%; justify-self: stretch; } body[data-screen="battle-screen"] #hud-meta { grid-template-columns: minmax(0, 1fr); justify-items: stretch; text-align: left; } body[data-screen="battle-screen"] #streak-container, body[data-screen="battle-screen"] #hud-meta > button { justify-self: stretch; width: 100%; } } @media (prefers-reduced-motion: reduce) { .animate-float, .fade-in, .modal-backdrop-open, .modal-panel-open, .animate-shake, .animate-pulse-red, .floating-text, .confetti-piece { animation: none !important; transition: none !important; } .interactive-surface, .hover-surface { transition: none !important; transform: none !important; } } /* * Battle layout contract: keep the two-column desktop composition, * but let the document own vertical scrolling so no controls clip. */ body[data-screen="battle-screen"] { overflow-x: hidden; overflow-y: auto; } body[data-screen="battle-screen"] #battle-screen { width: 100%; min-width: 0; min-height: calc(100dvh - 2rem); height: auto; overflow: visible; padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important; } body[data-screen="battle-screen"] .battle-workspace, body[data-screen="battle-screen"] .battle-context, body[data-screen="battle-screen"] .battle-decision, body[data-screen="battle-screen"] #battle-insight-grid { min-width: 0; height: auto; max-height: none; overflow: visible; } body[data-screen="battle-screen"] .battle-workspace { align-items: start; } body[data-screen="battle-screen"] .battle-context { grid-template-rows: auto auto; } @media (max-width: 640px) { body[data-screen="battle-screen"] #battle-screen { gap: 0.75rem; padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important; } body[data-screen="battle-screen"] .battle-workspace, body[data-screen="battle-screen"] .battle-context, body[data-screen="battle-screen"] .battle-decision, body[data-screen="battle-screen"] #battle-insight-grid, body[data-screen="battle-screen"] .quiz-insight-card, body[data-screen="battle-screen"] .spellbook-shell, body[data-screen="battle-screen"] #game-card { width: 100%; min-width: 0; max-width: 100%; } body[data-screen="battle-screen"] .battle-option-label { overflow-wrap: anywhere; } } /* Accessibility-sized text must remain fluid on the narrowest phones. */ @media (max-width: 360px) { .start-howto-details, .start-more-shell { width: 100%; min-width: 0; justify-items: stretch; } .start-howto-details > summary, .start-more-shell > summary { justify-self: center; } .start-howto-panel, .start-more-panel { box-sizing: border-box; min-width: 0; max-width: 100%; } .start-howto-item { min-width: 0; overflow-wrap: anywhere; } }</style>
+<style>
+#simulation-screen .shape-lab { container-type: inline-size; border: 1px solid color-mix(in srgb, var(--theme-display-start) 30%, var(--theme-border)); border-radius: 1.2rem; background: linear-gradient(145deg, color-mix(in srgb, var(--theme-display-start) 7%, var(--theme-panel)) 0%, color-mix(in srgb, var(--theme-panel-deep) 94%, transparent) 100%); padding: clamp(0.85rem, 2vw, 1.25rem); display: grid; gap: 0.9rem; box-shadow: var(--theme-shadow); }
+#simulation-screen .shape-lab-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+#simulation-screen .shape-lab-head > div:first-child { min-width: 0; }
+#simulation-screen .shape-lab-head .simulation-panel-badge { flex: 0 0 auto; }
+#simulation-screen #shape-lab-content { min-width: 0; display: grid; gap: 0.75rem; }
+#simulation-screen .shape-lab-question { border-left: 5px solid var(--theme-accent-amber); border-radius: 0.85rem; background: color-mix(in srgb, var(--theme-accent-amber) 9%, var(--theme-panel-muted)); padding: 0.75rem 0.85rem; color: var(--theme-text); font-size: 0.88rem; font-weight: 850; line-height: 1.45; }
+#simulation-screen .shape-lab-progress { display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+#simulation-screen .shape-lab-progress-dot { width: 0.68rem; height: 0.68rem; border-radius: 999px; border: 2px solid var(--theme-border-strong); background: var(--theme-panel-deep); }
+#simulation-screen .shape-lab-progress-dot.is-complete { background: var(--theme-display-start); border-color: var(--theme-display-start); }
+#simulation-screen .shape-lab-stage-label { color: var(--theme-text-muted); font-size: 0.72rem; font-weight: 800; margin-left: 0.35rem; }
+#simulation-screen .shape-lab-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+#simulation-screen .shape-lab-pane { min-width: 0; min-height: 0; border: 1px solid color-mix(in srgb, var(--theme-border) 78%, transparent); border-radius: 1rem; background: color-mix(in srgb, var(--theme-panel-muted) 48%, transparent); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.62rem; overflow: visible; }
+#simulation-screen .shape-lab-pane.is-current { border-color: color-mix(in srgb, var(--theme-display-start) 65%, var(--theme-border)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--theme-display-start) 12%, transparent); }
+#simulation-screen .shape-lab-pane-kicker { color: var(--theme-kicker-accent); font-size: 0.67rem; font-weight: 900; letter-spacing: 0.11em; text-transform: uppercase; }
+#simulation-screen .shape-lab-pane-title { margin: 0; color: var(--theme-text); font-size: 0.83rem; font-weight: 900; line-height: 1.3; }
+#simulation-screen .shape-lab-copy, #simulation-screen .shape-lab-caption, #simulation-screen .shape-lab-tail { color: var(--theme-text-soft); font-size: 0.72rem; line-height: 1.42; }
+#simulation-screen .shape-lab-formula { border: 1px dashed color-mix(in srgb, var(--theme-display-end) 42%, var(--theme-border)); border-radius: 0.72rem; background: color-mix(in srgb, var(--theme-display-end) 6%, transparent); color: var(--theme-text); padding: 0.55rem 0.62rem; font-size: 0.74rem; font-weight: 800; line-height: 1.4; overflow-wrap: anywhere; }
+#simulation-screen .shape-lab-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; }
+#simulation-screen .shape-lab-controls .simulation-action-button { min-width: 9.75rem; }
+#simulation-screen .shape-lab-info-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.55rem; }
+#simulation-screen .shape-lab-info { border-radius: 0.78rem; border: 1px solid color-mix(in srgb, var(--theme-border) 72%, transparent); background: color-mix(in srgb, var(--theme-panel-muted) 42%, transparent); padding: 0.62rem; }
+#simulation-screen .shape-lab-info strong { display: block; color: var(--theme-text); font-size: 0.7rem; margin-bottom: 0.28rem; }
+#simulation-screen .shape-lab-info span { color: var(--theme-text-soft); font-size: 0.68rem; line-height: 1.4; }
+#simulation-screen .shape-lab-mechanism { display: grid; gap: 0.55rem; align-content: start; flex: 1; }
+#simulation-screen .shape-trial-row, #simulation-screen .shape-opportunity-strip, #simulation-screen .shape-population, #simulation-screen .shape-contribution-row { display: flex; flex-wrap: wrap; gap: 0.28rem; align-items: center; }
+#simulation-screen .shape-token, #simulation-screen .shape-opportunity, #simulation-screen .shape-population-dot, #simulation-screen .shape-contribution { display: inline-grid; place-items: center; min-width: 1.65rem; min-height: 1.65rem; border-radius: 0.5rem; border: 1px solid var(--theme-border-strong); background: var(--theme-panel-deep); color: var(--theme-text-soft); font-size: 0.64rem; font-weight: 900; }
+#simulation-screen .shape-token.is-success, #simulation-screen .shape-population-dot.is-target, #simulation-screen .shape-opportunity.is-active { border-color: var(--theme-accent-green); background: color-mix(in srgb, var(--theme-accent-green) 17%, var(--theme-panel-deep)); color: var(--theme-text); }
+#simulation-screen .shape-opportunity { min-width: 0.9rem; min-height: 1.9rem; width: 0.9rem; border-radius: 0.3rem; }
+#simulation-screen .shape-population-dot { border-radius: 999px; min-width: 1.15rem; min-height: 1.15rem; width: 1.15rem; height: 1.15rem; font-size: 0; }
+#simulation-screen .shape-flow-pool { position: relative; height: 2.15rem; overflow: hidden; border: 1px solid var(--theme-border-strong); border-radius: 0.65rem; background: var(--theme-panel-deep); }
+#simulation-screen .shape-flow-fill { height: 100%; width: var(--pool-width, 100%); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--theme-display-start) 74%, transparent) 0 9px, color-mix(in srgb, var(--theme-display-end) 68%, transparent) 9px 18px); transition: width 320ms ease; }
+#simulation-screen .shape-flow-pool span { position: absolute; inset: 0; display: grid; place-items: center; color: var(--theme-text); font-size: 0.68rem; font-weight: 900; text-shadow: 0 1px 2px var(--theme-panel-deep); }
+#simulation-screen .shape-mini-chart { width: 100%; min-width: 0; min-height: 11rem; display: flex; align-items: stretch; gap: 0.14rem; border-left: 1px solid var(--theme-border-strong); border-bottom: 1px solid var(--theme-border-strong); padding: 0.35rem 0.22rem 0; overflow: hidden; }
+#simulation-screen .shape-bar-slot { flex: 1 1 0; min-width: 0; display: grid; grid-template-rows: minmax(5rem, 1fr) auto; gap: 0.14rem; align-items: end; min-height: 9.1rem; overflow: hidden; }
+#simulation-screen .shape-bar { width: 100%; height: max(0.18rem, var(--shape-height, 0%)); border: 1px solid color-mix(in srgb, var(--theme-display-start) 72%, var(--theme-border)); border-radius: 0.36rem 0.36rem 0.08rem 0.08rem; background: linear-gradient(180deg, var(--theme-display-start), color-mix(in srgb, var(--theme-display-end) 68%, var(--theme-display-start))); transition: height 300ms ease, opacity 180ms ease; transform-origin: bottom; }
+#simulation-screen .shape-bar.is-hidden { opacity: 0.12; height: 0.18rem; }
+#simulation-screen .shape-bar.is-highlight { outline: 3px solid color-mix(in srgb, var(--theme-accent-amber) 45%, transparent); }
+#simulation-screen .shape-bar-slot.is-selected .shape-bar, #simulation-screen .shape-density-block.is-selected { box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-accent-green) 52%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--theme-text) 28%, transparent); }
+#simulation-screen .shape-bar-value, #simulation-screen .shape-bar-label { min-width: 0; overflow: hidden; text-overflow: clip; text-align: center; color: var(--theme-text-muted); font-size: clamp(0.46rem, 0.72vw, 0.58rem); line-height: 1.15; white-space: nowrap; }
+#simulation-screen .shape-bar-value { color: var(--theme-text-soft); font-weight: 800; }
+#simulation-screen .shape-height-inspector { min-width: 0; display: grid; gap: 0.34rem; border-left: 4px solid var(--theme-accent-green); border-radius: 0.68rem; background: color-mix(in srgb, var(--theme-accent-green) 8%, var(--theme-panel-deep)); padding: 0.55rem 0.62rem; }
+#simulation-screen .shape-height-inspector-head { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 0.55rem; flex-wrap: wrap; }
+#simulation-screen .shape-height-inspector-title { color: var(--theme-text); font-size: 0.7rem; font-weight: 900; }
+#simulation-screen .shape-height-inspector-picker { display: flex; align-items: center; gap: 0.4rem; color: var(--theme-text-muted); font-size: 0.62rem; font-weight: 800; }
+#simulation-screen .shape-height-inspector-select { max-width: min(14rem, 100%); min-height: 2rem; border: 1px solid var(--theme-border-strong); border-radius: 0.5rem; background: var(--theme-input-bg); color: var(--theme-text); padding: 0.28rem 1.7rem 0.28rem 0.42rem; font: inherit; }
+#simulation-screen .shape-height-inspector-select:focus-visible { outline: 3px solid color-mix(in srgb, var(--theme-accent-green) 58%, transparent); outline-offset: 2px; }
+#simulation-screen .shape-height-inspector-lead { color: var(--theme-text); font-size: 0.68rem; font-weight: 800; line-height: 1.38; overflow-wrap: anywhere; }
+#simulation-screen .shape-height-inspector-examples { min-width: 0; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+#simulation-screen .shape-height-inspector-examples-label { flex-basis: 100%; color: var(--theme-text-muted); font-size: 0.57rem; font-weight: 800; line-height: 1.3; }
+#simulation-screen .shape-height-inspector-example-chip { min-width: 0; max-width: 100%; border: 1px solid color-mix(in srgb, var(--theme-accent-green) 30%, var(--theme-border)); border-radius: 999px; background: color-mix(in srgb, var(--theme-panel) 78%, transparent); color: var(--theme-text-soft); padding: 0.18rem 0.38rem; font-size: 0.57rem; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
+#simulation-screen .shape-height-inspector-copy { color: var(--theme-text-soft); font-size: 0.66rem; line-height: 1.42; }
+#simulation-screen .shape-run-example, #simulation-screen .shape-story-summary { border-left: 4px solid var(--theme-display-start); border-radius: 0.62rem; background: color-mix(in srgb, var(--theme-display-start) 8%, var(--theme-panel-deep)); color: var(--theme-text-soft); padding: 0.52rem 0.58rem; font-size: 0.68rem; font-weight: 800; line-height: 1.42; overflow-wrap: anywhere; }
+#simulation-screen .shape-story-summary { border-left-color: var(--theme-accent-amber); }
+#simulation-screen .shape-sequence-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: 0.4rem; max-height: none; overflow: visible; align-content: start; }
+#simulation-screen .shape-sequence-group { border: 1px solid var(--theme-border); border-left-width: 4px; border-radius: 0.55rem; padding: 0.48rem; background: var(--theme-panel-deep); opacity: 0.35; transform: translateY(0.55rem); transition: opacity 180ms ease, transform 180ms ease; }
+#simulation-screen .shape-sequence-group.is-built { opacity: 1; transform: translateY(0); }
+#simulation-screen .shape-sequence-group.is-rise { border-left-color: var(--theme-accent-green); }
+#simulation-screen .shape-sequence-group.is-peak { border-left-color: var(--theme-accent-amber); }
+#simulation-screen .shape-sequence-group.is-fall { border-left-color: var(--theme-accent-rose); }
+#simulation-screen .shape-sequence-group strong { color: var(--theme-text); display: block; font-size: 0.68rem; line-height: 1.3; }
+#simulation-screen .shape-sequence-list { color: var(--theme-text-muted); font-size: 0.65rem; line-height: 1.4; overflow-wrap: anywhere; }
+#simulation-screen .shape-sequence-cue { margin-top: 0.24rem; color: var(--theme-text-soft); font-size: 0.65rem; font-weight: 900; line-height: 1.35; }
+#simulation-screen .shape-ratio-list, #simulation-screen .shape-combination-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.4rem; max-height: none; overflow: visible; align-content: start; }
+#simulation-screen .shape-ratio-row, #simulation-screen .shape-combination-row { border-left: 4px solid var(--theme-border-strong); border-radius: 0.45rem; background: var(--theme-panel-deep); color: var(--theme-text-soft); padding: 0.4rem 0.48rem; font-size: 0.64rem; line-height: 1.3; }
+#simulation-screen .shape-ratio-row.is-rise { border-left-color: var(--theme-accent-green); }
+#simulation-screen .shape-ratio-row.is-fall { border-left-color: var(--theme-accent-rose); }
+#simulation-screen .shape-comparison { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+#simulation-screen .shape-comparison .simulation-toggle-chip { min-height: 2.35rem; }
+#simulation-screen .shape-ribbon { position: relative; height: 4rem; border: 1px solid var(--theme-border-strong); border-radius: 0.6rem; background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--theme-display-start) 36%, var(--theme-panel)) 0 12.5%, color-mix(in srgb, var(--theme-display-end) 24%, var(--theme-panel)) 12.5% 25%); overflow: hidden; }
+#simulation-screen .shape-ribbon-probe { position: absolute; top: 0.35rem; bottom: 0.35rem; left: var(--probe-left, 0%); width: 25%; border: 3px solid var(--theme-accent-amber); border-radius: 0.42rem; background: color-mix(in srgb, var(--theme-accent-amber) 20%, transparent); transition: left 120ms ease; }
+#simulation-screen .shape-probe-input { width: 100%; min-height: 2.75rem; accent-color: var(--theme-display-start); }
+#simulation-screen .shape-density-blocks { display: flex; align-items: end; gap: 0.14rem; height: 8.6rem; border-bottom: 1px solid var(--theme-border-strong); }
+#simulation-screen .shape-density-block { flex: 1; height: var(--shape-height, 10%); min-width: 0.18rem; border-radius: 0.18rem 0.18rem 0 0; background: color-mix(in srgb, var(--theme-display-start) 76%, var(--theme-display-end)); transition: height 300ms ease; }
+#simulation-screen .shape-restart-note { border-radius: 0.65rem; border: 1px dashed var(--theme-accent-green); background: color-mix(in srgb, var(--theme-accent-green) 8%, transparent); color: var(--theme-text-soft); padding: 0.5rem; font-size: 0.68rem; line-height: 1.4; }
+#simulation-screen .shape-contribution { min-width: 3.6rem; min-height: 2.1rem; padding: 0.2rem 0.35rem; }
+#simulation-screen .shape-stage-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+#simulation-screen .shape-stage-tab { border: 1px solid var(--theme-border); border-radius: 999px; color: var(--theme-text-muted); padding: 0.26rem 0.45rem; font-size: 0.61rem; font-weight: 800; }
+#simulation-screen .shape-stage-tab.is-active { border-color: var(--theme-display-start); color: var(--theme-text); background: color-mix(in srgb, var(--theme-display-start) 13%, transparent); }
+#simulation-screen .shape-lab.is-playing .shape-lab-pane.is-current { animation: shape-lab-pulse 700ms ease-in-out infinite alternate; }
+@keyframes shape-lab-pulse { from { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--theme-display-start) 10%, transparent); } to { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--theme-display-start) 27%, transparent); } }
+@container (max-width: 68rem) { #simulation-screen .shape-lab-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } #simulation-screen .shape-lab-pane:nth-child(3) { grid-column: 1 / -1; } #simulation-screen .shape-lab-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @container (max-width: 44rem) { #simulation-screen .shape-lab-grid, #simulation-screen .shape-lab-info-grid { grid-template-columns: minmax(0, 1fr); } #simulation-screen .shape-lab-pane:nth-child(3) { grid-column: auto; } #simulation-screen .shape-sequence-groups, #simulation-screen .shape-ratio-list, #simulation-screen .shape-combination-list { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1180px) { #simulation-screen .shape-lab-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } #simulation-screen .shape-lab-pane:nth-child(3) { grid-column: 1 / -1; } #simulation-screen .shape-lab-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 720px) { #simulation-screen .shape-lab-grid { grid-template-columns: minmax(0, 1fr); } #simulation-screen .shape-lab-pane:nth-child(3) { grid-column: auto; } #simulation-screen .shape-lab-info-grid { grid-template-columns: minmax(0, 1fr); } #simulation-screen .shape-sequence-groups, #simulation-screen .shape-ratio-list, #simulation-screen .shape-combination-list { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { #simulation-screen .shape-lab-head { flex-direction: column; } #simulation-screen .shape-lab-controls { flex-direction: column; } #simulation-screen .shape-lab-controls .simulation-action-button { width: 100%; min-width: 0; } #simulation-screen .shape-mini-chart { min-height: 10rem; gap: 0.08rem; } #simulation-screen .shape-bar-value { display: none; } }
+@media (prefers-reduced-motion: reduce) { #simulation-screen .shape-flow-fill, #simulation-screen .shape-bar, #simulation-screen .shape-sequence-group, #simulation-screen .shape-ribbon-probe, #simulation-screen .shape-density-block { transition: none !important; } #simulation-screen .shape-lab.is-playing .shape-lab-pane.is-current { animation: none !important; } }
+</style>
 </head>
 <body id="main-body" data-theme="dark" class="min-h-[100dvh] flex flex-col items-center justify-start p-2 sm:p-4 relative overflow-x-hidden">
     <div id="theme-radial-bg" class="fixed inset-0 z-0 opacity-20 pointer-events-none"></div>
@@ -647,6 +733,23 @@
                             <div id="simulation-presets" class="simulation-preset-list simulation-example-list"></div>
                         </div>
 
+                        <section id="simulation-shape-lab" class="shape-lab" aria-labelledby="shape-lab-title">
+                            <div class="shape-lab-head">
+                                <div>
+                                    <div class="archive-stage-kicker">Shape Lab · why the graph looks this way</div>
+                                    <h2 id="shape-lab-title" class="simulation-panel-title">Why does this distribution have this shape?</h2>
+                                    <p class="simulation-section-copy">Build the story behind the bars or curve, then run the simulation and watch that pattern appear.</p>
+                                </div>
+                                <div id="shape-lab-status" class="simulation-panel-badge" aria-live="polite">Ready to predict</div>
+                            </div>
+                            <div class="shape-lab-controls" aria-label="Shape explanation controls">
+                                <button id="shape-lab-play" type="button" data-action="shape-lab-play" class="simulation-action-button simulation-action-button-accent">Play explanation</button>
+                                <button id="shape-lab-next" type="button" data-action="shape-lab-next" class="simulation-action-button">Next step</button>
+                                <button type="button" data-action="shape-lab-reset" class="simulation-action-button simulation-action-button-muted">Reset explanation</button>
+                            </div>
+                            <div id="shape-lab-content"></div>
+                        </section>
+
                         <div class="simulation-main-grid">
                             <div id="simulation-see-column" class="simulation-see-column simulation-tutorial-panel" data-simulation-tutorial-step="graph">
                                 <div class="simulation-panel-tutorial-overlay" data-simulation-tutorial-overlay="graph">
@@ -1000,7 +1103,7 @@
             },
             {
                 id: "cdf",
-                label: "Does it settle down?",
+                label: "How does probability accumulate?",
                 helper: "Cumulative view",
                 tone: "cdf",
                 contentTitle: "Cumulative distribution",
@@ -1043,8 +1146,68 @@
             return { value, recentLabel, scene };
         }
 
+        const SHAPE_LAB_CONFIG = Object.freeze({
+            binomial: Object.freeze({
+                type: "branching",
+                prediction: "Why do the bars start short, rise toward the middle, then fall again?",
+                creates: "One run contains a fixed number of two-result trials. We sort the whole run by its final success count.",
+                highLow: "One-sided runs have very few possible orders. Mixed runs can be arranged in many more orders, so their bars are usually taller.",
+                parameterEffect: "If success becomes easier, success-heavy runs become more common and the tallest bar moves right. If success becomes harder, it moves left.",
+                notice: "For a fair coin, each H/T order is equally likely: one order at either edge and the most orders near an even split."
+            }),
+            geometric: Object.freeze({
+                type: "probability-flow",
+                prediction: "Why is an immediate first success most common, with every later bar shorter?",
+                creates: "A run ends the moment its first success happens.",
+                highLow: "Everyone can succeed immediately. Reaching a later bar requires failing every earlier trial, so fewer runs remain.",
+                parameterEffect: "Easier success empties the waiting group sooner. Harder success leaves more runs continuing into later trials.",
+                notice: "Moving one bar right always adds one more failure that must happen first."
+            }),
+            poisson: Object.freeze({
+                type: "rare-events",
+                prediction: "Why do the bars rise toward an ordinary event count and fall toward unusually quiet or crowded windows?",
+                creates: "Repeat the same fixed time or space window and count how many events occur inside it.",
+                highLow: "Very quiet and very crowded windows are unusual. Counts near the usual activity gather the most windows.",
+                parameterEffect: "More activity moves the tallest bars toward larger counts and makes a wider range of busy windows believable.",
+                notice: "The peak represents ordinary-looking windows; the two sides represent increasingly unusual quiet or crowding."
+            }),
+            hypergeometric: Object.freeze({
+                type: "combinations",
+                prediction: "Why do mixed handfuls usually have taller bars than very one-sided handfuls?",
+                creates: "Take a handful from a finite stock containing target and other objects, without putting chosen objects back.",
+                highLow: "Mixed handfuls can usually be assembled from many different actual objects. Extreme mixes have fewer valid handfuls or may be impossible.",
+                parameterEffect: "A larger target share moves the common handfuls toward more targets. A larger draw changes the remaining stock more strongly.",
+                notice: "Without replacement, every chosen object changes what the next draw can be."
+            }),
+            normal: Object.freeze({
+                type: "convolution",
+                prediction: "Why do results gather near the centre and thin out toward both extremes?",
+                creates: "Many small influences push a result up or down, then combine into one final value.",
+                highLow: "There are many ways for opposite pushes to partly cancel, but few ways for many pushes to line up strongly in one direction.",
+                parameterEffect: "Changing the centre moves the bell. Changing the spread makes it wider and lower or narrower and taller.",
+                notice: "The middle is common because many different combinations land there; either extreme needs unusual agreement."
+            }),
+            uniform: Object.freeze({
+                type: "ribbon",
+                prediction: "If two windows have the same width, should moving one left or right change its chance?",
+                creates: "Choose a location anywhere along one allowed range, with no part of the range preferred.",
+                highLow: "Every equal-width window offers the same amount of landing space, so the graph stays flat.",
+                parameterEffect: "A wider allowed range spreads the same total chance more thinly. A narrower range packs it more tightly.",
+                notice: "For a continuous result, chance belongs to a stretch of the ruler, not to one exact point."
+            }),
+            exponential: Object.freeze({
+                type: "survival",
+                prediction: "Why are short waits common while progressively longer waits become rarer?",
+                creates: "Start many clocks together and stop each one when its next event occurs.",
+                highLow: "The first time region starts with every clock. Later regions contain only the smaller group still waiting.",
+                parameterEffect: "Faster events shrink the waiting group sooner. Slower events leave more long waits.",
+                notice: "Each step right first requires surviving every earlier time region."
+            })
+        });
+
         const SIMULATION_META = {
             binomial: {
+                shapeLab: SHAPE_LAB_CONFIG.binomial,
                 params: [
                     { id: "n", label: "Trials", min: 1, max: 24, step: 1, default: 12, integer: true, note: "How many tries happen in each run." },
                     { id: "p", label: "Chance of success", min: 0.1, max: 0.9, step: 0.05, default: 0.5, note: "Chance that one trial is a success." }
@@ -1095,6 +1258,7 @@
                 }
             },
             geometric: {
+                shapeLab: SHAPE_LAB_CONFIG.geometric,
                 params: [
                     { id: "p", label: "Chance of success", min: 0.1, max: 0.9, step: 0.05, default: 0.3, note: "Chance that one try is the first success." }
                 ],
@@ -1146,6 +1310,7 @@
                 }
             },
             poisson: {
+                shapeLab: SHAPE_LAB_CONFIG.poisson,
                 params: [
                     { id: "lambda", label: "Average events", min: 0.5, max: 15, step: 0.5, default: 4, note: "Average number of events in one interval." }
                 ],
@@ -1197,6 +1362,7 @@
                 }
             },
             hypergeometric: {
+                shapeLab: SHAPE_LAB_CONFIG.hypergeometric,
                 params: [
                     { id: "population", label: "Population size", min: 10, max: 60, step: 1, default: 30, integer: true, note: "How many items are in the whole set." },
                     { id: "successes", label: "Target items", min: 1, max: 30, step: 1, default: 8, integer: true, note: "How many items are the kind you care about." },
@@ -1259,6 +1425,7 @@
                 }
             },
             normal: {
+                shapeLab: SHAPE_LAB_CONFIG.normal,
                 params: [
                     { id: "mu", label: "Average", min: -5, max: 5, step: 0.5, default: 0, note: "The centre of the bell shape." },
                     { id: "sigma", label: "Spread", min: 0.5, max: 3, step: 0.25, default: 1, note: "How wide the values spread around the centre." }
@@ -1307,6 +1474,7 @@
                 }
             },
             uniform: {
+                shapeLab: SHAPE_LAB_CONFIG.uniform,
                 params: [
                     { id: "a", label: "Minimum", min: -2, max: 9, step: 0.5, default: 0, note: "Smallest possible value." },
                     { id: "b", label: "Maximum", min: -1, max: 12, step: 0.5, default: 6, note: "Largest possible value." }
@@ -1353,6 +1521,7 @@
                 }
             },
             exponential: {
+                shapeLab: SHAPE_LAB_CONFIG.exponential,
                 params: [
                     { id: "lambda", label: "Average rate", min: 0.25, max: 3, step: 0.25, default: 1, note: "How often events happen on average." }
                 ],
@@ -1467,9 +1636,22 @@
             scheduledTimeouts: new Set(),
             debouncedTimeouts: new Map(),
             simulationAutoTimer: null,
+            shapeLabTimer: null,
             lastLives: null
         };
 
+
+        function createShapeLabState(distId = distributions[0].id) {
+            return {
+                distId,
+                step: 0,
+                playing: false,
+                probe: 0.18,
+                withReplacement: false,
+                restartAt: null,
+                selectedIndex: null
+            };
+        }
 
         function createEmptyChecklistSelections() {
             return Object.fromEntries(Object.keys(CHECKLIST_GROUPS).map((groupId) => [groupId, ""]));
@@ -1521,7 +1703,8 @@
                 simulationRunSize: 40,
                 simulationVisuals: createDefaultSimulationVisuals(),
                 simulationParams: createDefaultSimulationParams(),
-                simulationResults: createEmptySimulationResults()
+                simulationResults: createEmptySimulationResults(),
+                shapeLab: createShapeLabState(distributions[0].id)
             };
         }
 
@@ -1596,7 +1779,7 @@
             simulationScreen simulationFilters simulationActiveFilters simulationResultsSummary simulationTutorialBackdrop simulationNav simulationSeeColumn simulationStageHead
             simulationLearningScaffold simulationScene simulationRecent simulationRunBadge simulationRunMainBtn simulationRunTotal simulationRunTotalLabel simulationRunStatusCopy
             simulationRunSizeLabel simulationRunSizeCopy simulationRunExample simulationChartMode simulationChartContext simulationChart simulationChartLegend simulationParameters
-            simulationRunSize simulationToggles simulationToggleNotes simulationPresets simulationStats simulationWhy finalScore finalTime
+            simulationRunSize simulationToggles simulationToggleNotes simulationPresets simulationStats simulationWhy simulationShapeLab shapeLabContent shapeLabStatus shapeLabPlay shapeLabNext finalScore finalTime
             finalStreak finalDiagnosis victoryMsg gameoverReason gameoverDiagnosis recordsHighScore recordsLastScore recordsLastOutcome
             recordsTotalRuns recordsLastPack recordsList recordsEmpty vizCanvas vfxLayer
         `.trim().split(/\s+/);
@@ -2317,6 +2500,7 @@
             if (els.battleDecision && screenId !== "battle-screen") els.battleDecision.scrollTop = 0;
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
             state.screen = screenId;
+            if (screenId !== "simulation-screen") stopShapeLab();
             syncVizLoop();
             syncSimulationAuto();
         }
@@ -3695,6 +3879,7 @@
             renderSimulationLearningScaffold(model);
             renderSimulationChartContext(model);
             renderSimulationScene(model);
+            renderSimulationShapeLab(model);
             renderSimulationStats(model);
             renderSimulationWhy(model);
             renderSimulationChart(model);
@@ -4336,6 +4521,828 @@
             els.simulationRecent.appendChild(row);
         }
 
+        function getShapeLabMaxStep(model) {
+            const steps = {
+                binomial: model.params.n <= 8 ? Math.round(model.params.n) + 1 : 6,
+                geometric: 10,
+                poisson: Math.min(12, Math.floor(model.theory.domainMax) + 1),
+                hypergeometric: Math.min(8, Math.floor(model.theory.domainMax - model.theory.domainMin) + 1),
+                uniform: 4,
+                exponential: 8,
+                normal: 5
+            };
+            return Math.max(1, steps[model.dist.id] || 4);
+        }
+
+        function getShapeLabBuiltCount(step, maxStep, itemCount) {
+            if (step <= 0) return 0;
+            return Math.min(itemCount, Math.ceil((step / maxStep) * itemCount));
+        }
+
+        function formatShapeProbability(value) {
+            if (value >= 0.1) return value.toFixed(3);
+            if (value >= 0.001) return value.toFixed(4);
+            return value > 0 ? value.toExponential(2) : "0";
+        }
+
+        function formatShapeCount(value) {
+            if (!Number.isFinite(value)) return "very many";
+            if (value < 1e6) return Math.round(value).toLocaleString();
+            if (value < 1e9) return (value / 1e6).toFixed(value < 1e7 ? 1 : 0) + " million";
+            return (value / 1e9).toFixed(1) + " billion";
+        }
+
+        function stopShapeLab() {
+            lifecycle.cancel("shape-lab-play");
+            runtime.shapeLabTimer = null;
+            if (state.shapeLab) state.shapeLab.playing = false;
+            if (els.simulationShapeLab) els.simulationShapeLab.classList.remove("is-playing");
+            if (els.shapeLabPlay) els.shapeLabPlay.textContent = "Play explanation";
+        }
+
+        function resetShapeLab(distId = state.simulationSelectedDist, shouldRender = true) {
+            stopShapeLab();
+            state.shapeLab = createShapeLabState(distId);
+            if (shouldRender && state.screen === "simulation-screen") renderSimulationShapeLab(buildSimulationModel(getCurrentSimulationDist()));
+        }
+
+        function stepShapeLab(model = buildSimulationModel(getCurrentSimulationDist())) {
+            if (state.shapeLab.distId !== model.dist.id) state.shapeLab = createShapeLabState(model.dist.id);
+            const maxStep = getShapeLabMaxStep(model);
+            if (state.shapeLab.step >= maxStep) {
+                stopShapeLab();
+                renderSimulationShapeLab(model);
+                return false;
+            }
+            state.shapeLab.step += 1;
+            renderSimulationShapeLab(model);
+            return true;
+        }
+
+        function playShapeLab(model = buildSimulationModel(getCurrentSimulationDist())) {
+            stopShapeLab();
+            if (state.shapeLab.distId !== model.dist.id || state.shapeLab.step >= getShapeLabMaxStep(model)) state.shapeLab = createShapeLabState(model.dist.id);
+            state.shapeLab.playing = true;
+            renderSimulationShapeLab(model);
+            const reducedMotion = Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+            const advance = () => {
+                lifecycle.release("shape-lab-play");
+                runtime.shapeLabTimer = null;
+                if (state.screen !== "simulation-screen" || document.hidden || !state.shapeLab.playing) {
+                    stopShapeLab();
+                    return;
+                }
+                const currentModel = buildSimulationModel(getCurrentSimulationDist());
+                if (!stepShapeLab(currentModel)) return;
+                if (state.shapeLab.step >= getShapeLabMaxStep(currentModel)) {
+                    stopShapeLab();
+                    renderSimulationShapeLab(currentModel);
+                    return;
+                }
+                const timeoutId = window.setTimeout(advance, reducedMotion ? 260 : 720);
+                runtime.shapeLabTimer = timeoutId;
+                lifecycle.track("shape-lab-play", () => window.clearTimeout(timeoutId));
+            };
+            const timeoutId = window.setTimeout(advance, reducedMotion ? 80 : 520);
+            runtime.shapeLabTimer = timeoutId;
+            lifecycle.track("shape-lab-play", () => window.clearTimeout(timeoutId));
+        }
+
+        function createShapeLabPane(kicker, title, paneIndex, currentPane) {
+            const pane = createEl("section", { className: `shape-lab-pane${paneIndex === currentPane ? " is-current" : ""}` });
+            pane.appendChild(createEl("div", { className: "shape-lab-pane-kicker", text: kicker }));
+            pane.appendChild(createEl("h3", { className: "shape-lab-pane-title", text: title }));
+            return pane;
+        }
+
+        function appendShapeLabText(parent, text, className = "shape-lab-copy") {
+            parent.appendChild(createEl("p", { className, text }));
+        }
+
+        function renderShapeHeightInspector(parent, detail, picker = {}) {
+            const inspector = createEl("div", { className: "shape-height-inspector" });
+            const head = createEl("div", { className: "shape-height-inspector-head" });
+            head.appendChild(createEl("div", { className: "shape-height-inspector-title", text: detail.title || "Why this height?" }));
+            if (picker.choices?.length) {
+                const label = createEl("label", { className: "shape-height-inspector-picker" });
+                label.appendChild(createEl("span", { text: picker.label || "Choose a bar" }));
+                const select = createEl("select", { className: "shape-height-inspector-select", attrs: { "data-shape-lab-input": "inspect", "aria-label": picker.label || "Choose a bar" } });
+                picker.choices.forEach((choice) => select.appendChild(createEl("option", { text: choice.label, attrs: { value: String(choice.value) } })));
+                select.value = String(picker.selectedIndex);
+                label.appendChild(select);
+                head.appendChild(label);
+            }
+            inspector.appendChild(head);
+            if (detail.lead) inspector.appendChild(createEl("div", { className: "shape-height-inspector-lead", text: detail.lead }));
+            if (detail.examples?.length) {
+                const examples = createEl("div", { className: "shape-height-inspector-examples" });
+                if (detail.examplesLabel) examples.appendChild(createEl("div", { className: "shape-height-inspector-examples-label", text: detail.examplesLabel }));
+                detail.examples.slice(0, 3).forEach((example) => examples.appendChild(createEl("span", { className: "shape-height-inspector-example-chip", text: example })));
+                inspector.appendChild(examples);
+            }
+            inspector.appendChild(createEl("div", { className: "shape-height-inspector-copy", text: detail.copy, attrs: { "aria-live": "polite" } }));
+            parent.appendChild(inspector);
+        }
+
+        function buildBinaryRunExamples(total, successes, successSymbol = "S", otherSymbol = "F", limit = 5) {
+            const examples = [];
+            const run = Array(total).fill(otherSymbol);
+            const chosen = [];
+            const placeSuccesses = (start, remaining) => {
+                if (examples.length >= limit) return;
+                if (remaining === 0) {
+                    if (total <= 10) examples.push(run.join(" "));
+                    else if (!successes) examples.push("no successes in the run");
+                    else if (successes === total) examples.push("success on every trial");
+                    else examples.push("success on trial" + (successes === 1 ? " " : "s ") + chosen.map((index) => index + 1).join(", "));
+                    return;
+                }
+                for (let index = start; index <= total - remaining && examples.length < limit; index += 1) {
+                    run[index] = successSymbol;
+                    chosen.push(index);
+                    placeSuccesses(index + 1, remaining - 1);
+                    chosen.pop();
+                    run[index] = otherSymbol;
+                }
+            };
+            placeSuccesses(0, successes);
+            return examples;
+        }
+
+        function getBinaryRunLanguage(model) {
+            const presetId = getActiveSimulationPreset(model)?.id;
+            if (presetId === "coins") return { success: "head", successes: "heads", other: "tail", others: "tails", successSymbol: "H", otherSymbol: "T", trial: "flip", trials: "flips" };
+            if (presetId === "defects") return { success: "faulty bulb", successes: "faulty bulbs", other: "working bulb", others: "working bulbs", successSymbol: "D", otherSymbol: "W", trial: "check", trials: "checks" };
+            if (presetId === "clicks") return { success: "made shot", successes: "made shots", other: "miss", others: "misses", successSymbol: "M", otherSymbol: "X", trial: "shot", trials: "shots" };
+            return { success: "success", successes: "successes", other: "other result", others: "other results", successSymbol: "S", otherSymbol: "F", trial: "trial", trials: "trials" };
+        }
+
+        function getShapeInspectorIndex(itemCount, preferredIndex = 0) {
+            if (itemCount <= 0) return null;
+            const storedIndex = Number(state.shapeLab.selectedIndex);
+            if (Number.isInteger(storedIndex) && storedIndex >= 0 && storedIndex < itemCount) return storedIndex;
+            return clamp(preferredIndex, 0, itemCount - 1);
+        }
+
+        function renderShapeBars(parent, values, labels, builtCount, options = {}) {
+            const chart = createEl("div", { className: "shape-mini-chart", attrs: { role: "img", "aria-label": options.ariaLabel || "Probability mass bars; taller bars represent more probability." } });
+            const maxValue = Math.max(...values, 0.000001);
+            const canInspect = typeof options.explain === "function";
+            const preferredIndex = Number.isInteger(options.highlightIndex) && options.highlightIndex < builtCount ? options.highlightIndex : builtCount - 1;
+            const selectedIndex = canInspect ? getShapeInspectorIndex(builtCount, preferredIndex) : null;
+            values.forEach((value, index) => {
+                const built = index < builtCount;
+                const slot = createEl("div", { className: `shape-bar-slot${selectedIndex === index ? " is-selected" : ""}` });
+                slot.appendChild(createEl("div", {
+                    className: "shape-bar" + (built ? "" : " is-hidden") + (options.highlightIndex === index ? " is-highlight" : ""),
+                    attrs: { style: "--shape-height:" + (built ? Math.max(2, (value / maxValue) * 100) : 0) + "%", title: String(labels[index]) + " outcome", "aria-hidden": "true" }
+                }));
+                slot.appendChild(createEl("div", { className: "shape-bar-label", text: labels[index] }));
+                chart.appendChild(slot);
+            });
+            parent.appendChild(chart);
+            if (canInspect) {
+                const choices = labels.slice(0, builtCount).map((label, index) => ({ value: index, label: options.choiceLabel ? options.choiceLabel(label, index) : "Outcome " + label }));
+                renderShapeHeightInspector(parent, selectedIndex == null ? {
+                    title: "Which complete runs land here?",
+                    lead: "Build the first bar with Play explanation or Next step.",
+                    copy: "Then choose a bar to see the experiment stories collected by that outcome."
+                } : options.explain(selectedIndex), { choices, selectedIndex, label: options.pickerLabel || "Choose a bar" });
+            }
+            return selectedIndex;
+        }
+
+        function renderDensityBlocks(parent, values, options = {}) {
+            const chart = createEl("div", { className: "shape-density-blocks", attrs: { role: "img", "aria-label": options.ariaLabel || "Density shape. Curve height is density, not the probability of one exact value." } });
+            const scale = options.scale || Math.max(...values, 0.000001);
+            const visibleCount = options.visibleCount == null ? values.length : clamp(options.visibleCount, 0, values.length);
+            const canInspect = typeof options.explain === "function";
+            const labels = options.labels || values.map((_, index) => String(index));
+            const preferredIndex = Number.isInteger(options.highlightIndex) && options.highlightIndex < visibleCount ? options.highlightIndex : visibleCount - 1;
+            const selectedIndex = canInspect ? getShapeInspectorIndex(visibleCount, preferredIndex) : null;
+            values.forEach((value, index) => {
+                const visibleValue = index < visibleCount ? value : 0;
+                chart.appendChild(createEl("span", { className: `shape-density-block${selectedIndex === index ? " is-selected" : ""}`, attrs: { style: `--shape-height:${clamp((visibleValue / scale) * 100, visibleValue > 0 ? 1 : 0, 100)}%`, "aria-hidden": "true" } }));
+            });
+            parent.appendChild(chart);
+            if (canInspect) {
+                const choices = labels.slice(0, visibleCount).map((label, index) => ({ value: index, label: options.choiceLabel ? options.choiceLabel(label, index) : label }));
+                renderShapeHeightInspector(parent, selectedIndex == null ? {
+                    title: "Which nearby outcomes gather here?",
+                    lead: "Build the first part of the density with Play explanation or Next step.",
+                    copy: "Then choose a location. For a continuous outcome, compare equal-width neighbourhoods rather than exact points."
+                } : options.explain(selectedIndex), { choices, selectedIndex, label: options.pickerLabel || "Choose a region" });
+            }
+            return selectedIndex;
+        }
+
+        function renderShapeLabInfo(config) {
+            const grid = createEl("div", { className: "shape-lab-info-grid" });
+            [["What happens in one run?", config.creates], ["Why does the graph rise or fall?", config.highLow], ["What changes the shape?", config.parameterEffect], ["Main idea", config.notice]].forEach(([title, copy]) => {
+                const card = createEl("div", { className: "shape-lab-info" });
+                card.appendChild(createEl("strong", { text: title }));
+                card.appendChild(createEl("span", { text: copy }));
+                grid.appendChild(card);
+            });
+            return grid;
+        }
+
+        function getShapeLabPanes(model) {
+            const maxStep = getShapeLabMaxStep(model);
+            const currentPane = state.shapeLab.step === 0 ? 0 : Math.min(2, Math.floor(((state.shapeLab.step - 1) / maxStep) * 3));
+            const grid = createEl("div", { className: "shape-lab-grid" });
+            const panes = {
+                mechanism: createShapeLabPane("1 · One complete run", "What can happen in one run?", 0, currentPane),
+                construction: createShapeLabPane("2 · Why heights change", model.dist.family === "discrete" ? "Why do the bars rise or fall?" : "Why does the curve rise or fall?", 1, currentPane),
+                result: createShapeLabPane("3 · The visible pattern", model.dist.family === "discrete" ? "Taller bar = this result happens more often" : "Higher curve = more results gather nearby", 2, currentPane)
+            };
+            grid.append(panes.mechanism, panes.construction, panes.result);
+            return { grid, panes, maxStep };
+        }
+
+        function renderBranchingMechanism(model, panes, maxStep) {
+            const { n, p } = model.params;
+            const actualN = Math.round(n);
+            const values = Array.from({ length: actualN + 1 }, (_, k) => model.theory.pmfAt(k));
+            const builtCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, values.length);
+            const runLanguage = getBinaryRunLanguage(model);
+            const fairTrial = Math.abs(p - 0.5) < 0.0001;
+            const mode = values.indexOf(Math.max(...values));
+            const trialRow = createEl("div", { className: "shape-trial-row", attrs: { "aria-label": actualN + " places in one complete run" } });
+            Array.from({ length: Math.min(actualN, 24) }, (_, index) => trialRow.appendChild(createEl("span", { className: "shape-token", text: String(index + 1) })));
+            panes.mechanism.appendChild(trialRow);
+            appendShapeLabText(panes.mechanism, "One run has " + actualN + " " + runLanguage.trials + ". Record " + runLanguage.successSymbol + " for " + runLanguage.success + " or " + runLanguage.otherSymbol + " for " + runLanguage.other + ". When the run ends, count the " + runLanguage.successes + " and place the whole run in that bar.");
+            const exampleCount = clamp(Math.round(actualN * p), 0, actualN);
+            const exampleSymbols = Array(actualN).fill(runLanguage.otherSymbol);
+            for (let placed = 0; placed < exampleCount; placed += 1) {
+                const position = Math.min(actualN - 1, Math.floor(((placed + 1) * actualN) / (exampleCount + 1)));
+                exampleSymbols[position] = runLanguage.successSymbol;
+            }
+            const exampleRun = actualN <= 12 ? exampleSymbols.join(" ") : exampleCount + " " + (exampleCount === 1 ? runLanguage.success : runLanguage.successes) + " spread through the run";
+            panes.mechanism.appendChild(createEl("div", { className: "shape-run-example", text: "Example: " + exampleRun + "  →  " + exampleCount + " " + (exampleCount === 1 ? runLanguage.success : runLanguage.successes) + "  →  bar " + exampleCount }));
+            appendShapeLabText(panes.mechanism, "Different orders can finish with the same total. The graph puts all of those complete runs into the same bar.");
+
+            const middleLabel = actualN % 2 === 0 ? String(actualN / 2) : Math.floor(actualN / 2) + " or " + Math.ceil(actualN / 2);
+            const stories = actualN === 1 ? [
+                {
+                    className: "is-rise",
+                    title: "0 " + runLanguage.successes,
+                    copy: "The only run is " + runLanguage.otherSymbol + ".",
+                    cue: "One possible order"
+                },
+                {
+                    className: "is-fall",
+                    title: "1 " + runLanguage.success,
+                    copy: "The only run is " + runLanguage.successSymbol + ".",
+                    cue: "One possible order"
+                }
+            ] : [
+                {
+                    className: "is-rise",
+                    title: "Left edge · 0 " + runLanguage.successes,
+                    copy: "Every " + runLanguage.trial + " is " + runLanguage.other + ". Only one complete " + runLanguage.successSymbol + "/" + runLanguage.otherSymbol + " order fits.",
+                    cue: fairTrial ? "One order → short first bar" : "The possible-order pile starts with one"
+                },
+                {
+                    className: "is-rise",
+                    title: "Moving inward",
+                    copy: "With 1 " + runLanguage.success + ", it can occupy any of the " + actualN + " positions. Adding a few more creates even more ways to mix the two results.",
+                    cue: "More possible orders → bars can rise"
+                },
+                {
+                    className: "is-peak",
+                    title: "Middle · around " + middleLabel,
+                    copy: "Neither result is forced into only a few places. The two results have the greatest freedom to trade positions.",
+                    cue: fairTrial ? "Most orders → tallest bar" : "Most orders, before likelihood shifts the peak"
+                },
+                {
+                    className: "is-fall",
+                    title: "Past the middle",
+                    copy: "Now " + runLanguage.others + " are the smaller group inside the run. There are fewer ways to place them, so the number of complete orders shrinks.",
+                    cue: "Fewer possible orders → bars can fall"
+                },
+                {
+                    className: "is-fall",
+                    title: "Right edge · " + actualN + " " + runLanguage.successes,
+                    copy: "Every " + runLanguage.trial + " is " + runLanguage.success + ". Again, only one complete order fits.",
+                    cue: fairTrial ? "One order → short final bar" : "The possible-order pile ends with one"
+                }
+            ];
+            const storyVisibleCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, stories.length);
+            const constructionRule = actualN === 1
+                ? "With only one trial there is no middle rise and fall: the two bars simply compare the two possible results."
+                : fairTrial
+                    ? "Because the two results are equally likely, every complete " + runLanguage.successSymbol + "/" + runLanguage.otherSymbol + " order has the same chance. A larger pile of orders directly makes a taller bar."
+                    : p < 0.5
+                        ? runLanguage.successes + " are harder to get. Extra position choices make the bars rise at first, but eventually requiring another uncommon " + runLanguage.success + " matters more, so the bars fall before the halfway point."
+                        : runLanguage.successes + " are easier to get. Success-heavy runs are favoured, so the rise continues farther right before the bars fall.";
+            panes.construction.appendChild(createEl("div", { className: "shape-story-summary", text: constructionRule }));
+            const groups = createEl("div", { className: "shape-sequence-groups" });
+            stories.forEach((story, index) => {
+                const group = createEl("div", { className: "shape-sequence-group " + story.className + (index < storyVisibleCount ? " is-built" : "") });
+                group.appendChild(createEl("strong", { text: story.title }));
+                group.appendChild(createEl("div", { className: "shape-sequence-list", text: story.copy }));
+                group.appendChild(createEl("div", { className: "shape-sequence-cue", text: story.cue }));
+                groups.appendChild(group);
+            });
+            panes.construction.appendChild(groups);
+
+            renderShapeBars(panes.result, values, values.map((_, k) => String(k)), builtCount, {
+                highlightIndex: mode,
+                ariaLabel: "Success-count bars. The bars rise where more complete runs gather and fall where fewer gather.",
+                choiceLabel(_label, index) {
+                    return index + " " + (index === 1 ? runLanguage.success : runLanguage.successes);
+                },
+                pickerLabel: "Choose a success count",
+                explain(index) {
+                    const k = index;
+                    const otherCount = actualN - k;
+                    const routes = Math.round(Math.exp(logCombination(actualN, k)));
+                    const examples = buildBinaryRunExamples(actualN, k, runLanguage.successSymbol, runLanguage.otherSymbol, 3).map((example) => actualN <= 10 ? example : example.replace("no successes", "no " + runLanguage.successes).replace("success on every", runLanguage.success + " on every").replace("success on trial", runLanguage.success + " on trial"));
+                    const successText = k + " " + (k === 1 ? runLanguage.success : runLanguage.successes);
+                    const otherText = otherCount + " " + (otherCount === 1 ? runLanguage.other : runLanguage.others);
+                    let positionStory;
+                    if (actualN === 1) positionStory = "There is only one position, so each result has one possible order.";
+                    else if (k === 0) positionStory = "Every " + runLanguage.trial + " is forced to be " + runLanguage.other + ". The next bar is taller in a fair setup because one " + runLanguage.success + " can appear in any position.";
+                    else if (k === actualN) positionStory = "Every " + runLanguage.trial + " is forced to be " + runLanguage.success + ". Only one complete order reaches this far edge.";
+                    else if (Math.abs(k - actualN / 2) <= 0.5) positionStory = "This is the most flexible mix: the two results can trade positions in the greatest number of different orders.";
+                    else if (k < actualN / 2) positionStory = "This run is becoming less one-sided. There are more ways to place the " + runLanguage.successes + " among the " + runLanguage.others + ", so the possible-order piles are growing.";
+                    else positionStory = "The logic has reversed. " + runLanguage.others.charAt(0).toUpperCase() + runLanguage.others.slice(1) + " are now the smaller group, so there are fewer ways to place them and the possible-order piles shrink.";
+                    let heightStory;
+                    if (fairTrial) heightStory = "Every complete order has the same chance, so this pile size directly controls the bar height.";
+                    else if (k < mode) heightStory = "For this setting, the extra ways to make the next count still outweigh the difficulty of changing one more result, so the bars are rising.";
+                    else if (k === mode) heightStory = "Here the number of possible orders and how easy those runs are combine to make the tallest bar.";
+                    else heightStory = "Past the tallest bar, asking for another " + runLanguage.success + " makes the complete run too unusual for the extra position choices to compensate, so the bars fall.";
+                    return {
+                        title: "Why does the " + successText + " bar have this height?",
+                        lead: successText + " + " + otherText + " = " + actualN + " " + runLanguage.trials + ". Every complete run with that total joins this bar.",
+                        examplesLabel: "Some complete orders (" + runLanguage.successSymbol + " = " + runLanguage.success + ", " + runLanguage.otherSymbol + " = " + runLanguage.other + ")",
+                        examples,
+                        copy: "This bar collects " + (routes === 1 ? "one complete order" : formatShapeCount(routes) + " different complete orders") + ". " + positionStory + " " + heightStory
+                    };
+                }
+            });
+            appendShapeLabText(panes.result, "Amber marks the tallest bar. Green marks the bar you selected.", "shape-lab-caption");
+        }
+
+        function renderProbabilityFlow(model, panes, maxStep) {
+            const p = model.params.p;
+            const count = 10;
+            const builtCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, count);
+            const remaining = (1 - p) ** builtCount;
+            const pool = createEl("div", { className: "shape-flow-pool" });
+            pool.appendChild(createEl("div", { className: "shape-flow-fill", attrs: { style: "--pool-width:" + (remaining * 100) + "%" } }));
+            pool.appendChild(createEl("span", { text: "Runs still waiting for a first success" }));
+            panes.mechanism.appendChild(pool);
+            const trail = createEl("div", { className: "shape-trial-row", attrs: { "aria-label": "Failure trail ending at the first success" } });
+            for (let k = 1; k <= count; k += 1) {
+                trail.appendChild(createEl("span", { className: "shape-token" + (k <= builtCount && k === builtCount ? " is-success" : ""), text: k <= builtCount ? (k === builtCount ? "S" : "F") : String(k) }));
+            }
+            panes.mechanism.appendChild(trail);
+            appendShapeLabText(panes.mechanism, builtCount
+                ? "To finish on trial " + builtCount + ", the run must fail every earlier trial and then succeed. Any earlier success would have ended it sooner."
+                : "Every run begins before trial 1. A success ends the run; only a failure carries it forward to another trial.");
+            const list = createEl("div", { className: "shape-ratio-list" });
+            for (let k = 1; k <= builtCount; k += 1) {
+                const path = k <= 5 ? Array(k - 1).fill("F").concat("S").join(" → ") : "F → F → … → F → S";
+                const copy = k === 1
+                    ? "Trial 1 · " + path + " · everyone can succeed immediately, so this bar starts tallest."
+                    : "Trial " + k + " · " + path + " · one more earlier failure is required, so fewer runs reach this bar.";
+                list.appendChild(createEl("div", { className: "shape-ratio-row is-fall", text: copy }));
+            }
+            panes.construction.appendChild(list);
+            if (!builtCount) panes.construction.appendChild(createEl("div", { className: "shape-story-summary", text: "The waiting group can only shrink: each success removes a run before the next trial begins." }));
+            const values = Array.from({ length: count }, (_, index) => model.theory.pmfAt(index + 1));
+            renderShapeBars(panes.result, values, values.map((_, index) => String(index + 1)), builtCount, {
+                highlightIndex: 0,
+                ariaLabel: "First-success bars. Each later bar is shorter because fewer runs survive the earlier failures.",
+                choiceLabel(_label, index) {
+                    return "First success on trial " + (index + 1);
+                },
+                pickerLabel: "Choose a stopping trial",
+                explain(index) {
+                    const k = index + 1;
+                    const path = k <= 6 ? Array(k - 1).fill("F").concat("S").join(" → ") : "F → F → … → F → S";
+                    return {
+                        title: "Why is trial " + k + " this tall?",
+                        lead: k === 1 ? "The run succeeds immediately. Nothing has to happen first." : "The run must fail " + (k - 1) + " time" + (k === 2 ? "" : "s") + " first, then succeed on trial " + k + ".",
+                        examplesLabel: "The only order that stops here (F = failure, S = success)",
+                        examples: [path],
+                        copy: "There are no alternative orders because an earlier success would already have stopped the run. Everyone can reach the first bar, but every step right loses the runs that succeeded earlier. The group still waiting gets smaller, so every later bar is shorter."
+                    };
+                }
+            });
+            appendShapeLabText(panes.result, "Some runs may still be waiting after the displayed trials; they continue beyond the right edge.", "shape-lab-tail");
+        }
+
+        function renderRareEventMechanism(model, panes, maxStep) {
+            const lambda = model.params.lambda;
+            const stage = state.shapeLab.step;
+            const strip = createEl("div", { className: "shape-opportunity-strip", attrs: { "aria-label": "Many small moments inside one fixed window" } });
+            Array.from({ length: 30 }, (_, index) => strip.appendChild(createEl("span", { className: "shape-opportunity" + (index < Math.min(30, Math.max(1, Math.round(lambda * 2))) ? " is-active" : ""), text: "" })));
+            panes.mechanism.appendChild(strip);
+            appendShapeLabText(panes.mechanism, "Use the same fixed time or space window again and again. Events can occur at many different moments inside it; when the window closes, count how many happened.");
+            panes.mechanism.appendChild(createEl("div", { className: "shape-run-example", text: "A bar does not care exactly when the events occurred. It gathers every window that finished with the same event count." }));
+
+            const maxK = Math.min(18, Math.floor(model.theory.domainMax));
+            const values = Array.from({ length: maxK + 1 }, (_, k) => model.theory.pmfAt(k));
+            const builtCount = getShapeLabBuiltCount(stage, maxStep, values.length);
+            const usualCount = Math.max(0, Math.round(lambda));
+            const stories = [
+                {
+                    className: "is-rise",
+                    title: "Unusually quiet windows",
+                    copy: "Counts far below the usual activity need most possible event moments to stay quiet.",
+                    cue: usualCount === 0 ? "The first bar may already be tallest" : "Closer to ordinary → bars rise"
+                },
+                {
+                    className: "is-peak",
+                    title: "Ordinary windows · around " + usualCount + " events",
+                    copy: "Many normal-looking timings and spacings finish near the usual amount of activity.",
+                    cue: "Most ordinary windows gather here → tallest bars"
+                },
+                {
+                    className: "is-fall",
+                    title: "Unusually crowded windows",
+                    copy: "Counts far above the usual activity need many events to squeeze into the same fixed window.",
+                    cue: "More crowding required → bars fall"
+                }
+            ];
+            const storyVisibleCount = getShapeLabBuiltCount(stage, maxStep, stories.length);
+            const storyGrid = createEl("div", { className: "shape-sequence-groups" });
+            stories.forEach((story, index) => {
+                const card = createEl("div", { className: "shape-sequence-group " + story.className + (index < storyVisibleCount ? " is-built" : "") });
+                card.appendChild(createEl("strong", { text: story.title }));
+                card.appendChild(createEl("div", { className: "shape-sequence-list", text: story.copy }));
+                card.appendChild(createEl("div", { className: "shape-sequence-cue", text: story.cue }));
+                storyGrid.appendChild(card);
+            });
+            panes.construction.appendChild(storyGrid);
+            panes.construction.appendChild(createEl("div", { className: "shape-story-summary", text: "Moving from an extreme toward the usual count makes the windows look less surprising, so bars rise. Moving past the usual count makes extra crowding increasingly surprising, so bars fall." }));
+
+            const mode = values.indexOf(Math.max(...values));
+            renderShapeBars(panes.result, values, values.map((_, k) => String(k)), builtCount, {
+                highlightIndex: mode,
+                ariaLabel: "Event-count bars. Ordinary windows form the tallest bars; unusually quiet or crowded windows form shorter bars.",
+                choiceLabel(label) {
+                    return label + " event" + (label === "1" ? "" : "s");
+                },
+                pickerLabel: "Choose an event count",
+                explain(index) {
+                    const k = index;
+                    const examples = k === 0
+                        ? ["a completely quiet window"]
+                        : k === 1
+                            ? ["one event early", "one event halfway through", "one event near the end"]
+                            : ["events spread through the window", "several occur early", "several occur late"];
+                    const positionStory = k === 0
+                        ? "The entire window must stay quiet."
+                        : Math.abs(k - lambda) <= 1
+                            ? "This is close to the ordinary activity for the current window."
+                            : k < lambda
+                                ? "This window is quieter than usual."
+                                : "This window is more crowded than usual.";
+                    return {
+                        title: "Why does the " + k + "-event bar have this height?",
+                        lead: "This bar gathers every fixed window containing exactly " + k + " event" + (k === 1 ? "" : "s") + ", wherever inside the window they occurred.",
+                        examplesLabel: "Different windows that join this bar",
+                        examples,
+                        copy: positionStory + " Starting from a very quiet count, each step toward the usual activity makes the window less exceptional, so bars rise. After the ordinary count, every extra event requires more unusual crowding, so bars fall."
+                    };
+                }
+            });
+            appendShapeLabText(panes.result, "Even larger counts remain possible beyond the displayed right edge; the chart shows the main part of the pattern.", "shape-lab-tail");
+        }
+
+        function binomialShapeProbability(n, p, k) {
+            if (k < 0 || k > n) return 0;
+            return Math.exp(logCombination(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p));
+        }
+
+        function renderCombinationGroups(model, panes, maxStep) {
+            const N = Math.round(model.params.population);
+            const K = Math.round(model.params.successes);
+            const n = Math.round(model.params.draws);
+            const population = createEl("div", { className: "shape-population", attrs: { "aria-label": "Stock containing " + K + " target and " + (N - K) + " other objects" } });
+            Array.from({ length: N }, (_, index) => population.appendChild(createEl("span", { className: "shape-population-dot" + (index < K ? " is-target" : ""), attrs: { title: index < K ? "Target" : "Other", "aria-hidden": "true" } })));
+            panes.mechanism.appendChild(population);
+            appendShapeLabText(panes.mechanism, "Start with " + K + " target objects and " + (N - K) + " other objects. Take a handful of " + n + ". The bar records how many targets ended up in that handful.");
+            const compare = createEl("div", { className: "shape-comparison", attrs: { "aria-label": "Compare whether chosen objects are returned" } });
+            [[false, "Keep chosen objects out"], [true, "Put each object back"]].forEach(([mode, label]) => compare.appendChild(createEl("button", { className: "simulation-toggle-chip" + (state.shapeLab.withReplacement === mode ? " is-active" : ""), text: label, attrs: { type: "button", "data-action": "shape-lab-set-replacement", "data-with-replacement": mode ? "true" : "false", "aria-pressed": state.shapeLab.withReplacement === mode ? "true" : "false" } })));
+            panes.mechanism.appendChild(compare);
+            appendShapeLabText(panes.mechanism, state.shapeLab.withReplacement
+                ? "Putting each object back restores the stock before the next draw."
+                : "Keeping chosen objects out changes what is available on every following draw.");
+
+            const minK = state.shapeLab.withReplacement ? 0 : Math.max(0, n - (N - K));
+            const maxK = state.shapeLab.withReplacement ? n : Math.min(n, K);
+            const labels = Array.from({ length: maxK - minK + 1 }, (_, index) => minK + index);
+            const values = labels.map((k) => state.shapeLab.withReplacement ? binomialShapeProbability(n, K / N, k) : model.theory.pmfAt(k));
+            const builtCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, values.length);
+            const stories = state.shapeLab.withReplacement ? [
+                {
+                    className: "is-rise",
+                    title: "Very one-sided runs",
+                    copy: "All-target or no-target runs allow only a small number of target/other orders.",
+                    cue: "Few orders → shorter edge bars"
+                },
+                {
+                    className: "is-peak",
+                    title: "Mixed runs",
+                    copy: "Targets can occupy many different draw positions, so more complete runs share the same target count.",
+                    cue: "More orders → taller middle bars"
+                },
+                {
+                    className: "is-fall",
+                    title: "The stock resets",
+                    copy: "Returning each object means one draw does not change what the next draw can be.",
+                    cue: "The common target share pulls the peak left or right"
+                }
+            ] : [
+                {
+                    className: "is-rise",
+                    title: "Very one-sided handfuls",
+                    copy: "Extreme target counts can be assembled from relatively few actual objects, and some counts cannot be made at all.",
+                    cue: "Few valid handfuls → shorter edge bars"
+                },
+                {
+                    className: "is-peak",
+                    title: "Mixed handfuls",
+                    copy: "A target-and-other mix can usually be assembled from many different actual combinations of objects.",
+                    cue: "Many valid handfuls → taller bars"
+                },
+                {
+                    className: "is-fall",
+                    title: "The stock keeps changing",
+                    copy: "Taking a target removes one target; taking another object removes that instead. Later choices depend on earlier ones.",
+                    cue: "The finite stock limits the far edges"
+                }
+            ];
+            const storyVisibleCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, stories.length);
+            const storyGrid = createEl("div", { className: "shape-sequence-groups" });
+            stories.forEach((story, index) => {
+                const card = createEl("div", { className: "shape-sequence-group " + story.className + (index < storyVisibleCount ? " is-built" : "") });
+                card.appendChild(createEl("strong", { text: story.title }));
+                card.appendChild(createEl("div", { className: "shape-sequence-list", text: story.copy }));
+                card.appendChild(createEl("div", { className: "shape-sequence-cue", text: story.cue }));
+                storyGrid.appendChild(card);
+            });
+            panes.construction.appendChild(storyGrid);
+
+            const mode = values.indexOf(Math.max(...values));
+            renderShapeBars(panes.result, values, labels.map(String), builtCount, {
+                highlightIndex: mode,
+                ariaLabel: state.shapeLab.withReplacement ? "Target-count bars when each object is returned." : "Target-count bars for handfuls taken from a finite stock.",
+                choiceLabel(_label, index) {
+                    const count = labels[index];
+                    return count + " target" + (count === 1 ? "" : "s");
+                },
+                pickerLabel: "Choose a handful",
+                explain(index) {
+                    const k = labels[index];
+                    const otherCount = n - k;
+                    if (state.shapeLab.withReplacement) {
+                        return {
+                            title: "Why does the " + k + "-target bar have this height?",
+                            lead: "This bar gathers every " + n + "-draw run containing " + k + " target" + (k === 1 ? "" : "s") + " and " + otherCount + " other result" + (otherCount === 1 ? "" : "s") + ".",
+                            examplesLabel: "Example orders (T = target, O = other)",
+                            examples: buildBinaryRunExamples(n, k, "T", "O", 3),
+                            copy: "Because the object is returned, the stock starts fresh on every draw. Mixed target counts allow targets to occupy many different positions; one-sided counts allow fewer orders. The target share of the stock then pulls the tallest bar toward fewer or more targets."
+                        };
+                    }
+                    const sampleExamples = Array.from({ length: 3 }, (_, seed) => {
+                        const targets = K > 0 ? Array.from({ length: k }, (_, item) => "T" + (((item + seed) % K) + 1)) : [];
+                        const otherStock = N - K;
+                        const others = otherStock > 0 ? Array.from({ length: otherCount }, (_, item) => "O" + (((item + seed) % otherStock) + 1)) : [];
+                        const objects = targets.concat(others);
+                        return objects.slice(0, 6).join(" · ") + (objects.length > 6 ? " · …" : "");
+                    });
+                    const edgeStory = k === minK || k === maxK
+                        ? "This count sits at an edge of what the stock can supply, so relatively few different handfuls fit."
+                        : "This mix can be assembled from many different actual target and other objects.";
+                    return {
+                        title: "Why does the " + k + "-target bar have this height?",
+                        lead: "This bar gathers every " + n + "-object handful with " + k + " target" + (k === 1 ? "" : "s") + " and " + otherCount + " other object" + (otherCount === 1 ? "" : "s") + ".",
+                        examplesLabel: "Different actual handfuls that join this bar",
+                        examples: sampleExamples,
+                        copy: edgeStory + " Every valid handful adds to its bar. Because selected objects stay out, the stock blocks or thins out the most extreme mixes, while common mixes gather more handfuls and make taller bars."
+                    };
+                }
+            });
+            appendShapeLabText(panes.result, "Without replacement, only target counts from " + Math.max(0, n - (N - K)) + " through " + Math.min(n, K) + " can happen. Returning objects usually allows a wider range of results.", "shape-lab-tail");
+        }
+
+        function renderProbabilityRibbon(model, panes, maxStep) {
+            const { a, b } = model.params;
+            const width = b - a;
+            const probeWidth = 0.25;
+            const probe = clamp(state.shapeLab.probe, 0, 1 - probeWidth);
+            const ribbon = createEl("div", { className: "shape-ribbon", attrs: { role: "img", "aria-label": "Allowed range with a movable equal-width window" } });
+            ribbon.appendChild(createEl("div", { className: "shape-ribbon-probe", attrs: { style: "--probe-left:" + (probe * 100) + "%", "aria-hidden": "true" } }));
+            panes.mechanism.appendChild(ribbon);
+            panes.mechanism.appendChild(createEl("input", { className: "shape-probe-input", attrs: { type: "range", min: 0, max: 75, step: 1, value: Math.round(probe * 100), "data-shape-lab-input": "probe", "aria-label": "Move the same-width window left or right" } }));
+            appendShapeLabText(panes.mechanism, "Imagine dropping a pin somewhere on the allowed ruler. Move the highlighted window left or right without changing its width.");
+            panes.mechanism.appendChild(createEl("div", { className: "shape-run-example", text: "The window offers exactly the same amount of landing space wherever it sits." }));
+
+            const equalRegions = createEl("div", { className: "shape-trial-row", attrs: { "aria-label": "Four equal-width regions" } });
+            Array.from({ length: 4 }, (_, index) => equalRegions.appendChild(createEl("span", { className: "shape-token" + (index < state.shapeLab.step ? " is-success" : ""), text: "same width" })));
+            panes.construction.appendChild(equalRegions);
+            panes.construction.appendChild(createEl("div", { className: "shape-story-summary", text: "Left, middle, and right are treated alike. Equal-width windows gather equal shares, so no part of the graph needs to rise above another." }));
+
+            const density = 1 / width;
+            renderDensityBlocks(panes.result, Array.from({ length: 24 }, () => density), { scale: 2, visibleCount: getShapeLabBuiltCount(state.shapeLab.step, maxStep, 24), ariaLabel: "Flat shape because every equal-width region is treated alike." });
+            renderShapeHeightInspector(panes.result, {
+                title: "Why does the curve stay flat?",
+                lead: "Slide the same-width highlighted window along the ruler. It always offers the pin the same amount of landing space.",
+                examplesLabel: "The window can sit anywhere",
+                examples: ["left", "middle", "right"],
+                copy: "No location is favoured, so every equal-width window gathers the same share and the curve stays flat. One exact point has no width; chance comes from a stretch of the ruler, shown by the area across that stretch."
+            });
+            appendShapeLabText(panes.result, "Making the allowed ruler wider spreads the same total chance more thinly. Making it narrower packs the chance more tightly.", "shape-lab-tail");
+        }
+
+        function renderSurvivalPool(model, panes, maxStep) {
+            const lambda = model.params.lambda;
+            const intervals = 8;
+            const builtCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, intervals);
+            const dt = 0.5;
+            const remaining = Math.exp(-lambda * builtCount * dt);
+            const pool = createEl("div", { className: "shape-flow-pool" });
+            pool.appendChild(createEl("div", { className: "shape-flow-fill", attrs: { style: "--pool-width:" + (remaining * 100) + "%" } }));
+            pool.appendChild(createEl("span", { text: "Cases still waiting" }));
+            panes.mechanism.appendChild(pool);
+            appendShapeLabText(panes.mechanism, "Start many clocks together. Some waits end in the first time slice. Only the clocks still running can end in the next slice, so the waiting group keeps shrinking.");
+            const restartButton = createEl("button", { className: "simulation-action-button simulation-action-button-muted", text: state.shapeLab.restartAt == null ? "Restart the clock here" : "Clear restarted clock", attrs: { type: "button", "data-action": "shape-lab-restart-clock" } });
+            restartButton.disabled = !builtCount;
+            panes.mechanism.appendChild(restartButton);
+            if (state.shapeLab.restartAt != null) panes.mechanism.appendChild(createEl("div", { className: "shape-restart-note", text: "Look only at cases that have waited this long. From this new starting point, their remaining wait follows the same kind of story again." }));
+
+            const rows = createEl("div", { className: "shape-ratio-list" });
+            for (let index = 0; index < builtCount; index += 1) {
+                const start = (index * dt).toFixed(1);
+                const end = ((index + 1) * dt).toFixed(1);
+                const copy = index === 0
+                    ? start + "–" + end + " · every case begins able to finish here, so the first region is highest."
+                    : start + "–" + end + " · a case must first remain waiting through all earlier slices, so fewer cases reach this region.";
+                rows.appendChild(createEl("div", { className: "shape-ratio-row is-fall", text: copy }));
+            }
+            panes.construction.appendChild(rows);
+            if (!builtCount) panes.construction.appendChild(createEl("div", { className: "shape-story-summary", text: "Each later time region starts with a smaller group because earlier events have already removed cases from the waiting pool." }));
+
+            const xs = Array.from({ length: 36 }, (_, index) => index * 6 / 35);
+            const densities = xs.map((x) => lambda * Math.exp(-lambda * x));
+            const densityVisibleCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, xs.length);
+            renderDensityBlocks(panes.result, densities, {
+                scale: 3,
+                visibleCount: densityVisibleCount,
+                highlightIndex: 0,
+                labels: xs.map((x) => "time " + formatSimulationValue(x, 2)),
+                ariaLabel: "Waiting-time curve that falls because fewer cases remain available to finish later.",
+                choiceLabel(label) {
+                    return "Near " + label;
+                },
+                pickerLabel: "Choose a time region",
+                explain(index) {
+                    const timeLabel = formatSimulationValue(xs[index], 2);
+                    return {
+                        title: "Who is still waiting near time " + timeLabel + "?",
+                        lead: "This region gathers waits that lasted until about " + timeLabel + " and then ended inside the next equal-width time slice.",
+                        examplesLabel: "Follow the shrinking waiting group",
+                        examples: index === 0 ? ["start: everyone is waiting", "first slice: some waits end"] : ["everyone starts", "earlier slices remove cases", "only survivors can finish here"],
+                        copy: "The first slice starts with every clock. A later slice starts only with clocks that survived all earlier slices, so fewer endings remain available and the curve falls. One exact instant has no width; chance comes from the area across a time slice."
+                    };
+                }
+            });
+            appendShapeLabText(panes.result, "Some cases keep waiting beyond the displayed right edge. Longer waits remain possible, but progressively fewer cases survive that far.", "shape-lab-tail");
+        }
+
+        function buildDieSumDistribution(count) {
+            let probabilities = [1];
+            for (let contribution = 0; contribution < count; contribution += 1) {
+                const next = Array(probabilities.length + 5).fill(0);
+                probabilities.forEach((probability, total) => {
+                    for (let face = 0; face < 6; face += 1) next[total + face] += probability / 6;
+                });
+                probabilities = next;
+            }
+            return probabilities;
+        }
+
+        function compressShapeValues(values, targetCount = 35) {
+            if (values.length <= targetCount) return values;
+            const bins = Array(targetCount).fill(0);
+            values.forEach((value, index) => bins[Math.min(targetCount - 1, Math.floor(index * targetCount / values.length))] += value);
+            return bins;
+        }
+
+        function renderConvolutionStages(model, panes, maxStep) {
+            const stages = [1, 2, 5, 10, 30];
+            const stageIndex = Math.min(stages.length - 1, Math.max(0, state.shapeLab.step - 1));
+            const count = stages[stageIndex];
+            const tabs = createEl("div", { className: "shape-stage-tabs", attrs: { "aria-label": "Number of small influences being combined" } });
+            stages.forEach((value, index) => tabs.appendChild(createEl("span", { className: "shape-stage-tab" + (index === stageIndex ? " is-active" : ""), text: value + " small influence" + (value === 1 ? "" : "s") })));
+            panes.mechanism.appendChild(tabs);
+            const contributions = createEl("div", { className: "shape-contribution-row" });
+            Array.from({ length: Math.min(count, 10) }, (_, index) => contributions.appendChild(createEl("span", { className: "shape-contribution", text: "push " + (index + 1) })));
+            if (count > 10) contributions.appendChild(createEl("span", { className: "shape-contribution", text: "+" + (count - 10) + " more" }));
+            panes.mechanism.appendChild(contributions);
+            appendShapeLabText(panes.mechanism, "Imagine each influence giving the result a small push upward or downward. Add all those pushes to get one final result.");
+            panes.mechanism.appendChild(createEl("div", { className: "shape-run-example", text: "Opposite pushes partly cancel. Same-direction pushes reinforce one another." }));
+
+            const sumValues = compressShapeValues(buildDieSumDistribution(count));
+            renderShapeBars(panes.construction, sumValues, sumValues.map((_, index) => index === 0 || index === sumValues.length - 1 ? (index === 0 ? "low" : "high") : ""), sumValues.length, { highlightIndex: sumValues.indexOf(Math.max(...sumValues)), ariaLabel: "Combined-result piles. The centre grows because many mixtures cancel there." });
+            panes.construction.appendChild(createEl("div", { className: "shape-story-summary", text: "There are many different mixtures of upward and downward pushes that nearly cancel, so results pile up near the centre. Reaching either extreme needs many pushes to line up in the same direction, which can happen in far fewer ways." }));
+
+            const { mu, sigma } = model.params;
+            const xs = Array.from({ length: 49 }, (_, index) => -18 + index * 36 / 48);
+            const densities = xs.map((x) => {
+                const distanceFromCentre = (x - mu) / sigma;
+                return Math.exp(-0.5 * distanceFromCentre * distanceFromCentre) / (sigma * Math.sqrt(2 * Math.PI));
+            });
+            const densityVisibleCount = getShapeLabBuiltCount(state.shapeLab.step, maxStep, densities.length);
+            const centreIndex = xs.reduce((bestIndex, x, index) => Math.abs(x - mu) < Math.abs(xs[bestIndex] - mu) ? index : bestIndex, 0);
+            renderDensityBlocks(panes.result, densities, {
+                scale: 0.8,
+                visibleCount: densityVisibleCount,
+                highlightIndex: centreIndex,
+                labels: xs.map((x) => "value " + formatSimulationValue(x, 2)),
+                ariaLabel: "Bell-shaped curve. Many combinations gather near the centre and few reach either extreme.",
+                choiceLabel(label) {
+                    return "Near " + label;
+                },
+                pickerLabel: "Choose a region",
+                explain(index) {
+                    const x = xs[index];
+                    const location = formatSimulationValue(x, 2);
+                    const nearCentre = Math.abs(x - mu) <= sigma * 0.5;
+                    return {
+                        title: "Why do results gather near value " + location + "?",
+                        lead: "Treat this as an equal-width neighbourhood of nearby results, not as one exact point.",
+                        examplesLabel: "How small pushes can combine",
+                        examples: ["+ − + − → near centre", "+ + + + → high extreme", "− − − − → low extreme"],
+                        copy: (nearCentre
+                            ? "Many mixtures of upward and downward pushes partly cancel and land in this central neighbourhood."
+                            : "Reaching this outer neighbourhood requires more pushes to line up in the same direction.") + " The centre therefore gathers many runs while either tail gathers few. Chance comes from the area across a neighbourhood, not from one exact point."
+                    };
+                }
+            });
+            appendShapeLabText(panes.result, "This illustrates why bell shapes often appear when one result combines many small, separate influences. Changing the centre moves the bell; changing the spread makes it wider or narrower.", "shape-lab-tail");
+        }
+
+        const SHAPE_LAB_RENDERERS = Object.freeze({
+            branching: renderBranchingMechanism,
+            "probability-flow": renderProbabilityFlow,
+            "rare-events": renderRareEventMechanism,
+            combinations: renderCombinationGroups,
+            ribbon: renderProbabilityRibbon,
+            survival: renderSurvivalPool,
+            convolution: renderConvolutionStages
+        });
+
+        function renderSimulationShapeLab(model) {
+            if (!els.shapeLabContent || !model?.meta?.shapeLab) return;
+            if (!state.shapeLab || state.shapeLab.distId !== model.dist.id) {
+                stopShapeLab();
+                state.shapeLab = createShapeLabState(model.dist.id);
+            }
+            const controls = els.simulationShapeLab?.querySelector(".shape-lab-controls");
+            clearElement(els.shapeLabContent);
+            const config = model.meta.shapeLab;
+            const { grid, panes, maxStep } = getShapeLabPanes(model);
+            els.shapeLabContent.appendChild(createEl("div", { className: "shape-lab-question", text: `Predict first: ${config.prediction}` }));
+            const progress = createEl("div", { className: "shape-lab-progress", attrs: { role: "progressbar", "aria-label": "Explanation progress", "aria-valuemin": "0", "aria-valuemax": String(maxStep), "aria-valuenow": String(state.shapeLab.step) } });
+            for (let index = 1; index <= maxStep; index += 1) progress.appendChild(createEl("span", { className: `shape-lab-progress-dot${index <= state.shapeLab.step ? " is-complete" : ""}`, attrs: { "aria-hidden": "true" } }));
+            progress.appendChild(createEl("span", { className: "shape-lab-stage-label", text: state.shapeLab.step === 0 ? "Make a prediction, then play or step forward." : `Step ${state.shapeLab.step} of ${maxStep}` }));
+            els.shapeLabContent.appendChild(progress);
+            if (controls) els.shapeLabContent.appendChild(controls);
+            const renderer = SHAPE_LAB_RENDERERS[config.type];
+            if (renderer) renderer(model, panes, maxStep);
+            els.shapeLabContent.appendChild(grid);
+            els.shapeLabContent.appendChild(renderShapeLabInfo(config));
+            if (els.shapeLabStatus) els.shapeLabStatus.textContent = state.shapeLab.step === 0 ? "Ready to explore" : state.shapeLab.step >= maxStep ? "Explanation ready" : "Building the story · " + state.shapeLab.step + "/" + maxStep;
+            if (els.shapeLabNext) els.shapeLabNext.disabled = state.shapeLab.step >= maxStep;
+            if (els.shapeLabPlay) els.shapeLabPlay.textContent = state.shapeLab.playing ? "Pause explanation" : state.shapeLab.step >= maxStep ? "Play again" : "Play explanation";
+            if (els.simulationShapeLab) els.simulationShapeLab.classList.toggle("is-playing", Boolean(state.shapeLab.playing));
+        }
+
+        function handleShapeLabInput(event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.dataset.shapeLabInput !== "probe") return;
+            stopShapeLab();
+            state.shapeLab.probe = clamp(Number(target.value) / 100, 0, 0.75);
+            renderSimulationShapeLab(buildSimulationModel(getCurrentSimulationDist()));
+        }
+
+        function handleShapeLabChange(event) {
+            const target = event.target;
+            if (!(target instanceof HTMLSelectElement) || target.dataset.shapeLabInput !== "inspect") return;
+            const selectedIndex = Number(target.value);
+            if (!Number.isInteger(selectedIndex) || selectedIndex < 0) return;
+            stopShapeLab();
+            state.shapeLab.selectedIndex = selectedIndex;
+            renderSimulationShapeLab(buildSimulationModel(getCurrentSimulationDist()));
+        }
+
         function renderSimulationParameters(model) {
             clearElement(els.simulationParameters);
             model.meta.params.forEach((param) => {
@@ -4847,6 +5854,8 @@
                 clearElement(els.simulationScene);
                 clearElement(els.simulationRecent);
                 clearElement(els.simulationLearningScaffold);
+                clearElement(els.shapeLabContent);
+                stopShapeLab();
                 if (els.simulationSeeColumn) els.simulationSeeColumn.classList.remove("has-results");
                 if (els.simulationRunBadge) els.simulationRunBadge.textContent = "0 runs";
                 if (els.simulationChartMode) els.simulationChartMode.textContent = "Observed only";
@@ -4876,6 +5885,7 @@
             renderSimulationParameters(model);
             renderSimulationToggles();
             renderSimulationPresets(model);
+            renderSimulationShapeLab(model);
             renderSimulationStats(model);
             renderSimulationWhy(model);
             renderSimulationChart(model);
@@ -4898,6 +5908,7 @@
             state.simulationCustomParams[distId] = false;
             state.simulationParamNotice = "";
             stopSimulationAuto();
+            resetShapeLab(distId, false);
             clearSimulationSamples(distId);
             populateSimulationHub();
         }
@@ -4957,6 +5968,7 @@
             state.simulationParamNotice = "";
             state.simulationParams = createDefaultSimulationParams();
             state.simulationResults = createEmptySimulationResults();
+            state.shapeLab = createShapeLabState(state.simulationSelectedDist);
             ensureSimulationSeeded(state.simulationSelectedDist);
             populateSimulationHub();
         }
@@ -5026,6 +6038,7 @@
             state.simulationSelectedPreset = "";
             state.simulationCustomParams[dist.id] = true;
             stopSimulationAuto();
+            resetShapeLab(dist.id, false);
             const params = sanitizeSimulationParams(dist.id, paramId);
             clearSimulationSamples(dist.id);
             const model = buildSimulationModel(dist);
@@ -5178,6 +6191,7 @@
             state.simulationSelectedPreset = "";
             state.simulationCustomParams[distId] = false;
             state.simulationParamNotice = "";
+            resetShapeLab(distId, false);
             clearSimulationSamples(distId);
             ensureSimulationSeeded(distId);
             populateSimulationHub();
@@ -5206,6 +6220,30 @@
             "simulation-tutorial-next": () => moveSimulationTutorialStep(1),
             "simulation-tutorial-prev": () => moveSimulationTutorialStep(-1),
             "simulation-tutorial-close": stopSimulationTutorial,
+            "shape-lab-play": () => {
+                if (state.shapeLab.playing) {
+                    stopShapeLab();
+                    renderSimulationShapeLab(buildSimulationModel(getCurrentSimulationDist()));
+                } else {
+                    playShapeLab();
+                }
+            },
+            "shape-lab-next": () => {
+                stopShapeLab();
+                stepShapeLab();
+            },
+            "shape-lab-reset": () => resetShapeLab(state.simulationSelectedDist),
+            "shape-lab-set-replacement": (trigger) => {
+                stopShapeLab();
+                state.shapeLab.withReplacement = trigger.dataset.withReplacement === "true";
+                state.shapeLab.selectedIndex = null;
+                renderSimulationShapeLab(buildSimulationModel(getCurrentSimulationDist()));
+            },
+            "shape-lab-restart-clock": () => {
+                stopShapeLab();
+                state.shapeLab.restartAt = state.shapeLab.restartAt == null ? state.shapeLab.step * 0.5 : null;
+                renderSimulationShapeLab(buildSimulationModel(getCurrentSimulationDist()));
+            },
             "simulation-reset-samples": () => {
                 stopSimulationAuto();
                 state.simulationParamNotice = "";
@@ -5329,6 +6367,7 @@
         function handleVisibilityChange() {
             syncVizLoop();
             syncSimulationAuto();
+            if (document.hidden) stopShapeLab();
         }
 
         function destroyApp() {
@@ -5337,6 +6376,7 @@
             clearRuntimeTimeouts();
             stopVizLoop();
             stopSimulationAuto();
+            stopShapeLab();
             destroyFeatureLayers();
             lifecycle.cancel("resize-frame");
             runtime.resizeFrame = null;
@@ -5363,6 +6403,8 @@
             els.simulationSearch.addEventListener("input", handleSimulationSearchInput, { signal });
             els.simulationParameters.addEventListener("input", handleSimulationParameterInput, { signal });
             els.simulationParameters.addEventListener("change", handleSimulationParameterInput, { signal });
+            els.shapeLabContent.addEventListener("input", handleShapeLabInput, { signal });
+            els.shapeLabContent.addEventListener("change", handleShapeLabChange, { signal });
             els.simulationRunSize.addEventListener("input", handleSimulationRunSizeInput, { signal });
             els.simulationRunSize.addEventListener("change", handleSimulationRunSizeInput, { signal });
             if (els.simulationAutoPace) els.simulationAutoPace.addEventListener("input", handleSimulationPaceInput, { signal });

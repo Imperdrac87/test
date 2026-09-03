@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A scenario-based Functional Skills Maths Level 2 practice game with 100 activities.">
+  <title>Skills Quest — Functional Maths Level 2</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-2: #0d1c2e;
+      --panel: rgba(16, 32, 50, .94);
+      --panel-2: #122941;
+      --panel-3: #183550;
+      --text: #f7fbff;
+      --muted: #a9bed0;
+      --line: #2b4b64;
+      --brand: #39d6b4;
+      --brand-2: #20a4f3;
+      --warm: #ffbf69;
+      --danger: #ff6b7a;
+      --good: #48e28b;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .34);
+      --radius: 22px;
+    }
+    [data-theme="light"] {
+      color-scheme: light;
+      --bg: #edf6f8;
+      --bg-2: #dfecef;
+      --panel: rgba(255,255,255,.96);
+      --panel-2: #eef7f8;
+      --panel-3: #e1eff2;
+      --text: #102638;
+      --muted: #536c7b;
+      --line: #bad1d8;
+      --brand: #087f69;
+      --brand-2: #0575b8;
+      --warm: #b35b00;
+      --danger: #c43043;
+      --good: #137a45;
+      --shadow: 0 24px 70px rgba(27, 73, 92, .16);
+    }
+    [data-theme="paper"] {
+      color-scheme: light;
+      --bg: #f4efe3;
+      --bg-2: #e8dfcf;
+      --panel: rgba(255,252,245,.97);
+      --panel-2: #f7f0e3;
+      --panel-3: #eee3d2;
+      --text: #342d25;
+      --muted: #706457;
+      --line: #d3c2aa;
+      --brand: #217568;
+      --brand-2: #386d93;
+      --warm: #a85815;
+      --danger: #ae3e4f;
+      --good: #377c4d;
+      --shadow: 0 24px 70px rgba(70, 50, 30, .16);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--brand-2) 23%, transparent), transparent 33rem),
+        radial-gradient(circle at 92% 82%, color-mix(in srgb, var(--brand) 18%, transparent), transparent 34rem),
+        linear-gradient(145deg, var(--bg), var(--bg-2));
+      background-attachment: fixed;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .22;
+      background-image: linear-gradient(color-mix(in srgb, var(--line) 35%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--line) 35%, transparent) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, black, transparent 72%);
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--brand-2) 60%, white);
+      outline-offset: 3px;
+    }
+    .hidden { display: none !important; }
+    .app { width: min(1180px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 60px; position: relative; }
+    .topbar { display: flex; gap: 14px; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: -.02em; }
+    .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(135deg,var(--brand),var(--brand-2)); color: #06131c; box-shadow: 0 10px 30px color-mix(in srgb, var(--brand) 28%, transparent); }
+    .brand small { display: block; color: var(--muted); font-size: .69rem; letter-spacing: .15em; text-transform: uppercase; }
+    .theme-switcher { display: flex; gap: 5px; padding: 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); }
+    .theme-switcher button { border: 0; border-radius: 999px; padding: 7px 10px; color: var(--muted); background: transparent; font-size: .78rem; font-weight: 800; }
+    .theme-switcher button[aria-pressed="true"] { color: var(--text); background: var(--panel-3); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(14px); }
+    .hero { padding: clamp(28px,6vw,64px); overflow: hidden; position: relative; }
+    .hero::after { content: "%  ×  £  π"; position: absolute; right: -10px; bottom: -18px; color: color-mix(in srgb, var(--brand) 15%, transparent); font-size: clamp(4.5rem,12vw,9rem); font-weight: 950; letter-spacing: -.14em; transform: rotate(-4deg); pointer-events: none; }
+    .eyebrow { color: var(--brand); text-transform: uppercase; font-size: .76rem; letter-spacing: .24em; font-weight: 900; }
+    h1 { max-width: 760px; margin: 12px 0 10px; font-size: clamp(2.5rem,8vw,5.8rem); line-height: .92; letter-spacing: -.065em; }
+    .hero-copy { max-width: 650px; margin: 0; color: var(--muted); font-size: clamp(1rem,2vw,1.2rem); line-height: 1.65; position: relative; z-index: 1; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; position: relative; z-index: 1; }
+    .tag { border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px; background: color-mix(in srgb, var(--panel-2) 76%, transparent); color: var(--muted); font-size: .78rem; font-weight: 800; }
+    .home-grid { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(280px,.65fr); gap: 18px; margin-top: 18px; }
+    .setup { padding: 24px; }
+    .section-kicker { color: var(--brand); text-transform: uppercase; letter-spacing: .2em; font-size: .68rem; font-weight: 900; }
+    h2, h3, p { margin-top: 0; }
+    h2 { margin-bottom: 8px; font-size: clamp(1.45rem,3vw,2rem); }
+    .section-copy { color: var(--muted); line-height: 1.55; }
+    .field-label { display: flex; justify-content: space-between; gap: 10px; margin: 22px 0 9px; color: var(--muted); font-size: .8rem; font-weight: 850; text-transform: uppercase; letter-spacing: .1em; }
+    .field-label span { color: var(--brand); text-transform: none; letter-spacing: 0; }
+    .topic-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+    .choice-card { display: grid; grid-template-columns: 35px 1fr; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); color: var(--text); text-align: left; transition: .18s ease; }
+    .choice-card:hover { border-color: var(--brand); transform: translateY(-1px); }
+    .choice-card[aria-pressed="true"] { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 13%, var(--panel-2)); box-shadow: inset 0 0 0 1px var(--brand); }
+    .choice-icon { width: 35px; height: 35px; border-radius: 10px; display: grid; place-items: center; background: var(--panel-3); font-size: 1.15rem; }
+    .choice-card strong { display: block; font-size: .88rem; }
+    .choice-card small { display: block; color: var(--muted); margin-top: 2px; font-size: .7rem; line-height: 1.25; }
+    .segmented { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+    .segmented button { min-height: 47px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: var(--panel-2); font-weight: 850; }
+    .segmented button[aria-pressed="true"] { color: var(--text); border-color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, var(--panel-2)); }
+    .primary, .secondary, .danger-btn { border: 0; border-radius: 14px; padding: 14px 18px; font-weight: 900; }
+    .primary { color: #06141b; background: linear-gradient(135deg,var(--brand),color-mix(in srgb,var(--brand-2) 70%,var(--brand))); box-shadow: 0 11px 28px color-mix(in srgb,var(--brand) 22%,transparent); }
+    .primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .secondary { color: var(--text); border: 1px solid var(--line); background: var(--panel-2); }
+    .danger-btn { color: #fff; background: var(--danger); }
+    .launch { width: 100%; margin-top: 22px; font-size: 1.04rem; }
+    .side-stack { display: grid; gap: 18px; align-content: start; }
+    .mini-panel { padding: 22px; }
+    .mini-list { display: grid; gap: 11px; margin-top: 16px; }
+    .mini-row { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+    .mini-row b { display: block; font-size: .9rem; }
+    .mini-row span:last-child { color: var(--muted); font-size: .76rem; }
+    .num { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; color: #07131a; background: var(--warm); font-weight: 950; }
+    .utility-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .utility-grid button { min-height: 78px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); color: var(--text); font-weight: 850; }
+    .utility-grid button span { display:block; font-size:1.3rem; margin-bottom:5px; }
+    .screen-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; }
+    .screen-head h2 { margin:0; }
+    .hud { display:grid; grid-template-columns: auto minmax(150px,1fr) auto auto; gap:14px; align-items:center; padding:13px 16px; position:sticky; top:8px; z-index:20; }
+    .lives { letter-spacing:4px; color:var(--danger); white-space:nowrap; }
+    .progress-wrap { display:grid; gap:5px; }
+    .progress-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:.72rem; font-weight:800; }
+    .progress-track { height:8px; border-radius:99px; background:var(--panel-3); overflow:hidden; }
+    .progress-bar { height:100%; width:0; background:linear-gradient(90deg,var(--brand-2),var(--brand)); transition:width .3s ease; }
+    .timer, .score { font-weight:950; white-space:nowrap; }
+    .game-grid { display:grid; grid-template-columns:minmax(0,1.16fr) minmax(330px,.84fr); gap:18px; margin-top:18px; align-items:start; }
+    .paper { padding:22px; }
+    .paper-head { display:flex; gap:12px; justify-content:space-between; align-items:start; margin-bottom:15px; }
+    .role { color:var(--brand); font-size:.73rem; text-transform:uppercase; letter-spacing:.13em; font-weight:900; }
+    .level-badge { flex:none; border-radius:999px; padding:6px 10px; background:var(--panel-3); color:var(--warm); font-size:.72rem; font-weight:900; }
+    .source-document { min-height:270px; padding:22px; border-radius:14px; background:#fffdf8; color:#1b2c36; box-shadow:inset 0 0 0 1px #d7d0c4, 0 12px 30px rgba(0,0,0,.18); font-family:Georgia,serif; overflow:auto; }
+    .source-document h3 { margin-bottom:4px; font-family:ui-sans-serif,system-ui,sans-serif; letter-spacing:-.02em; }
+    .source-document .doc-sub { color:#63727a; font:700 .72rem ui-sans-serif,system-ui,sans-serif; text-transform:uppercase; letter-spacing:.12em; margin-bottom:14px; }
+    .source-document table { width:100%; border-collapse:collapse; margin-top:10px; font-family:ui-sans-serif,system-ui,sans-serif; font-size:.88rem; }
+    .source-document th, .source-document td { border-bottom:1px solid #d7dde0; padding:8px 6px; text-align:left; }
+    .source-document th:last-child, .source-document td:last-child { text-align:right; }
+    .source-document .total-row { font-weight:900; border-top:2px solid #1b2c36; }
+    .source-document .doc-note { margin-top:14px; padding:10px; border-left:4px solid #2d8698; background:#eaf4f5; font:700 .8rem ui-sans-serif,system-ui,sans-serif; line-height:1.45; }
+    .diagram { width:100%; min-width:300px; height:auto; margin-top:10px; }
+    .answer-panel { padding:22px; }
+    .question-number { color:var(--brand); text-transform:uppercase; letter-spacing:.18em; font-size:.68rem; font-weight:900; }
+    .prompt { margin:9px 0 8px; font-size:1.25rem; line-height:1.42; }
+    .instruction { color:var(--muted); font-size:.83rem; line-height:1.5; }
+    .marks-chip { display:inline-block; margin-top:8px; color:var(--warm); font-size:.73rem; font-weight:900; }
+    .answer-block { margin-top:18px; }
+    .input-label { display:block; margin-bottom:7px; color:var(--muted); font-size:.76rem; font-weight:850; text-transform:uppercase; letter-spacing:.08em; }
+    .answer-entry { display:flex; align-items:stretch; }
+    .answer-entry .unit { display:grid; place-items:center; min-width:45px; padding:0 12px; color:var(--text); background:var(--panel-3); border:1px solid var(--line); border-right:0; border-radius:12px 0 0 12px; font-weight:900; }
+    input[type="text"], textarea { width:100%; color:var(--text); background:var(--bg-2); border:1px solid var(--line); padding:12px 13px; }
+    input[type="text"] { border-radius:12px; }
+    .answer-entry .unit + input { border-radius:0 12px 12px 0; }
+    textarea { min-height:76px; resize:vertical; border-radius:12px; line-height:1.45; }
+    .choice-list { display:grid; gap:8px; }
+    .radio-option { display:flex; gap:10px; align-items:flex-start; padding:11px; border:1px solid var(--line); border-radius:12px; background:var(--panel-2); cursor:pointer; }
+    .radio-option:has(input:checked) { border-color:var(--brand); background:color-mix(in srgb,var(--brand) 11%,var(--panel-2)); }
+    .help-row { display:flex; flex-wrap:wrap; gap:8px; margin:17px 0; }
+    .help-row button { flex:1; min-width:100px; padding:10px; border:1px solid var(--line); border-radius:11px; color:var(--muted); background:var(--panel-2); font-size:.76rem; font-weight:850; }
+    .hint-box { margin-bottom:13px; padding:12px; border-left:4px solid var(--warm); border-radius:9px; color:var(--text); background:color-mix(in srgb,var(--warm) 9%,var(--panel-2)); font-size:.84rem; line-height:1.5; }
+    .submit-row { display:flex; gap:9px; }
+    .submit-row .primary { flex:1; }
+    .feedback { position:fixed; inset:0; z-index:50; padding:22px; background:rgba(2,10,17,.82); backdrop-filter:blur(10px); overflow:auto; display:grid; place-items:center; }
+    .feedback-card { width:min(760px,100%); padding:25px; }
+    .feedback-title { display:flex; justify-content:space-between; gap:15px; align-items:start; }
+    .answer-explanation { z-index:60; }
+    .answer-reveal { margin:18px 0; padding:16px 18px; border:1px solid color-mix(in srgb,var(--brand) 55%,var(--line)); border-radius:14px; background:color-mix(in srgb,var(--brand) 10%,var(--panel-2)); }
+    .answer-reveal span { display:block; color:var(--muted); font-size:.7rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; }
+    .answer-reveal strong { display:block; margin-top:4px; color:var(--brand); font-size:clamp(1.5rem,5vw,2.25rem); line-height:1.15; }
+    .why-card { margin-bottom:18px; padding:14px; border-left:4px solid var(--brand-2); border-radius:10px; background:color-mix(in srgb,var(--brand-2) 8%,var(--panel-2)); }
+    .why-card h3 { margin-bottom:6px; font-size:.84rem; letter-spacing:.06em; text-transform:uppercase; }
+    .why-card p { margin:0; color:var(--muted); line-height:1.55; }
+    .result-score { font-size:2.1rem; font-weight:950; color:var(--brand); white-space:nowrap; }
+    .mark-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:18px 0; }
+    .mark-card { padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--panel-2); }
+    .mark-card span { display:block; color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; font-weight:850; }
+    .mark-card b { display:block; margin-top:4px; font-size:1.1rem; }
+    .solution { display:grid; gap:10px; margin:14px 0 20px; }
+    .solution-step { display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:start; color:var(--muted); line-height:1.48; }
+    .solution-step b { width:26px; height:26px; display:grid; place-items:center; border-radius:8px; background:var(--panel-3); color:var(--brand); }
+    .check-callout { padding:12px; border-left:4px solid var(--good); border-radius:10px; background:color-mix(in srgb,var(--good) 9%,var(--panel-2)); color:var(--muted); line-height:1.45; }
+    .end-card { padding:clamp(24px,5vw,52px); text-align:center; }
+    .end-score { font-size:clamp(3rem,10vw,6rem); line-height:1; font-weight:950; color:var(--brand); }
+    .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:24px 0; }
+    .summary-grid div { padding:14px; border:1px solid var(--line); border-radius:13px; background:var(--panel-2); }
+    .summary-grid b { display:block; font-size:1.3rem; }
+    .summary-grid span { color:var(--muted); font-size:.72rem; }
+    .topic-results { display:grid; gap:7px; max-width:600px; margin:0 auto 22px; text-align:left; }
+    .topic-result { display:grid; grid-template-columns:1fr auto; gap:8px; padding:9px 11px; border-radius:10px; background:var(--panel-2); }
+    .drawer { position:fixed; inset:0; z-index:45; background:rgba(2,10,17,.78); backdrop-filter:blur(8px); padding:20px; overflow:auto; }
+    .drawer-card { width:min(980px,100%); margin:3vh auto; padding:24px; }
+    .library-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:11px; }
+    .library-item { display:block; width:100%; padding:16px; border:1px solid var(--line); border-radius:14px; background:var(--panel-2); color:var(--text); text-align:left; font:inherit; cursor:pointer; transition:.18s ease; }
+    .library-item:hover { border-color:var(--brand); transform:translateY(-2px); background:color-mix(in srgb,var(--brand) 8%,var(--panel-2)); }
+    .library-item h3 { margin:4px 0 6px; font-size:1rem; }
+    .library-item p { margin:0; color:var(--muted); font-size:.8rem; line-height:1.45; }
+    .library-action { display:block; margin-top:12px; color:var(--brand); font-size:.75rem; font-weight:900; }
+    .library-intro { margin-bottom:16px; color:var(--muted); line-height:1.55; }
+    .library-chapter { display:grid; gap:15px; }
+    .chapter-hero { padding:18px; border:1px solid color-mix(in srgb,var(--brand) 45%,var(--line)); border-radius:15px; background:color-mix(in srgb,var(--brand) 8%,var(--panel-2)); }
+    .chapter-hero p { margin:8px 0 0; color:var(--muted); line-height:1.6; }
+    .chapter-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .chapter-section { padding:17px; border:1px solid var(--line); border-radius:14px; background:var(--panel-2); }
+    .chapter-section h3 { margin-bottom:9px; font-size:.96rem; }
+    .chapter-section ul,.chapter-section ol { margin:0; padding-left:21px; color:var(--muted); }
+    .chapter-section li { margin:7px 0; line-height:1.5; }
+    .rule-list,.logic-list { display:grid; gap:8px; }
+    .rule-item,.logic-step { padding:10px 11px; border-radius:10px; background:var(--bg-2); color:var(--muted); line-height:1.5; font-size:.82rem; }
+    .rule-item b,.logic-step b { color:var(--text); }
+    .logic-step span { display:block; margin-top:3px; }
+    .logic-step em { color:var(--brand-2); font-style:normal; font-weight:850; }
+    .chapter-example { grid-column:1 / -1; }
+    .example-question { margin-bottom:10px; padding:11px 12px; border-left:4px solid var(--brand); border-radius:9px; background:var(--bg-2); line-height:1.5; }
+    .example-relationship { margin-bottom:10px; padding:12px; border:1px solid color-mix(in srgb,var(--brand-2) 40%,var(--line)); border-radius:10px; background:color-mix(in srgb,var(--brand-2) 7%,var(--bg-2)); }
+    .example-relationship span { display:block; color:var(--brand-2); font-size:.68rem; font-weight:900; letter-spacing:.11em; text-transform:uppercase; }
+    .example-relationship p { margin:5px 0 0; color:var(--text); line-height:1.55; }
+    .example-result { margin-top:10px; color:var(--brand); font-size:1.12rem; }
+    .example-interpretation { margin-top:10px; padding:11px 12px; border-radius:10px; background:var(--bg-2); color:var(--muted); line-height:1.5; }
+    .example-interpretation strong { color:var(--text); }
+    .chapter-actions { display:flex; justify-content:space-between; gap:10px; padding-top:3px; }
+    .chapter-actions button { min-width:180px; }
+    .input-label small { display:block; margin-top:3px; color:var(--brand-2); font-size:.68rem; font-weight:800; }
+    .comparison-grid { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:12px; margin:18px 0; }
+    .comparison-card { min-width:0; padding:15px; border:1px solid var(--line); border-radius:13px; background:var(--panel-2); }
+    .comparison-card h3 { margin-bottom:10px; }
+    .reflection-box { margin-top:9px; padding:11px; border-radius:10px; background:var(--bg-2); }
+    .reflection-box span { display:block; color:var(--muted); font-size:.67rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .reflection-box p { margin:5px 0 0; color:var(--text); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .reflection-note { margin:11px 0 0; color:var(--muted); font-size:.74rem; line-height:1.45; }
+    .lab-intro { margin-bottom:16px; padding:13px 15px; border-left:4px solid var(--brand); border-radius:10px; background:color-mix(in srgb,var(--brand) 8%,var(--panel-2)); color:var(--muted); line-height:1.5; }
+    .lab-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .lab-card { padding:18px; border:1px solid var(--line); border-radius:14px; background:var(--panel-2); }
+    .lab-card h3 { margin-bottom:4px; }
+    .lab-card > p { color:var(--muted); font-size:.78rem; line-height:1.45; }
+    .lab-card label { display:block; color:var(--muted); font-size:.74rem; font-weight:850; margin:9px 0 5px; }
+    .lab-card input,.lab-card select { width:100%; min-height:43px; padding:9px 11px; border:1px solid var(--line); border-radius:10px; color:var(--text); background:var(--bg-2); }
+    .lab-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .lab-result { margin-top:13px; padding:12px; border-radius:11px; background:color-mix(in srgb,var(--brand) 10%,var(--bg-2)); text-align:center; }
+    .lab-result span { display:block; color:var(--muted); font-size:.66rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .lab-result strong { display:block; margin-top:3px; color:var(--brand); font-size:1.25rem; }
+    .lab-explanation { display:grid; gap:7px; margin-top:11px; }
+    .lab-method-line { padding:9px 10px; border:1px solid var(--line); border-radius:9px; background:var(--bg-2); color:var(--muted); font-size:.76rem; line-height:1.45; }
+    .lab-method-line b { color:var(--text); }
+    .lab-method-line[data-lab-section="why"] { border-left:3px solid var(--brand-2); }
+    .lab-method-line[data-lab-section="check"] { border-left:3px solid var(--good); }
+    .records-table { width:100%; border-collapse:collapse; }
+    .records-table th,.records-table td { padding:10px; border-bottom:1px solid var(--line); text-align:left; font-size:.82rem; }
+    .empty { padding:25px; text-align:center; color:var(--muted); border:1px dashed var(--line); border-radius:14px; }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); opacity:0; z-index:80; pointer-events:none; padding:11px 15px; border:1px solid var(--line); border-radius:999px; background:var(--panel); box-shadow:var(--shadow); color:var(--text); font-size:.8rem; font-weight:850; transition:.2s ease; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (max-width: 840px) {
+      .home-grid,.game-grid { grid-template-columns:1fr; }
+      .side-stack { grid-template-columns:1fr 1fr; }
+      .hud { grid-template-columns:auto 1fr auto; }
+      .score { grid-column:3; grid-row:1; }
+      .timer { grid-column:1; grid-row:2; }
+      .hud .secondary { grid-column:3; grid-row:2; }
+      .lab-grid,.chapter-grid { grid-template-columns:1fr; }
+      .chapter-example { grid-column:auto; }
+      .comparison-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width: 600px) {
+      .app { width:min(100% - 16px,1180px); padding-top:10px; }
+      .topbar { align-items:flex-start; }
+      .brand > div:last-child { display:none; }
+      .hero,.setup,.mini-panel,.paper,.answer-panel,.feedback-card,.drawer-card { padding:17px; }
+      .topic-grid,.library-grid,.side-stack { grid-template-columns:1fr; }
+      .segmented { grid-template-columns:1fr 1fr; }
+      .hud { gap:9px; padding:10px; }
+      .progress-wrap { grid-column:1 / -1; grid-row:3; }
+      .mark-grid,.summary-grid { grid-template-columns:1fr 1fr; }
+      .source-document { min-height:220px; padding:15px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body data-theme="dark">
+  <main class="app" id="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">ƒ</div><div>Skills Quest<small>Functional Maths Level 2</small></div></div>
+      <div class="theme-switcher" aria-label="Colour theme">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">Dark</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme-choice="paper" aria-pressed="false">Paper</button>
+      </div>
+    </header>
+
+    <section id="home-screen">
+      <div class="hero panel">
+        <div class="eyebrow">Real maths. Real decisions.</div>
+        <h1>Build skills for work and life.</h1>
+        <p class="hero-copy">Practise Functional Skills Maths Level 2 through realistic payslips, prices, plans, timetables, charts and everyday decisions.</p>
+        <div class="hero-tags"><span class="tag">100 activities</span><span class="tag">10 topic packs</span><span class="tag">Answer + self-review</span><span class="tag">Fresh numbers every run</span></div>
+      </div>
+      <div class="home-grid">
+        <section class="setup panel">
+          <div class="section-kicker">Set up a practice run</div>
+          <h2>Choose what to practise</h2>
+          <p class="section-copy">Mixed Practice samples every area. A topic pack gives focused revision.</p>
+          <div class="field-label">Topic pack <span id="selected-topic-label">Mixed Practice</span></div>
+          <div class="topic-grid" id="topic-picker"></div>
+          <div class="field-label">Challenge level <span id="selected-level-label">Mixed levels</span></div>
+          <div class="segmented" id="level-picker"></div>
+          <div class="field-label">Pace <span id="selected-pace-label">15 minutes</span></div>
+          <div class="segmented" id="pace-picker"></div>
+          <button class="primary launch" type="button" data-action="start-run">Start 10-question run →</button>
+        </section>
+        <aside class="side-stack">
+          <section class="mini-panel panel">
+            <div class="section-kicker">How practice works</div>
+            <div class="mini-list">
+              <div class="mini-row"><span class="num">1</span><span><b>Give the answer</b><span>This is the part the game can mark.</span></span></div>
+              <div class="mini-row"><span class="num">2</span><span><b>Record your thinking</b><span>Working and checking notes are optional and unscored.</span></span></div>
+              <div class="mini-row"><span class="num">3</span><span><b>Compare and learn</b><span>Review your notes beside the model solution.</span></span></div>
+            </div>
+          </section>
+          <section class="mini-panel panel">
+            <div class="section-kicker">Study tools</div>
+            <h2 style="font-size:1.2rem">Explore before you play</h2>
+            <div class="utility-grid">
+              <button type="button" data-action="open-library"><span>▦</span>Topic library</button>
+              <button type="button" data-action="open-lab"><span>⌁</span>Practice lab</button>
+              <button type="button" data-action="open-records"><span>★</span>Records</button>
+              <button type="button" data-action="reset-records"><span>↺</span>Reset</button>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section id="game-screen" class="hidden" aria-live="polite">
+      <div class="hud panel">
+        <div class="lives" id="lives" aria-label="3 lives">♥ ♥ ♥</div>
+        <div class="progress-wrap"><div class="progress-meta"><span id="question-progress">Question 1 of 10</span><span id="topic-progress">Money</span></div><div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div></div>
+        <div class="timer" id="timer">15:00</div>
+        <div class="score">Score <span id="score">0</span></div>
+        <button class="secondary" type="button" data-action="quit-run">Quit</button>
+      </div>
+      <div class="game-grid">
+        <article class="paper panel">
+          <div class="paper-head"><div><div class="role" id="question-role">Workplace scenario</div><h2 id="question-title">Loading activity</h2></div><span class="level-badge" id="level-badge">Level A</span></div>
+          <div class="source-document" id="source-document"></div>
+        </article>
+        <section class="answer-panel panel">
+          <div class="question-number" id="question-code">Activity</div>
+          <h2 class="prompt" id="question-prompt">Loading…</h2>
+          <p class="instruction" id="question-instruction"></p>
+          <span class="marks-chip" id="marks-chip"></span>
+          <form id="answer-form">
+            <div class="answer-block" id="answer-control"></div>
+            <div class="answer-block" id="working-block"><label class="input-label" for="working-input">Write your working <small>Optional · not automatically marked</small></label><textarea id="working-input" placeholder="Record the calculation or steps you used for comparison…"></textarea></div>
+            <div class="answer-block" id="check-block"><label class="input-label" for="check-input">How did you check? <small>Optional · not automatically marked</small></label><textarea id="check-input" placeholder="Estimate, reverse the calculation, or explain why it is reasonable…"></textarea></div>
+            <div class="help-row"><button type="button" data-action="show-strategy">Strategy (-15)</button><button type="button" data-action="show-hint">Hint (-25)</button><button type="button" data-action="show-answer">Show answer (-100)</button></div>
+            <div class="hint-box hidden" id="hint-box"></div>
+            <div class="submit-row"><button class="primary" type="submit">Mark my answer</button></div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <section id="end-screen" class="hidden">
+      <div class="end-card panel">
+        <div class="section-kicker">Run complete</div><h2 id="end-heading">Strong practice.</h2><div class="end-score" id="end-percent">0%</div><p class="section-copy" id="end-copy"></p>
+        <div class="summary-grid"><div><b id="end-marks">0/0</b><span>Answer marks</span></div><div><b id="end-correct">0</b><span>Correct answers</span></div><div><b id="end-streak">0</b><span>Best streak</span></div><div><b id="end-score">0</b><span>Game score</span></div></div>
+        <div class="topic-results" id="topic-results"></div>
+        <div class="submit-row" style="max-width:500px;margin:auto"><button class="secondary" type="button" data-action="return-home">Change setup</button><button class="primary" type="button" data-action="start-run">Practise again</button></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="feedback hidden" id="feedback" role="dialog" aria-modal="true" aria-labelledby="feedback-heading">
+    <article class="feedback-card panel"><div class="feedback-title"><div><div class="section-kicker" id="feedback-kicker">Marked</div><h2 id="feedback-heading">Review your answer</h2></div><div class="result-score" id="result-score">0/2</div></div><p class="section-copy" id="feedback-message"></p><div class="mark-grid" id="mark-grid"></div><div class="comparison-grid"><section class="comparison-card"><h3>Your approach</h3><div class="reflection-box"><span>Your working</span><p id="learner-working"></p></div><div class="reflection-box"><span>Your check</span><p id="learner-check"></p></div><p class="reflection-note">Your notes are shown for honest self-review. The game does not award marks for free text.</p></section><section class="comparison-card"><h3>Model approach</h3><div class="solution" id="solution"></div><div class="check-callout" id="solution-check"></div></section></div><button class="primary" style="width:100%;margin-top:18px" type="button" data-action="next-question">Next question →</button></article>
+  </div>
+
+  <div class="feedback answer-explanation hidden" id="answer-explanation" role="dialog" aria-modal="true" aria-labelledby="explanation-heading">
+    <article class="feedback-card panel">
+      <div class="feedback-title"><div><div class="section-kicker">Guided answer</div><h2 id="explanation-heading">Why this answer works</h2></div><button class="secondary" type="button" data-action="close-answer-explanation" aria-label="Close answer explanation">Close</button></div>
+      <div class="answer-reveal"><span>Final answer</span><strong id="explanation-answer"></strong></div>
+      <section class="why-card"><h3>Why this is the answer</h3><p id="explanation-why"></p></section>
+      <h3>Step by step</h3><div class="solution" id="explanation-steps"></div>
+      <div class="check-callout" id="explanation-check"></div>
+      <button class="primary" style="width:100%;margin-top:18px" type="button" data-action="close-answer-explanation">Return to the question</button>
+    </article>
+  </div>
+
+  <div class="drawer hidden" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title"><article class="drawer-card panel"><div class="screen-head"><div><div class="section-kicker" id="drawer-kicker">Study tool</div><h2 id="drawer-title">Topic library</h2></div><button class="secondary" type="button" data-action="close-drawer">Close</button></div><div id="drawer-content"></div></article></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script id="functional-skills-engine">
+  (function (root) {
+    'use strict';
+
+    var TOPICS = [
+      { id:'money', icon:'£', label:'Money', short:'Budgets, wages, VAT and value', description:'Use discounts, tax, rates of pay, profit, budgets and compound interest in everyday financial decisions.' },
+      { id:'percentages', icon:'%', label:'Percentages & Number', short:'Fractions, decimals and change', description:'Connect fractions, decimals and percentages; calculate change, reverse percentages, use formulae and estimate.' },
+      { id:'ratio', icon:'∶', label:'Ratio & Proportion', short:'Recipes, sharing and scale factors', description:'Simplify ratios and solve direct and inverse proportion problems in recipes, mixtures and work planning.' },
+      { id:'measures', icon:'↔', label:'Measures & Conversions', short:'Units, time, speed and density', description:'Convert metric and imperial measures and calculate with time, speed, density, capacity and exchange rates.' },
+      { id:'area', icon:'□', label:'Area & Perimeter', short:'Rooms, gardens and circles', description:'Find areas and perimeters of triangles, circles, composite shapes and practical spaces.' },
+      { id:'volume', icon:'▧', label:'Volume & Surface Area', short:'Tanks, concrete and packaging', description:'Use formulae for cuboids, cylinders and other 3-D shapes, including capacity and surface area.' },
+      { id:'data', icon:'▥', label:'Data Handling', short:'Averages, range and comparisons', description:'Calculate and compare mean, median, mode and range, including an estimated mean from grouped data.' },
+      { id:'probability', icon:'◇', label:'Probability', short:'Tables, trees and combined events', description:'Express and calculate simple and combined probabilities using diagrams, surveys and two-way tables.' },
+      { id:'graphs', icon:'⌁', label:'Graphs & Charts', short:'Trends, charts and correlation', description:'Read and evaluate line, bar, pie, conversion and scatter graphs, including simple correlation.' },
+      { id:'shape', icon:'△', label:'Scale, Coordinates & Shape', short:'Plans, angles and elevations', description:'Work with scale drawings, coordinates, angles, plans, elevations, nets and 2-D views of 3-D shapes.' }
+    ];
+    var LEVELS = ['A','A','B','B','B','C','C','C','C','C'];
+    var LEVEL_NAMES = { A:'Level A · one step', B:'Level B · connected steps', C:'Level C · exam style' };
+    var WHY_BY_TOPIC = {
+      money:'Money problems are solved by tracking which amounts must be combined, removed or compared before deciding what the final figure represents.',
+      percentages:'A percentage describes an amount out of 100, so converting it to a fraction, decimal or multiplier connects the stated change to the original value.',
+      ratio:'A ratio keeps quantities in fixed relative parts. Finding one part or a scale factor makes it possible to enlarge, reduce or share the quantities fairly.',
+      measures:'Measurements must use compatible units before they can be combined. The operation then follows the relationship between the quantities, such as distance ÷ time.',
+      area:'Area measures the surface covered, while perimeter measures the distance around an edge. Choosing the matching formula gives both the value and the correct unit.',
+      volume:'Volume measures three-dimensional space, so the relevant dimensions are combined using the stated solid’s formula and the result uses cubic units.',
+      data:'The required statistic has a specific meaning: averages describe a typical value, while range describes spread. The calculation must match that meaning.',
+      probability:'Probability compares favourable outcomes with all possible outcomes. For connected events, the diagram or sampling rule determines whether probabilities are multiplied, added or adjusted.',
+      graphs:'A graph converts visual position into data. Reading the correct points or overall trend first provides the values needed for the calculation or conclusion.',
+      shape:'Scale, coordinates and angle facts describe position and size precisely. Applying the stated scale or geometric total connects the drawing to the required measurement.'
+    };
+    var LIBRARY_GUIDES = {
+      money:{
+        idea:"Treat every money question as a story about an original amount and the changes made to it. Decide whether each change is added, removed, multiplied or compared before touching the calculator.",
+        recognise:["Prices, wages, bills, budgets, VAT, discounts, profit, interest or best-value comparisons.","Words such as total, change, per hour, increase, decrease, percentage profit or balance."],
+        rules:[
+          {name:"Percentage amount",text:"amount = percentage ÷ 100 × original"},
+          {name:"Changed amount",text:"new value = original × percentage multiplier; for example, add 20% by multiplying by 1.20."},
+          {name:"Profit",text:"profit = selling price − cost price; profit percentage = profit ÷ cost price × 100."},
+          {name:"Wages",text:"pay = hours × hourly rate, with overtime calculated separately when its rate changes."}
+        ],
+        strategy:[
+          {action:"Name the starting amount.",why:"Percentage changes must be applied to the correct base value."},
+          {action:"Translate each money word into an operation.",why:"Discount means subtract; VAT or interest usually means add; per hour means multiply."},
+          {action:"Keep full calculator values until the final line.",why:"Rounding too early can change pounds and pence."},
+          {action:"State the result with £ and two decimal places.",why:"Money answers need a clear unit and sensible accuracy."}
+        ],
+        traps:["Taking a percentage from the already changed value when the question refers to the original.","Using selling price instead of cost price in a profit-percentage calculation.","Rounding every intermediate line instead of the final answer."],
+        example:{question:"A jacket costs £80 and is reduced by 15%. What is the sale price?",relationship:"sale price = original price × proportion remaining. A 15% reduction leaves 85%, so sale price = £80 × 0.85.",steps:[{work:"15% = 15 ÷ 100 = 0.15",why:"Dividing by 100 converts 15% into the decimal 0.15. This decimal represents the proportion of the original price removed."},{work:"£80 × 0.15 = £12",why:"Multiplying the original price by 0.15 calculates the discount in money: £12 is removed from the price."},{work:"£80 − £12 = £68",why:"The sale price is the original price minus the discount. Equivalently, £80 × 0.85 = £68 because 85% remains."}],result:"£68.00",interpretation:"The customer pays £68.00. The reduction is £12.00, so the original £80.00 has been divided into £12.00 removed and £68.00 remaining.",check:"Use the remaining-percentage multiplier: £80 × 0.85 = £68. This agrees with £80 − £12 = £68."}
+      },
+      percentages:{
+        idea:"Fractions, decimals and percentages are different ways to describe the same proportion. Convert to the form that makes the required calculation easiest.",
+        recognise:["Questions containing %, fractions, decimals, percentage change, reverse percentages, estimation or formula substitution.","Phrases such as of, increased by, decreased by, original value, percentage difference or approximately."],
+        rules:[
+          {name:"Convert",text:"percentage ↔ decimal: divide or multiply by 100; fraction to decimal: numerator ÷ denominator."},
+          {name:"Percentage change",text:"change ÷ original × 100."},
+          {name:"Multiplier",text:"increase by p%: 1 + p/100; decrease by p%: 1 − p/100."},
+          {name:"Reverse percentage",text:"original = final ÷ multiplier. Do not simply add the percentage back."}
+        ],
+        strategy:[
+          {action:"Identify the whole or original value.",why:"Every proportion needs a clear value representing 100%."},
+          {action:"Decide whether you need an amount, a changed total, or the original.",why:"These use different calculations even when the same percentage appears."},
+          {action:"Choose a fraction, decimal or multiplier.",why:"The right representation makes the relationship visible."},
+          {action:"Estimate before accepting the calculator result.",why:"An estimate catches misplaced decimal points and wrong multipliers."}
+        ],
+        traps:["Dividing by the final value instead of the original when finding percentage change.","Adding 20% to reverse a 20% decrease; the two percentages use different base values.","Reading 0.6 as 0.6% instead of 60%."],
+        example:{question:"After a 20% reduction, a price is £72. What was the original price?",relationship:"reduced price = original price × proportion remaining. In money, £90 × 0.80 = £72. Because the reduced price is known but the original is unknown, division is the inverse operation.",steps:[{work:"100% − 20% = 80%",why:"The original price is 100%. Removing 20% leaves 80%, so the £72 reduced price represents 80% of the unknown original price."},{work:"80% = 80 ÷ 100 = 0.80",why:"The decimal 0.80 is a multiplier: multiplying any original price by 0.80 calculates the money remaining after the 20% reduction."},{work:"original price × 0.80 = £72, so original price = £72 ÷ 0.80 = £90",why:"Division reverses the multiplication by 0.80. It scales the known 80% amount, £72, back to the full 100% amount, £90."}],result:"£90.00",interpretation:"£90.00 is the price before the reduction. Of this original amount, £18.00 is removed and £72.00 remains to be paid.",check:"Substitute the answer into the forward relationship: £90 × 0.80 = £72. Equivalently, 20% of £90 is £18 and £90 − £18 = £72."}
+      },
+      ratio:{
+        idea:"A ratio compares fixed-size parts. Find either the value of one part or the scale factor, then use it consistently for every quantity.",
+        recognise:["Recipes, mixtures, maps, sharing, staffing, exchange between quantities, direct proportion or inverse proportion.","Phrases such as in the ratio, for every, scale up, share, proportionally, same rate or fewer workers take longer."],
+        rules:[
+          {name:"Simplify",text:"divide every part by the same common factor."},
+          {name:"Share a total",text:"one part = total ÷ sum of ratio parts, then multiply by each ratio number."},
+          {name:"Direct proportion",text:"both quantities change by the same scale factor."},
+          {name:"Inverse proportion",text:"one quantity increases while the other decreases so their product stays constant."}
+        ],
+        strategy:[
+          {action:"Write the quantities in the same order as the ratio.",why:"Swapping the order gives the right arithmetic to the wrong item."},
+          {action:"Find the total number of parts or a known scale factor.",why:"This connects the abstract ratio to an actual quantity."},
+          {action:"Find one part before rebuilding the required amounts.",why:"A unit-part method is reliable for awkward totals."},
+          {action:"Add shared amounts or compare scaled pairs.",why:"The final check confirms the fixed relationship was preserved."}
+        ],
+        traps:["Dividing the total by only one ratio number instead of the sum.","Adding the same amount to each side instead of multiplying by the same factor.","Treating an inverse relationship as direct proportion."],
+        example:{question:"Share £150 in the ratio 2:3.",relationship:"the complete £150 corresponds to 2 + 3 = 5 equal ratio parts. Therefore, one part = £150 ÷ 5.",steps:[{work:"2 + 3 = 5 parts",why:"The two shares together contain five equal-sized parts. Adding the ratio numbers finds how many equal parts represent the whole £150."},{work:"£150 ÷ 5 = £30 per part",why:"Dividing the whole amount by the five equal parts calculates the monetary value of one part."},{work:"2 × £30 = £60 and 3 × £30 = £90",why:"The first person receives two £30 parts and the second receives three £30 parts, preserving the required 2:3 relationship."}],result:"£60 and £90",interpretation:"The £150 total is divided into a £60 share and a £90 share. The second share is larger because it contains three parts rather than two.",check:"The shares total £60 + £90 = £150, and £60:£90 divides by 30 to give 2:3."}
+      },
+      measures:{
+        idea:"Measurements can only be combined when their units are compatible. Convert first, then use the relationship between the quantities.",
+        recognise:["Length, mass, capacity, time, temperature, speed, density, mileage, currency or metric–imperial conversion.","Units such as mm, cm, m, km, g, kg, ml, litres, mph, km/h, g/cm³ or an exchange rate."],
+        rules:[
+          {name:"Metric steps",text:"1 m = 100 cm = 1000 mm; 1 kg = 1000 g; 1 litre = 1000 ml."},
+          {name:"Speed",text:"speed = distance ÷ time; distance = speed × time; time = distance ÷ speed."},
+          {name:"Density",text:"density = mass ÷ volume."},
+          {name:"Conversion factor",text:"multiply in the direction stated by the factor; divide to reverse it."}
+        ],
+        strategy:[
+          {action:"Circle every unit and the unit requested.",why:"This reveals whether a conversion is needed."},
+          {action:"Convert to compatible units before using a formula.",why:"Mixing hours with minutes or metres with centimetres creates meaningless results."},
+          {action:"Write the relationship as a formula and substitute.",why:"A written formula makes the chosen operation easier to verify."},
+          {action:"Use size sense to check the direction of conversion.",why:"Converting to a smaller unit should produce a larger number."}
+        ],
+        traps:["Using 100 instead of 1000 for kilograms to grams or litres to millilitres.","Treating 2 hours 30 minutes as 2.30 hours instead of 2.5 hours.","Multiplying when a reverse conversion requires division."],
+        example:{question:"A van travels 150 km in 2 hours 30 minutes. Find its average speed.",relationship:"distance = speed × time. Because speed is unknown, rearrange using the inverse operation: speed = distance ÷ time.",steps:[{work:"2 hours 30 minutes = 2.5 hours",why:"Thirty minutes is 30/60 = 0.5 hours. Converting the complete time to hours makes it compatible with the required unit, kilometres per hour."},{work:"speed = distance ÷ time",why:"Average speed is the distance allocated to one unit of time. Division calculates how many kilometres correspond to each hour."},{work:"150 km ÷ 2.5 h = 60 km/h",why:"The units also divide: kilometres ÷ hours gives kilometres per hour, so the numerical result and unit both match the quantity requested."}],result:"60 km/h",interpretation:"The van covers an average of 60 kilometres during each hour of the 2.5-hour journey.",check:"Substitute into the original relationship: 60 km/h × 2.5 h = 150 km."}
+      },
+      area:{
+        idea:"Perimeter measures a boundary; area measures covered surface. Break composite shapes into familiar pieces and calculate only the measure requested.",
+        recognise:["Flooring, fencing, turf, paint coverage, borders, plans, circles, triangles or composite shapes.","Square units signal area; a distance around an edge signals perimeter."],
+        rules:[
+          {name:"Rectangle",text:"area = length × width; perimeter = 2(length + width)."},
+          {name:"Triangle",text:"area = ½ × base × perpendicular height."},
+          {name:"Circle",text:"area = πr²; circumference = 2πr or πd."},
+          {name:"Composite area",text:"add non-overlapping pieces, or subtract a cut-out from a larger shape."}
+        ],
+        strategy:[
+          {action:"Mark whether the question asks for area or perimeter.",why:"The same diagram can require completely different measurements."},
+          {action:"Write missing lengths and split the shape.",why:"Simple rectangles, triangles and circles are easier and safer to calculate."},
+          {action:"Apply each formula with consistent units.",why:"Every length must use the same unit before areas are combined."},
+          {action:"Attach linear or square units.",why:"Units communicate whether you measured an edge or a surface."}
+        ],
+        traps:["Using diameter as the radius in a circle formula.","Adding internal dividing lines to the outside perimeter.","Forgetting to subtract a doorway, cut-out or uncovered section."],
+        example:{question:"An L-shaped floor is a 6 m by 4 m rectangle with a 2 m by 1.5 m corner removed. Find its area.",relationship:"area of the L-shape = area of the complete outer rectangle − area of the rectangular cut-out.",steps:[{work:"outer area = 6 m × 4 m = 24 m²",why:"The 6 m by 4 m rectangle covers the entire outer boundary before the corner is removed."},{work:"cut-out area = 2 m × 1.5 m = 3 m²",why:"The missing corner is also rectangular, so multiplying its perpendicular dimensions finds the area that is not part of the floor."},{work:"L-shape area = 24 m² − 3 m² = 21 m²",why:"Subtracting the non-floor region leaves only the surface covered by the L-shaped floor."}],result:"21 m²",interpretation:"The L-shaped floor covers 21 square metres. Square metres are required because area measures a two-dimensional surface.",check:"The answer must be smaller than the full 24 m² rectangle. Adding the removed 3 m² back gives 21 + 3 = 24 m²."}
+      },
+      volume:{
+        idea:"Volume measures space inside a solid and uses cubic units. Surface area measures the faces covering it and uses square units.",
+        recognise:["Tanks, boxes, concrete, packaging, containers, capacity, cylinders or surface covering.","Words such as holds, fills, inside, volume, capacity, faces, material or surface area."],
+        rules:[
+          {name:"Cuboid volume",text:"V = length × width × height."},
+          {name:"Prism volume",text:"V = cross-sectional area × length."},
+          {name:"Cylinder volume",text:"V = πr²h."},
+          {name:"Capacity",text:"1 cm³ = 1 ml and 1000 cm³ = 1 litre."}
+        ],
+        strategy:[
+          {action:"Decide between inside space and outside covering.",why:"This separates volume from surface area."},
+          {action:"Identify the cross-section or all exposed faces.",why:"The solid’s structure determines the correct formula."},
+          {action:"Convert every dimension before multiplying.",why:"Mixed dimensions do not produce a valid cubic unit."},
+          {action:"Convert capacity only after finding volume.",why:"Keeping the geometry and unit conversion as separate steps reduces mistakes."}
+        ],
+        traps:["Giving cm² for a volume or cm³ for a surface area.","Using diameter instead of radius in πr²h.","Multiplying litres by another length after already converting the volume."],
+        example:{question:"Find the volume of a cylinder with radius 2 cm and height 5 cm. Use π = 3.14.",relationship:"cylinder volume = circular base area × height = πr²h. The same circular cross-section continues through the full height.",steps:[{work:"r² = 2² = 4 cm²",why:"The base is a circle, and circle area depends on the square of the radius. Squaring 2 cm gives 4 cm²."},{work:"base area = 3.14 × 4 = 12.56 cm²",why:"Substituting π = 3.14 and r² = 4 into πr² calculates the area of one circular base."},{work:"volume = 12.56 cm² × 5 cm = 62.8 cm³",why:"Multiplying the base area by the height counts 5 cm of identical cross-section. The units cm² × cm become cm³."}],result:"62.8 cm³",interpretation:"The cylinder contains 62.8 cubic centimetres of three-dimensional space, equivalent to 62.8 ml of capacity.",check:"A 4 cm × 4 cm × 5 cm box surrounding the cylinder has volume 80 cm³, so the cylinder’s 62.8 cm³ is reasonably smaller."}
+      },
+      data:{
+        idea:"Choose a statistic for the question’s purpose: averages describe a typical value, while range describes spread. Always inspect the data before calculating.",
+        recognise:["Lists, frequency tables, grouped data, surveys, comparisons, averages, spread or claims based on samples.","Words such as typical, average, middle, most common, consistent, variation or estimate."],
+        rules:[
+          {name:"Mean",text:"sum of values ÷ number of values; with frequencies use Σfx ÷ Σf."},
+          {name:"Median",text:"the middle value after ordering the data."},
+          {name:"Mode",text:"the most frequent value or category."},
+          {name:"Range",text:"highest − lowest; a smaller range means less spread."}
+        ],
+        strategy:[
+          {action:"Identify whether the question asks about centre or spread.",why:"No single statistic answers every comparison."},
+          {action:"Order raw data or read frequencies carefully.",why:"Median, mode and range depend on position or frequency."},
+          {action:"Show the total and the number of values for a mean.",why:"These are the two independent ingredients of the calculation."},
+          {action:"Interpret the statistic in context.",why:"A calculated number only becomes an answer when its meaning is stated."}
+        ],
+        traps:["Finding the median before putting values in order.","Dividing a frequency-table total by the number of rows instead of total frequency.","Using class boundaries rather than midpoints for an estimated grouped mean."],
+        example:{question:"For 8, 10, 10, 12 and 15, find the mean, median, mode and range.",relationship:"mean = total ÷ number of values; median = ordered middle value; mode = most frequent value; range = highest − lowest.",steps:[{work:"total = 8 + 10 + 10 + 12 + 15 = 55; mean = 55 ÷ 5 = 11",why:"There are five observations. Dividing their total by five calculates the equal share each observation would have if the total were distributed evenly."},{work:"ordered data: 8, 10, 10, 12, 15; median = 10; mode = 10",why:"The median is the third, central value in the ordered list. The mode is also 10 because it occurs twice, more often than any other value."},{work:"range = 15 − 8 = 7",why:"Subtracting the minimum from the maximum measures the full spread between the two extreme observations."}],result:"Mean 11; median 10; mode 10; range 7",interpretation:"The data are centred around 10–11, and the complete distance from the lowest value to the highest is 7.",check:"The mean 11 lies within the data range from 8 to 15, and reversing the mean calculation gives 11 × 5 = 55."}
+      },
+      probability:{
+        idea:"Probability compares favourable outcomes with all possible outcomes. For more than one event, decide whether outcomes are combined with AND, OR, replacement or no replacement.",
+        recognise:["Chance, likelihood, spinners, cards, bags, surveys, two-way tables, tree diagrams or repeated events.","Words such as and, or, at least, not, without replacement, independent or mutually exclusive."],
+        rules:[
+          {name:"Single event",text:"P(event) = favourable outcomes ÷ total outcomes, from 0 to 1."},
+          {name:"Complement",text:"P(not A) = 1 − P(A)."},
+          {name:"AND",text:"follow one route and multiply its branch probabilities."},
+          {name:"OR",text:"add the probabilities of separate qualifying outcomes; subtract overlap if outcomes can occur together."}
+        ],
+        strategy:[
+          {action:"List or display the complete sample space.",why:"Missing possible outcomes changes the denominator."},
+          {action:"Mark the outcomes that satisfy the exact wording.",why:"This prevents confusing AND with OR."},
+          {action:"Update totals after an item is not replaced.",why:"The second event then has a different denominator and possibly numerator."},
+          {action:"Check that the probability lies from 0 to 1.",why:"Anything outside this interval cannot represent a probability."}
+        ],
+        traps:["Keeping the same denominator after an object is removed without replacement.","Adding along a tree branch instead of multiplying.","Assuming events are independent merely because there are two stages."],
+        example:{question:"A bag has 3 red and 2 blue counters. Two are taken without replacement. Find P(both red).",relationship:"P(both red) = P(first red) × P(second red given that the first was red). ‘Both’ means the two events must occur along the same route.",steps:[{work:"P(first red) = 3/5",why:"At the start, three of the five equally likely counters are red, so favourable outcomes ÷ total outcomes is 3 ÷ 5."},{work:"P(second red | first red) = 2/4",why:"Without replacement means the first red counter stays out of the bag. Two red counters remain among four counters in total."},{work:"P(both red) = 3/5 × 2/4 = 6/20 = 3/10",why:"Multiplication combines probabilities along one complete AND route. Simplifying 6/20 gives 3/10, which is 0.3."}],result:"3/10 or 0.3",interpretation:"There is a probability of 0.3, or a 30% chance, that both selected counters are red.",check:"After one red is removed, the second-red probability falls from 3/5 to 2/4. Therefore the answer must be below 3/5 × 3/5 = 0.36; 0.3 is reasonable."}
+      },
+      graphs:{
+        idea:"A graph maps visual position to values. Read titles, axes, keys and scales first; then decide whether the question needs an exact reading, a calculation or an interpretation.",
+        recognise:["Line graphs, bar charts, pie charts, scatter graphs, conversion graphs and time series.","Requests to read, compare, interpolate, estimate, describe a trend, identify correlation or criticise a graph."],
+        rules:[
+          {name:"Scale",text:"value per small division = labelled interval ÷ number of divisions."},
+          {name:"Pie chart",text:"sector angle = category ÷ total × 360°."},
+          {name:"Conversion graph",text:"move from the known axis to the line, then across to the required axis."},
+          {name:"Correlation",text:"describes association, not proof that one variable causes the other."}
+        ],
+        strategy:[
+          {action:"Read the title, both axes, units and key.",why:"A correctly located point can still be misinterpreted with the wrong variable or unit."},
+          {action:"Work out the scale of one small division.",why:"Guessing between labels is a common source of reading errors."},
+          {action:"Use a ruler-like vertical or horizontal trace.",why:"This keeps the reading aligned with the correct point or conversion line."},
+          {action:"Describe evidence, not just appearance.",why:"A conclusion should name the direction, size or exception visible in the data."}
+        ],
+        traps:["Assuming every axis begins at zero.","Reading the grid as one unit without checking labelled intervals.","Claiming that correlation proves causation or extending a trend far beyond the data."],
+        example:{question:"A conversion graph shows 4 cm represents 10 km. What distance does 7.2 cm represent?",relationship:"real distance = graph length × constant conversion rate. The rate is 10 km ÷ 4 cm = 2.5 km per cm.",steps:[{work:"conversion rate = 10 km ÷ 4 cm = 2.5 km per cm",why:"Dividing the known real distance by its graph length finds how many kilometres are represented by one centimetre."},{work:"7.2 cm × 2.5 km per cm = 18 km",why:"The graph is directly proportional, so every centimetre uses the same rate. The cm units cancel, leaving kilometres."},{work:"real distance = 18 km",why:"The calculation has produced a value on the real-distance axis, so the answer must be stated in kilometres."}],result:"18 km",interpretation:"A length of 7.2 cm on this graph represents a real-world distance of 18 kilometres.",check:"7.2 cm is 7.2 ÷ 4 = 1.8 times the known length. Applying the same scale factor gives 10 km × 1.8 = 18 km."}
+      },
+      shape:{
+        idea:"Shape questions use fixed geometric relationships to connect a drawing with real lengths, positions, angles or views. Mark known facts directly on the diagram.",
+        recognise:["Scale drawings, maps, bearings, coordinates, angle diagrams, plans, elevations, nets and 2-D views of 3-D objects.","Ratios such as 1:50, coordinate pairs, parallel lines, compass directions or requests for a front/side view."],
+        rules:[
+          {name:"Scale drawing",text:"real length = drawing length × scale factor, followed by any required unit conversion."},
+          {name:"Angle totals",text:"straight line 180°; around a point 360°; triangle 180°; quadrilateral 360°."},
+          {name:"Coordinates",text:"move horizontally using x first, then vertically using y."},
+          {name:"Plans and elevations",text:"a plan is viewed from above; an elevation is viewed from a named side."}
+        ],
+        strategy:[
+          {action:"Identify the viewpoint, scale or angle fact supplied.",why:"This determines which geometric relationship controls the problem."},
+          {action:"Annotate known lengths, coordinates and equal or parallel features.",why:"Visible structure prevents using an unrelated dimension or angle."},
+          {action:"Apply one relationship at a time.",why:"Separating scale, geometry and conversion makes connected problems traceable."},
+          {action:"Compare the answer with the drawing’s proportions.",why:"Even a not-to-scale sketch can reveal impossible directions or relative sizes."}
+        ],
+        traps:["Reading coordinates as y then x.","Forgetting to convert centimetres on a plan into metres in reality.","Including hidden or rear edges in a view where they are not visible."],
+        example:{question:"A room is 8 cm long on a 1:50 plan. Find its real length in metres.",relationship:"real length = plan length × scale factor. At 1:50, 1 cm on the plan represents 50 cm in reality.",steps:[{work:"real length = 8 cm × 50 = 400 cm",why:"Multiplying by the scale factor converts each of the eight plan centimetres into fifty real centimetres."},{work:"400 cm ÷ 100 = 4 m",why:"One metre contains 100 centimetres. Dividing by 100 changes the unit from centimetres to metres without changing the physical length."},{work:"real room length = 4 m",why:"Metres are the unit requested and are appropriate for describing the actual size of a room."}],result:"4 m",interpretation:"The 8 cm line on the plan represents a room that is 4 metres long in reality.",check:"At this scale, 2 cm represents 100 cm = 1 m. The plan length 8 cm contains four groups of 2 cm, so it represents 4 m."}
+      }
+    };
+
+    function seededRandom(seed) {
+      var state = (Number(seed) || 1) >>> 0;
+      return function () {
+        state = (state * 1664525 + 1013904223) >>> 0;
+        return state / 4294967296;
+      };
+    }
+    function int(rng, min, max) { return Math.floor(rng() * (max - min + 1)) + min; }
+    function pick(rng, values) { return values[int(rng, 0, values.length - 1)]; }
+    function round(value, places) { var power = Math.pow(10, places == null ? 2 : places); return Math.round((value + Number.EPSILON) * power) / power; }
+    function money(value) { return '£' + Number(value).toFixed(2); }
+    function number(value, places) { return Number(value).toLocaleString('en-GB', { maximumFractionDigits: places == null ? 2 : places }); }
+    function esc(value) { return String(value).replace(/[&<>"']/g, function (char) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]; }); }
+    function rowsHtml(rows) { return rows.map(function(row){ return '<tr' + (row.total ? ' class="total-row"' : '') + '><td>' + esc(row[0]) + '</td><td>' + esc(row[1]) + '</td></tr>'; }).join(''); }
+    function documentCard(title, subtitle, rows, note, visual) {
+      return {
+        type: visual ? 'diagram' : 'document',
+        html:'<h3>' + esc(title) + '</h3><div class="doc-sub">' + esc(subtitle) + '</div>' +
+          (rows && rows.length ? '<table><thead><tr><th>Item</th><th>Information</th></tr></thead><tbody>' + rowsHtml(rows) + '</tbody></table>' : '') +
+          (visual || '') + (note ? '<div class="doc-note">' + esc(note) + '</div>' : '')
+      };
+    }
+    function evidenceTerms(steps) {
+      var found = (steps || []).join(' ').match(/-?\d+(?:[.,]\d+)?%?/g) || [];
+      return found.slice(0, 5);
+    }
+    function makeQuestion(config) {
+      var level = config.level || 'B';
+      var marks = level === 'A' ? {answer:2,method:1,check:0,total:3} : level === 'B' ? {answer:2,method:1,check:1,total:4} : {answer:2,method:2,check:1,total:5};
+      return {
+        topic:config.topic,
+        level:level,
+        role:config.role || 'Everyday scenario',
+        title:config.title,
+        prompt:config.prompt,
+        instruction:config.instruction || 'Give your answer to a sensible level of accuracy and include the unit where needed.',
+        document:config.document,
+        answer:Object.assign({kind:'number',tolerance:.005,unit:'',alternatives:[],options:[]},config.answer),
+        strategy:config.strategy || 'Underline what you know, identify the operation, then work one step at a time.',
+        hint:config.hint || 'Write down the information you need before using the calculator.',
+        why:config.why || WHY_BY_TOPIC[config.topic] + ' For this question, ' + (config.hint || 'use the information in the document to choose the calculation that matches what is being asked.'),
+        solution:{steps:config.steps || [],check:config.check || 'Use an estimate or reverse calculation to decide whether the answer is reasonable.'},
+        marks:config.marks || marks,
+        evidence:{methodTerms:config.methodTerms || evidenceTerms(config.steps),checkTerms:config.checkTerms || evidenceTerms([config.check || ''])}
+      };
+    }
+    function choiceAnswer(value, options) { return {kind:'choice',value:value,tolerance:0,unit:'',alternatives:[],options:options}; }
+    function topic(id) { return TOPICS.filter(function(item){ return item.id === id; })[0]; }
+    function svgBars(labels, values, colour) {
+      var max = Math.max.apply(Math, values);
+      var bars = values.map(function(value,index){ var h=Math.round(value/max*120); var x=35+index*62; return '<rect x="'+x+'" y="'+(155-h)+'" width="34" height="'+h+'" rx="4" fill="'+(colour||'#238f87')+'"/><text x="'+(x+17)+'" y="174" text-anchor="middle" font-size="10">'+esc(labels[index])+'</text><text x="'+(x+17)+'" y="'+(148-h)+'" text-anchor="middle" font-size="10">'+value+'</text>'; }).join('');
+      return '<svg class="diagram" viewBox="0 0 400 190" role="img" aria-label="Bar chart"><line x1="28" y1="155" x2="380" y2="155" stroke="#60727c"/>'+bars+'</svg>';
+    }
+    function svgLine(points, yLabel) {
+      var max=Math.max.apply(Math,points), min=Math.min.apply(Math,points), span=max-min||1;
+      var coords=points.map(function(v,i){ return (35+i*(330/(points.length-1)))+','+(150-(v-min)/span*105); }).join(' ');
+      var dots=points.map(function(v,i){ var x=35+i*(330/(points.length-1)),y=150-(v-min)/span*105; return '<circle cx="'+x+'" cy="'+y+'" r="4" fill="#217b96"/><text class="graph-value" x="'+x+'" y="'+(y-9)+'" text-anchor="middle" font-size="10" font-weight="700">'+v+'</text><text x="'+x+'" y="170" text-anchor="middle" font-size="9">'+(i+1)+'</text>'; }).join('');
+      return '<svg class="diagram" viewBox="0 0 400 190" role="img" aria-label="Line graph values: '+esc(points.join(', '))+'"><line x1="28" y1="150" x2="375" y2="150" stroke="#60727c"/><polyline points="'+coords+'" fill="none" stroke="#217b96" stroke-width="4"/>'+dots+'<text x="16" y="20" font-size="10">'+esc(yLabel||'Value')+'</text></svg>';
+    }
+
+    function moneyQuestion(index, rng, level) {
+      var a,b,c,d,answer,rows;
+      switch(index) {
+        case 0:
+          a=pick(rng,[3.4,3.6,3.8,4.1]); b=pick(rng,[1.25,1.4,1.55]); c=pick(rng,[.85,1.05,1.2]); d=pick(rng,[4.95,5.25,5.5]); answer=round(a+b+c-d,2);
+          return makeQuestion({topic:'money',level:level,role:'Café assistant',title:'Meal deal saving',document:documentCard('Harbour Café','Lunch price list',[['Sandwich',money(a)],['Drink',money(b)],['Snack',money(c)],['Meal deal: all three',money(d)]],'The meal deal contains one sandwich, one drink and one snack.'),prompt:'How much does a customer save by buying the meal deal?',answer:{value:answer,unit:'£'},steps:['Separate cost: '+money(a)+' + '+money(b)+' + '+money(c)+' = '+money(a+b+c)+'.','Saving: '+money(a+b+c)+' − '+money(d)+' = '+money(answer)+'.'],check:'Add the saving to the deal price: '+money(answer)+' + '+money(d)+' = '+money(a+b+c)+'.',hint:'First find the cost of buying all three items separately.'});
+        case 1:
+          a=pick(rng,[40,48,60,72]); b=pick(rng,[15,20,25]); answer=round(a*(1-b/100),2);
+          return makeQuestion({topic:'money',level:level,role:'Shop assistant',title:'Sale price',document:documentCard('North Street Outfitters','Weekend offer',[['Marked price',money(a)],['Discount',b+'% off']],'The discount is taken from the marked price.'),prompt:'What is the sale price?',answer:{value:answer,unit:'£'},steps:[b+'% of '+money(a)+' = '+money(a*b/100)+'.',money(a)+' − '+money(a*b/100)+' = '+money(answer)+'.'],check:'The price is lower than '+money(a)+' by '+money(a*b/100)+', which is '+b+'%.',hint:'Find the discount amount, then subtract it from the marked price.'});
+        case 2:
+          a=pick(rng,[80,120,175,240]); b=20; answer=round(a*1.2,2);
+          return makeQuestion({topic:'money',level:level,role:'Office administrator',title:'Invoice with VAT',document:documentCard('Bright Repairs Ltd','Customer invoice',[['Work before VAT',money(a)],['VAT rate',b+'%']],'VAT must be added to the price shown.'),prompt:'Calculate the invoice total including VAT.',answer:{value:answer,unit:'£'},steps:['VAT: '+b+'% of '+money(a)+' = '+money(a*.2)+'.','Total: '+money(a)+' + '+money(a*.2)+' = '+money(answer)+'.'],check:'A 20% increase is the same as multiplying by 1.2: '+a+' × 1.2 = '+money(answer)+'.',hint:'The total is 120% of the price before VAT.'});
+        case 3:
+          a=pick(rng,[18,24,30,35]); b=pick(rng,[10.5,11.8,12.4]); answer=round(a*b,2);
+          return makeQuestion({topic:'money',level:level,role:'Payroll clerk',title:'Weekly wages',document:documentCard('Weekly time sheet','Employee: Sam K',[['Hours worked',a+' hours'],['Hourly rate',money(b)]],'No deductions are needed for this activity.'),prompt:'Calculate Sam’s gross pay for the week.',answer:{value:answer,unit:'£'},steps:[a+' × '+money(b)+' = '+money(answer)+'.'],check:'Estimate using £'+Math.round(b)+' per hour: '+a+' × £'+Math.round(b)+' ≈ '+money(a*Math.round(b))+', close to the answer.',hint:'Gross pay = hours worked × hourly rate.'});
+        case 4:
+          a=pick(rng,[10,11,12]); b=35; c=pick(rng,[4,6,8]); d=1.5; answer=round(b*a+c*a*d,2);
+          return makeQuestion({topic:'money',level:level,role:'Payroll clerk',title:'Overtime pay',document:documentCard('Factory pay rules','Weekly payroll',[['Basic hours',b+' hours'],['Hourly rate',money(a)],['Overtime worked',c+' hours'],['Overtime rate','1.5 × basic rate']],'Basic and overtime pay must be added.'),prompt:'What is the total gross pay for the week?',answer:{value:answer,unit:'£'},steps:['Basic pay: '+b+' × '+money(a)+' = '+money(b*a)+'.','Overtime rate: '+money(a)+' × 1.5 = '+money(a*d)+'; overtime pay = '+c+' × '+money(a*d)+' = '+money(c*a*d)+'.','Total: '+money(b*a)+' + '+money(c*a*d)+' = '+money(answer)+'.'],check:'The total must be more than the basic pay of '+money(b*a)+' and less than '+money((b+c)*a*d)+'.',hint:'Calculate the overtime hourly rate before finding overtime pay.'});
+        case 5:
+          a=pick(rng,[320,450,560]); b=pick(rng,[205,290,375]); answer=round(a-b,2);
+          return makeQuestion({topic:'money',level:level,role:'Market trader',title:'Profit on sales',document:documentCard('Saturday market','Trading summary',[['Sales income',money(a)],['Stock and stall costs',money(b)]],'Profit is the money left after all listed costs.'),prompt:'Calculate the profit for Saturday.',answer:{value:answer,unit:'£'},steps:['Profit = income − costs.',''+money(a)+' − '+money(b)+' = '+money(answer)+'.'],check:'Costs + profit = income: '+money(b)+' + '+money(answer)+' = '+money(a)+'.',hint:'Subtract total costs from sales income.'});
+        case 6:
+          a=pick(rng,[8,10,12]); b=pick(rng,[.08,.1,.12]); c=pick(rng,[5,6,7]); d=pick(rng,[.14,.16,.18]); var usage=pick(rng,[80,100,120]); var planA=round(a+b*usage,2), planB=round(c+d*usage,2); answer=round(Math.abs(planA-planB),2); var winner=planA<planB?'Plan A':'Plan B';
+          return makeQuestion({topic:'money',level:level,role:'Household budget adviser',title:'Compare mobile tariffs',document:documentCard('Monthly mobile tariffs','Prices exclude no other charges',[['Plan A',money(a)+' + '+money(b)+' per minute'],['Plan B',money(c)+' + '+money(d)+' per minute'],['Expected use',usage+' minutes']],'Choose using the total monthly cost, not only the standing charge.'),prompt:'Which plan is cheaper, and by how much?',instruction:'Enter the amount saved. State the cheaper plan in your working.',answer:{value:answer,unit:'£'},steps:['Plan A: '+money(a)+' + ('+usage+' × '+money(b)+') = '+money(planA)+'.','Plan B: '+money(c)+' + ('+usage+' × '+money(d)+') = '+money(planB)+'.',winner+' is cheaper by '+money(answer)+'.'],check:'The difference '+money(answer)+' added to the cheaper total gives the dearer total.',methodTerms:[winner,String(planA),String(planB)],hint:'Work out a full monthly cost for each tariff.'});
+        case 7:
+          a=pick(rng,[1650,1780,1920]); var rent=pick(rng,[650,720,780]), food=pick(rng,[260,300,340]), travel=pick(rng,[120,145,170]), bills=pick(rng,[210,240,275]); answer=round(a-rent-food-travel-bills,2);
+          return makeQuestion({topic:'money',level:level,role:'Community adviser',title:'Monthly budget',document:documentCard('Household budget','One month',[['Income',money(a)],['Rent',money(rent)],['Food',money(food)],['Travel',money(travel)],['Bills',money(bills)]],'Any money left can be put into savings.'),prompt:'How much money is left after all listed spending?',answer:{value:answer,unit:'£'},steps:['Total spending = '+money(rent)+' + '+money(food)+' + '+money(travel)+' + '+money(bills)+' = '+money(rent+food+travel+bills)+'.','Money left = '+money(a)+' − '+money(rent+food+travel+bills)+' = '+money(answer)+'.'],check:'Spending '+money(rent+food+travel+bills)+' + money left '+money(answer)+' = income '+money(a)+'.',hint:'Add every expense before subtracting from the income.'});
+        case 8:
+          a=pick(rng,[450,600,750]); b=pick(rng,[3.6,4.5,5.25]); c=pick(rng,[800,1000,1200]); d=pick(rng,[5.6,6.5,7.2]); var unitA=b/a*100, unitB=d/c*100; answer=round(Math.min(unitA,unitB),2); var pack=unitA<unitB?'Pack A':'Pack B';
+          return makeQuestion({topic:'money',level:level,role:'Shopper',title:'Best-value pack',document:documentCard('Ground coffee','Shelf label',[['Pack A',a+' g for '+money(b)],['Pack B',c+' g for '+money(d)]],'Compare the same quantity for both packs.'),prompt:'Which pack is better value? Give its cost per 100 g.',instruction:'Enter the cost per 100 g and name the pack in your working.',answer:{value:answer,unit:'£'},steps:['Pack A per 100 g: '+money(b)+' ÷ '+a+' × 100 = '+money(unitA)+'.','Pack B per 100 g: '+money(d)+' ÷ '+c+' × 100 = '+money(unitB)+'.',pack+' is better value at '+money(answer)+' per 100 g.'],check:'Multiplying the unit cost by the number of 100 g portions returns approximately the pack price.',methodTerms:[pack,'100'],hint:'Divide price by grams, then multiply by 100.'});
+        default:
+          a=pick(rng,[500,800,1200]); b=pick(rng,[2,3,4]); c=pick(rng,[2,3]); answer=round(a*Math.pow(1+b/100,c),2);
+          return makeQuestion({topic:'money',level:level,role:'Savings adviser',title:'Compound interest',document:documentCard('Fixed savings account','Interest added annually',[['Starting balance',money(a)],['Annual interest',b+'%'],['Time',c+' years']],'Each year’s interest is added before the next year is calculated.'),prompt:'What will the account balance be after '+c+' years?',answer:{value:answer,unit:'£',tolerance:.01},steps:['Annual multiplier = 1 + '+b+'/100 = '+(1+b/100)+'.','Balance = '+money(a)+' × '+(1+b/100)+'^'+c+' = '+money(answer)+'.'],check:'Simple interest would give '+money(a*(1+b*c/100))+'; compound interest should be slightly higher.',hint:'Use the multiplier '+(1+b/100)+' once for each year.'});
+      }
+    }
+
+    function percentageQuestion(index, rng, level) {
+      var a,b,answer;
+      switch(index) {
+        case 0: a=pick(rng,[70,90,120,160]); b=pick(rng,[10,15,20,25]); answer=a*b/100; return makeQuestion({topic:'percentages',level:level,role:'Retail trainee',title:'Percentage of an amount',document:documentCard('Stock check','End-of-day figures',[['Items counted',a],['Marked for transfer',b+'%']],'Find the stated percentage of the total.'),prompt:'How many items are marked for transfer?',answer:{value:answer,unit:'items'},steps:[b+'% of '+a+' = '+(b/100)+' × '+a+' = '+answer+'.'],check:answer+' out of '+a+' is '+answer+'/'+a+' × 100 = '+b+'%.',hint:'Change the percentage to a decimal, then multiply.'});
+        case 1: a=pick(rng,[18,24,35]); b=pick(rng,[40,60,70]); answer=round(a/b*100,1); return makeQuestion({topic:'percentages',level:level,role:'Team leader',title:'One amount as a percentage',document:documentCard('Training attendance','This month',[['Staff who attended',a],['Total staff',b]],'Express attendance as a percentage of all staff.'),prompt:'What percentage of staff attended?',answer:{value:answer,unit:'%',tolerance:.05},steps:[a+' ÷ '+b+' × 100 = '+answer+'%.'],check:answer+'% of '+b+' = '+a+'.',hint:'Use part ÷ whole × 100.'});
+        case 2: a=pick(rng,[240,360,480]); b=pick(rng,[8,12,15]); answer=round(a*(1+b/100),2); return makeQuestion({topic:'percentages',level:level,role:'Events organiser',title:'Percentage increase',document:documentCard('Venue booking','Revised capacity',[['Original capacity',a],['Increase',b+'%']],'The new capacity includes the original places and the increase.'),prompt:'What is the new capacity?',answer:{value:answer,unit:'people'},steps:['Increase: '+b+'% of '+a+' = '+a*b/100+'.','New capacity: '+a+' + '+a*b/100+' = '+answer+'.'],check:'Multiplier check: '+a+' × '+(1+b/100)+' = '+answer+'.',hint:'Find the increase, then add it to the original.'});
+        case 3: a=pick(rng,[250,400,650]); b=pick(rng,[12,18,24]); answer=round(a*(1-b/100),2); return makeQuestion({topic:'percentages',level:level,role:'Energy adviser',title:'Percentage decrease',document:documentCard('Energy-use target','Quarterly review',[['Previous use',a+' kWh'],['Target reduction',b+'%']],'Calculate the use after the full reduction.'),prompt:'What is the target energy use?',answer:{value:answer,unit:'kWh'},steps:['Reduction: '+b+'% of '+a+' = '+a*b/100+' kWh.','Target: '+a+' − '+a*b/100+' = '+answer+' kWh.'],check:'The multiplier '+(1-b/100)+' gives '+a+' × '+(1-b/100)+' = '+answer+'.',hint:'The amount remaining is '+(100-b)+'%.'});
+        case 4: b=pick(rng,[10,20,25]); a=pick(rng,[54,72,96]); answer=round(a/(1-b/100),2); return makeQuestion({topic:'percentages',level:level,role:'Store manager',title:'Reverse percentage',document:documentCard('Clearance report','Price after reduction',[['Sale price',money(a)],['Reduction',b+'%']],'The sale price is '+(100-b)+'% of the original price.'),prompt:'What was the original price?',answer:{value:answer,unit:'£'},steps:['Remaining percentage = '+(100-b)+'% = '+(1-b/100)+'.','Original price = '+money(a)+' ÷ '+(1-b/100)+' = '+money(answer)+'.'],check:b+'% of '+money(answer)+' is '+money(answer*b/100)+'; subtracting gives '+money(a)+'.',hint:'Do not add '+b+'%. Divide by the decimal for the percentage remaining.'});
+        case 5: var numerator=pick(rng,[1,2,3,5,7]), denominator=pick(rng,[4,5,8,10]); answer=round(numerator/denominator*100,1); return makeQuestion({topic:'percentages',level:level,role:'Kitchen trainee',title:'Fraction–decimal–percentage',document:documentCard('Recipe completion','Preparation check',[['Batches completed',numerator],['Batches planned',denominator]],'Give the completed fraction as a percentage.'),prompt:'What percentage of the planned batches is complete?',answer:{value:answer,unit:'%',tolerance:.05},steps:[numerator+'/'+denominator+' = '+round(numerator/denominator,3)+'.',''+round(numerator/denominator,3)+' × 100 = '+answer+'%.'],check:answer+'% written as a decimal is '+round(answer/100,3)+', matching '+numerator+'/'+denominator+'.',hint:'Divide the numerator by the denominator, then multiply by 100.'});
+        case 6: a=pick(rng,[-8,-6,-4]); b=pick(rng,[3,5,7]); answer=b-a; return makeQuestion({topic:'percentages',level:level,role:'Warehouse supervisor',title:'Negative numbers',document:documentCard('Cold-store log','Temperature readings',[['Morning',a+' °C'],['Afternoon',b+' °C']],'A rise crosses zero.'),prompt:'By how many degrees did the temperature rise?',answer:{value:answer,unit:'°C'},steps:['Difference = '+b+' − ('+a+') = '+answer+' °C.'],check:'Starting at '+a+', moving up '+Math.abs(a)+' reaches zero, then '+b+' more reaches '+b+': total '+answer+'.',hint:'Count from the negative temperature to zero, then from zero to the positive temperature.'});
+        case 7: a=pick(rng,[3,4,5]); b=pick(rng,[8,10,12]); var x=pick(rng,[6,7,9]); answer=a*x+b; return makeQuestion({topic:'percentages',level:level,role:'Maintenance planner',title:'Substitute into a formula',document:documentCard('Hire charge formula','Equipment booking',[['Formula','C = '+a+'h + '+b],['Hire time, h',x+' hours']],'C is the charge in pounds.'),prompt:'Use the formula to calculate C.',answer:{value:answer,unit:'£'},steps:['Substitute h = '+x+': C = '+a+' × '+x+' + '+b+'.','C = '+(a*x)+' + '+b+' = '+answer+'.'],check:'The charge is the fixed £'+b+' plus £'+a+' for each of '+x+' hours.',hint:'Replace h with '+x+' and follow the order of operations.'});
+        case 8: a=pick(rng,[4,5,6]); b=pick(rng,[3,4,7]); var c=pick(rng,[2,3]); answer=a+b*c*c; return makeQuestion({topic:'percentages',level:level,role:'Apprentice technician',title:'Order of operations',document:documentCard('Calibration expression','Evaluate accurately',[['Expression',a+' + '+b+' × '+c+'²']], 'Use indices before multiplication, and multiplication before addition.'),prompt:'What is the value of the expression?',answer:{value:answer,unit:''},steps:[c+'² = '+(c*c)+'.',b+' × '+(c*c)+' = '+(b*c*c)+'.',a+' + '+(b*c*c)+' = '+answer+'.'],check:'Working left to right would give a different answer; the index and multiplication must come first.',hint:'Use BIDMAS: evaluate the squared number first.'});
+        default: a=pick(rng,[487,623,794]); b=pick(rng,[38,52,67]); answer=Math.round(a)*Math.round(b/10)*10; var exact=a*b; var estimate=Math.round(a/100)*100*Math.round(b/10)*10; return makeQuestion({topic:'percentages',level:level,role:'Purchasing assistant',title:'Estimate and check',document:documentCard('Bulk order','Reasonableness check',[['Number of units',a],['Cost per unit',money(b)]],'Estimate before accepting the calculator total.'),prompt:'Estimate the total cost by rounding each number to 1 significant figure.',answer:{value:estimate,unit:'£'},steps:[a+' rounds to '+Math.round(a/100)*100+'; '+b+' rounds to '+Math.round(b/10)*10+'.','Estimate: '+Math.round(a/100)*100+' × '+Math.round(b/10)*10+' = '+money(estimate)+'.'],check:'The exact total is '+money(exact)+', which is reasonably close to the estimate.',hint:'Round '+a+' to the nearest hundred and '+b+' to the nearest ten.'});
+      }
+    }
+
+    function ratioQuestion(index, rng, level) {
+      var a,b,c,answer;
+      switch(index) {
+        case 0: a=pick(rng,[4,6,8]); b=pick(rng,[250,300,350]); c=pick(rng,[10,12,16]); answer=b*c/a; return makeQuestion({topic:'ratio',level:level,role:'Catering assistant',title:'Scale a recipe',document:documentCard('Soup recipe','Serves '+a,[['Stock',b+' ml'],['Vegetables',a*75+' g'],['Required servings',c]],'All ingredients must be scaled by the same factor.'),prompt:'How much stock is needed for '+c+' servings?',answer:{value:answer,unit:'ml'},steps:['Scale factor = '+c+' ÷ '+a+' = '+c/a+'.','Stock = '+b+' × '+c/a+' = '+answer+' ml.'],check:'Per serving is '+b/a+' ml; '+c+' servings need '+b/a+' × '+c+' = '+answer+' ml.',hint:'Find the scale factor from servings first.'});
+        case 1: a=pick(rng,[2,3,4]); b=pick(rng,[3,4,5]); c=pick(rng,[25,35,45]); answer=round(c*a/(a+b),1); return makeQuestion({topic:'ratio',level:level,role:'Builder',title:'Concrete mix',document:documentCard('Concrete specification','Mix by volume',[['Cement : sand',a+' : '+b],['Total mix needed',c+' buckets']],'Keep the ratio exact.'),prompt:'How many buckets of cement are needed?',answer:{value:answer,unit:'buckets',tolerance:.05},steps:['Total ratio parts = '+a+' + '+b+' = '+(a+b)+'.','One part = '+c+' ÷ '+(a+b)+' = '+round(c/(a+b),2)+'.','Cement = '+a+' × '+round(c/(a+b),2)+' = '+answer+' buckets.'],check:'Cement plus sand must total '+c+' buckets.',hint:'Add the ratio parts before finding the value of one part.'});
+        case 2: a=pick(rng,[2,3,5]); b=pick(rng,[3,4,7]); c=pick(rng,[250,360,480]); answer=round(c*a/(a+b),2); return makeQuestion({topic:'ratio',level:level,role:'Business partners',title:'Share a profit',document:documentCard('Partnership agreement','Profit share',[['Amina : Ben',a+' : '+b],['Profit to share',money(c)]],'The whole profit is shared in the stated ratio.'),prompt:'How much does Amina receive?',answer:{value:answer,unit:'£'},steps:['Total parts = '+a+' + '+b+' = '+(a+b)+'.','Amina receives '+a+'/'+(a+b)+' × '+money(c)+' = '+money(answer)+'.'],check:'Ben receives '+money(c-answer)+'; together they receive '+money(c)+'.',hint:'Amina receives '+a+' out of '+(a+b)+' equal parts.'});
+        case 3: a=pick(rng,[12,18,24]); b=pick(rng,[16,27,36]); var gcd=function(x,y){while(y){var t=y;y=x%y;x=t;}return x;}(a,b); var simple=(a/gcd)+':'+(b/gcd); return makeQuestion({topic:'ratio',level:level,role:'Paint mixer',title:'Simplify a ratio',document:documentCard('Paint batch','Colour mix',[['Blue',a+' parts'],['White',b+' parts']],'Write the ratio in its simplest whole-number form.'),prompt:'Simplify the ratio '+a+' : '+b+'.',answer:choiceAnswer(simple,[simple,(a/gcd)+':'+b,a+':'+(b/gcd),(b/gcd)+':'+(a/gcd)]),steps:['The highest common factor of '+a+' and '+b+' is '+gcd+'.','Divide both sides by '+gcd+': '+simple+'.'],check:'Multiplying '+simple+' by '+gcd+' returns '+a+':'+b+'.',hint:'Find the largest number that divides both parts.'});
+        case 4: a=pick(rng,[3,4,5]); b=pick(rng,[7,9,11]); c=pick(rng,[12,15,20]); answer=c*b/a; return makeQuestion({topic:'ratio',level:level,role:'Workshop technician',title:'Missing ratio part',document:documentCard('Resin mixture','Mixing guide',[['Resin : hardener',a+' : '+b],['Resin available',c+' litres']],'Scale both parts equally.'),prompt:'How many litres of hardener are needed?',answer:{value:answer,unit:'litres'},steps:['Scale factor = '+c+' ÷ '+a+' = '+c/a+'.','Hardener = '+b+' × '+c/a+' = '+answer+' litres.'],check:c+':'+answer+' simplifies back to '+a+':'+b+'.',hint:'Work out what '+a+' was multiplied by to become '+c+'.'});
+        case 5: a=pick(rng,[3,4,5]); b=pick(rng,[42,56,75]); c=pick(rng,[7,8,9]); answer=b/a*c; return makeQuestion({topic:'ratio',level:level,role:'Travel planner',title:'Direct proportion',document:documentCard('Coach booking','Group price',[['People',a],['Cost',money(b)],['New group size',c]],'The cost per person stays constant.'),prompt:'What will the new group cost?',answer:{value:answer,unit:'£'},steps:['Cost per person = '+money(b)+' ÷ '+a+' = '+money(b/a)+'.','For '+c+' people: '+money(b/a)+' × '+c+' = '+money(answer)+'.'],check:money(answer)+' ÷ '+c+' gives the same per-person cost.',hint:'First calculate the cost for one person.'});
+        case 6: a=pick(rng,[4,6,8]); b=pick(rng,[12,15,18]); c=pick(rng,[6,8,12]); answer=a*b/c; return makeQuestion({topic:'ratio',level:level,role:'Site manager',title:'Inverse proportion',document:documentCard('Painting schedule','Same amount of work',[['Original team',a+' workers'],['Original time',b+' days'],['New team',c+' workers']],'Assume all workers work at the same rate.'),prompt:'How many days should the new team take?',answer:{value:answer,unit:'days'},steps:['Total work = '+a+' × '+b+' = '+a*b+' worker-days.','New time = '+a*b+' ÷ '+c+' = '+answer+' days.'],check:c+' workers × '+answer+' days = '+a*b+' worker-days, the same total work.',hint:'More workers means fewer days. Keep worker-days constant.'});
+        case 7: a=pick(rng,[2,3,4]); b=pick(rng,[5,7,9]); c=pick(rng,[28,36,44]); answer=round(c*b/(a+b),1); return makeQuestion({topic:'ratio',level:level,role:'Garden designer',title:'Divide a border',document:documentCard('Planting plan','Flower border',[['Roses : lavender',a+' : '+b],['Total border length',c+' m']],'The border is divided in the stated ratio.'),prompt:'How many metres are used for lavender?',answer:{value:answer,unit:'m',tolerance:.05},steps:['Total parts = '+(a+b)+'.','Lavender = '+b+'/'+(a+b)+' × '+c+' = '+answer+' m.'],check:'Roses use '+round(c-answer,1)+' m; both lengths total '+c+' m.',hint:'Lavender takes '+b+' of the '+(a+b)+' parts.'});
+        case 8: a=pick(rng,[2,3,4]); b=pick(rng,[5,6,7]); c=pick(rng,[42,54,66]); answer=c*a/(a+b); return makeQuestion({topic:'ratio',level:level,role:'Shift manager',title:'Workforce ratio',document:documentCard('Staffing plan','Day shift',[['Supervisors : operatives',a+' : '+b],['Total staff',c]],'Every member of staff is included in one group.'),prompt:'How many supervisors are needed?',answer:{value:answer,unit:'supervisors'},steps:['Total ratio parts = '+(a+b)+'.','Supervisors = '+a+'/'+(a+b)+' × '+c+' = '+answer+'.'],check:'Operatives = '+(c-answer)+'; '+answer+':'+(c-answer)+' simplifies to '+a+':'+b+'.',hint:'Find the fraction of staff represented by the supervisor part.'});
+        default: a=pick(rng,[2,3,4]); b=pick(rng,[5,6,8]); var priceA=pick(rng,[8,10,12]), priceB=pick(rng,[14,16,18]); c=pick(rng,[21,28,35]); answer=round((a*priceA+b*priceB)/(a+b)*c,2); return makeQuestion({topic:'ratio',level:level,role:'Coffee roaster',title:'Blend cost',document:documentCard('House coffee blend','Cost per kilogram',[['Bean A : Bean B',a+' : '+b],['Bean A',money(priceA)+' per kg'],['Bean B',money(priceB)+' per kg'],['Blend required',c+' kg']],'Work out the weighted cost of the full blend.'),prompt:'What is the total cost of '+c+' kg of the blend?',answer:{value:answer,unit:'£'},steps:['Cost of '+(a+b)+' ratio-parts (kg) = '+a+' × '+money(priceA)+' + '+b+' × '+money(priceB)+' = '+money(a*priceA+b*priceB)+'.','Cost per kg = '+money(a*priceA+b*priceB)+' ÷ '+(a+b)+' = '+money((a*priceA+b*priceB)/(a+b))+'.','Total = '+c+' × '+money((a*priceA+b*priceB)/(a+b))+' = '+money(answer)+'.'],check:'The cost per kg lies between '+money(priceA)+' and '+money(priceB)+', so the total is reasonable.',hint:'Find the cost of one complete set of ratio parts, then the cost per kilogram.'});
+      }
+    }
+
+    function measuresQuestion(index, rng, level) {
+      var a,b,answer;
+      switch(index) {
+        case 0: a=pick(rng,[125,240,375,650]); answer=a/100; return makeQuestion({topic:'measures',level:level,role:'Textile assistant',title:'Centimetres to metres',document:documentCard('Fabric order','Cutting list',[['Length required',a+' cm']], '1 metre = 100 centimetres.'),prompt:'Convert the length to metres.',answer:{value:answer,unit:'m'},steps:[a+' ÷ 100 = '+answer+' m.'],check:answer+' × 100 = '+a+' cm.',hint:'Centimetres are smaller units, so divide by 100.'});
+        case 1: a=pick(rng,[1250,1750,2400,3250]); answer=a/1000; return makeQuestion({topic:'measures',level:level,role:'Kitchen assistant',title:'Millilitres to litres',document:documentCard('Drinks dispenser','Refill amount',[['Juice needed',a+' ml']], '1 litre = 1000 millilitres.'),prompt:'Convert the amount to litres.',answer:{value:answer,unit:'litres'},steps:[a+' ÷ 1000 = '+answer+' litres.'],check:answer+' × 1000 = '+a+' ml.',hint:'Divide millilitres by 1000.'});
+        case 2: a=pick(rng,[35,48,72,95]); answer=round(a/1.6,1); return makeQuestion({topic:'measures',level:level,role:'Delivery driver',title:'Kilometres to miles',document:documentCard('Route information','Conversion supplied',[['Route distance',a+' km'],['Conversion','8 km ≈ 5 miles']],'Give the answer to 1 decimal place.'),prompt:'Approximately how many miles is the route?',answer:{value:answer,unit:'miles',tolerance:.05},steps:['Using 1 mile ≈ 1.6 km: '+a+' ÷ 1.6 = '+answer+' miles.'],check:answer+' × 1.6 ≈ '+a+' km.',hint:'Convert from kilometres to the larger unit, miles, by dividing by 1.6.'});
+        case 3: a=pick(rng,[5,8,12,15]); answer=round(a*2.2,1); return makeQuestion({topic:'measures',level:level,role:'Parcel clerk',title:'Kilograms to pounds',document:documentCard('International parcel','Conversion supplied',[['Mass',a+' kg'],['Conversion','1 kg ≈ 2.2 lb']],'Use the given conversion factor.'),prompt:'Approximately how many pounds does the parcel weigh?',answer:{value:answer,unit:'lb',tolerance:.05},steps:[a+' × 2.2 = '+answer+' lb.'],check:answer+' ÷ 2.2 = '+a+' kg.',hint:'Each kilogram is about 2.2 pounds.'});
+        case 4: var startH=pick(rng,[7,8,9,10]), startM=pick(rng,[5,15,25,40]), duration=pick(rng,[95,110,145,170]); var endTotal=startH*60+startM+duration; var endH=Math.floor(endTotal/60), endM=endTotal%60; answer=duration; return makeQuestion({topic:'measures',level:level,role:'Travel planner',title:'Journey duration',document:documentCard('Rail itinerary','Same-day journey',[['Depart',String(startH).padStart(2,'0')+':'+String(startM).padStart(2,'0')],['Arrive',String(endH).padStart(2,'0')+':'+String(endM).padStart(2,'0')]],'There are 60 minutes in one hour.'),prompt:'How long is the journey in minutes?',answer:{value:answer,unit:'minutes'},steps:['From departure to the next whole hour, then to '+String(endH).padStart(2,'0')+':'+String(endM).padStart(2,'0')+', totals '+answer+' minutes.'],check:'Adding '+answer+' minutes to the departure time gives the listed arrival time.',hint:'Count to the next whole hour first, then add the remaining time.'});
+        case 5: a=pick(rng,[96,120,150,180]); b=pick(rng,[1.5,2,2.5,3]); answer=round(a/b,1); return makeQuestion({topic:'measures',level:level,role:'Fleet coordinator',title:'Average speed',document:documentCard('Van journey','Trip record',[['Distance',a+' miles'],['Time',b+' hours']],'Assume the travel speed is averaged over the whole trip.'),prompt:'Calculate the average speed.',answer:{value:answer,unit:'mph',tolerance:.05},steps:['Average speed = distance ÷ time.',''+a+' ÷ '+b+' = '+answer+' mph.'],check:answer+' mph × '+b+' hours = '+a+' miles.',hint:'Use speed = distance ÷ time.'});
+        case 6: a=pick(rng,[540,720,960]); b=pick(rng,[60,80,120]); answer=round(a/b,1); return makeQuestion({topic:'measures',level:level,role:'Materials technician',title:'Density',document:documentCard('Material sample','Test result',[['Mass',a+' g'],['Volume',b+' cm³']],'Density = mass ÷ volume.'),prompt:'Calculate the density of the sample.',answer:{value:answer,unit:'g/cm³',tolerance:.05},steps:['Density = '+a+' ÷ '+b+' = '+answer+' g/cm³.'],check:answer+' × '+b+' cm³ = '+a+' g.',hint:'Substitute the mass and volume into the supplied formula.'});
+        case 7: a=pick(rng,[330,420,510]); b=pick(rng,[5.5,6,7.5]); answer=round(a/b,1); return makeQuestion({topic:'measures',level:level,role:'Transport manager',title:'Fuel consumption',document:documentCard('Vehicle log','One week',[['Distance travelled',a+' miles'],['Fuel used',b+' gallons']],'Compare vehicles using miles per gallon.'),prompt:'Calculate the fuel consumption in miles per gallon.',answer:{value:answer,unit:'mpg',tolerance:.05},steps:['Miles per gallon = '+a+' ÷ '+b+' = '+answer+' mpg.'],check:answer+' mpg × '+b+' gallons ≈ '+a+' miles.',hint:'Divide the distance by the number of gallons.'});
+        case 8: a=pick(rng,[-12,-7,-3]); b=pick(rng,[4,8,11]); answer=b-a; return makeQuestion({topic:'measures',level:level,role:'Weather observer',title:'Temperature change',document:documentCard('Mountain station','Daily readings',[['Overnight low',a+' °C'],['Afternoon high',b+' °C']],'Find the complete rise across zero.'),prompt:'What was the temperature increase?',answer:{value:answer,unit:'°C'},steps:['Increase = '+b+' − ('+a+') = '+answer+' °C.'],check:'Rise '+Math.abs(a)+' degrees to reach 0 °C, then '+b+' more: '+answer+' °C.',hint:'Subtracting a negative value is the same as adding its positive value.'});
+        default: a=pick(rng,[250,400,650]); b=pick(rng,[1.12,1.15,1.18]); var fee=pick(rng,[2,3,4]); answer=round(a*b-fee,2); return makeQuestion({topic:'measures',level:level,role:'Travel money adviser',title:'Currency conversion',document:documentCard('Travel exchange','Today’s counter rate',[['Pounds to exchange',money(a)],['Rate','£1 = €'+b.toFixed(2)],['Service fee','€'+fee.toFixed(2)]],'The fee is deducted after conversion.'),prompt:'How many euros will the customer receive?',answer:{value:answer,unit:'€'},steps:['Convert: '+money(a)+' × '+b.toFixed(2)+' = €'+(a*b).toFixed(2)+'.','Deduct fee: €'+(a*b).toFixed(2)+' − €'+fee.toFixed(2)+' = €'+answer.toFixed(2)+'.'],check:'Before the small fee, the amount should be '+b+' times the pounds, so €'+answer+' is reasonable.',hint:'Multiply by the exchange rate, then subtract the fee.'});
+      }
+    }
+
+    function areaQuestion(index, rng, level) {
+      var a,b,c,answer;
+      switch(index) {
+        case 0: a=pick(rng,[4,5,6,8]); b=pick(rng,[3,4,5,7]); answer=a*b; return makeQuestion({topic:'area',level:level,role:'Flooring assistant',title:'Rectangular floor area',document:documentCard('Room plan','Not to scale',[['Length',a+' m'],['Width',b+' m']],'Area of a rectangle = length × width.'),prompt:'Calculate the floor area.',answer:{value:answer,unit:'m²'},steps:[a+' × '+b+' = '+answer+' m².'],check:'The answer is in square metres because two lengths were multiplied.',hint:'Multiply the length by the width.'});
+        case 1: a=pick(rng,[8,10,12]); b=pick(rng,[5,7,9]); answer=2*(a+b); return makeQuestion({topic:'area',level:level,role:'Gardener',title:'Garden perimeter',document:documentCard('Garden plan','Rectangular plot',[['Length',a+' m'],['Width',b+' m']],'The full outside boundary needs edging.'),prompt:'How many metres of edging are needed?',answer:{value:answer,unit:'m'},steps:['Perimeter = 2 × ('+a+' + '+b+') = '+answer+' m.'],check:'Two lengths and two widths: '+a+' + '+a+' + '+b+' + '+b+' = '+answer+'.',hint:'Add all four sides, not the area.'});
+        case 2: a=pick(rng,[8,10,12]); b=pick(rng,[5,6,9]); answer=a*b/2; return makeQuestion({topic:'area',level:level,role:'Sign maker',title:'Triangle area',document:documentCard('Triangular sign','Dimensions',[['Base',a+' cm'],['Perpendicular height',b+' cm']],'Area of a triangle = ½ × base × perpendicular height.'),prompt:'Calculate the area of the sign.',answer:{value:answer,unit:'cm²'},steps:['½ × '+a+' × '+b+' = '+answer+' cm².'],check:'A rectangle with the same base and height has area '+a*b+' cm²; the triangle is half.',hint:'Use the perpendicular height, then divide the rectangle area by 2.'});
+        case 3: a=pick(rng,[3,4,5,6]); answer=round(Math.PI*a*a,1); return makeQuestion({topic:'area',level:level,role:'Landscape designer',title:'Circular flower bed',document:documentCard('Flower-bed plan','Circular bed',[['Radius',a+' m'],['Use π','3.142']],'Area of a circle = πr².'),prompt:'Calculate the area to 1 decimal place.',answer:{value:round(3.142*a*a,1),unit:'m²',tolerance:.05},steps:['Area = 3.142 × '+a+'².','Area = 3.142 × '+(a*a)+' = '+round(3.142*a*a,1)+' m².'],check:'The bed fits inside a '+(2*a)+' m by '+(2*a)+' m square of area '+4*a*a+' m².',hint:'Square the radius before multiplying by π.'});
+        case 4: a=pick(rng,[4,6,8]); answer=round(2*3.142*a,1); return makeQuestion({topic:'area',level:level,role:'Metalworker',title:'Circular rim',document:documentCard('Circular frame','Manufacturing note',[['Radius',a+' cm'],['Use π','3.142']],'Circumference = 2πr.'),prompt:'Find the length around the rim to 1 decimal place.',answer:{value:answer,unit:'cm',tolerance:.05},steps:['2 × 3.142 × '+a+' = '+answer+' cm.'],check:'The circumference is a little more than three times the diameter '+(2*a)+' cm.',hint:'Use circumference, not area: 2 × π × radius.'});
+        case 5: a=pick(rng,[8,10,12]); b=pick(rng,[6,7,9]); var cutL=pick(rng,[2,3,4]), cutW=pick(rng,[2,3]); answer=a*b-cutL*cutW; return makeQuestion({topic:'area',level:level,role:'Flooring contractor',title:'Composite floor',document:documentCard('L-shaped floor','Dimensions',[['Outer rectangle',a+' m × '+b+' m'],['Cut-out',cutL+' m × '+cutW+' m']],'Subtract the rectangular cut-out from the outer rectangle.'),prompt:'Calculate the L-shaped floor area.',answer:{value:answer,unit:'m²'},steps:['Outer area = '+a+' × '+b+' = '+a*b+' m².','Cut-out area = '+cutL+' × '+cutW+' = '+cutL*cutW+' m².','Floor area = '+a*b+' − '+cutL*cutW+' = '+answer+' m².'],check:'The answer is smaller than the outer area '+a*b+' m² by exactly '+cutL*cutW+' m².',hint:'Find the large rectangle, then subtract the missing rectangle.'});
+        case 6: a=pick(rng,[4,5,6]); b=pick(rng,[3,4,5]); var tileCoverage=pick(rng,[1.2,1.5,2]); var waste=10; answer=Math.ceil((a*b*(1+waste/100))/tileCoverage); return makeQuestion({topic:'area',level:level,role:'Flooring estimator',title:'Boxes of flooring',document:documentCard('Flooring order','Allow for cuts',[['Room',a+' m × '+b+' m'],['Coverage per box',tileCoverage+' m²'],['Waste allowance',waste+'%']],'Only complete boxes can be ordered.'),prompt:'How many boxes of flooring are required?',answer:{value:answer,unit:'boxes'},steps:['Room area = '+a+' × '+b+' = '+a*b+' m².','Including 10% waste: '+a*b+' × 1.10 = '+round(a*b*1.1,2)+' m².','Boxes = '+round(a*b*1.1,2)+' ÷ '+tileCoverage+' = '+round(a*b*1.1/tileCoverage,2)+', so order '+answer+' boxes.'],check:(answer-1)+' boxes cover '+round((answer-1)*tileCoverage,2)+' m², which is not enough; '+answer+' boxes are enough.',hint:'Increase the area by 10%, divide by box coverage, then round up.'});
+        case 7: a=pick(rng,[5,6,8]); b=pick(rng,[2.4,2.6,3]); var doors=pick(rng,[1.8,2]), coverage=pick(rng,[8,10,12]); answer=Math.ceil((a*b-doors)*2/coverage); return makeQuestion({topic:'area',level:level,role:'Decorator',title:'Paint a wall',document:documentCard('Paint estimate','Two coats',[['Wall',a+' m × '+b+' m'],['Door area',doors+' m²'],['Coverage per tin',coverage+' m²'],['Coats required','2']],'Do not paint the door. Buy whole tins.'),prompt:'How many tins of paint are needed?',answer:{value:answer,unit:'tins'},steps:['Paintable area for one coat = '+a+' × '+b+' − '+doors+' = '+round(a*b-doors,2)+' m².','Two coats = '+round((a*b-doors)*2,2)+' m².','Tins = '+round((a*b-doors)*2,2)+' ÷ '+coverage+' = '+round((a*b-doors)*2/coverage,2)+', so buy '+answer+'.'],check:answer+' tins cover '+answer*coverage+' m², enough for both coats.',hint:'Subtract the door, double for two coats, then round tins up.'});
+        case 8: a=pick(rng,[12,15,18]); b=pick(rng,[8,10,12]); var gate=pick(rng,[1.2,1.5,2]); answer=round(2*(a+b)-gate,1); return makeQuestion({topic:'area',level:level,role:'Fencing contractor',title:'Fence with a gate',document:documentCard('Community garden','Boundary plan',[['Length',a+' m'],['Width',b+' m'],['Gate opening',gate+' m']],'No fence is fitted across the gate opening.'),prompt:'What length of fencing is needed?',answer:{value:answer,unit:'m',tolerance:.05},steps:['Full perimeter = 2 × ('+a+' + '+b+') = '+2*(a+b)+' m.','Fencing = '+2*(a+b)+' − '+gate+' = '+answer+' m.'],check:'Fencing plus the '+gate+' m gate opening equals the full perimeter.',hint:'Find the perimeter, then remove the gate width.'});
+        default: a=pick(rng,[7,9,11]); b=pick(rng,[4,6,8]); c=pick(rng,[5,6,7]); answer=round((a+b)*c/2,1); return makeQuestion({topic:'area',level:level,role:'Groundworker',title:'Trapezium area',document:documentCard('Paving section','Trapezium dimensions',[['Parallel side a',a+' m'],['Parallel side b',b+' m'],['Perpendicular height',c+' m'],['Formula','Area = (a + b)h ÷ 2']],'Use the supplied formula.'),prompt:'Calculate the paved area.',answer:{value:answer,unit:'m²',tolerance:.05},steps:['Area = ('+a+' + '+b+') × '+c+' ÷ 2.','Area = '+(a+b)+' × '+c+' ÷ 2 = '+answer+' m².'],check:'The answer lies between rectangles '+Math.min(a,b)*c+' m² and '+Math.max(a,b)*c+' m².',hint:'Add the parallel sides before multiplying by the height.'});
+      }
+    }
+
+    function volumeQuestion(index, rng, level) {
+      var a,b,c,answer;
+      switch(index) {
+        case 0: a=pick(rng,[4,5,6]); b=pick(rng,[3,4,5]); c=pick(rng,[2,3]); answer=a*b*c; return makeQuestion({topic:'volume',level:level,role:'Storage planner',title:'Cuboid volume',document:documentCard('Storage crate','Internal dimensions',[['Length',a+' m'],['Width',b+' m'],['Height',c+' m']],'Volume of a cuboid = length × width × height.'),prompt:'Calculate the crate volume.',answer:{value:answer,unit:'m³'},steps:[a+' × '+b+' × '+c+' = '+answer+' m³.'],check:'The unit is cubic metres because three lengths were multiplied.',hint:'Multiply all three perpendicular dimensions.'});
+        case 1: a=pick(rng,[2,3,4]); b=pick(rng,[5,7,10]); answer=round(3.142*a*a*b,1); return makeQuestion({topic:'volume',level:level,role:'Tank manufacturer',title:'Cylinder volume',document:documentCard('Cylindrical tank','Dimensions',[['Radius',a+' m'],['Height',b+' m'],['Use π','3.142'],['Formula','V = πr²h']],'Give the answer to 1 decimal place.'),prompt:'Calculate the tank volume.',answer:{value:answer,unit:'m³',tolerance:.05},steps:['V = 3.142 × '+a+'² × '+b+'.','V = 3.142 × '+a*a+' × '+b+' = '+answer+' m³.'],check:'Base area '+round(3.142*a*a,1)+' m² × height '+b+' m gives the same volume.',hint:'Square the radius, then multiply by π and height.'});
+        case 2: a=pick(rng,[1.5,2,2.5]); b=pick(rng,[1.2,1.5,1.8]); c=pick(rng,[.8,1,1.2]); answer=round(a*b*c*1000,0); return makeQuestion({topic:'volume',level:level,role:'Aquarium installer',title:'Tank capacity',document:documentCard('Rectangular water tank','Internal measurements',[['Length',a+' m'],['Width',b+' m'],['Depth',c+' m'],['Conversion','1 m³ = 1000 litres']],'Assume the tank is filled to the stated depth.'),prompt:'What is the tank capacity in litres?',answer:{value:answer,unit:'litres'},steps:['Volume = '+a+' × '+b+' × '+c+' = '+round(a*b*c,3)+' m³.','Capacity = '+round(a*b*c,3)+' × 1000 = '+answer+' litres.'],check:answer+' ÷ 1000 = '+round(a*b*c,3)+' m³.',hint:'Find cubic metres first, then convert to litres.'});
+        case 3: a=pick(rng,[8,10,12]); b=pick(rng,[.6,.8,1]); c=pick(rng,[.25,.3,.4]); var bag=pick(rng,[.04,.05]); answer=Math.ceil(a*b*c/bag); return makeQuestion({topic:'volume',level:level,role:'Builder',title:'Concrete foundation',document:documentCard('Strip foundation','Concrete order',[['Length',a+' m'],['Width',b+' m'],['Depth',c+' m'],['Concrete per bag',bag+' m³']],'Whole bags must be ordered.'),prompt:'How many bags of concrete are needed?',answer:{value:answer,unit:'bags'},steps:['Foundation volume = '+a+' × '+b+' × '+c+' = '+round(a*b*c,2)+' m³.','Bags = '+round(a*b*c,2)+' ÷ '+bag+' = '+round(a*b*c/bag,2)+', so order '+answer+'.'],check:answer+' bags provide '+round(answer*bag,2)+' m³, which covers the required volume.',hint:'Find volume, divide by the volume per bag, then round up.'});
+        case 4: a=pick(rng,[4,5,6]); b=pick(rng,[3,4]); c=pick(rng,[2,3]); answer=2*(a*b+a*c+b*c); return makeQuestion({topic:'volume',level:level,role:'Packaging designer',title:'Cuboid surface area',document:documentCard('Closed display box','Outside dimensions',[['Length',a+' cm'],['Width',b+' cm'],['Height',c+' cm'],['Formula','SA = 2(lw + lh + wh)']],'The box is closed on all six faces.'),prompt:'Calculate the total surface area.',answer:{value:answer,unit:'cm²'},steps:['lw = '+a*b+', lh = '+a*c+', wh = '+b*c+'.','SA = 2 × ('+a*b+' + '+a*c+' + '+b*c+') = '+answer+' cm².'],check:'Adding the areas of all six faces gives two of each rectangle.',hint:'Calculate the three different face areas, add, then double.'});
+        case 5: a=pick(rng,[2,3,4]); b=pick(rng,[6,8,10]); answer=round(2*3.142*a*a+2*3.142*a*b,1); return makeQuestion({topic:'volume',level:level,role:'Can designer',title:'Cylinder surface area',document:documentCard('Closed cylinder','Material estimate',[['Radius',a+' cm'],['Height',b+' cm'],['Use π','3.142'],['Formula','SA = 2πr² + 2πrh']],'Include both circular ends.'),prompt:'Calculate the surface area to 1 decimal place.',answer:{value:answer,unit:'cm²',tolerance:.05},steps:['Ends: 2 × 3.142 × '+a+'² = '+round(2*3.142*a*a,1)+' cm².','Curved surface: 2 × 3.142 × '+a+' × '+b+' = '+round(2*3.142*a*b,1)+' cm².','Total = '+answer+' cm².'],check:'Both ends and the curved rectangle have been included exactly once.',hint:'Calculate the two parts of the supplied formula separately.'});
+        case 6: var boxL=pick(rng,[40,50,60]), boxW=pick(rng,[30,40]), boxH=pick(rng,[20,30]); a=pick(rng,[10,12,15]); b=pick(rng,[10]); c=pick(rng,[5,10]); answer=Math.floor(boxL/a)*Math.floor(boxW/b)*Math.floor(boxH/c); return makeQuestion({topic:'volume',level:level,role:'Warehouse packer',title:'Fit small boxes',document:documentCard('Shipping carton','Dimensions',[['Carton',boxL+' × '+boxW+' × '+boxH+' cm'],['Small box',a+' × '+b+' × '+c+' cm']],'Boxes are aligned with the carton sides; ignore wall thickness.'),prompt:'What is the greatest number of small boxes that fit?',answer:{value:answer,unit:'boxes'},steps:['Along length: '+boxL+' ÷ '+a+' = '+Math.floor(boxL/a)+'. Along width: '+boxW+' ÷ '+b+' = '+Math.floor(boxW/b)+'. Along height: '+boxH+' ÷ '+c+' = '+Math.floor(boxH/c)+'.','Total = '+Math.floor(boxL/a)+' × '+Math.floor(boxW/b)+' × '+Math.floor(boxH/c)+' = '+answer+' boxes.'],check:'Multiplying the small-box volume by '+answer+' does not exceed the carton volume.',hint:'Find how many fit along each dimension, then multiply.'});
+        case 7: a=pick(rng,[2,2.5,3]); b=pick(rng,[1.5,2,2.4]); var litres=pick(rng,[1800,2400,3000]); answer=round(litres/1000/(a*b),2); return makeQuestion({topic:'volume',level:level,role:'Facilities manager',title:'Water depth',document:documentCard('Rectangular tank','Water reading',[['Base length',a+' m'],['Base width',b+' m'],['Water volume',litres+' litres'],['Conversion','1000 litres = 1 m³']],'Depth = volume ÷ base area.'),prompt:'Calculate the water depth in metres.',answer:{value:answer,unit:'m',tolerance:.005},steps:['Water volume = '+litres+' ÷ 1000 = '+litres/1000+' m³.','Base area = '+a+' × '+b+' = '+a*b+' m².','Depth = '+litres/1000+' ÷ '+a*b+' = '+answer+' m.'],check:'Base area '+a*b+' m² × depth '+answer+' m ≈ '+litres/1000+' m³.',hint:'Convert litres to cubic metres before dividing by base area.'});
+        case 8: a=pick(rng,[3,4,5]); b=pick(rng,[6,9,12]); answer=round(3.142*a*a*b/3,1); return makeQuestion({topic:'volume',level:level,role:'Product designer',title:'Cone volume',document:documentCard('Conical container','Prototype',[['Radius',a+' cm'],['Height',b+' cm'],['Use π','3.142'],['Formula','V = πr²h ÷ 3']],'Give the answer to 1 decimal place.'),prompt:'Calculate the container volume.',answer:{value:answer,unit:'cm³',tolerance:.05},steps:['V = 3.142 × '+a+'² × '+b+' ÷ 3.','V = '+answer+' cm³.'],check:'A cylinder with the same base and height has three times this volume.',hint:'Calculate πr²h, then divide by 3.'});
+        default: a=pick(rng,[3,4,5]); answer=round(4/3*3.142*a*a*a,1); return makeQuestion({topic:'volume',level:level,role:'Display manufacturer',title:'Sphere volume',document:documentCard('Spherical display','Design dimensions',[['Radius',a+' cm'],['Use π','3.142'],['Formula','V = 4πr³ ÷ 3']],'Give the answer to 1 decimal place.'),prompt:'Calculate the sphere volume.',answer:{value:answer,unit:'cm³',tolerance:.05},steps:['r³ = '+a+' × '+a+' × '+a+' = '+a*a*a+'.','V = 4 × 3.142 × '+a*a*a+' ÷ 3 = '+answer+' cm³.'],check:'The answer is positive and uses cubic centimetres, appropriate for volume.',hint:'Cube the radius before multiplying by 4π/3.'});
+      }
+    }
+
+    function dataQuestion(index, rng, level) {
+      var values,answer;
+      switch(index) {
+        case 0: values=[int(rng,18,24),int(rng,24,30),int(rng,30,36),int(rng,36,42),int(rng,42,48)]; answer=round(values.reduce(function(s,v){return s+v;},0)/values.length,1); return makeQuestion({topic:'data',level:level,role:'Team supervisor',title:'Mean output',document:documentCard('Daily output','Units completed',[['Monday',values[0]],['Tuesday',values[1]],['Wednesday',values[2]],['Thursday',values[3]],['Friday',values[4]]],'Use all five days.'),prompt:'Calculate the mean daily output.',answer:{value:answer,unit:'units',tolerance:.05},steps:['Total = '+values.join(' + ')+' = '+values.reduce(function(s,v){return s+v;},0)+'.','Mean = total ÷ 5 = '+answer+'.'],check:'The mean lies between the lowest value '+Math.min.apply(Math,values)+' and highest '+Math.max.apply(Math,values)+'.',hint:'Add every value, then divide by the number of values.'});
+        case 1: values=[int(rng,8,12),int(rng,13,17),int(rng,18,22),int(rng,23,27),int(rng,28,32),int(rng,33,37),int(rng,38,42)]; answer=values[3]; return makeQuestion({topic:'data',level:level,role:'Sports assistant',title:'Median score',document:documentCard('Fitness scores','Already in order',[['Scores',values.join(', ')]],'There are seven scores.'),prompt:'Find the median score.',answer:{value:answer,unit:'points'},steps:['With 7 values, the median is the 4th value.','The 4th value is '+answer+'.'],check:'There are three values below '+answer+' and three above it.',hint:'The median is the middle value after ordering.'});
+        case 2: var mode=pick(rng,[3,4,5,6]); values=[mode-2,mode,mode+1,mode,mode+3,mode,mode+2]; answer=mode; return makeQuestion({topic:'data',level:level,role:'Quality controller',title:'Mode',document:documentCard('Faults per batch','Seven batches',[['Fault counts',values.join(', ')]],'Identify the value occurring most often.'),prompt:'What is the mode?',answer:{value:answer,unit:'faults'},steps:[mode+' occurs three times, more often than any other value.','Mode = '+mode+'.'],check:'Count the frequency of each listed value.',hint:'The mode is the most frequent value.'});
+        case 3: values=[int(rng,12,16),int(rng,18,22),int(rng,24,28),int(rng,30,34),int(rng,36,42)]; answer=Math.max.apply(Math,values)-Math.min.apply(Math,values); return makeQuestion({topic:'data',level:level,role:'Customer-service manager',title:'Range',document:documentCard('Call waiting times','Minutes',[['Sample',values.join(', ')]],'Range measures spread from lowest to highest.'),prompt:'Calculate the range.',answer:{value:answer,unit:'minutes'},steps:['Highest = '+Math.max.apply(Math,values)+', lowest = '+Math.min.apply(Math,values)+'.','Range = '+Math.max.apply(Math,values)+' − '+Math.min.apply(Math,values)+' = '+answer+'.'],check:'Adding the range to the lowest value gives the highest value.',hint:'Range = highest − lowest.'});
+        case 4: var setA=[18,20,20,22,20], setB=[10,17,20,23,30]; return makeQuestion({topic:'data',level:level,role:'Production manager',title:'Compare consistency',document:documentCard('Packing times','Minutes per order',[['Team A',setA.join(', ')],['Team B',setB.join(', ')]],'Both teams have a mean of 20 minutes.'),prompt:'Which team is more consistent?',instruction:'Choose the best conclusion. Explain using a measure of spread.',answer:choiceAnswer('Team A',['Team A','Team B','They are equally consistent','There is not enough information']),steps:['Team A range = 22 − 18 = 4.','Team B range = 30 − 10 = 20.','Team A is more consistent because its times have the smaller range.'],check:'The values for Team A are visibly closer together around 20.',methodTerms:['range','4','20'],hint:'Compare the ranges; a smaller range means more consistency.'});
+        case 5: var mid=[5,15,25,35], freq=[int(rng,2,4),int(rng,4,7),int(rng,5,8),int(rng,2,5)]; var totalF=freq.reduce(function(s,v){return s+v;},0), fx=mid.reduce(function(s,v,i){return s+v*freq[i];},0); answer=round(fx/totalF,1); var groupedRows=[['0–10',freq[0]],['10–20',freq[1]],['20–30',freq[2]],['30–40',freq[3]]]; return makeQuestion({topic:'data',level:level,role:'Travel analyst',title:'Estimated grouped mean',document:documentCard('Journey times','Grouped minutes',groupedRows,'Use class midpoints 5, 15, 25 and 35.'),prompt:'Estimate the mean journey time.',answer:{value:answer,unit:'minutes',tolerance:.05},steps:['Multiply each midpoint by its frequency: total midpoint × frequency = '+fx+'.','Total frequency = '+totalF+'.','Estimated mean = '+fx+' ÷ '+totalF+' = '+answer+' minutes.'],check:'The estimate lies inside the grouped range 0–40 minutes.',hint:'Use midpoint × frequency, add, then divide by total frequency.'});
+        case 6: var count=pick(rng,[5,6,8]), target=pick(rng,[18,20,24]), known=[]; for(var i=0;i<count-1;i++) known.push(int(rng,target-5,target+4)); answer=target*count-known.reduce(function(s,v){return s+v;},0); return makeQuestion({topic:'data',level:level,role:'Tutor',title:'Missing value from a mean',document:documentCard('Assessment scores','One score missing',[['Known scores',known.join(', ')],['Number of scores',count],['Mean score',target]],'Use the mean to reconstruct the total.'),prompt:'What is the missing score?',answer:{value:answer,unit:'marks'},steps:['Required total = mean × count = '+target+' × '+count+' = '+target*count+'.','Known total = '+known.reduce(function(s,v){return s+v;},0)+'.','Missing score = '+target*count+' − '+known.reduce(function(s,v){return s+v;},0)+' = '+answer+'.'],check:'Adding '+answer+' to the known scores and dividing by '+count+' gives '+target+'.',hint:'Find the total that the stated mean requires.'});
+        case 7: var survey=[int(rng,20,30),int(rng,30,40),int(rng,15,25),int(rng,8,15)]; answer=survey.reduce(function(s,v){return s+v;},0); return makeQuestion({topic:'data',level:level,role:'Community researcher',title:'Read a frequency table',document:documentCard('Travel survey','Main way to work',[['Walk',survey[0]],['Bus',survey[1]],['Car',survey[2]],['Cycle',survey[3]]],'Each person selected one response.'),prompt:'How many people completed the survey?',answer:{value:answer,unit:'people'},steps:['Total responses = '+survey.join(' + ')+' = '+answer+'.'],check:'All four category frequencies have been included once.',hint:'Add the frequencies in every category.'});
+        case 8: values=[int(rng,80,100),int(rng,95,115),int(rng,110,130),int(rng,120,145),int(rng,90,110),int(rng,105,125)]; answer=round(values.reduce(function(s,v){return s+v;},0)/6,1); return makeQuestion({topic:'data',level:level,role:'Café manager',title:'Average customers',document:documentCard('Customer count','Six trading days',[['Daily counts',values.join(', ')]],'Use the arithmetic mean.'),prompt:'Calculate the mean number of customers per day.',answer:{value:answer,unit:'customers',tolerance:.05},steps:['Total customers = '+values.reduce(function(s,v){return s+v;},0)+'.','Mean = '+values.reduce(function(s,v){return s+v;},0)+' ÷ 6 = '+answer+'.'],check:'The mean is between '+Math.min.apply(Math,values)+' and '+Math.max.apply(Math,values)+'.',hint:'Add all six days and divide by 6.'});
+        default: var aMean=24,aRange=6,bMean=27,bRange=18; return makeQuestion({topic:'data',level:level,role:'Operations manager',title:'Compare two data sets',document:documentCard('Delivery teams','Weekly summary',[['Team North','Mean '+aMean+' jobs; range '+aRange],['Team South','Mean '+bMean+' jobs; range '+bRange]],'Higher mean means greater output; smaller range means more consistency.'),prompt:'Which statement is fully supported by the data?',answer:choiceAnswer('South has higher output; North is more consistent',['South has higher output; North is more consistent','North has higher output; South is more consistent','South is both faster and more consistent','Both teams perform identically']),steps:['Team South has the higher mean: '+bMean+' > '+aMean+'.','Team North has the smaller range: '+aRange+' < '+bRange+', so it is more consistent.'],check:'The conclusion uses both the centre (mean) and spread (range).',methodTerms:['mean','range'],hint:'Use the mean for typical output and the range for consistency.'});
+      }
+    }
+
+    function probabilityQuestion(index, rng, level) {
+      var a,b,answer;
+      switch(index) {
+        case 0: a=pick(rng,[2,3,4]); b=pick(rng,[8,10,12]); answer=round(a/b,3); return makeQuestion({topic:'probability',level:level,role:'Game designer',title:'Spinner probability',document:documentCard('Fair spinner','Equal-sized sections',[['Blue sections',a],['Total sections',b]],'Every section is equally likely.'),prompt:'What is the probability of landing on blue?',instruction:'Give the probability as a decimal.',answer:{value:answer,unit:'',tolerance:.0005,alternatives:[a+'/'+b]},steps:['Probability = favourable outcomes ÷ total outcomes.','P(blue) = '+a+'/'+b+' = '+answer+'.'],check:'The answer is between 0 and 1, and '+a+' is less than '+b+'.',hint:'Use blue sections divided by all sections.'});
+        case 1: var target=pick(rng,[7,8,9,10]); var ways=6-Math.abs(7-target); answer=round(ways/36,3); return makeQuestion({topic:'probability',level:level,role:'Board-game tester',title:'Two dice',document:documentCard('Two fair dice','Combined total',[['Target total',target],['Possible ordered outcomes','36']],'List or count pairs that make the target.'),prompt:'What is the probability that the two dice total '+target+'?',instruction:'Give your answer as a decimal to 3 decimal places.',answer:{value:answer,unit:'',tolerance:.0005,alternatives:[ways+'/36']},steps:['There are '+ways+' ordered pairs with total '+target+'.','Probability = '+ways+'/36 = '+answer+' (3 d.p.).'],check:'The result is below 0.2, reasonable because only '+ways+' of 36 outcomes work.',hint:'Count pairs (1, '+(target-1)+'), (2, '+(target-2)+') and so on, keeping die values from 1 to 6.'});
+        case 2: a=pick(rng,[3,4,5]); b=pick(rng,[5,6,7]); answer=round(a/(a+b)*(a-1)/(a+b-1),3); return makeQuestion({topic:'probability',level:level,role:'Quality sampler',title:'Without replacement',document:documentCard('Component bag','Sample two components',[['Approved',a],['Rejected',b],['Replacement','No']],'Two components are selected.'),prompt:'What is the probability that both components are approved?',instruction:'Give your answer as a decimal to 3 decimal places.',answer:{value:answer,unit:'',tolerance:.0005},steps:['First approved: '+a+'/'+(a+b)+'.','Second approved: '+(a-1)+'/'+(a+b-1)+'.','Both = '+a+'/'+(a+b)+' × '+(a-1)+'/'+(a+b-1)+' = '+answer+'.'],check:'The second fraction is smaller because one approved component has been removed.',hint:'After one approved component is taken, both the approved count and total fall by 1.'});
+        case 3: var maleYes=pick(rng,[18,24,30]), femaleYes=pick(rng,[22,28,35]), maleNo=pick(rng,[12,16,20]), femaleNo=pick(rng,[8,14,18]); var total=maleYes+femaleYes+maleNo+femaleNo; answer=round((maleYes+femaleYes)/total,3); return makeQuestion({topic:'probability',level:level,role:'Survey analyst',title:'Two-way table probability',document:documentCard('Flexible-working survey','Staff responses',[['Men: yes / no',maleYes+' / '+maleNo],['Women: yes / no',femaleYes+' / '+femaleNo],['Total staff',total]],'Choose one member of staff at random.'),prompt:'What is the probability that the selected person answered yes?',instruction:'Give your answer as a decimal to 3 decimal places.',answer:{value:answer,unit:'',tolerance:.0005},steps:['Yes total = '+maleYes+' + '+femaleYes+' = '+(maleYes+femaleYes)+'.','Probability = '+(maleYes+femaleYes)+'/'+total+' = '+answer+'.'],check:'The yes total is part of the full table total, so the probability is between 0 and 1.',hint:'Add both yes cells, then divide by the grand total.'});
+        case 4: a=pick(rng,[.6,.7,.8]); b=pick(rng,[.3,.4,.5]); answer=round(a*b,2); return makeQuestion({topic:'probability',level:level,role:'Events coordinator',title:'Independent events tree',document:documentCard('Outdoor event','Independent forecasts',[['P(dry morning)',a],['P(dry afternoon)',b]],'For this activity, treat the two forecasts as independent.'),prompt:'What is the probability it is dry in both morning and afternoon?',answer:{value:answer,unit:'',tolerance:.005},steps:['For independent combined events, multiply.',''+a+' × '+b+' = '+answer+'.'],check:'The probability of both events is no greater than either individual probability.',hint:'Follow the dry branch twice and multiply the branch probabilities.'});
+        case 5: a=pick(rng,[18,24,30]); b=pick(rng,[60,80,100]); answer=round(a/b,3); return makeQuestion({topic:'probability',level:level,role:'Transport researcher',title:'Experimental probability',document:documentCard('Bus punctuality sample','Observed journeys',[['Late buses',a],['Journeys observed',b]],'Use the observed relative frequency.'),prompt:'Estimate the probability that the next bus is late.',instruction:'Give your answer as a decimal.',answer:{value:answer,unit:'',tolerance:.0005},steps:['Experimental probability = observed late ÷ total observed.',''+a+' ÷ '+b+' = '+answer+'.'],check:'The result matches the fraction '+a+'/'+b+' and lies between 0 and 1.',hint:'Divide the event frequency by the total number of trials.'});
+        case 6: a=pick(rng,[.2,.25,.3]); answer=round(1-(1-a)*(1-a),3); return makeQuestion({topic:'probability',level:level,role:'Maintenance planner',title:'At least one event',document:documentCard('Machine checks','Two independent days',[['P(fault on one day)',a],['Days checked','2']],'Use the complement of no faults.'),prompt:'What is the probability of at least one fault over the two days?',answer:{value:answer,unit:'',tolerance:.0005},steps:['P(no fault on one day) = 1 − '+a+' = '+(1-a)+'.','P(no faults on both days) = '+(1-a)+'² = '+round((1-a)*(1-a),3)+'.','P(at least one) = 1 − '+round((1-a)*(1-a),3)+' = '+answer+'.'],check:'The chance of at least one fault is greater than the single-day chance '+a+'.',hint:'Find the probability of no faults on both days, then subtract from 1.'});
+        case 7: a=pick(rng,[.35,.4,.45]); b=pick(rng,[.2,.25,.3]); var both=pick(rng,[.08,.1,.12]); answer=round(a+b-both,2); return makeQuestion({topic:'probability',level:level,role:'Marketing analyst',title:'Either event',document:documentCard('Customer survey','Overlapping choices',[['P(buys coffee)',a],['P(buys cake)',b],['P(buys both)',both]],'Customers who buy both must not be counted twice.'),prompt:'What is the probability a customer buys coffee or cake?',answer:{value:answer,unit:'',tolerance:.005},steps:['P(coffee or cake) = '+a+' + '+b+' − '+both+'.','Result = '+answer+'.'],check:'The answer is at least '+Math.max(a,b)+' but less than or equal to '+round(a+b,2)+'.',hint:'Add the two probabilities, then subtract the overlap.'});
+        case 8: a=pick(rng,[.15,.2,.25]); b=pick(rng,[80,120,200]); answer=a*b; return makeQuestion({topic:'probability',level:level,role:'Stock controller',title:'Expected frequency',document:documentCard('Defect forecast','Next delivery',[['Probability of defect',a],['Items expected',b]],'Expected frequency = probability × number of trials.'),prompt:'How many defective items would be expected?',answer:{value:answer,unit:'items'},steps:[a+' × '+b+' = '+answer+' items.'],check:answer+'/'+b+' = '+a+', the stated defect proportion.',hint:'Multiply the probability by the number of items.'});
+        default: return makeQuestion({topic:'probability',level:level,role:'Safety trainer',title:'Probability scale',document:documentCard('Risk statement','Choose a probability',[['Event','A routine alarm test fails'],['Description','Unlikely, but possible']],'Probabilities run from 0 (impossible) to 1 (certain).'),prompt:'Which probability best represents “unlikely, but possible”?',answer:choiceAnswer('0.15',['0','0.15','0.50','1']),steps:['0 would mean impossible and 1 would mean certain.','0.15 is above zero but well below 0.5, so it represents an unlikely event.'],check:'The chosen number fits the language on the 0-to-1 probability scale.',hint:'Look for a value close to 0 but not equal to 0.'});
+      }
+    }
+
+    function graphsQuestion(index, rng, level) {
+      var values,answer,visual;
+      switch(index) {
+        case 0: values=[int(rng,18,28),int(rng,30,42),int(rng,22,34),int(rng,38,50)]; visual=svgBars(['Mon','Tue','Wed','Thu'],values); answer=Math.max.apply(Math,values)-Math.min.apply(Math,values); return makeQuestion({topic:'graphs',level:level,role:'Café manager',title:'Read a bar chart',document:documentCard('Hot drinks sold','Four weekdays',[], 'Values are shown above each bar.',visual),prompt:'How many more drinks were sold on the busiest day than the quietest day?',answer:{value:answer,unit:'drinks'},steps:['Highest bar = '+Math.max.apply(Math,values)+'. Lowest bar = '+Math.min.apply(Math,values)+'.','Difference = '+Math.max.apply(Math,values)+' − '+Math.min.apply(Math,values)+' = '+answer+'.'],check:'The difference added to the lowest value gives the highest.',hint:'Identify the tallest and shortest bars, then subtract.'});
+        case 1: values=[12,16,21,27,34,42]; visual=svgLine(values,'Customers'); answer=values[5]-values[0]; return makeQuestion({topic:'graphs',level:level,role:'Visitor-centre manager',title:'Read a line graph',document:documentCard('Hourly visitors','Hours 1 to 6',[], 'The plotted points show the visitor count each hour.',visual),prompt:'By how many did the visitor count increase from hour 1 to hour 6?',answer:{value:answer,unit:'visitors'},steps:['Hour 1 = '+values[0]+'. Hour 6 = '+values[5]+'.','Increase = '+values[5]+' − '+values[0]+' = '+answer+'.'],check:values[0]+' + '+answer+' = '+values[5]+'.',hint:'Read the first and last plotted values, then find the difference.'});
+        case 2: var scatter='<svg class="diagram" viewBox="0 0 400 210" role="img" aria-label="Scatter graph showing points rising from left to right"><line x1="42" y1="170" x2="375" y2="170" stroke="#60727c"/><line x1="42" y1="20" x2="42" y2="170" stroke="#60727c"/><g fill="#267e99">'+[[65,150],[90,135],[120,142],[150,112],[180,118],[210,85],[245,92],[275,65],[310,58],[345,38]].map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5"/>';}).join('')+'</g><text x="200" y="198" text-anchor="middle" font-size="11">Training hours</text><text x="16" y="105" transform="rotate(-90 16 105)" text-anchor="middle" font-size="11">Test score</text></svg>'; return makeQuestion({topic:'graphs',level:level,role:'Training coordinator',title:'Scatter graph correlation',document:documentCard('Training evaluation','Hours and assessment score',[], 'Each point represents one employee.',scatter),prompt:'What type of correlation does the scatter graph show?',answer:choiceAnswer('Positive correlation',['Positive correlation','Negative correlation','No correlation','Perfect negative correlation']),steps:['As training hours increase, assessment scores generally increase.','A rising pattern from left to right is positive correlation.'],check:'The points are not exactly on a line, so it is a correlation rather than a guaranteed relationship.',hint:'Trace the overall direction of the cloud of points from left to right.'});
+        case 3: var scatter2='<svg class="diagram" viewBox="0 0 400 210" role="img" aria-label="Scatter graph showing points falling from left to right"><line x1="42" y1="170" x2="375" y2="170" stroke="#60727c"/><line x1="42" y1="20" x2="42" y2="170" stroke="#60727c"/><g fill="#267e99">'+[[60,38],[90,50],[125,44],[155,74],[190,82],[220,105],[255,96],[285,130],[320,138],[352,154]].map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5"/>';}).join('')+'</g><text x="200" y="198" text-anchor="middle" font-size="11">Average speed</text><text x="16" y="105" transform="rotate(-90 16 105)" text-anchor="middle" font-size="11">Journey time</text></svg>'; return makeQuestion({topic:'graphs',level:level,role:'Transport analyst',title:'Interpret correlation',document:documentCard('Delivery journeys','Speed and journey time',[], 'Each point represents one route.',scatter2),prompt:'Which conclusion is supported by this graph?',answer:choiceAnswer('Higher speeds tend to be linked with shorter journey times',['Higher speeds tend to be linked with shorter journey times','Higher speeds always cause delays','There is no relationship','Every journey at the same speed takes the same time']),steps:['The point cloud slopes downward as average speed increases.','This negative correlation supports a tendency toward shorter journey times at higher speeds.'],check:'Correlation shows a pattern, not that every individual journey follows it.',hint:'Describe the overall downward pattern without claiming it is exact.'});
+        case 4: var total=pick(rng,[120,180,240]), category=pick(rng,[30,45,60]); answer=round(category/total*360,0); return makeQuestion({topic:'graphs',level:level,role:'Survey designer',title:'Pie-chart angle',document:documentCard('Travel survey','Pie chart preparation',[['Total responses',total],['Bus responses',category]],'A full pie chart is 360°.'),prompt:'What angle should represent bus responses?',answer:{value:answer,unit:'°'},steps:['Fraction for bus = '+category+'/'+total+'.','Angle = '+category+'/'+total+' × 360 = '+answer+'°.'],check:'The angle is the same fraction of 360° as '+category+' is of '+total+'.',hint:'Use category ÷ total × 360.'});
+        case 5: var scale=pick(rng,[1.5,1.6,2.2]); var input=pick(rng,[20,35,50]); answer=round(input*scale,1); var conversionSvg='<svg class="diagram" viewBox="0 0 400 210" role="img" aria-label="Straight conversion graph"><line x1="42" y1="170" x2="375" y2="170" stroke="#60727c"/><line x1="42" y1="20" x2="42" y2="170" stroke="#60727c"/><line x1="42" y1="170" x2="345" y2="35" stroke="#267e99" stroke-width="4"/><text x="205" y="198" text-anchor="middle" font-size="11">Input units</text><text x="15" y="105" transform="rotate(-90 15 105)" text-anchor="middle" font-size="11">Output units</text><text x="232" y="75" font-size="11">factor × '+scale+'</text></svg>'; return makeQuestion({topic:'graphs',level:level,role:'Workshop assistant',title:'Use a conversion graph',document:documentCard('Unit conversion','Straight-line graph',[], 'The graph uses a conversion factor of '+scale+'.',conversionSvg),prompt:'Use the relationship to convert '+input+' input units.',answer:{value:answer,unit:'output units',tolerance:.05},steps:[input+' × '+scale+' = '+answer+' output units.'],check:answer+' ÷ '+scale+' = '+input+'.',hint:'A straight conversion graph through the origin represents direct proportion.'});
+        case 6: values=[24,31,28,39,45]; answer=round(values.reduce(function(s,v){return s+v;},0)/5,1); return makeQuestion({topic:'graphs',level:level,role:'Retail analyst',title:'Graph data average',document:documentCard('Weekly online orders','Orders from Monday to Friday',[], 'Read the plotted values before calculating.',svgLine(values,'Orders')),prompt:'Calculate the mean daily orders shown.',answer:{value:answer,unit:'orders',tolerance:.05},steps:['Total = '+values.join(' + ')+' = '+values.reduce(function(s,v){return s+v;},0)+'.','Mean = total ÷ 5 = '+answer+'.'],check:'The mean lies between 24 and 45 orders.',hint:'Read all five plotted values, add them, then divide by 5.'});
+        case 7: var misleading='<svg class="diagram" viewBox="0 0 400 200" role="img" aria-label="Bar chart with vertical axis starting at 80"><line x1="55" y1="160" x2="365" y2="160" stroke="#60727c"/><line x1="55" y1="25" x2="55" y2="160" stroke="#60727c"/><text x="32" y="162" font-size="10">80</text><text x="28" y="35" font-size="10">100</text><rect x="110" y="92" width="65" height="68" fill="#238f87"/><rect x="235" y="45" width="65" height="115" fill="#267e99"/><text x="142" y="180" text-anchor="middle" font-size="11">A: 90</text><text x="267" y="180" text-anchor="middle" font-size="11">B: 97</text></svg>'; return makeQuestion({topic:'graphs',level:level,role:'News editor',title:'Evaluate a misleading chart',document:documentCard('Customer satisfaction','Percent satisfied',[], 'Inspect the vertical axis before judging the difference.',misleading),prompt:'Why might this chart exaggerate the difference?',answer:choiceAnswer('The vertical axis starts at 80 instead of 0',['The vertical axis starts at 80 instead of 0','The bars have different colours','There are only two labels','The values are percentages']),steps:['The axis is truncated: it begins at 80, not 0.','This makes the 7 percentage-point difference appear much larger visually.'],check:'A chart starting at zero would show both bars as similar heights.',hint:'Look at the lowest value printed on the vertical axis.'});
+        case 8: values=[85,92,88,105,119,126]; answer=values[5]-values[2]; return makeQuestion({topic:'graphs',level:level,role:'Energy manager',title:'Compare points on a line graph',document:documentCard('Weekly electricity use','Six weeks, kWh',[], 'Each point is labelled by its plotted height.',svgLine(values,'kWh')),prompt:'How much greater was use in week 6 than in week 3?',answer:{value:answer,unit:'kWh'},steps:['Week 6 = '+values[5]+' kWh; week 3 = '+values[2]+' kWh.','Difference = '+values[5]+' − '+values[2]+' = '+answer+' kWh.'],check:values[2]+' + '+answer+' = '+values[5]+'.',hint:'Read the two requested weeks, not the lowest and highest overall.'});
+        default: values=[16,23,29,35]; answer=values.reduce(function(s,v){return s+v;},0); return makeQuestion({topic:'graphs',level:level,role:'Event organiser',title:'Select and interpret a chart',document:documentCard('Ticket sales','Four ticket types',[], 'A bar chart is suitable because the categories are discrete.',svgBars(['Adult','Child','Senior','Group'],values,'#9966cc')),prompt:'How many tickets were sold altogether?',answer:{value:answer,unit:'tickets'},steps:['Add the bar values: '+values.join(' + ')+' = '+answer+'.'],check:'The total is larger than every individual category, as expected.',hint:'Read each category frequency and add all four.'});
+      }
+    }
+
+    function shapeQuestion(index, rng, level) {
+      var a,b,answer;
+      switch(index) {
+        case 0: a=pick(rng,[4,5,6,8]); b=pick(rng,[50,100,200]); answer=a*b/100; return makeQuestion({topic:'shape',level:level,role:'Interior designer',title:'Scale drawing length',document:documentCard('Office plan','Scale 1 : '+b,[['Length on plan',a+' cm'],['Scale','1 cm represents '+b+' cm']],'Give the actual length in metres.'),prompt:'What is the actual length?',answer:{value:answer,unit:'m'},steps:['Actual centimetres = '+a+' × '+b+' = '+a*b+' cm.','Convert: '+a*b+' ÷ 100 = '+answer+' m.'],check:answer+' m is '+a*b+' cm; at 1:'+b+' this draws as '+a+' cm.',hint:'Multiply by the scale, then convert centimetres to metres.'});
+        case 1: a=pick(rng,[12,18,25]); b=pick(rng,[50,100,200]); answer=round(a*100/b,1); return makeQuestion({topic:'shape',level:level,role:'Garden planner',title:'Create a scale length',document:documentCard('Garden drawing','Scale 1 : '+b,[['Actual path length',a+' m'],['Scale','1 cm represents '+b+' cm']],'Find the line length to draw in centimetres.'),prompt:'How long should the path be on the drawing?',answer:{value:answer,unit:'cm',tolerance:.05},steps:['Actual length = '+a+' × 100 = '+a*100+' cm.','Drawing length = '+a*100+' ÷ '+b+' = '+answer+' cm.'],check:answer+' × '+b+' = '+a*100+' cm = '+a+' m.',hint:'Put actual length and scale in the same unit before dividing.'});
+        case 2: var x1=pick(rng,[-6,-4,-2]), y1=pick(rng,[1,3,5]), dx=pick(rng,[4,6,8]), dy=pick(rng,[-5,-3,4]); var x2=x1+dx,y2=y1+dy; return makeQuestion({topic:'shape',level:level,role:'Map technician',title:'Coordinate movement',document:documentCard('Site grid','Coordinates',[['Start','('+x1+', '+y1+')'],['Move',''+dx+' right and '+Math.abs(dy)+' '+(dy<0?'down':'up')]],'Right increases x; up increases y.'),prompt:'What are the final coordinates?',answer:choiceAnswer('('+x2+', '+y2+')',['('+x2+', '+y2+')','('+(x1-dx)+', '+y2+')','('+x2+', '+(y1-dy)+')','('+y2+', '+x2+')']),steps:['New x = '+x1+' + '+dx+' = '+x2+'.','New y = '+y1+' '+(dy<0?'− '+Math.abs(dy):'+ '+dy)+' = '+y2+'.','Final point: ('+x2+', '+y2+').'],check:'Reverse the movement from ('+x2+', '+y2+') to return to ('+x1+', '+y1+').',hint:'Change x for left/right and y for up/down.'});
+        case 3: var ax=pick(rng,[-8,-6,-4]), ay=pick(rng,[-2,2,4]), bx=ax+pick(rng,[4,6,8]), by=ay+pick(rng,[4,6,8]); var mx=(ax+bx)/2,my=(ay+by)/2; return makeQuestion({topic:'shape',level:level,role:'CAD apprentice',title:'Midpoint of coordinates',document:documentCard('Component drawing','End points',[['A','('+ax+', '+ay+')'],['B','('+bx+', '+by+')']],'The midpoint is halfway in both x and y.'),prompt:'What is the midpoint of line AB?',answer:choiceAnswer('('+mx+', '+my+')',['('+mx+', '+my+')','('+(bx-ax)+', '+(by-ay)+')','('+(ax+bx)+', '+(ay+by)+')','('+my+', '+mx+')']),steps:['Midpoint x = ('+ax+' + '+bx+') ÷ 2 = '+mx+'.','Midpoint y = ('+ay+' + '+by+') ÷ 2 = '+my+'.'],check:'The change from A to the midpoint equals the change from the midpoint to B.',hint:'Average the two x-coordinates and separately average the y-coordinates.'});
+        case 4: a=pick(rng,[42,55,68]); b=pick(rng,[63,71,84]); answer=180-a-b; return makeQuestion({topic:'shape',level:level,role:'Roofing apprentice',title:'Triangle angle',document:documentCard('Roof truss','Angle check',[['Angle A',a+'°'],['Angle B',b+'°'],['Angle C','?']],'Angles in a triangle total 180°.'),prompt:'Calculate angle C.',answer:{value:answer,unit:'°'},steps:['Angle C = 180° − '+a+'° − '+b+'° = '+answer+'°.'],check:a+' + '+b+' + '+answer+' = 180°.',hint:'Subtract the two known angles from 180°.'});
+        case 5: a=pick(rng,[75,90,110]); b=pick(rng,[85,105,120]); var c=pick(rng,[60,70,80]); answer=360-a-b-c; return makeQuestion({topic:'shape',level:level,role:'Road-layout planner',title:'Angles around a point',document:documentCard('Junction plan','Four angles',[['Angle 1',a+'°'],['Angle 2',b+'°'],['Angle 3',c+'°'],['Angle 4','?']],'Angles around a point total 360°.'),prompt:'Calculate the missing angle.',answer:{value:answer,unit:'°'},steps:['Known total = '+a+' + '+b+' + '+c+' = '+(a+b+c)+'°.','Missing angle = 360 − '+(a+b+c)+' = '+answer+'°.'],check:a+' + '+b+' + '+c+' + '+answer+' = 360°.',hint:'Add the known angles and subtract from 360°.'});
+        case 6: var elevation='<svg class="diagram" viewBox="0 0 400 190" role="img" aria-label="3D stack of cubes"><g fill="#dce9ec" stroke="#315c67" stroke-width="2"><rect x="80" y="95" width="55" height="55"/><rect x="135" y="95" width="55" height="55"/><rect x="190" y="95" width="55" height="55"/><rect x="135" y="40" width="55" height="55"/></g></svg>'; return makeQuestion({topic:'shape',level:level,role:'Construction trainee',title:'Front elevation',document:documentCard('Block model','View from the front',[], 'The model is one cube deep.',elevation),prompt:'Which description matches the front elevation?',answer:choiceAnswer('Three squares in the bottom row, with one above the middle',['Three squares in the bottom row, with one above the middle','Four squares in one vertical column','A two-by-two square','Only three squares in one row']),steps:['Looking from the front removes depth.','The visible outline has three cubes along the bottom and one stacked over the centre.'],check:'The elevation contains four unit squares, matching all four cubes because none is hidden from the front.',hint:'Flatten the model as it appears from directly in front.'});
+        case 7: return makeQuestion({topic:'shape',level:level,role:'Packaging trainee',title:'Recognise a net',document:documentCard('Packaging net','Shape identification',[['Faces','6 equal squares'],['Arrangement','A cross that folds without overlap']],'Identify the 3-D solid.'),prompt:'Which solid can be made from this net?',answer:choiceAnswer('Cube',['Cube','Cylinder','Triangular prism','Cone']),steps:['A cube has six congruent square faces.','A suitable cross arrangement of six squares folds into a cube.'],check:'No curved faces or triangular faces are present.',hint:'Match the number and shapes of faces to the solid.'});
+        case 8: a=pick(rng,[35,48,62]); answer=(a+180)%360; return makeQuestion({topic:'shape',level:level,role:'Surveyor',title:'Reverse bearing',document:documentCard('Site survey','Direction record',[['Bearing from A to B',String(a).padStart(3,'0')+'°']],'A reverse bearing differs by 180°.'),prompt:'What is the bearing from B back to A?',answer:{value:answer,unit:'°'},steps:['Reverse bearing = '+a+'° + 180° = '+answer+'°.'],check:'The two bearings differ by exactly 180°.',hint:'Because the original bearing is below 180°, add 180°.'});
+        default: a=pick(rng,[4,5,6]); b=pick(rng,[3,4,5]); var scale=100; var actualL=a*scale/100, actualW=b*scale/100; answer=actualL*actualW; return makeQuestion({topic:'shape',level:level,role:'Facilities planner',title:'Area from a scale plan',document:documentCard('Meeting-room plan','Scale 1 : '+scale,[['Plan length',a+' cm'],['Plan width',b+' cm']],'Convert both dimensions before calculating area.'),prompt:'Calculate the actual floor area.',answer:{value:answer,unit:'m²'},steps:['At 1:'+scale+', '+a+' cm represents '+a*scale+' cm = '+actualL+' m.',''+b+' cm represents '+b*scale+' cm = '+actualW+' m.','Area = '+actualL+' × '+actualW+' = '+answer+' m².'],check:'The scale is converted on the lengths before squaring through area.',hint:'Find both actual lengths in metres, then multiply them.'});
+      }
+    }
+
+    var GENERATORS = {money:moneyQuestion,percentages:percentageQuestion,ratio:ratioQuestion,measures:measuresQuestion,area:areaQuestion,volume:volumeQuestion,data:dataQuestion,probability:probabilityQuestion,graphs:graphsQuestion,shape:shapeQuestion};
+    var ACTIVITIES = [];
+    TOPICS.forEach(function(t){ for(var i=0;i<10;i++){ ACTIVITIES.push({id:t.id+'-'+String(i+1).padStart(2,'0'),topic:t.id,index:i,level:LEVELS[i],title:t.label+' activity '+(i+1)}); } });
+    function listActivities(){ return ACTIVITIES.map(function(item){ return Object.assign({},item); }); }
+    function buildQuestion(activityId, rng){
+      var spec=ACTIVITIES.filter(function(item){return item.id===activityId;})[0];
+      if(!spec) throw new Error('Unknown activity: '+activityId);
+      var random=typeof rng==='function'?rng:Math.random;
+      var result=GENERATORS[spec.topic](spec.index,random,spec.level);
+      result.id=spec.id; result.activityTitle=spec.title;
+      return result;
+    }
+    function parseNumeric(value){
+      var raw=String(value==null?'':value).trim().replace(/,/g,'').replace(/[£€$]/g,'').replace(/\s*(?:items?|people|hours?|minutes?|days?|boxes?|bags?|tins?|litres?|miles?|customers?|orders?|tickets?|supervisors?|faults?|marks?|points?|drinks?|visitors?|output units?|kWh|mph|mpg|lb|kg|ml|cm|m|g\/cm³|cm²|m²|cm³|m³|°C|°|%)\s*$/i,'').trim();
+      if(/^[-+]?\d+\s*\/\s*\d+$/.test(raw)){ var parts=raw.split('/'); return Number(parts[0])/Number(parts[1]); }
+      return Number(raw);
+    }
+    function normalText(value){ return String(value==null?'':value).trim().toLowerCase().replace(/\s+/g,' '); }
+    function gradeAnswer(question,response){
+      response=response||{};
+      var answerCorrect=false, actual=response.answer;
+      if(question.answer.kind==='choice') answerCorrect=normalText(actual)===normalText(question.answer.value)||(question.answer.alternatives||[]).some(function(alt){return normalText(actual)===normalText(alt);});
+      else {
+        var parsed=parseNumeric(actual);
+        answerCorrect=Number.isFinite(parsed)&&Math.abs(parsed-Number(question.answer.value))<=(Number(question.answer.tolerance)||.005);
+        if(!answerCorrect) answerCorrect=(question.answer.alternatives||[]).some(function(alt){return normalText(actual)===normalText(alt);});
+      }
+      var answerAwarded=answerCorrect?question.marks.answer:0;
+      return {answerCorrect:answerCorrect,answerAwarded:answerAwarded,methodAwarded:0,checkAwarded:0,score:answerAwarded,total:question.marks.answer,workingProvided:normalText(response.working).length>0,checkProvided:normalText(response.check).length>0};
+    }
+    function shuffle(values,rng){ var out=values.slice(); for(var i=out.length-1;i>0;i--){var j=Math.floor(rng()*(i+1));var temp=out[i];out[i]=out[j];out[j]=temp;} return out; }
+    function pickRun(options){
+      options=options||{}; var rng=options.rng||Math.random,count=options.count||10;
+      var pool=ACTIVITIES.filter(function(item){return (!options.topic||options.topic==='mixed'||item.topic===options.topic)&&(!options.level||options.level==='mixed'||item.level===options.level);});
+      if(!pool.length) pool=ACTIVITIES.slice();
+      var run=[],cycle=0; while(run.length<count){ var batch=shuffle(pool,rng); for(var i=0;i<batch.length&&run.length<count;i++){run.push(Object.assign({},batch[i],{variant:cycle}));} cycle++; }
+      return run;
+    }
+    function validateBank(){
+      var errors=[];
+      ACTIVITIES.forEach(function(activity,index){
+        try { var q=buildQuestion(activity.id,seededRandom(index+11)); if(!q.prompt||!q.document||!q.document.html||!q.solution.steps.length||q.answer.value===undefined||q.marks.total!==q.marks.answer+q.marks.method+q.marks.check) errors.push(activity.id+': incomplete'); }
+        catch(error){ errors.push(activity.id+': '+error.message); }
+      });
+      return errors;
+    }
+    var API={TOPICS:TOPICS,LIBRARY_GUIDES:LIBRARY_GUIDES,LEVEL_NAMES:LEVEL_NAMES,listActivities:listActivities,buildQuestion:buildQuestion,gradeAnswer:gradeAnswer,pickRun:pickRun,seededRandom:seededRandom,validateBank:validateBank,topic:topic,parseNumeric:parseNumeric};
+    if(typeof module!=='undefined'&&module.exports) module.exports=API;
+    root.FunctionalSkillsEngine=API;
+  })(typeof globalThis!=='undefined'?globalThis:this);
+  </script>
+  <script>
+  (function(){
+    'use strict';
+    var E=window.FunctionalSkillsEngine;
+    var $=function(selector){return document.querySelector(selector);};
+    var $$=function(selector){return Array.prototype.slice.call(document.querySelectorAll(selector));};
+    var state={topic:'mixed',level:'mixed',pace:15,run:[],index:0,lives:3,score:0,streak:0,bestStreak:0,marks:0,totalMarks:0,correct:0,results:[],current:null,timer:null,timeLeft:900,answerRevealed:false,penalty:0};
+    var topicNames=Object.fromEntries(E.TOPICS.map(function(t){return [t.id,t.label];}));
+    topicNames.mixed='Mixed Practice';
+
+    function escapeHtml(value){return String(value).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+    function setScreen(id){['home-screen','game-screen','end-screen'].forEach(function(screen){$('#'+screen).classList.toggle('hidden',screen!==id);}); window.scrollTo({top:0,behavior:'smooth'});}
+    function toast(message){var node=$('#toast');node.textContent=message;node.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(function(){node.classList.remove('show');},1800);}
+    function safeGetRecords(){try{return JSON.parse(localStorage.getItem('skillsQuestRecords')||'[]');}catch(error){return [];}}
+    function safeSaveRecords(records){try{localStorage.setItem('skillsQuestRecords',JSON.stringify(records.slice(0,20)));}catch(error){}}
+    function savePreferences(){try{localStorage.setItem('skillsQuestPreferences',JSON.stringify({topic:state.topic,level:state.level,pace:state.pace,theme:document.body.dataset.theme}));}catch(error){}}
+    function loadPreferences(){try{var p=JSON.parse(localStorage.getItem('skillsQuestPreferences')||'{}');if(p.topic)state.topic=p.topic;if(p.level)state.level=p.level;if(p.pace!==undefined)state.pace=p.pace;if(p.theme)setTheme(p.theme);}catch(error){}}
+    function setTheme(theme){document.body.dataset.theme=theme;$$('[data-theme-choice]').forEach(function(btn){btn.setAttribute('aria-pressed',String(btn.dataset.themeChoice===theme));});}
+
+    function renderSetup(){
+      var mixed={id:'mixed',icon:'✦',label:'Mixed Practice',short:'All ten topics in one run'};
+      $('#topic-picker').innerHTML=[mixed].concat(E.TOPICS).map(function(t){return '<button type="button" class="choice-card" data-select-topic="'+t.id+'" aria-pressed="'+(state.topic===t.id)+'"><span class="choice-icon">'+t.icon+'</span><span><strong>'+escapeHtml(t.label)+'</strong><small>'+escapeHtml(t.short)+'</small></span></button>';}).join('');
+      var levels=[{id:'mixed',label:'Mixed'},{id:'A',label:'A · One step'},{id:'B',label:'B · Two step'},{id:'C',label:'C · Exam'}];
+      $('#level-picker').innerHTML=levels.map(function(item){return '<button type="button" data-select-level="'+item.id+'" aria-pressed="'+(state.level===item.id)+'">'+item.label+'</button>';}).join('');
+      var paces=[{value:20,label:'20 min'},{value:15,label:'15 min'},{value:10,label:'10 min'},{value:0,label:'Untimed'}];
+      $('#pace-picker').innerHTML=paces.map(function(item){return '<button type="button" data-select-pace="'+item.value+'" aria-pressed="'+(state.pace===item.value)+'">'+item.label+'</button>';}).join('');
+      $('#selected-topic-label').textContent=topicNames[state.topic];
+      $('#selected-level-label').textContent=state.level==='mixed'?'Mixed levels':E.LEVEL_NAMES[state.level];
+      $('#selected-pace-label').textContent=state.pace?state.pace+' minutes':'Untimed';
+    }
+
+    function resetRunState(){clearInterval(state.timer);state.run=E.pickRun({topic:state.topic,level:state.level,count:10,rng:Math.random});state.index=0;state.lives=3;state.score=0;state.streak=0;state.bestStreak=0;state.marks=0;state.totalMarks=0;state.correct=0;state.results=[];state.timeLeft=state.pace*60;state.answerRevealed=false;state.penalty=0;}
+    function startRun(){resetRunState();setScreen('game-screen');renderQuestion();if(state.pace){state.timer=setInterval(function(){state.timeLeft--;renderTimer();if(state.timeLeft<=0){clearInterval(state.timer);toast('Time is up — showing your results');setTimeout(finishRun,600);}},1000);}renderTimer();}
+    function formatTime(seconds){if(!state.pace)return 'Untimed';var m=Math.max(0,Math.floor(seconds/60)),s=Math.max(0,seconds%60);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+    function renderTimer(){$('#timer').textContent=formatTime(state.timeLeft);$('#timer').style.color=state.pace&&state.timeLeft<=60?'var(--danger)':'';}
+    function currentResponse(){var selected=$('input[name="choice-answer"]:checked');return{answer:selected?selected.value:($('#answer-input')?$('#answer-input').value:''),working:$('#working-input').value,check:$('#check-input').value};}
+    function renderQuestion(){
+      var spec=state.run[state.index];state.current=E.buildQuestion(spec.id,Math.random);state.answerRevealed=false;state.penalty=0;
+      var q=state.current,t=E.topic(q.topic),pct=(state.index/10)*100;
+      $('#lives').textContent=Array.from({length:3},function(_,i){return i<state.lives?'♥':'♡';}).join(' ');$('#lives').setAttribute('aria-label',state.lives+' lives remaining');
+      $('#question-progress').textContent='Question '+(state.index+1)+' of 10';$('#topic-progress').textContent=t.label;$('#progress-bar').style.width=pct+'%';$('#score').textContent=state.score;
+      $('#question-role').textContent=q.role;$('#question-title').textContent=q.title;$('#level-badge').textContent=E.LEVEL_NAMES[q.level];$('#source-document').innerHTML=q.document.html;
+      $('#question-code').textContent=q.id.toUpperCase()+' · '+t.label;$('#question-prompt').textContent=q.prompt;$('#question-instruction').textContent=q.instruction;$('#marks-chip').textContent=q.marks.answer+' automatically marked answer marks · working and checking are for self-review';
+      if(q.answer.kind==='choice'){$('#answer-control').innerHTML='<span class="input-label">Choose one answer</span><div class="choice-list">'+q.answer.options.map(function(option,i){return '<label class="radio-option"><input type="radio" name="choice-answer" value="'+escapeHtml(option)+'"><span>'+escapeHtml(option)+'</span></label>';}).join('')+'</div>';}
+      else {var unit=q.answer.unit||'';$('#answer-control').innerHTML='<label class="input-label" for="answer-input">Your answer'+(unit?' ('+escapeHtml(unit)+')':'')+'</label><div class="answer-entry">'+(unit?'<span class="unit">'+escapeHtml(unit)+'</span>':'')+'<input id="answer-input" type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" placeholder="Enter your answer"></div>';}
+      $('#working-input').value='';$('#check-input').value='';$('#working-block').classList.remove('hidden');$('#check-block').classList.remove('hidden');$('#hint-box').classList.add('hidden');$('#hint-box').textContent='';$('#answer-explanation').classList.add('hidden');
+      setTimeout(function(){var focus=$('#answer-input')||$('input[name="choice-answer"]');if(focus)focus.focus();},50);
+    }
+    function formatFinalAnswer(q){
+      if(q.answer.kind==='choice')return String(q.answer.value);
+      var value=Number(q.answer.value),unit=q.answer.unit||'',display=Number.isFinite(value)?String(q.answer.value):String(q.answer.value);
+      if((unit==='£'||unit==='€')&&Number.isFinite(value))return unit+value.toFixed(2);
+      return display+(unit?' '+unit:'');
+    }
+    function showAnswerExplanation(q){
+      state.explanationReturnFocus=document.activeElement;
+      $('#explanation-answer').textContent=formatFinalAnswer(q);
+      $('#explanation-why').textContent=q.why;
+      $('#explanation-steps').innerHTML=q.solution.steps.map(function(step,index){return '<div class="solution-step"><b>'+(index+1)+'</b><span>'+escapeHtml(step)+'</span></div>';}).join('');
+      $('#explanation-check').innerHTML='<strong>Quick check:</strong> '+escapeHtml(q.solution.check);
+      $('#answer-explanation').classList.remove('hidden');document.body.style.overflow='hidden';
+      setTimeout(function(){$('#answer-explanation [data-action="close-answer-explanation"]').focus();},20);
+    }
+    function closeAnswerExplanation(){
+      $('#answer-explanation').classList.add('hidden');document.body.style.overflow='';
+      if(state.explanationReturnFocus&&document.contains(state.explanationReturnFocus))state.explanationReturnFocus.focus();
+    }
+    function useHelp(type){
+      var q=state.current,box=$('#hint-box');box.classList.remove('hidden');
+      if(type==='strategy'){box.innerHTML='<strong>Strategy:</strong> '+escapeHtml(q.strategy);state.penalty+=15;}
+      if(type==='hint'){box.innerHTML='<strong>Hint:</strong> '+escapeHtml(q.hint);state.penalty+=25;}
+      if(type==='answer'){
+        state.answerRevealed=true;state.penalty+=100;box.innerHTML='<strong>Answer:</strong> '+escapeHtml(String(q.answer.value))+(q.answer.unit?' '+escapeHtml(q.answer.unit):'')+'. Review the method, then submit when ready.';
+        if(q.answer.kind==='choice'){var radio=$$('input[name="choice-answer"]').filter(function(input){return input.value===String(q.answer.value);})[0];if(radio)radio.checked=true;}else if($('#answer-input')){$('#answer-input').value=q.answer.value;}
+        showAnswerExplanation(q);
+      }
+      state.score=Math.max(0,state.score-(type==='strategy'?15:type==='hint'?25:100));$('#score').textContent=state.score;
+    }
+    function markAnswer(event){
+      event.preventDefault();var q=state.current,response=currentResponse();
+      if(!String(response.answer).trim()){toast('Enter or choose an answer first');return;}
+      var result=E.gradeAnswer(q,response);
+      if(state.answerRevealed){result.answerAwarded=0;result.score=0;}
+      state.totalMarks+=result.total;state.marks+=result.score;
+      if(result.answerCorrect&&!state.answerRevealed){state.correct++;state.streak++;state.bestStreak=Math.max(state.bestStreak,state.streak);state.score+=100+Math.min(50,state.streak*10);}
+      else if(result.answerCorrect){state.streak=0;}
+      else {state.lives--;state.streak=0;}
+      state.results.push({topic:q.topic,marks:result.score,total:result.total,correct:result.answerCorrect&&!state.answerRevealed});showFeedback(result,response);
+    }
+    function showFeedback(result,response){
+      var q=state.current,perfect=result.score===result.total&&!state.answerRevealed;
+      $('#feedback-kicker').textContent=state.answerRevealed?'Answer revealed':perfect?'Answer mark earned':'Review and improve';
+      $('#feedback-heading').textContent=state.answerRevealed?'Compare with the worked answer':perfect?'Correct — now compare methods':'Use the model to review your approach';
+      $('#result-score').textContent=result.score+'/'+result.total;
+      $('#feedback-message').textContent=state.answerRevealed?'Because the answer was revealed, no answer mark is awarded. Your notes remain available for comparison.':result.answerCorrect?'Your final answer is correct. Compare your optional notes with the model reasoning below.':'Your final answer is not correct yet. Compare each model step with what you wrote and find where the approaches separate.';
+      var cards=[['Answer',result.answerAwarded,result.total]];
+      $('#mark-grid').innerHTML=cards.map(function(card){return '<div class="mark-card"><span>'+card[0]+'</span><b>'+card[1]+' / '+card[2]+'</b></div>';}).join('');
+      var emptyWorking='Nothing written — use the model method to see what you could record next time.';
+      var emptyCheck='Nothing written — compare the model check with an estimate or reverse calculation of your own.';
+      $('#learner-working').textContent=String(response&&response.working||'').trim()||emptyWorking;
+      $('#learner-check').textContent=String(response&&response.check||'').trim()||emptyCheck;
+      $('#solution').innerHTML=q.solution.steps.map(function(step,i){return '<div class="solution-step"><b>'+(i+1)+'</b><span>'+escapeHtml(step)+'</span></div>';}).join('');
+      $('#solution-check').innerHTML='<strong>Model check:</strong> '+escapeHtml(q.solution.check);
+      $('[data-action="next-question"]').textContent=(state.index>=9||state.lives<=0)?'View results →':'Next question →';$('#feedback').classList.remove('hidden');
+    }
+    function nextQuestion(){$('#feedback').classList.add('hidden');state.index++;if(state.index>=10||state.lives<=0){finishRun();}else{renderQuestion();}}
+    function finishRun(){clearInterval(state.timer);$('#feedback').classList.add('hidden');var percent=state.totalMarks?Math.round(state.marks/state.totalMarks*100):0;$('#end-percent').textContent=percent+'%';$('#end-marks').textContent=state.marks+'/'+state.totalMarks;$('#end-correct').textContent=state.correct;$('#end-streak').textContent=state.bestStreak;$('#end-score').textContent=state.score;$('#end-heading').textContent=percent>=80?'Confident and accurate.':percent>=60?'Good progress.':percent>=40?'A useful practice run.':'Keep building the method.';$('#end-copy').textContent=percent>=80?'Your final answers were consistently accurate. Use the saved comparisons to keep refining efficient methods.':percent>=60?'Review the lower-scoring topics below, then try a focused pack.':'Use the model solutions and Topic Library, then retry at Level A or B.';
+      var grouped={};state.results.forEach(function(r){if(!grouped[r.topic])grouped[r.topic]={marks:0,total:0};grouped[r.topic].marks+=r.marks;grouped[r.topic].total+=r.total;});$('#topic-results').innerHTML=Object.keys(grouped).map(function(id){var g=grouped[id];return '<div class="topic-result"><span>'+escapeHtml(topicNames[id])+'</span><strong>'+Math.round(g.marks/g.total*100)+'%</strong></div>';}).join('');
+      var records=safeGetRecords();records.unshift({date:new Date().toISOString(),topic:topicNames[state.topic],level:state.level==='mixed'?'Mixed':state.level,marks:state.marks,total:state.totalMarks,score:state.score});safeSaveRecords(records);setScreen('end-screen');
+    }
+    function quitRun(){if(!confirm('Leave this run? Your unfinished result will not be saved.'))return;clearInterval(state.timer);setScreen('home-screen');}
+    function renderLibraryIndex(){
+      $('#drawer-kicker').textContent='Learn before you practise';$('#drawer-title').textContent='Topic library';
+      $('#drawer-content').innerHTML='<p class="library-intro"><strong>Choose a chapter to understand the idea behind the calculations.</strong> Each guide shows how to recognise the question, choose a strategy, avoid common traps and check a worked example. Practice starts only when you use the button at the end of a chapter.</p><div class="library-grid">'+E.TOPICS.map(function(t){return '<button type="button" class="library-item" data-library-guide="'+t.id+'"><span class="section-kicker">'+t.icon+' '+escapeHtml(t.label)+'</span><h3>'+escapeHtml(t.short)+'</h3><p>'+escapeHtml(t.description)+'</p><span class="library-action">Open learning guide →</span></button>';}).join('')+'</div>';
+    }
+    function renderLibraryGuide(topicId){
+      var t=E.topic(topicId),guide=E.LIBRARY_GUIDES[topicId];if(!t||!guide){renderLibraryIndex();return;}
+      function bullets(items){return '<ul>'+items.map(function(item){return '<li>'+escapeHtml(item)+'</li>';}).join('')+'</ul>';}
+      var rules=guide.rules.map(function(rule){return '<div class="rule-item"><b>'+escapeHtml(rule.name)+':</b> '+escapeHtml(rule.text)+'</div>';}).join('');
+      var logic=guide.strategy.map(function(step,index){return '<div class="logic-step"><b>'+(index+1)+'. '+escapeHtml(step.action)+'</b><span><em>Why it works:</em> '+escapeHtml(step.why)+'</span></div>';}).join('');
+      var exampleSteps=guide.example.steps.map(function(step,index){return '<div class="logic-step"><b>'+(index+1)+'. '+escapeHtml(step.work)+'</b><span><em>Why:</em> '+escapeHtml(step.why)+'</span></div>';}).join('');
+      $('#drawer-kicker').textContent='Learning guide';$('#drawer-title').textContent=t.label;
+      $('#drawer-content').innerHTML='<article class="library-chapter" data-library-chapter="'+t.id+'">'+
+        '<section class="chapter-hero" data-library-section="idea"><div class="section-kicker">'+t.icon+' Core idea</div><h3>'+escapeHtml(t.short)+'</h3><p>'+escapeHtml(guide.idea)+'</p></section><div class="chapter-grid">'+
+        '<section class="chapter-section" data-library-section="recognise"><h3>How to recognise it</h3>'+bullets(guide.recognise)+'</section>'+
+        '<section class="chapter-section" data-library-section="rules"><h3>Rules worth knowing</h3><div class="rule-list">'+rules+'</div></section>'+
+        '<section class="chapter-section" data-library-section="strategy"><h3>Solving logic</h3><div class="logic-list">'+logic+'</div></section>'+
+        '<section class="chapter-section" data-library-section="traps"><h3>Common traps</h3>'+bullets(guide.traps)+'</section>'+
+        '<section class="chapter-section chapter-example" data-library-section="example"><h3>Worked example</h3><div class="example-question"><strong>Question:</strong> '+escapeHtml(guide.example.question)+'</div><div class="example-relationship" data-example-relationship><span>Model the relationship</span><p>'+escapeHtml(guide.example.relationship)+'</p></div><div class="logic-list">'+exampleSteps+'</div><div class="example-result"><strong>Answer:</strong> '+escapeHtml(guide.example.result)+'</div><div class="example-interpretation" data-example-interpretation><strong>What the answer means:</strong> '+escapeHtml(guide.example.interpretation)+'</div><div class="check-callout" style="margin-top:10px"><strong>Reasonableness check:</strong> '+escapeHtml(guide.example.check)+'</div></section></div>'+
+        '<div class="chapter-actions"><button class="secondary" type="button" data-action="library-home">← Back to library</button><button class="primary" type="button" data-action="practise-library-topic" data-topic="'+t.id+'">Practise '+escapeHtml(t.label)+' →</button></div></article>';
+      $('#drawer').scrollTop=0;
+    }
+    function openDrawer(kind){
+      var title=$('#drawer-title'),kicker=$('#drawer-kicker'),content=$('#drawer-content');
+      if(kind==='library'){renderLibraryIndex();}
+      if(kind==='lab'){kicker.textContent='Guided method workshop';title.textContent='Practice lab';content.innerHTML=renderPracticeLab();updateLab();}
+      if(kind==='records'){var records=safeGetRecords();kicker.textContent='Saved locally';title.textContent='Recent records';content.innerHTML=records.length?'<table class="records-table"><thead><tr><th>Date</th><th>Pack</th><th>Level</th><th>Marks</th><th>Score</th></tr></thead><tbody>'+records.map(function(r){return '<tr><td>'+new Date(r.date).toLocaleDateString('en-GB')+'</td><td>'+escapeHtml(r.topic)+'</td><td>'+escapeHtml(r.level)+'</td><td>'+r.marks+'/'+r.total+'</td><td>'+r.score+'</td></tr>';}).join('')+'</tbody></table>':'<div class="empty">Complete a practice run and your result will appear here.</div>';}
+      $('#drawer').classList.remove('hidden');
+    }
+    function renderPracticeLab(){
+      return '<p class="lab-intro"><strong>See the reasoning, not just the result.</strong> Change any value and each tool rebuilds its rule, why, working and check immediately.</p><div class="lab-grid">'+
+        '<article class="lab-card" data-lab-tool="percent"><div class="section-kicker">% Percentages</div><h3>Percentage workshop</h3><p>Find an amount, apply a change, or work backwards.</p><label for="lab-percent-mode">Method</label><select id="lab-percent-mode"><option value="amount">Find a percentage</option><option value="increase">Percentage increase</option><option value="decrease">Percentage decrease</option><option value="reverse">Reverse a decrease</option></select><div class="lab-fields"><div><label for="lab-pct">Percentage</label><input type="text" id="lab-pct" value="15" inputmode="decimal"></div><div><label for="lab-amount">Amount</label><input type="text" id="lab-amount" value="80" inputmode="decimal"></div></div><div class="lab-result"><span>Result</span><strong id="lab-percent-result"></strong></div><div class="lab-explanation" id="lab-percent-explanation"></div></article>'+
+        '<article class="lab-card" data-lab-tool="ratio"><div class="section-kicker">∶ Ratio</div><h3>Ratio splitter & scaler</h3><p>Share a total or scale a quantity in direct proportion.</p><label for="lab-ratio-mode">Method</label><select id="lab-ratio-mode"><option value="share">Share a total</option><option value="scale">Scale a quantity</option></select><div class="lab-fields"><div><label for="lab-ratio-a" id="lab-ratio-a-label">Ratio A</label><input type="text" id="lab-ratio-a" value="2" inputmode="decimal"></div><div><label for="lab-ratio-b" id="lab-ratio-b-label">Ratio B</label><input type="text" id="lab-ratio-b" value="3" inputmode="decimal"></div></div><label for="lab-ratio-total" id="lab-ratio-total-label">Total to share</label><input type="text" id="lab-ratio-total" value="150" inputmode="decimal"><div class="lab-result"><span>Result</span><strong id="lab-ratio-result"></strong></div><div class="lab-explanation" id="lab-ratio-explanation"></div></article>'+
+        '<article class="lab-card" data-lab-tool="conversion"><div class="section-kicker">↔ Conversions</div><h3>Unit converter</h3><p>Move in either direction using a known conversion factor.</p><label for="lab-conversion">Conversion</label><select id="lab-conversion"><option value="mm-m">mm → m</option><option value="m-mm">m → mm</option><option value="cm-m">cm → m</option><option value="m-cm">m → cm</option><option value="ml-l">ml → litres</option><option value="l-ml">litres → ml</option><option value="g-kg">g → kg</option><option value="kg-g">kg → g</option><option value="km-mi">km → miles</option><option value="mi-km">miles → km</option><option value="kg-lb">kg → lb</option><option value="lb-kg">lb → kg</option></select><label for="lab-value">Value to convert</label><input type="text" id="lab-value" value="2500" inputmode="decimal"><div class="lab-result"><span>Result</span><strong id="lab-convert-result"></strong></div><div class="lab-explanation" id="lab-convert-explanation"></div></article>'+
+        '<article class="lab-card" data-lab-tool="shape"><div class="section-kicker">□ Shape</div><h3>Shape formula workshop</h3><p>Compare area, perimeter, circumference and volume.</p><label for="lab-shape-mode">Calculation</label><select id="lab-shape-mode"><option value="rect-area">Rectangle area</option><option value="rect-perimeter">Rectangle perimeter</option><option value="circle-area">Circle area</option><option value="circle-circumference">Circle circumference</option><option value="cuboid-volume">Cuboid volume</option><option value="cylinder-volume">Cylinder volume</option></select><div class="lab-fields"><div><label for="lab-shape-a" id="lab-shape-a-label">Length (m)</label><input type="text" id="lab-shape-a" value="5" inputmode="decimal"></div><div><label for="lab-shape-b" id="lab-shape-b-label">Width (m)</label><input type="text" id="lab-shape-b" value="4" inputmode="decimal"></div></div><div id="lab-shape-c-wrap"><label for="lab-shape-c">Height (m)</label><input type="text" id="lab-shape-c" value="3" inputmode="decimal"></div><div class="lab-result"><span>Result</span><strong id="lab-shape-result"></strong></div><div class="lab-explanation" id="lab-shape-explanation"></div></article>'+
+        '<article class="lab-card" data-lab-tool="data"><div class="section-kicker">▥ Data</div><h3>Data-set explorer</h3><p>See how centre and spread describe the same data differently.</p><label for="lab-data">Values separated by commas</label><input type="text" id="lab-data" value="12, 18, 20, 26"><div class="lab-result"><span>Summary</span><strong id="lab-data-result"></strong></div><div class="lab-explanation" id="lab-data-explanation"></div></article></div>';
+    }
+    function labRound(value,places){var power=Math.pow(10,places==null?2:places);return Math.round((value+Number.EPSILON)*power)/power;}
+    function setLabExplanation(tool,result,parts){
+      $('#lab-'+tool+'-result').textContent=result;
+      $('#lab-'+tool+'-explanation').innerHTML='<div class="lab-method-line" data-lab-section="rule"><b>Rule:</b> '+escapeHtml(parts.rule)+'</div><div class="lab-method-line" data-lab-section="why"><b>Why it works:</b> '+escapeHtml(parts.why)+'</div><div class="lab-method-line" data-lab-section="working"><b>Working:</b> '+escapeHtml(parts.working)+'</div><div class="lab-method-line" data-lab-section="check"><b>Check:</b> '+escapeHtml(parts.check)+'</div>';
+    }
+    function invalidLab(tool,message){setLabExplanation(tool,'Enter valid values',{rule:'Use numerical values in every required field.',why:'The method needs complete numerical information before it can produce a meaningful result.',working:message,check:'Check for empty fields, letters or a zero where division is required.'});}
+    function updatePercentLab(){
+      var pct=E.parseNumeric($('#lab-pct').value),amount=E.parseNumeric($('#lab-amount').value),mode=$('#lab-percent-mode').value;if(!Number.isFinite(pct)||!Number.isFinite(amount)||pct<0){invalidLab('percent','Use a non-negative percentage and a numerical amount.');return;}if((mode==='decrease'||mode==='reverse')&&pct>=100){invalidLab('percent','A decrease being reversed must be less than 100%, otherwise no positive original value remains.');return;}var result,multiplier;
+      if(mode==='amount'){result=labRound(pct/100*amount);setLabExplanation('percent',String(result),{rule:'percentage amount = percentage ÷ 100 × amount',why:'Percent means “out of 100”, so dividing by 100 finds one percentage part before scaling it to the amount.',working:pct+' ÷ 100 × '+amount+' = '+result,check:result+' ÷ '+amount+' × 100 = '+pct+'%'});}
+      if(mode==='increase'){multiplier=1+pct/100;result=labRound(amount*multiplier);setLabExplanation('percent',String(result),{rule:'new value = original × (1 + percentage ÷ 100)',why:'An increase keeps all of the original 100% and adds another '+pct+'%, giving '+(100+pct)+'% in total and a multiplier of '+multiplier+'.',working:amount+' × '+multiplier+' = '+result,check:'Increase = '+result+' − '+amount+' = '+labRound(result-amount)+', which is '+pct+'% of '+amount+'.'});}
+      if(mode==='decrease'){multiplier=1-pct/100;result=labRound(amount*multiplier);setLabExplanation('percent',String(result),{rule:'new value = original × (1 − percentage ÷ 100)',why:'A decrease removes '+pct+'% and leaves '+(100-pct)+'% of the original, represented by the multiplier '+multiplier+'.',working:amount+' × '+multiplier+' = '+result,check:'Reduction = '+amount+' − '+result+' = '+labRound(amount-result)+', which is '+pct+'% of '+amount+'.'});}
+      if(mode==='reverse'){multiplier=1-pct/100;result=labRound(amount/multiplier);setLabExplanation('percent',String(result),{rule:'original = final value ÷ percentage remaining as a decimal',why:'After a '+pct+'% decrease, the shown amount represents only '+(100-pct)+'% of the original, so division reverses that multiplier.',working:amount+' ÷ '+multiplier+' = '+result,check:result+' × '+multiplier+' = '+amount+', returning to the final value.'});}
+    }
+    function updateRatioLab(){
+      var a=E.parseNumeric($('#lab-ratio-a').value),b=E.parseNumeric($('#lab-ratio-b').value),total=E.parseNumeric($('#lab-ratio-total').value),mode=$('#lab-ratio-mode').value;if(!Number.isFinite(a)||!Number.isFinite(b)||!Number.isFinite(total)||a<=0||b<=0){invalidLab('ratio','Ratio parts and quantities must be positive numbers.');return;}
+      if(mode==='share'){var one=total/(a+b),shareA=labRound(a*one),shareB=labRound(b*one);$('#lab-ratio-a-label').textContent='Ratio A';$('#lab-ratio-b-label').textContent='Ratio B';$('#lab-ratio-total-label').textContent='Total to share';setLabExplanation('ratio',shareA+' and '+shareB,{rule:'one part = total ÷ total ratio parts',why:'The ratio '+a+':'+b+' divides the whole into '+(a+b)+' equal parts, then assigns '+a+' parts to A and '+b+' parts to B.',working:'One part = '+total+' ÷ '+(a+b)+' = '+labRound(one)+'; shares = '+a+' × '+labRound(one)+' and '+b+' × '+labRound(one)+'.',check:shareA+' + '+shareB+' = '+total+', the original total.'});}
+      else {var factor=b/a,scaled=labRound(total*factor);$('#lab-ratio-a-label').textContent='Original scale';$('#lab-ratio-b-label').textContent='New scale';$('#lab-ratio-total-label').textContent='Original quantity';setLabExplanation('ratio',String(scaled),{rule:'new quantity = original quantity × new scale ÷ original scale',why:'Direct proportion means every quantity changes by the same scale factor, here '+b+' ÷ '+a+' = '+labRound(factor)+'.',working:total+' × '+b+' ÷ '+a+' = '+scaled,check:scaled+' ÷ '+labRound(factor)+' = '+total+', returning to the original quantity.'});}
+    }
+    function updateConversionLab(){
+      var conversions={
+        'mm-m':['mm','m',.001,'There are 1000 millimetres in one metre, so moving to the larger unit divides by 1000.'], 'm-mm':['m','mm',1000,'There are 1000 millimetres in one metre, so moving to the smaller unit multiplies by 1000.'],
+        'cm-m':['cm','m',.01,'There are 100 centimetres in one metre, so moving to the larger unit divides by 100.'], 'm-cm':['m','cm',100,'There are 100 centimetres in one metre, so moving to the smaller unit multiplies by 100.'],
+        'ml-l':['ml','litres',.001,'There are 1000 millilitres in one litre, so moving to litres divides by 1000.'], 'l-ml':['litres','ml',1000,'There are 1000 millilitres in one litre, so moving to millilitres multiplies by 1000.'],
+        'g-kg':['g','kg',.001,'There are 1000 grams in one kilogram, so moving to kilograms divides by 1000.'], 'kg-g':['kg','g',1000,'There are 1000 grams in one kilogram, so moving to grams multiplies by 1000.'],
+        'km-mi':['km','miles',.625,'Using 8 km ≈ 5 miles means each kilometre is approximately 5/8 of a mile.'], 'mi-km':['miles','km',1.6,'Using 5 miles ≈ 8 km means each mile is approximately 8/5, or 1.6, kilometres.'],
+        'kg-lb':['kg','lb',2.2,'Using 1 kg ≈ 2.2 lb means the pound value is found by multiplying kilograms by 2.2.'], 'lb-kg':['lb','kg',1/2.2,'Using 1 kg ≈ 2.2 lb means division by 2.2 reverses the conversion.']
+      };var value=E.parseNumeric($('#lab-value').value),conversion=conversions[$('#lab-conversion').value];if(!Number.isFinite(value)){invalidLab('convert','Enter one numerical measurement.');return;}var result=labRound(value*conversion[2],3),inverse=labRound(1/conversion[2],4);setLabExplanation('convert',result+' '+conversion[1],{rule:'output = input × conversion factor',why:conversion[3],working:value+' '+conversion[0]+' × '+labRound(conversion[2],4)+' = '+result+' '+conversion[1],check:result+' '+conversion[1]+' × '+inverse+' ≈ '+value+' '+conversion[0]+'.'});
+    }
+    function updateShapeLab(){
+      var mode=$('#lab-shape-mode').value,a=E.parseNumeric($('#lab-shape-a').value),b=E.parseNumeric($('#lab-shape-b').value),c=E.parseNumeric($('#lab-shape-c').value),result,unit,parts;if(!Number.isFinite(a)||a<=0||(!/^circle/.test(mode)&&(!Number.isFinite(b)||b<=0))||(mode==='cuboid-volume'&&(!Number.isFinite(c)||c<=0))){invalidLab('shape','Enter a positive number for each dimension used by the selected shape.');return;}
+      $('#lab-shape-c-wrap').classList.toggle('hidden',mode!=='cuboid-volume');$('#lab-shape-a-label').textContent=/^circle|cylinder/.test(mode)?'Radius (m)':'Length (m)';$('#lab-shape-b-label').textContent=mode==='cylinder-volume'?'Height (m)':'Width (m)';
+      if(mode==='rect-area'){result=labRound(a*b);unit='m²';parts={rule:'area = length × width',why:'Area counts the square units covering the rectangle, giving '+a+' rows of '+b+' square metres.',working:a+' × '+b+' = '+result+' m²',check:'The result uses square metres because two lengths were multiplied.'};}
+      if(mode==='rect-perimeter'){result=labRound(2*(a+b));unit='m';parts={rule:'perimeter = 2 × (length + width)',why:'A rectangle has two equal lengths and two equal widths, so the boundary contains each dimension twice.',working:'2 × ('+a+' + '+b+') = '+result+' m',check:a+' + '+b+' + '+a+' + '+b+' = '+result+' m.'};}
+      if(mode==='circle-area'){result=labRound(Math.PI*a*a);unit='m²';parts={rule:'area = π × radius²',why:'Squaring the radius creates the area scale, while π accounts for the circular boundary compared with a square.',working:'π × '+a+'² = '+result+' m²',check:'The circle fits inside a '+(2*a)+' m square of area '+4*a*a+' m².'};}
+      if(mode==='circle-circumference'){result=labRound(2*Math.PI*a);unit='m';parts={rule:'circumference = 2 × π × radius',why:'The diameter is twice the radius, and every circle’s circumference is π times its diameter.',working:'2 × π × '+a+' = '+result+' m',check:'The answer is a little more than three times the diameter '+2*a+' m.'};}
+      if(mode==='cuboid-volume'){result=labRound(a*b*c);unit='m³';parts={rule:'volume = length × width × height',why:'Volume counts cubic units across three perpendicular dimensions, so all three dimensions are multiplied.',working:a+' × '+b+' × '+c+' = '+result+' m³',check:'The unit is cubic metres because three metre measurements were multiplied.'};}
+      if(mode==='cylinder-volume'){result=labRound(Math.PI*a*a*b);unit='m³';parts={rule:'volume = π × radius² × height',why:'A cylinder is a stack of equal circular layers, so its circular base area is multiplied by its height.',working:'π × '+a+'² × '+b+' = '+result+' m³',check:'Base area '+labRound(Math.PI*a*a)+' m² × height '+b+' m = '+result+' m³.'};}
+      setLabExplanation('shape',result+' '+unit,parts);
+    }
+    function updateDataLab(){
+      var raw=$('#lab-data').value.split(','),values=raw.map(function(value){return Number(value.trim());});if(!values.length||values.some(function(value){return !Number.isFinite(value);})){invalidLab('data','Separate every numerical value with a comma.');return;}var sorted=values.slice().sort(function(a,b){return a-b;}),sum=values.reduce(function(total,value){return total+value;},0),mean=labRound(sum/values.length),middle=Math.floor(sorted.length/2),median=sorted.length%2?sorted[middle]:labRound((sorted[middle-1]+sorted[middle])/2),frequencies={},maxFrequency=0;sorted.forEach(function(value){frequencies[value]=(frequencies[value]||0)+1;maxFrequency=Math.max(maxFrequency,frequencies[value]);});var modes=maxFrequency>1?Object.keys(frequencies).filter(function(value){return frequencies[value]===maxFrequency;}).join(', '):'none',range=labRound(sorted[sorted.length-1]-sorted[0]);setLabExplanation('data','Mean '+mean+' · Median '+median+' · Mode '+modes+' · Range '+range,{rule:'mean = total ÷ count; median = middle; mode = most frequent; range = highest − lowest',why:'Each statistic answers a different question: mean balances all values, median locates the centre, mode finds repetition and range measures spread.',working:'Sorted: '+sorted.join(', ')+'. Total '+sum+' ÷ '+values.length+' = mean '+mean+'.',check:'The mean and median lie between '+sorted[0]+' and '+sorted[sorted.length-1]+'; range '+range+' spans those endpoints.'});
+    }
+    function updateLab(){if(!$('#lab-percent-mode'))return;updatePercentLab();updateRatioLab();updateConversionLab();updateShapeLab();updateDataLab();}
+
+    document.addEventListener('click',function(event){
+      var topicButton=event.target.closest('[data-select-topic]');if(topicButton){state.topic=topicButton.dataset.selectTopic;renderSetup();savePreferences();return;}
+      var levelButton=event.target.closest('[data-select-level]');if(levelButton){state.level=levelButton.dataset.selectLevel;renderSetup();savePreferences();return;}
+      var paceButton=event.target.closest('[data-select-pace]');if(paceButton){state.pace=Number(paceButton.dataset.selectPace);renderSetup();savePreferences();return;}
+      var themeButton=event.target.closest('[data-theme-choice]');if(themeButton){setTheme(themeButton.dataset.themeChoice);savePreferences();return;}
+      var libraryGuide=event.target.closest('[data-library-guide]');if(libraryGuide){renderLibraryGuide(libraryGuide.dataset.libraryGuide);return;}
+      var actionButton=event.target.closest('[data-action]');if(!actionButton)return;var action=actionButton.dataset.action;
+      if(action==='start-run')startRun();else if(action==='quit-run')quitRun();else if(action==='return-home')setScreen('home-screen');else if(action==='next-question')nextQuestion();else if(action==='show-strategy')useHelp('strategy');else if(action==='show-hint')useHelp('hint');else if(action==='show-answer')useHelp('answer');else if(action==='close-answer-explanation')closeAnswerExplanation();else if(action==='open-library')openDrawer('library');else if(action==='library-home')renderLibraryIndex();else if(action==='practise-library-topic'){state.topic=actionButton.dataset.topic;renderSetup();savePreferences();$('#drawer').classList.add('hidden');setScreen('home-screen');setTimeout(function(){var setup=$('.setup');if(setup)setup.scrollIntoView({behavior:'smooth',block:'start'});},20);toast(topicNames[state.topic]+' ready to practise');}else if(action==='open-lab')openDrawer('lab');else if(action==='open-records')openDrawer('records');else if(action==='close-drawer')$('#drawer').classList.add('hidden');else if(action==='reset-records'){if(confirm('Delete all saved practice records?')){safeSaveRecords([]);toast('Records reset');}}
+    });
+    document.addEventListener('input',updateLab);document.addEventListener('change',updateLab);$('#answer-form').addEventListener('submit',markAnswer);document.addEventListener('keydown',function(event){if(event.key!=='Escape')return;if(!$('#answer-explanation').classList.contains('hidden'))closeAnswerExplanation();else if(!$('#drawer').classList.contains('hidden'))$('#drawer').classList.add('hidden');});
+
+    function runSelfTests(){
+      var tests=[];function check(name,condition){if(!condition)throw new Error(name);tests.push(name);}
+      var activities=E.listActivities();
+      check('100 activities',activities.length===100);
+      var counts=E.TOPICS.map(function(t){return activities.filter(function(a){return a.topic===t.id;}).length;});
+      check('10 per topic',counts.every(function(count){return count===10;}));
+      check('bank validates',E.validateBank().length===0);
+      var sample=E.buildQuestion('money-01',E.seededRandom(7));
+      check('question evidence',sample.document.html.length>20&&sample.solution.steps.length>=2&&sample.solution.check.length>10);
+      var grade=E.gradeAnswer({answer:{kind:'number',value:36.5,tolerance:.005,unit:'£',alternatives:[]},marks:{answer:2,method:1,check:1,total:4},evidence:{methodTerms:['20%','7.30'],checkTerms:['29.20','7.30']}},{answer:'£36.50',working:'2 + 2 = 5',check:'I guessed 7'});
+      check('answer-only grading',grade.score===2&&grade.total===2&&grade.answerCorrect&&grade.methodAwarded===0&&grade.checkAwarded===0);
+      var run=E.pickRun({topic:'ratio',count:10,rng:E.seededRandom(31)});
+      check('filtered run',run.length===10&&new Set(run.map(function(a){return a.id;})).size===10&&run.every(function(a){return a.topic==='ratio';}));
+      var lineGraph=E.buildQuestion('graphs-02',E.seededRandom(5)),graphProbe=document.createElement('div');graphProbe.innerHTML=lineGraph.document.html;
+      var graphSvg=graphProbe.querySelector('svg');
+      check('line graph values',graphSvg&&/values:/i.test(graphSvg.getAttribute('aria-label')||'')&&graphProbe.querySelectorAll('.graph-value').length>=2);
+      check('setup controls',$$('#topic-picker [data-select-topic]').length===11&&$$('#level-picker [data-select-level]').length===4);
+      state.pace=0;$('[data-action="start-run"]').click();
+      check('run opens',!$('#game-screen').classList.contains('hidden')&&state.current&&$('#source-document').textContent.trim().length>20&&$('#answer-control').children.length>0);
+      check('working prompts are unscored',/optional/i.test($('#working-block').textContent)&&/not automatically marked/i.test($('#working-block').textContent)&&/optional/i.test($('#check-block').textContent)&&/answer mark/i.test($('#marks-chip').textContent));
+      $('[data-action="show-answer"]').click();var answerModal=$('#answer-explanation');
+      check('answer explanation modal',answerModal&&!answerModal.classList.contains('hidden')&&$('#explanation-answer').textContent.trim().length>0&&$('#explanation-why').textContent.trim().length>40&&$$('#explanation-steps .solution-step').length===state.current.solution.steps.length&&$('#explanation-check').textContent.trim().length>10);
+      closeAnswerExplanation();
+      $('#working-input').value='2 + 2 = 5';$('#check-input').value='I guessed 7';$('#answer-form').requestSubmit();
+      check('reflection comparison',!$('#feedback').classList.contains('hidden')&&$('#learner-working').textContent==='2 + 2 = 5'&&$('#learner-check').textContent==='I guessed 7'&&$('#mark-grid').children.length===1&&$('#result-score').textContent==='0/'+state.current.marks.answer);
+      clearInterval(state.timer);$('#feedback').classList.add('hidden');setScreen('end-screen');$('[data-action="return-home"]').click();
+      check('home return',!$('#home-screen').classList.contains('hidden')&&$('#game-screen').classList.contains('hidden'));
+      $('[data-action="open-library"]').click();var libraryButtons=$$('#drawer-content [data-library-guide]');
+      var everyGuideRenders=E.TOPICS.every(function(topic){renderLibraryGuide(topic.id);var chapter=$('#drawer-content [data-library-chapter="'+topic.id+'"]');return chapter&&chapter.querySelectorAll('[data-library-section]').length>=6&&chapter.querySelector('[data-action="practise-library-topic"][data-topic="'+topic.id+'"]');});
+      renderLibraryIndex();libraryButtons=$$('#drawer-content [data-library-guide]');
+      check('library chapter index',libraryButtons.length===10&&everyGuideRenders&&!$('#drawer').classList.contains('hidden'));
+      libraryButtons[0].click();
+      check('library guide content',$('#drawer-content [data-library-chapter="money"]')&&$$('#drawer-content [data-library-section]').length>=6&&$('#drawer-content').textContent.indexOf('Why it works')>=0&&$('#drawer-content [data-action="practise-library-topic"]'));
+      var clearlyExplained=E.TOPICS.every(function(topic){renderLibraryGuide(topic.id);var relationship=$('#drawer-content [data-example-relationship]'),interpretation=$('#drawer-content [data-example-interpretation]');return relationship&&relationship.textContent.trim().length>45&&interpretation&&interpretation.textContent.trim().length>45;});
+      renderLibraryGuide('percentages');var percentageGuideText=$('#drawer-content').textContent;
+      check('worked examples explain relationships',clearlyExplained&&percentageGuideText.indexOf('£90 × 0.80 = £72')>=0&&percentageGuideText.indexOf('inverse operation')>=0);
+      $('[data-action="library-home"]').click();
+      check('library back navigation',$$('#drawer-content [data-library-guide]').length===10);
+      $$('#drawer-content [data-library-guide]')[0].click();$('[data-action="practise-library-topic"]').click();
+      check('library practice action',state.topic==='money'&&$('#drawer').classList.contains('hidden')&&$('#selected-topic-label').textContent==='Money');
+      $('[data-action="open-lab"]').click();var labCards=$$('#drawer-content [data-lab-tool]');
+      check('expanded guided lab',labCards.length===5&&labCards.every(function(card){var why=card.querySelector('[data-lab-section="why"]');return card.querySelectorAll('[data-lab-section]').length===4&&why&&why.textContent.trim().length>35;}));
+      check('lab calculations',$('#lab-percent-result').textContent.trim()==='12'&&/60/.test($('#lab-ratio-result').textContent)&&/90/.test($('#lab-ratio-result').textContent)&&$('#lab-convert-result').textContent.trim()==='2.5 m'&&$('#lab-shape-result').textContent.trim()==='20 m²'&&/Mean 19/.test($('#lab-data-result').textContent));
+      $('#lab-percent-mode').value='increase';$('#lab-pct').value='150';$('#lab-amount').value='80';updateLab();
+      check('percentage increase over 100',$('#lab-percent-result').textContent.trim()==='200'&&/250%/.test($('#lab-percent-explanation').textContent));
+      var output=document.createElement('output');output.id='self-test-result';output.dataset.passed='true';output.textContent=tests.length+' browser tests passed';document.body.appendChild(output);
+    }
+    loadPreferences();renderSetup();var selfTestMode=new URLSearchParams(location.search).get('selftest');if(selfTestMode){try{runSelfTests();if(selfTestMode==='library'){renderLibraryGuide('percentages');$('#drawer').classList.remove('hidden');}else if(selfTestMode==='feedback'){$('#drawer').classList.add('hidden');state.pace=0;startRun();useHelp('answer');closeAnswerExplanation();$('#working-input').value='I found the required values, chose the operation, and calculated the result.';$('#check-input').value='I reversed the calculation and compared the size with an estimate.';$('#answer-form').requestSubmit();}}catch(error){var failed=document.createElement('output');failed.id='self-test-result';failed.dataset.passed='false';failed.textContent=error.message;document.body.appendChild(failed);}}
+  })();
+  </script>
+</body>
+</html>

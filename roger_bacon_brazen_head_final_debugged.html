@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Brazen Head of Roger Bacon (Caput Argenteum)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Medieval & Occult aesthetics -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --brass-bright: #e5b95c;
+      --brass-mid: #b8860b;
+      --brass-dark: #6e4d0b;
+      --patina: #2e6f66;
+      --ember: #ff5e13;
+      --flicker-intensity: 0.95;
+    }
+
+    body {
+      font-family: 'EB Garamond', serif;
+      background-color: #040302;
+      color: #dfd2bd;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    .font-decorative { font-family: 'Cinzel Decorative', cursive; }
+
+    /* Vault stone background with organic shadow respiration */
+    .stone-vault {
+      background: radial-gradient(circle at var(--torch-x, 50%) var(--torch-y, 36%), rgba(52, 33, 14, 0.42) 0%, rgba(15, 10, 7, 0.88) 55%, #040302 100%),
+                  repeating-radial-gradient(circle at 50% 50%, rgba(255, 140, 20, 0.012) 0, rgba(0, 0, 0, 0.06) 42px);
+      transition: background 0.15s ease-out;
+    }
+
+    /* Respiration loop for the chamber shadows */
+    @keyframes chamberBreath {
+      0%, 100% { opacity: 0.90; transform: scale(1); }
+      50% { opacity: 0.98; transform: scale(1.02); }
+    }
+
+    .chamber-shadow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.14) 80%, rgba(0,0,0,0.94) 100%),
+        radial-gradient(ellipse at 50% 38%, transparent 0 24%, rgba(0,0,0,0.3) 54%, rgba(0,0,0,0.85) 100%);
+      mix-blend-mode: multiply;
+      animation: chamberBreath 10s ease-in-out infinite;
+    }
+
+    /* Candle draft blackout flickers */
+    .draft-blackout {
+      animation: draftFlicker 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    }
+
+    @keyframes draftFlicker {
+      0% { filter: brightness(1) contrast(1); }
+      25% { filter: brightness(0.12) contrast(1.6); }
+      40% { filter: brightness(0.85) contrast(1.1); }
+      65% { filter: brightness(0.08) contrast(1.8); }
+      80% { filter: brightness(0.9) contrast(1.05); }
+      100% { filter: brightness(1) contrast(1); }
+    }
+
+    .vault-arch {
+      position: fixed;
+      left: 50%;
+      top: -22vh;
+      transform: translateX(-50%);
+      width: min(88vw, 1020px);
+      height: 80vh;
+      border: 24px solid rgba(56, 38, 20, 0.16);
+      border-bottom: 0;
+      border-radius: 48% 48% 0 0 / 68% 68% 0 0;
+      box-shadow: inset 0 0 85px rgba(0,0,0,0.95), 0 0 100px rgba(0,0,0,0.9);
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(0.4px);
+    }
+
+    .head-aged {
+      filter: drop-shadow(0 22px 38px rgba(0,0,0,0.98)) contrast(1.12) saturate(0.82);
+      transition: filter 0.4s ease;
+    }
+
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fff2c4 0%, #e5b95c 35%, #b37e22 70%, #ffd67a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(229, 185, 92, 0.2);
+    }
+
+    /* Shaking effect on thunder/breakdown */
+    @keyframes screenTremor {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      15% { transform: translate(-5px, 6px) rotate(-0.8deg); }
+      30% { transform: translate(6px, -4px) rotate(0.9deg); }
+      45% { transform: translate(-6px, -3px) rotate(-0.6deg); }
+      65% { transform: translate(5px, 4px) rotate(0.5deg); }
+      85% { transform: translate(-3px, 2px) rotate(-0.3deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    .tremor {
+      animation: screenTremor 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    /* Steam/smoke vent animation */
+    @keyframes riseSmoke {
+      0% { transform: translateY(0) scale(1); opacity: 0.6; }
+      100% { transform: translateY(-75px) scale(2.4); opacity: 0; }
+    }
+    .smoke-puff {
+      animation: riseSmoke 1.9s ease-out forwards;
+    }
+
+    .damage-glitch {
+      animation: damageGlitch 0.22s steps(2, end) 2;
+    }
+
+    @keyframes damageGlitch {
+      0% { transform: translate(0, 0) rotate(0); }
+      35% { transform: translate(-3px, 2px) rotate(-0.35deg); }
+      70% { transform: translate(3px, -2px) rotate(0.25deg); }
+      100% { transform: translate(0, 0) rotate(0); }
+    }
+
+    /* Peripheral Hallucinations on the vault walls */
+    .vault-whisper-left, .vault-whisper-right {
+      position: fixed;
+      top: 48%;
+      color: rgba(175, 120, 50, 0.04);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.75rem, 1.8vw, 1.1rem);
+      letter-spacing: 0.35em;
+      pointer-events: none;
+      z-index: 1;
+      writing-mode: vertical-rl;
+      transition: color 2.8s ease, text-shadow 2.8s ease;
+      text-transform: uppercase;
+    }
+    .vault-whisper-left { left: 4vw; }
+    .vault-whisper-right { right: 4vw; writing-mode: vertical-lr; }
+
+    .vault-whisper-active {
+      color: rgba(225, 95, 30, 0.22) !important;
+      text-shadow: 0 0 18px rgba(255, 75, 10, 0.35);
+    }
+
+    /* Eye shutter / aperture twitch */
+    .aperture-blink {
+      transform-origin: 160px 177px;
+      animation: shutterSnap 0.18s ease-in-out;
+    }
+
+    @keyframes shutterSnap {
+      0% { transform: scaleY(1); }
+      50% { transform: scaleY(0.05); }
+      100% { transform: scaleY(1); }
+    }
+
+    /* Custom scrollbar for scrolls and lore */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0907; }
+    ::-webkit-scrollbar-thumb { background: #47341e; border-radius: 4px; }
+  </style>
+</head>
+<body class="stone-vault min-h-screen flex flex-col justify-between items-center relative selection:bg-amber-950 selection:text-amber-200">
+
+  <!-- Ambient Embers & Candle Motes Canvas -->
+  <canvas id="ambientCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+  
+  <div class="vault-arch"></div>
+  <div id="chamberShadow" class="chamber-shadow"></div>
+
+  <!-- Peripheral Phantasm Inscriptions -->
+  <div id="whisperLeft" class="vault-whisper-left select-none">NON ES SOLUS IN HOC CUBICULO</div>
+  <div id="whisperRight" class="vault-whisper-right select-none">APERI OCULOS IAM CLAUDUNTUR</div>
+
+  <!-- Top Banner & Occult Controls -->
+  <header class="w-full z-10 pt-4 pb-2 px-6 flex flex-col sm:flex-row justify-between items-center max-w-6xl border-b border-amber-950/60 backdrop-blur-sm bg-black/30">
+    <div class="flex items-center space-x-3 mb-2 sm:mb-0">
+      <span class="text-amber-600 text-2xl animate-pulse">⚙</span>
+      <div>
+        <h1 class="font-decorative text-xl sm:text-2xl font-bold tracking-wider gold-gradient-text uppercase">
+          Caput Argenteum
+        </h1>
+        <p class="text-xs text-amber-300/40 font-cinzel tracking-widest uppercase">The Brazen Oracle of Friar Bacon &bull; Anno 1267</p>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center space-x-2 text-xs font-cinzel">
+      <button id="droneToggleBtn" title="Galvanic Sub-bass Drone" class="px-3 py-1.5 rounded border border-amber-900/60 hover:border-amber-600/80 bg-black/50 text-amber-300/80 transition duration-200 flex items-center gap-1.5 shadow-sm">
+        <span id="droneIcon">⚡</span>
+        <span>Drone: <span id="droneStatusText">Active</span></span>
+      </button>
+
+      <button id="loreBtn" class="px-3 py-1.5 rounded border border-amber-800/60 hover:border-amber-500/80 bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 transition duration-200 flex items-center gap-1.5 shadow-sm">
+        <span>📜</span> Lore
+      </button>
+
+      <button id="soundToggleBtn" title="Cycle sound modes" aria-label="Cycle sound modes" class="px-3 py-1.5 rounded border border-amber-800/60 hover:border-amber-500/80 bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 transition duration-200 flex items-center gap-1.5 shadow-sm">
+        <span id="soundIcon">🔊</span>
+        <span id="soundStatusText" class="sr-only">Chimes + Voice</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="w-full max-w-5xl z-10 flex-1 flex flex-col items-center justify-center p-4 sm:p-6 gap-5">
+    
+    <!-- Brazen Head Graphical Alchemical Container -->
+    <div class="relative group flex flex-col items-center">
+      
+      <!-- Astrological rings behind the head -->
+      <div class="absolute -top-6 w-72 h-72 sm:w-96 sm:h-96 rounded-full border border-amber-500/10 pointer-events-none flex items-center justify-center animate-[spin_130s_linear_infinite]">
+        <div class="w-full h-full rounded-full border-2 border-dashed border-amber-700/15"></div>
+      </div>
+      <div class="absolute -top-3 w-64 h-64 sm:w-80 sm:h-80 rounded-full border border-teal-500/10 pointer-events-none animate-[spin_85s_linear_infinite_reverse]"></div>
+
+      <!-- Smoke vents / temporal steam container -->
+      <div id="steamContainer" class="absolute top-20 w-48 h-20 pointer-events-none overflow-visible flex justify-between px-6 z-20"></div>
+
+      <!-- The Brazen Head SVG -->
+      <div id="headWrapper" class="relative cursor-pointer transition-transform duration-500 transform active:scale-[0.985] head-aged">
+        <svg id="brazenHeadSvg" class="w-64 h-80 sm:w-80 sm:h-[25rem] md:w-96 md:h-[30rem]" viewBox="0 0 320 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Metallic Brass Base Gradient -->
+            <linearGradient id="brassBase" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ab8037" />
+              <stop offset="25%" stop-color="#614010" />
+              <stop offset="50%" stop-color="#c99746" />
+              <stop offset="75%" stop-color="#734c16" />
+              <stop offset="100%" stop-color="#342004" />
+            </linearGradient>
+
+            <!-- Patina Verdigris Highlights -->
+            <linearGradient id="patinaGrad" x1="0%" y1="0%" x2="50%" y2="100%">
+              <stop offset="0%" stop-color="#326b60" stop-opacity="0.8" />
+              <stop offset="60%" stop-color="#174039" stop-opacity="0.32" />
+              <stop offset="100%" stop-color="#0a211c" stop-opacity="0" />
+            </linearGradient>
+
+            <!-- Neck collar brass -->
+            <linearGradient id="collarBrass" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="#372509" />
+              <stop offset="50%" stop-color="#bd8f42" />
+              <stop offset="100%" stop-color="#221503" />
+            </linearGradient>
+
+            <!-- Inner Mouth Void with furnace coal glow -->
+            <radialGradient id="mouthShadow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ff3b00" stop-opacity="0.85" />
+              <stop offset="55%" stop-color="#3b0c03" stop-opacity="0.95" />
+              <stop offset="100%" stop-color="#080402" />
+            </radialGradient>
+
+            <!-- Occult and Eye Glow Filters -->
+            <filter id="eyeGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            
+            <filter id="corpseGlow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Pedestal / Alchemical Neck Stand -->
+          <path d="M 80 340 C 80 320, 100 310, 160 310 C 220 310, 240 320, 240 340 L 260 380 C 260 392, 60 392, 60 380 Z" fill="url(#collarBrass)" stroke="#160e05" stroke-width="3"/>
+          <circle cx="95" cy="365" r="4" fill="#c99746" stroke="#1c0f02" stroke-width="1.5"/>
+          <circle cx="138" cy="370" r="4" fill="#c99746" stroke="#1c0f02" stroke-width="1.5"/>
+          <circle cx="182" cy="370" r="4" fill="#c99746" stroke="#1c0f02" stroke-width="1.5"/>
+          <circle cx="225" cy="365" r="4" fill="#c99746" stroke="#1c0f02" stroke-width="1.5"/>
+
+          <!-- Cranium Back Shadow & Outline -->
+          <path d="M 70 170 C 50 250, 75 300, 110 320 L 210 320 C 245 300, 270 250, 250 170 C 255 100, 240 40, 160 35 C 80 40, 65 100, 70 170 Z" fill="#181005" />
+
+          <!-- Main Skull & Upper Face Plate -->
+          <path id="skullFacePlate" d="M 70 170 C 52 230, 80 270, 100 280 C 130 285, 190 285, 220 280 C 240 270, 268 230, 250 170 C 258 100, 240 40, 160 35 C 80 40, 62 100, 70 170 Z" fill="url(#brassBase)" stroke="#372306" stroke-width="3.5" />
+          
+          <!-- Patina overlays on temples & forehead -->
+          <path d="M 85 80 C 100 55, 130 45, 160 45 C 190 45, 220 55, 235 80 C 205 75, 120 75, 85 80 Z" fill="url(#patinaGrad)" />
+          <path d="M 75 140 C 70 190, 85 240, 100 260 C 90 220, 80 180, 85 140 Z" fill="url(#patinaGrad)" />
+
+          <!-- Occult Forehead Sigil (Alchemical Mercury / Sun of Death) -->
+          <g transform="translate(160, 85)" stroke="#5e3e0a" stroke-width="2" fill="none" opacity="0.85">
+            <circle cx="0" cy="0" r="10"/>
+            <circle id="sigilCore" cx="0" cy="0" r="3.2" fill="#e5b95c" class="transition-colors duration-500"/>
+            <path d="M -8 -13 C -5 -18, 5 -18, 8 -13"/>
+            <line x1="0" y1="10" x2="0" y2="20"/>
+            <line x1="-5" y1="15" x2="5" y2="15"/>
+          </g>
+
+          <!-- Brow ridge -->
+          <path d="M 95 155 Q 130 145 155 155 Q 165 155 190 145 Q 225 155 225 155" stroke="#311e04" stroke-width="5" stroke-linecap="round" fill="none" />
+
+          <!-- Deep Eye Sockets with inner brass gearing -->
+          <g id="eyeSocketsGroup">
+            <polygon points="105,165 142,168 138,188 110,186" fill="#090502" stroke="#412c0c" stroke-width="2"/>
+            <polygon points="178,168 215,165 210,186 182,188" fill="#090502" stroke="#412c0c" stroke-width="2"/>
+            
+            <!-- Pupil and Shutter apertures -->
+            <g id="eyeballs">
+              <circle id="eyeLeft" cx="124" cy="177" r="3.4" fill="#2b1505" filter="url(#eyeGlow)" class="transition-all duration-300" />
+              <circle id="eyeRight" cx="196" cy="177" r="3.4" fill="#2b1505" filter="url(#eyeGlow)" class="transition-all duration-300" />
+            </g>
+          </g>
+
+          <!-- Nose Bridge & Sculpted Brass -->
+          <polygon points="160,155 153,222 167,222" fill="#7a4e11" stroke="#392204" stroke-width="1.5" />
+          <ellipse cx="152" cy="225" rx="3.5" ry="2" fill="#140902" />
+          <ellipse cx="168" cy="225" rx="3.5" ry="2" fill="#140902" />
+
+          <!-- Ear plates & brass bolt fixtures -->
+          <rect x="58" y="160" width="14" height="35" rx="5" fill="#694613" stroke="#322005" stroke-width="2"/>
+          <circle cx="65" cy="178" r="3.5" fill="#0c0702" />
+          <rect x="248" y="160" width="14" height="35" rx="5" fill="#694613" stroke="#322005" stroke-width="2"/>
+          <circle cx="255" cy="178" r="3.5" fill="#0c0702" />
+
+          <!-- Cheekbone Contours -->
+          <path d="M 98 200 C 115 220, 135 235, 145 242" stroke="#5b3d11" stroke-width="2.5" fill="none" />
+          <path d="M 222 200 C 205 220, 185 242, 175 242" stroke="#442c08" stroke-width="2.5" fill="none" />
+
+          <!-- Upper Lip & Teeth Frame -->
+          <path d="M 125 252 Q 160 249 195 252 C 185 260, 135 260, 125 252 Z" fill="#251705" stroke="#412b0a" stroke-width="1.5" />
+          <path d="M 134 256 L 138 259 L 144 256 L 150 259 L 156 256 L 164 256 L 170 259 L 176 256 L 182 259 L 186 256" stroke="#9e772f" stroke-width="2" fill="none"/>
+
+          <!-- MOUTH CAVITY (revealed when jaw drops) -->
+          <g id="mouthCavity">
+            <ellipse cx="160" cy="265" rx="35" ry="12" fill="url(#mouthShadow)"/>
+            <circle cx="160" cy="265" r="5" fill="#ff4d00" filter="url(#eyeGlow)" opacity="0.18" id="furnaceGlow" />
+          </g>
+
+          <!-- ANIMATED HINGED JAW GROUP -->
+          <g id="animatedJaw" style="transform-origin: 160px 260px; transition: transform 0.08s ease-out;">
+            <path d="M 115 260 C 120 280, 135 315, 160 315 C 185 315, 200 280, 205 260 C 190 268, 130 268, 115 260 Z" fill="url(#brassBase)" stroke="#392205" stroke-width="2.5" />
+            <path d="M 136 266 L 140 263 L 146 266 L 152 263 L 158 266 L 162 266 L 168 263 L 174 266 L 180 263 L 184 266" stroke="#be9444" stroke-width="1.8" fill="none"/>
+            <line x1="160" y1="285" x2="160" y2="305" stroke="#2b1903" stroke-width="2"/>
+            <circle cx="160" cy="295" r="2.5" fill="#c48e2e"/>
+            <circle cx="112" cy="260" r="4.5" fill="#755115" stroke="#180e02" stroke-width="1.5" />
+            <circle cx="208" cy="260" r="4.5" fill="#755115" stroke="#180e02" stroke-width="1.5" />
+          </g>
+
+          <!-- Casting scars and asymmetric antique marks -->
+          <g opacity="0.4" stroke="#190f05" fill="none" stroke-linecap="round">
+            <path d="M92 108 Q108 100 121 105" stroke-width="2.3"/>
+            <path d="M215 92 q-7 12 -2 25 q5 10 -3 20" stroke-width="1.8"/>
+            <path d="M83 219 q18 -6 29 3" stroke-width="2"/>
+            <path d="M205 225 q14 4 24 -5" stroke-width="1.5"/>
+            <path d="M151 119 q8 5 17 0" stroke-width="1.2"/>
+          </g>
+
+          <!-- Heat / Blood-Orange Internal Cracks Pulse -->
+          <g id="heatVeins" opacity="0" class="transition-opacity duration-700" stroke-linecap="round">
+            <path d="M 160 70 L 150 110 L 165 140" stroke="#ff4500" stroke-width="1.6" filter="url(#eyeGlow)" fill="none"/>
+            <path d="M 120 220 L 135 240" stroke="#ff3300" stroke-width="1.4" filter="url(#eyeGlow)" fill="none"/>
+            <path d="M 200 220 L 185 240" stroke="#ff3300" stroke-width="1.4" filter="url(#eyeGlow)" fill="none"/>
+          </g>
+
+          <!-- Catastrophic Cracks & Fractures (accumulating with act III & damage) -->
+          <g id="fractureLines" opacity="0" class="transition-opacity duration-500" stroke-linecap="round" stroke-linejoin="round">
+            <g id="primaryFractures">
+              <path d="M 155 40 L 145 90 L 162 130 L 148 165" stroke="#ff6a2b" stroke-width="4.6" fill="none" filter="url(#eyeGlow)"/>
+              <path d="M 110 270 L 95 240 L 75 230" stroke="#ff571d" stroke-width="4.1" fill="none" filter="url(#eyeGlow)"/>
+              <path d="M 160 300 L 175 325" stroke="#ff7c2e" stroke-width="3.8" fill="none" filter="url(#eyeGlow)"/>
+            </g>
+
+            <g id="secondaryFractures" opacity="0">
+              <path d="M 145 90 L 125 103 L 112 98" stroke="#ffa04d" stroke-width="2.8" fill="none"/>
+              <path d="M 162 130 L 185 145 L 205 135" stroke="#ffb45e" stroke-width="3" fill="none"/>
+              <path d="M 148 165 L 132 183 L 119 181" stroke="#ff8f42" stroke-width="2.5" fill="none"/>
+              <path d="M 95 240 L 109 222 L 122 218" stroke="#ff8c3b" stroke-width="2.7" fill="none"/>
+              <path d="M 175 325 L 191 338 L 206 335" stroke="#ff9e4b" stroke-width="2.5" fill="none"/>
+            </g>
+
+            <g id="tertiaryFractures" opacity="0">
+              <path d="M 205 135 L 224 121 L 237 126" stroke="#ffb873" stroke-width="1.9" fill="none"/>
+              <path d="M 132 183 L 113 197 L 101 194" stroke="#ff9652" stroke-width="2" fill="none"/>
+              <path d="M 185 145 L 194 165 L 212 174" stroke="#ff8d47" stroke-width="2.1" fill="none"/>
+              <path d="M 122 218 L 137 229 L 142 247" stroke="#ff9d54" stroke-width="1.8" fill="none"/>
+              <path d="M 191 338 L 185 354 L 197 366" stroke="#ffad66" stroke-width="1.8" fill="none"/>
+              <path d="M 75 230 L 62 214 L 64 198" stroke="#ff8440" stroke-width="2" fill="none"/>
+            </g>
+          </g>
+        </svg>
+
+        <!-- Cryptic invocation hint -->
+        <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-50 text-[11px] font-cinzel tracking-widest text-amber-400/80 pointer-events-none group-hover:opacity-100 transition duration-300">
+          [ touch the cold brass ]
+        </div>
+      </div>
+    </div>
+
+    <!-- Speech Inscription Tablet / Parchment Crypt Box -->
+    <div class="w-full max-w-2xl bg-gradient-to-b from-[#140e08] to-[#070503] border-2 border-amber-950/70 rounded-xl p-5 shadow-2xl relative overflow-hidden flex flex-col items-center min-h-[165px] justify-center">
+      <div class="absolute top-1 left-2 text-amber-800/40 text-xs select-none">✠</div>
+      <div class="absolute top-1 right-2 text-amber-800/40 text-xs select-none">✠</div>
+      <div class="absolute bottom-1 left-2 text-amber-800/40 text-xs select-none">✠</div>
+      <div class="absolute bottom-1 right-2 text-amber-800/40 text-xs select-none">✠</div>
+
+      <!-- Stage & Mode Indicator -->
+      <div id="oracleCategory" class="text-xs tracking-[0.25em] uppercase font-cinzel text-amber-500/70 mb-1 flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-amber-700 animate-pulse"></span>
+        <span>Awaiting Invocative Will</span>
+      </div>
+
+      <!-- Main Utterance Display with Corrupted Glyph Glitch Support -->
+      <div id="speechText" class="font-cinzel text-xl sm:text-2xl md:text-3xl text-center font-bold tracking-wide text-amber-100 min-h-[2.75rem] flex items-center justify-center px-4 leading-relaxed transition-all">
+        "The head is silent."
+      </div>
+
+      <!-- Subtitle: Translation or philosophical context -->
+      <div id="translationText" class="mt-2 text-xs sm:text-sm text-center text-amber-400/60 italic max-w-lg min-h-[1.5rem] font-serif transition-opacity duration-300">
+        It has waited longer than you have.
+      </div>
+    </div>
+
+    <!-- Controls & Action Buttons -->
+    <div class="w-full max-w-2xl flex flex-wrap justify-center gap-3 items-center">
+      <button id="baconSequenceBtn" class="px-5 py-3 rounded-lg border-2 border-amber-700/70 bg-gradient-to-b from-amber-900/40 via-amber-950/80 to-black hover:from-amber-800/60 hover:to-amber-950 text-amber-200 font-cinzel font-semibold tracking-wider text-sm transition-all shadow-[0_0_15px_rgba(217,119,6,0.2)] hover:shadow-[0_0_25px_rgba(217,119,6,0.4)] active:scale-95 flex items-center gap-2">
+        <span class="text-lg">⏳</span><span>Awaken the Head</span>
+      </button>
+
+      <button id="randomOracleBtn" class="px-5 py-3 rounded-lg border border-amber-900/80 bg-gradient-to-b from-stone-950/90 to-amber-950/40 hover:from-stone-900 hover:to-amber-900/60 text-amber-300 font-cinzel font-medium tracking-wider text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
+        <span class="text-lg">✨</span><span>Ask the Oracle</span>
+      </button>
+
+      <button id="autoCycleBtn" class="px-4 py-3 rounded-lg border border-amber-950/70 bg-black/50 hover:bg-amber-950/30 text-amber-400/70 font-cinzel text-xs tracking-wider transition-all flex items-center gap-1.5">
+        <span id="cycleIcon">🔄</span><span id="cycleText">Automatic Vigil</span>
+      </button>
+
+      <button id="unbiddenToggleBtn" class="px-4 py-3 rounded-lg border border-red-950/80 bg-black/60 hover:bg-red-950/30 text-red-300/70 font-cinzel text-xs tracking-wider transition-all flex items-center gap-1.5" aria-pressed="true">
+        <span id="unbiddenIcon">◉</span><span id="unbiddenText">Idle Whispers: On</span>
+      </button>
+
+      <button id="resetHeadBtn" class="px-4 py-3 rounded-lg border border-stone-800 bg-black/60 hover:bg-stone-900 text-stone-400 hover:text-stone-200 font-cinzel text-xs tracking-wider transition-all flex items-center gap-1.5">
+        <span>↺</span><span>Reset the Head</span>
+      </button>
+    </div>
+
+    <!-- Semantic Consultation -->
+    <div class="w-full max-w-2xl border border-amber-950/70 bg-black/40 rounded-xl p-4 shadow-[inset_0_0_25px_rgba(0,0,0,0.7)]">
+      <div class="text-[10px] font-cinzel tracking-[0.24em] uppercase text-amber-500/50 mb-2">Offer a thought to the brass</div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input id="philosophyInput" type="text" maxlength="280" autocomplete="off" spellcheck="false" placeholder="e.g. I fear what tomorrow may bring..." class="flex-1 rounded-lg border border-amber-950/80 bg-[#060402]/95 px-4 py-3 text-amber-100 placeholder:text-amber-900/60 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-900 font-serif" />
+        <button id="consultHeadBtn" class="px-5 py-3 rounded-lg border-2 border-amber-800/60 bg-gradient-to-b from-amber-950/90 to-black hover:border-amber-600/70 text-amber-200 font-cinzel text-sm tracking-wider active:scale-95 transition-all">Consult</button>
+      </div>
+      <div id="consultHint" class="mt-2 text-[11px] text-amber-700/65 italic">It answers by resemblance, not by obedience.</div>
+    </div>
+
+    <div id="baconSteps" class="text-[11px] font-cinzel tracking-[0.22em] uppercase text-amber-600/35">
+      The hour draws on. Miles sleeps.
+    </div>
+
+  </main>
+
+  <!-- Footer with lore attribution -->
+  <footer class="w-full z-10 py-3 text-center text-xs font-cinzel text-amber-600/35 border-t border-amber-950/40 bg-black/50">
+    <p>"De Mirabili Potestate Artis et Naturae" &bull; Synthesized in Alchemical Brass & Dark Resonance</p>
+  </footer>
+
+  <!-- Lore Modal -->
+  <div id="loreModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-gradient-to-b from-[#16100a] to-[#080604] border-2 border-amber-800/60 rounded-xl max-w-2xl w-full p-6 sm:p-8 max-h-[85vh] overflow-y-auto shadow-2xl relative">
+      <button id="closeLoreBtn" class="absolute top-4 right-4 text-amber-400 hover:text-amber-200 text-xl font-cinzel px-2 py-1">✕</button>
+      <h2 class="font-decorative text-2xl gold-gradient-text mb-4 text-center">The Legend of the Brazen Head</h2>
+      <div class="space-y-4 text-sm sm:text-base text-amber-200/90 leading-relaxed font-serif">
+        <p>In the folklore of late medieval Oxford, immortalized in Robert Greene's 1589 play <em>Friar Bacon and Friar Bungay</em>, <strong>Roger Bacon</strong> engineered an artificial head of solid brass.</p>
+        <p class="border-l-2 border-amber-700 pl-4 italic text-amber-300/80">"With demonic pacts and seven years of unremitting mechanical labor, Bacon sought to imbue the head with speech, so that it might teach them how to encompass all of England with an impenetrable rampart of solid brass."</p>
+        <p>The spirits swore the head would speak only once within a 30-day vigil, but the precise hour remained concealed. Exhausted after days without sleep, Bacon left his servant <strong>Miles</strong> on watch, bidding him under pain of death to awaken his master the instant the head uttered a sound.</p>
+        <p>In the dead of night, the head awakened and proclaimed: <strong>"Time is."</strong> Miles, deeming two words unworthy of waking the master, laughed. Half an hour later: <strong>"Time was."</strong> Miles again scoffed. A third time it cried out: <strong>"Time is past!"</strong></p>
+        <p>Instantaneously, a bolt of lightning flashed through the chamber, a demonic hand appeared with a hammer, and the Brazen Head shattered upon the stone flags. Bacon awoke only to discover that his lifetime's crowning endeavor had been reduced to dust.</p>
+      </div>
+      <div class="mt-6 pt-4 border-t border-amber-950/80 text-center">
+        <button id="closeLoreBtn2" class="px-6 py-2 rounded border border-amber-800/80 bg-amber-950/70 hover:bg-amber-900 text-amber-200 font-cinzel text-sm">Return to the Vault</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    /* =========================================================================
+       1. WEB AUDIO API SOUND ENGINE: SUB-BASS DRONE & METALLIC SOUNDS
+       ========================================================================= */
+    class AlchemicalAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.soundEnabled = true;
+        this.voiceEnabled = true;
+        this.droneActive = false;
+        this.droneMaster = null;
+        this.droneOsc1 = null;
+        this.droneOsc2 = null;
+        this.droneLfo = null;
+        this.droneStarting = false;
+      }
+
+      initContext() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Continuous low-frequency mechanical drone. Startup is guarded so init cannot recurse.
+      startSubBassDrone() {
+        if (!this.soundEnabled || this.droneActive || this.droneStarting) return;
+        this.droneStarting = true;
+        try {
+          this.initContext();
+          const now = this.ctx.currentTime;
+
+          this.droneMaster = this.ctx.createGain();
+          this.droneMaster.gain.setValueAtTime(0.001, now);
+          this.droneMaster.gain.exponentialRampToValueAtTime(0.075, now + 3.0); // Gentle fade-in
+
+          // Low-pass filter for furnace warmth
+          const lowpass = this.ctx.createBiquadFilter();
+          lowpass.type = 'lowpass';
+          lowpass.frequency.setValueAtTime(115, now);
+
+          // Binaural beating between 50Hz and 52.4Hz
+          this.droneOsc1 = this.ctx.createOscillator();
+          this.droneOsc1.type = 'sawtooth';
+          this.droneOsc1.frequency.setValueAtTime(50.0, now);
+
+          this.droneOsc2 = this.ctx.createOscillator();
+          this.droneOsc2.type = 'triangle';
+          this.droneOsc2.frequency.setValueAtTime(52.4, now);
+
+          // Subtle LFO modulation to simulate breathing draft
+          this.droneLfo = this.ctx.createOscillator();
+          const lfoGain = this.ctx.createGain();
+          this.droneLfo.frequency.setValueAtTime(0.18, now); // ~5.5s pulse
+          lfoGain.gain.setValueAtTime(0.025, now);
+          this.droneLfo.connect(lfoGain);
+          lfoGain.connect(this.droneMaster.gain);
+
+          this.droneOsc1.connect(lowpass);
+          this.droneOsc2.connect(lowpass);
+          lowpass.connect(this.droneMaster);
+          this.droneMaster.connect(this.ctx.destination);
+
+          this.droneOsc1.start(now);
+          this.droneOsc2.start(now);
+          this.droneLfo.start(now);
+          this.droneActive = true;
+          this.droneStarting = false;
+        } catch (e) {
+          this.droneStarting = false;
+          console.warn("Audio Context Drone Init:", e);
+        }
+      }
+
+      stopSubBassDrone() {
+        this.droneStarting = false;
+        if (!this.droneActive || !this.ctx || !this.droneMaster) return;
+        try {
+          const now = this.ctx.currentTime;
+          const oldMaster = this.droneMaster;
+          const oldOsc1 = this.droneOsc1;
+          const oldOsc2 = this.droneOsc2;
+          const oldLfo = this.droneLfo;
+
+          oldMaster.gain.setValueAtTime(Math.max(oldMaster.gain.value, 0.0001), now);
+          oldMaster.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+          // Release the current slot immediately so a deliberate re-enable can start cleanly.
+          this.droneActive = false;
+          this.droneMaster = null;
+          this.droneOsc1 = null;
+          this.droneOsc2 = null;
+          this.droneLfo = null;
+
+          setTimeout(() => {
+            try {
+              if (oldOsc1) oldOsc1.stop();
+              if (oldOsc2) oldOsc2.stop();
+              if (oldLfo) oldLfo.stop();
+            } catch (_) {}
+          }, 1300);
+        } catch (e) {
+          this.droneActive = false;
+          this.droneMaster = null;
+          this.droneOsc1 = null;
+          this.droneOsc2 = null;
+          this.droneLfo = null;
+        }
+      }
+
+      // Deep metallic gong / chime of ancient brass
+      playBrassBell(freq = 110, duration = 3.8) {
+        if (!this.soundEnabled) return;
+        this.initContext();
+        const now = this.ctx.currentTime;
+
+        const harmonics = [1, 1.414, 2.76, 3.14, 4.3];
+        const gains = [0.38, 0.22, 0.14, 0.08, 0.04];
+
+        harmonics.forEach((h, index) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = index % 2 === 0 ? 'sine' : 'triangle';
+          osc.frequency.setValueAtTime(freq * h, now);
+
+          gain.gain.setValueAtTime(gains[index], now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + duration);
+        });
+      }
+
+      // Mechanical gear click / ratchet
+      playMechanicalClick() {
+        if (!this.soundEnabled) return;
+        this.initContext();
+        const now = this.ctx.currentTime;
+
+        const bufferSize = this.ctx.sampleRate * 0.04;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(650 + Math.random() * 500, now);
+        filter.Q.value = 9;
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.24, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      // Cold metallic scratch / demonic chattering
+      playMetallicScratch() {
+        if (!this.soundEnabled) return;
+        this.initContext();
+        const now = this.ctx.currentTime;
+        const duration = 0.28;
+
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(2400, now);
+        filter.frequency.exponentialRampToValueAtTime(900, now + duration);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      // Catastrophic thunder & shattering brass chord
+      playThunderShatter() {
+        if (!this.soundEnabled) return;
+        this.initContext();
+        const now = this.ctx.currentTime;
+        const duration = 2.8;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(70, now);
+        osc.frequency.exponentialRampToValueAtTime(22, now + duration);
+
+        gain.gain.setValueAtTime(0.65, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+
+        [145, 158, 208, 288, 420, 850].forEach(f => {
+          const mOsc = this.ctx.createOscillator();
+          const mGain = this.ctx.createGain();
+          mOsc.type = 'square';
+          mOsc.frequency.setValueAtTime(f, now);
+          mGain.gain.setValueAtTime(0.12, now);
+          mGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+          mOsc.connect(mGain);
+          mGain.connect(this.ctx.destination);
+          mOsc.start(now);
+          mOsc.stop(now + 1.4);
+        });
+      }
+    }
+
+    const soundEngine = new AlchemicalAudioEngine();
+    // Canonical Bacon Sequence
+    const BACON_TRINITY = [
+      {
+        latin: "Tempus Adest.",
+        english: "Time is.",
+        note: "Act I: The Head awakens in the deep night. The opportune hour begins.",
+        toneFreq: 110,
+        pitchTTS: 0.65,
+        rateTTS: 0.72,
+        step: 1
+      },
+      {
+        latin: "Tempus Fuit.",
+        english: "Time was.",
+        note: "Act II: The fleeting moment wanes as Miles lingers in vain complacency.",
+        toneFreq: 88,
+        pitchTTS: 0.52,
+        rateTTS: 0.66,
+        step: 2
+      },
+      {
+        latin: "Tempus Praeteriit!",
+        english: "Time is past!",
+        note: "Act III: The fateful boundary crossed. Seven years of alchemy reduced to dust.",
+        toneFreq: 52,
+        pitchTTS: 0.38,
+        rateTTS: 0.58,
+        step: 3
+      }
+    ];
+
+    // Medieval, Scholastic & Occult Latin Sayings
+    const MEDIEVAL_ORACLES = [
+      {
+        latin: "Sic transit gloria mundi.",
+        english: "Thus passes the glory of the world.",
+        note: "Chant reminding earthly sovereigns of dust and mortal frailty."
+      },
+      {
+        latin: "Memento mori; memento te hominem esse.",
+        english: "Remember that you must die; remember you are only mortal.",
+        note: "Medieval contemplation on mortality and temporal impermanence."
+      },
+      {
+        latin: "Septem anni in uno puncto perierunt.",
+        english: "Seven years perished in a single punctum of time.",
+        note: "Bacon's lamentation over the irreversible ruin of the magnum opus."
+      },
+      {
+        latin: "Non es solus in hoc cubiculo.",
+        english: "Thou art not alone in this chamber.",
+        note: "An unsealed voice etched upon the Oxford laboratory flags."
+      },
+      {
+        latin: "Post tenebras lux, sed post lucem nox aeterna.",
+        english: "After darkness, light; yet after light, eternal night.",
+        note: "Inverted alchemical axiom on the exhaustion of the Great Work."
+      },
+      {
+        latin: "Quod sumus, hoc eritis; fuimus quandoque quod estis.",
+        english: "What we are, you shall be; what you are, we once were.",
+        note: "Epitaph etched upon 14th-century charnel crypts across Europe."
+      },
+      {
+        latin: "Aperi oculos; iam clauduntur tui.",
+        english: "Open thine eyes; thine are already closing.",
+        note: "Necromantic warning against the sleep of the watchful."
+      },
+      {
+        latin: "Omnia mutantur, nihil interit.",
+        english: "Everything changes, nothing truly perishes.",
+        note: "Philosophical maxim on the perpetual conservation of universal matter."
+      },
+      {
+        latin: "In te coram ipso quaere lapidem.",
+        english: "Seek within thine own soul the Philosopher's stone.",
+        note: "Hermetic precept regarding the internal Great Work (Magnum Opus)."
+      },
+      {
+        latin: "Veritas temporis filia dicitur.",
+        english: "Truth is called the daughter of Time.",
+        note: "Aulus Gellius, cherished by Bacon as the justification of experimental observation."
+      }
+    ];
+
+    const UNBIDDEN_UTTERANCES = [
+      { latin: "Miles dormit.", english: "Miles sleeps." },
+      { latin: "Baco non dormit.", english: "Bacon does not." },
+      { latin: "Audisne?", english: "Do you hear it?" },
+      { latin: "Noli respicere.", english: "Do not look behind thee." },
+      { latin: "Nunc te audit.", english: "Now it hears thee." },
+      { latin: "Non omnis vox tua est.", english: "Not every voice thou hearest is thine." },
+      { latin: "Quod expectas iam venit.", english: "That which thou awaitest has already come." },
+      { latin: "Inter duas cogitationes ianua est.", english: "Between two thoughts there is a door." },
+      { latin: "Oculi aenei numquam clauduntur.", english: "The eyes of brass never close." },
+      { latin: "Septem anni pulvis facti sunt.", english: "Seven years are become cold ash." }
+    ];
+
+    // Original scholastic-style oracles, deliberately not presented as historical quotations.
+    // Each carries conceptual tags used by the local resemblance engine below.
+    const PHILOSOPHICAL_RESPONSES = [
+      { latin: "Futurum nondum est, sed timorem iam regit.", english: "The future is not yet real, yet it already governs the fearful.", note: "Anticipation can make what does not yet exist act upon the present.", tags: ["future","fear","uncertainty","anticipation","tomorrow"] },
+      { latin: "Praesens porta angusta est per quam aeternitas apparet.", english: "The present is the narrow gate through which all eternity appears.", note: "Past and future reach us only as memory and expectation arising now.", tags: ["present","now","eternity","time","attention"] },
+      { latin: "Quod rem vocas partim mundus est, partim anima recipiens.", english: "What thou callest reality is partly the world and partly the manner in which thy soul receives it.", note: "The thing and the perceiver meet before experience becomes known.", tags: ["reality","perception","mind","world","appearance","truth"] },
+      { latin: "Crastinum promittitur nemini; imaginatur tamen ab omnibus.", english: "Tomorrow is promised to none, yet imagined by all.", note: "Expectation builds upon ground that does not yet exist.", tags: ["future","tomorrow","uncertainty","mortality","hope"] },
+      { latin: "Nunc fugit dum nominatur.", english: "The now flees even while it is named.", note: "The present cannot be grasped without becoming past.", tags: ["present","now","time","change","impermanence"] },
+      { latin: "Memoria sepulcrum non est; forma praesentis est.", english: "Memory is not a tomb; it is a form assumed by the present.", note: "The past acts only when recollected now.", tags: ["past","memory","present","identity","time"] },
+      { latin: "Fortuna futurum celat ut voluntas adhuc libera videatur.", english: "Fortune veils the future so that the will may still appear free.", note: "Providence, fate, and agency remain knotted together.", tags: ["future","fate","choice","freewill","uncertainty","fortune"] },
+      { latin: "Si omnia fixa sunt, etiam dubitatio tua fixa est.", english: "If all things are fixed, then even thy doubt was fixed before thee.", note: "Determinism turns the questioner into part of the answer.", tags: ["fate","determinism","choice","doubt","reality"] },
+      { latin: "Umbra non mentitur; lumen occultum confitetur.", english: "A shadow does not lie; it confesses to a light thou canst not see.", note: "Absence may disclose a hidden cause.", tags: ["reality","appearance","hidden","truth","shadow","knowledge"] },
+      { latin: "Quod mutatur verum esse potest.", english: "That which changes may still be real.", note: "Becoming need not be illusion.", tags: ["reality","change","truth","impermanence","being"] },
+      { latin: "Hodie causa est crastini, sed cras iudex erit hodierni.", english: "Today is the cause of tomorrow, yet tomorrow shall become the judge of today.", note: "Action moves forward while judgment looks backward.", tags: ["present","future","choice","consequence","tomorrow"] },
+      { latin: "Qui futurum nimis habitat, praesentem domum deserit.", english: "He who dwells too long in the future abandons the house of the present.", note: "Anticipation can become a kind of exile.", tags: ["future","present","anxiety","attention","fear"] },
+      { latin: "Non vides mundum nudum.", english: "Thou never seest the world naked; between thee and it the intellect always stands.", note: "Perception is encounter, not transparent possession.", tags: ["reality","perception","mind","knowledge","world"] },
+      { latin: "Esse nunc est; fuisse vestigium est; futurum nomen sine corpore est.", english: "To be is now; to have been is a footprint; the future is a name without a body.", note: "Of the three temporal modes, only one is immediately present.", tags: ["present","past","future","time","being"] },
+      { latin: "Quod times saepe bis patitur.", english: "What thou fearest is often suffered twice: once in the mind, and perhaps never in the world.", note: "Imagined futures can wound before events exist.", tags: ["fear","future","anxiety","mind","uncertainty"] },
+      { latin: "Veritas interdum nimis prope stat ut videatur.", english: "Truth is not always hidden; sometimes it stands too near to be seen.", note: "Familiarity itself can conceal.", tags: ["truth","knowledge","reality","hidden","perception"] },
+      { latin: "Inter momentum et aeternitatem mens humana pendet.", english: "The human mind hangs between the instant and eternity.", note: "Consciousness is finite yet capable of conceiving the unbounded.", tags: ["present","eternity","mind","time","mortality"] },
+      { latin: "Nullum cras invenies; cum venerit, nunc vocabitur.", english: "Thou shalt never find tomorrow; when it arrives, it shall be called now.", note: "The future is perpetually converted into present experience.", tags: ["future","tomorrow","present","now","time"] },
+      { latin: "Si speculum frangitur, imago multiplicatur; res una manet.", english: "When the mirror breaks, the image multiplies; the thing itself may remain one.", note: "Many appearances need not imply many realities.", tags: ["reality","appearance","perception","unity","truth"] },
+      { latin: "Mors futurum claudit, sed praesentem horam aperit.", english: "Death closes the future, yet it opens the present hour.", note: "Mortality gives urgency to what is actually here.", tags: ["mortality","future","present","death","attention"] },
+      { latin: "Causa invisibilis saepe eventum visibilem ducit.", english: "An unseen cause often leads a visible event by the hand.", note: "Visible effects may arise from causes not immediately perceived.", tags: ["cause","hidden","reality","future","knowledge"] },
+      { latin: "Dubitatio ianua scientiae est, sed domus fieri non debet.", english: "Doubt is a doorway to knowledge, but it should not become thy dwelling.", note: "Scepticism is useful as passage, destructive as permanent residence.", tags: ["doubt","knowledge","uncertainty","truth","mind"] },
+      { latin: "Quod venturum est nescis; quod faciendum est saepe iam scis.", english: "What shall come thou knowest not; what must be done thou often already knowest.", note: "Uncertainty about outcomes does not erase present agency.", tags: ["future","choice","present","uncertainty","action"] },
+      { latin: "Tempus omnia aufert, etiam ipsum nunc.", english: "Time takes everything, even the now that seems to resist it.", note: "The present is privileged only for an instant.", tags: ["time","present","impermanence","loss","now"] },
+      { latin: "Futurum manu praesentis pulsat.", english: "The future knocks using the hand of the present.", note: "What is done now becomes the messenger of what comes next.", tags: ["future","present","action","consequence","choice"] },
+      { latin: "Consuetudo miraculum celat.", english: "Reality is not less strange because thou hast grown accustomed to it.", note: "Habit can make the astonishing appear ordinary.", tags: ["reality","wonder","perception","habit","world"] },
+      { latin: "Forsitan hora tui meminit.", english: "What if the hour remembers thee, though thou rememberest it not?", note: "A deliberately uncanny reversal of memory and time.", tags: ["time","memory","identity","uncertainty","hidden"] },
+      { latin: "Nemo futurum timet quale est, sed quale fingitur.", english: "No man fears the future as it is, but as imagination paints it.", note: "The unknown acquires a shape from the mind before events give it one.", tags: ["future","fear","imagination","anxiety","perception"] },
+      { latin: "Praesens parvum est, sed totam vitam continet.", english: "The present is small, yet it contains the whole of life.", note: "Every life is encountered one present interval at a time.", tags: ["present","life","now","time","attention"] },
+      { latin: "Quod fuit non redit; sed vestigia eius in te ambulant.", english: "What was does not return, yet its footprints still walk within thee.", note: "The past persists through memory, habit, and consequence.", tags: ["past","memory","identity","consequence","time"] },
+      { latin: "Fatum silentium amat.", english: "Fate loves silence, for certainty would alter every choice made beneath it.", note: "Ignorance of the future may itself be part of agency.", tags: ["fate","future","choice","uncertainty","silence"] },
+      { latin: "Non omne quod videtur falsum est; non omne quod latet verum.", english: "Not everything seen is false, and not everything hidden is true.", note: "Mystery alone does not guarantee wisdom.", tags: ["truth","appearance","hidden","reality","knowledge"] },
+      { latin: "Mens speculum est quod se ipsum videre conatur.", english: "The mind is a mirror attempting to behold itself.", note: "Self-knowledge is difficult because observer and observed coincide.", tags: ["mind","identity","perception","self","knowledge"] },
+      { latin: "Hodie mortale est sicut tu.", english: "Today is mortal, even as thou art.", note: "A day dies whether used, wasted, loved, or feared.", tags: ["present","mortality","time","loss","life"] },
+      { latin: "Si tempus flumen est, quis est qui ripam vocat nunc?", english: "If time is a river, who is it that names one bank 'now'?", note: "The observer appears to stand still only by comparison.", tags: ["time","present","identity","change","perception"] },
+      { latin: "Crastinum in corde nascitur antequam in mundo nascatur.", english: "Tomorrow is born in the heart before it is born in the world.", note: "Hope and fear give the future emotional existence before factual existence.", tags: ["future","hope","fear","mind","anticipation"] },
+      { latin: "Res potest esse vera quam nemo intellegit.", english: "A thing may be true though no mind yet understands it.", note: "Truth and comprehension need not arrive together.", tags: ["truth","knowledge","reality","uncertainty","mind"] },
+      { latin: "Quod ignoras non est vacuum; est regio sine lumine.", english: "What thou knowest not is not emptiness, but a region without light.", note: "Ignorance marks a boundary of knowledge, not necessarily of existence.", tags: ["knowledge","unknown","hidden","reality","uncertainty"] },
+      { latin: "Voluntas inter causas stat, non extra mundum.", english: "Thy will stands among causes; it does not stand outside the world.", note: "Agency may be real without being causeless.", tags: ["choice","freewill","cause","reality","action"] },
+      { latin: "Etiam si fatum scribitur, manus tua atramento madet.", english: "Even if fate is written, thy hand is still wet with the ink.", note: "Destiny and participation need not be opposites.", tags: ["fate","choice","action","freewill","future"] },
+      { latin: "Memoria mutatur quoties aperitur.", english: "Memory changes each time its sealed chamber is opened.", note: "Remembering is reconstruction as well as preservation.", tags: ["memory","past","mind","identity","change"] },
+      { latin: "Tu heri non es; tamen ille in te loquitur.", english: "Thou art not the one who lived yesterday, yet that one still speaks within thee.", note: "Identity endures through change without remaining perfectly identical.", tags: ["identity","past","change","memory","self"] },
+      { latin: "Inter esse et videri saepe sola lux mutatur.", english: "Between being and seeming, sometimes only the light has changed.", note: "Perspective can alter appearance without altering the thing.", tags: ["reality","appearance","perception","truth","change"] },
+      { latin: "Quid si somnium non falsum est, sed aliud genus praesentiae?", english: "What if a dream is not false, but another manner of presence?", note: "Experience may be real as experience even when its objects are not external.", tags: ["reality","dream","perception","mind","appearance"] },
+      { latin: "Hora quam neglegis eadem est quam aliquando desiderabis.", english: "The hour thou neglectest may be the very hour thou shalt one day desire again.", note: "Value is often seen most clearly after irreversibility.", tags: ["present","past","loss","time","attention"] },
+      { latin: "Incertum non est nihil.", english: "The uncertain is not the same as nothing.", note: "Possibility occupies the mind even before reality selects an outcome.", tags: ["uncertainty","future","possibility","reality","mind"] },
+      { latin: "Omnis electio sepulcrum est viarum non captarum.", english: "Every choice is a small tomb for the roads not taken.", note: "Agency creates one future partly by closing others.", tags: ["choice","future","loss","possibility","action"] },
+      { latin: "Quod veniet fortasse iam causam suam invenit.", english: "What is coming may already have found its cause.", note: "The future can be unborn while its conditions are already gathering.", tags: ["future","cause","fate","consequence","uncertainty"] },
+      { latin: "Praesentia non clamat; ideo saepe praeteritur.", english: "The present does not shout, and therefore it is often passed unseen.", note: "Attention is easily captured by memory and anticipation instead.", tags: ["present","attention","now","perception","time"] },
+      { latin: "Si veritas timorem tuum destruit, fortasse timor mendacium custodiebat.", english: "If truth destroys thy fear, perhaps fear had been guarding a lie.", note: "Some anxieties survive by resisting examination.", tags: ["truth","fear","knowledge","mind","reality"] },
+      { latin: "Si veritas timorem auget, tamen veritas manet.", english: "If truth increases thy fear, still it remains truth.", note: "Comfort is not a test of reality.", tags: ["truth","fear","reality","knowledge","uncertainty"] },
+      { latin: "Finis rei saepe initium intellectus est.", english: "The end of a thing is often the beginning of understanding it.", note: "Completion grants a perspective impossible from within the unfinished event.", tags: ["ending","past","knowledge","time","change"] },
+      { latin: "Nescis utrum tempus transeat an tu per tempus transeas.", english: "Thou knowest not whether time passes, or whether thou passest through time.", note: "Language hides the metaphysics inside its grammar.", tags: ["time","reality","change","identity","uncertainty"] },
+      { latin: "Quod nunc impossibile videtur, cras memoria esse potest.", english: "What seems impossible now may tomorrow be only a memory.", note: "The boundary between dread and recollection is sometimes merely time.", tags: ["future","present","past","memory","uncertainty"] },
+      { latin: "Omnis hora semel tantum aperitur.", english: "Every hour opens only once.", note: "Repetition of clocks does not mean repetition of moments.", tags: ["present","time","loss","impermanence","attention"] },
+      { latin: "Mundus manet alienus etiam cum familiaris fit.", english: "The world remains strange even after it becomes familiar.", note: "Familiarity is a property of the observer, not necessarily of reality.", tags: ["reality","world","wonder","perception","knowledge"] },
+      { latin: "Futurum non respondet interrogationi; respondet actioni.", english: "The future does not answer questions; it answers actions.", note: "Prediction has limits, while conduct still alters what follows.", tags: ["future","action","choice","uncertainty","consequence"] }
+    ];
+
+    const THEME_LEXICON = {
+      future: ["future","tomorrow","later","coming","next","soon","afterward","await","ahead"],
+      present: ["present","now","today","moment","here","currently","instant","today","this moment"],
+      past: ["past","yesterday","memory","remember","before","history","was","used to","ago"],
+      fear: ["fear","afraid","scared","anxious","anxiety","worry","worried","dread","terrified","nervous"],
+      reality: ["reality","real","world","exist","existence","being","illusion","dream","appearance","true world"],
+      perception: ["see","seem","perceive","sense","mind","thought","consciousness","appearance","looks","feels"],
+      truth: ["truth","true","know","knowledge","certain","certainty","doubt","meaning","understand"],
+      choice: ["choice","choose","free","will","decision","decide","act","action","agency","should","do"],
+      fate: ["fate","destiny","fortune","determined","fixed","inevitable","providence","meant","supposed"],
+      mortality: ["death","die","dead","mortal","life","alive","end","ending","last","finite"],
+      change: ["change","changing","become","becoming","impermanent","move","moving","flux","different","transform"],
+      uncertainty: ["uncertain","unknown","maybe","perhaps","wonder","doubt","cannot know","not sure","confused"],
+      memory: ["memory","remember","forget","forgot","recollection","past","nostalgia"],
+      identity: ["identity","self","myself","who am i","who i am","person","same person","me"],
+      meaning: ["meaning","point","purpose","why","matter","matters","sense of it","all mean"],
+      loss: ["loss","lose","lost","gone","miss","missing","regret","irreversible"],
+      hope: ["hope","wish","want","better","possibility","possible","maybe good"],
+      attention: ["focus","attention","notice","aware","awareness","present","distracted"],
+      cause: ["cause","because","reason","why","leads","result","consequence"],
+      wonder: ["strange","weird","mysterious","wonder","mystery","unreal","odd"]
+    };
+
+    const CONCEPT_PATTERNS = [
+      { theme: "future", patterns: [/what.*happen/i, /what.*next/i, /what.*come/i, /where.*going/i, /ahead of me/i, /later on/i] },
+      { theme: "fear", patterns: [/what if/i, /i(?:'| a)m worried/i, /i fear/i, /afraid of/i, /keeps me up/i] },
+      { theme: "reality", patterns: [/is this real/i, /what is real/i, /all a dream/i, /simulation/i, /what.*reality/i] },
+      { theme: "meaning", patterns: [/what.*mean/i, /what.*point/i, /why.*anything/i, /why are we/i, /does.*matter/i] },
+      { theme: "identity", patterns: [/who am i/i, /who.*become/i, /am i still/i, /same person/i, /what am i/i] },
+      { theme: "choice", patterns: [/what should i do/i, /should i/i, /which path/i, /my decision/i, /do i choose/i] },
+      { theme: "fate", patterns: [/meant to be/i, /supposed to/i, /already decided/i, /destined/i, /inevitable/i] },
+      { theme: "past", patterns: [/cannot let go/i, /can't let go/i, /used to be/i, /back then/i, /wish i had/i] },
+      { theme: "present", patterns: [/right now/i, /this moment/i, /be present/i, /live in the moment/i] },
+      { theme: "mortality", patterns: [/one day i.*die/i, /when i die/i, /life.*short/i, /running out of time/i] },
+      { theme: "uncertainty", patterns: [/i don't know/i, /i do not know/i, /not sure/i, /no idea/i, /uncertain/i] },
+      { theme: "change", patterns: [/everything changes/i, /things change/i, /not the same/i, /becoming different/i] }
+    ];
+
+    const THEME_BRIDGES = {
+      anxiety: ["fear","future","uncertainty"],
+      anticipation: ["future","fear","hope"],
+      freewill: ["choice","fate","cause"],
+      determinism: ["fate","cause","choice"],
+      being: ["reality","identity"],
+      hidden: ["truth","reality","uncertainty"],
+      self: ["identity","mind"],
+      life: ["mortality","present","meaning"],
+      consequence: ["cause","future","choice"],
+      possibility: ["future","uncertainty","hope"],
+      world: ["reality","perception"],
+      mind: ["perception","identity","truth"]
+    };
+
+
+    const canvas = document.getElementById('ambientCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    class LabEmber {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + 10;
+        this.speedY = 0.35 + Math.random() * 1.0;
+        this.speedX = (Math.random() - 0.5) * 0.7;
+        this.size = 1 + Math.random() * 2.2;
+        this.alpha = 0.08 + Math.random() * 0.55;
+        this.decay = 0.0025 + Math.random() * 0.0035;
+        this.hue = Math.random() > 0.35 ? 32 : 12;
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX + Math.sin(this.y * 0.015) * 0.25;
+        this.alpha -= this.decay;
+        if (this.alpha <= 0 || this.y < -10) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, 90%, 55%, ${this.alpha})`;
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = `hsla(${this.hue}, 100%, 50%, ${this.alpha})`;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    const embers = Array.from({ length: 22 }, () => new LabEmber());
+
+    function renderEmbers() {
+      ctx.clearRect(0, 0, width, height);
+      embers.forEach(e => {
+        e.update();
+        e.draw();
+      });
+      requestAnimationFrame(renderEmbers);
+    }
+    renderEmbers();
+
+    // DOM Elements
+    const jawEl = document.getElementById('animatedJaw');
+    const eyeLeft = document.getElementById('eyeLeft');
+    const eyeRight = document.getElementById('eyeRight');
+    const eyeSocketsGroup = document.getElementById('eyeSocketsGroup');
+    const furnaceGlow = document.getElementById('furnaceGlow');
+    const speechTextEl = document.getElementById('speechText');
+    const translationTextEl = document.getElementById('translationText');
+    const oracleCategoryEl = document.getElementById('oracleCategory');
+    const fracturesEl = document.getElementById('fractureLines');
+    const primaryFracturesEl = document.getElementById('primaryFractures');
+    const secondaryFracturesEl = document.getElementById('secondaryFractures');
+    const tertiaryFracturesEl = document.getElementById('tertiaryFractures');
+    const heatVeinsEl = document.getElementById('heatVeins');
+    const sigilCore = document.getElementById('sigilCore');
+    const steamContainer = document.getElementById('steamContainer');
+    const brazenHeadSvg = document.getElementById('brazenHeadSvg');
+    const headWrapper = document.getElementById('headWrapper');
+    const philosophyInput = document.getElementById('philosophyInput');
+    const consultHeadBtn = document.getElementById('consultHeadBtn');
+    const resetHeadBtn = document.getElementById('resetHeadBtn');
+    const unbiddenToggleBtn = document.getElementById('unbiddenToggleBtn');
+    const unbiddenText = document.getElementById('unbiddenText');
+    const unbiddenIcon = document.getElementById('unbiddenIcon');
+    const droneToggleBtn = document.getElementById('droneToggleBtn');
+    const droneStatusText = document.getElementById('droneStatusText');
+    const whisperLeft = document.getElementById('whisperLeft');
+    const whisperRight = document.getElementById('whisperRight');
+
+    let jawInterval = null;
+    let activeTypewriter = null;
+    let isSpeaking = false;
+    let autoCycleTimer = null;
+    let damageLevel = 0;
+    let idleTimer = null;
+    let idleSince = Date.now();
+    let gazeEnabled = true;
+    let unbiddenEnabled = true;
+    let staringAtUser = false;
+    let speechGeneration = 0;
+    let activeUtterance = null;
+    let activeSpeechSession = null;
+    let speechRetryTimer = null;
+    let speechWatchdogTimer = null;
+    const consultHistory = [];
+    let falseAwakeningCooldown = 0;
+    const pendingTimeouts = new Set();
+
+    function later(fn, delay) {
+      const id = setTimeout(() => {
+        pendingTimeouts.delete(id);
+        fn();
+      }, delay);
+      pendingTimeouts.add(id);
+      return id;
+    }
+
+    function clearPendingEffects() {
+      pendingTimeouts.forEach(clearTimeout);
+      pendingTimeouts.clear();
+      if (activeTypewriter) {
+        clearInterval(activeTypewriter);
+        activeTypewriter = null;
+      }
+    }
+    // Occasional Candle Draft / Blackout flicker
+    function triggerChamberDraft() {
+      document.body.classList.add('draft-blackout');
+      later(() => document.body.classList.remove('draft-blackout'), 420);
+    }
+
+    // Flash subtle peripheral inscriptions on walls
+    function flashPeripheralWhispers() {
+      whisperLeft.classList.add('vault-whisper-active');
+      whisperRight.classList.add('vault-whisper-active');
+      soundEngine.playMetallicScratch();
+      later(() => {
+        whisperLeft.classList.remove('vault-whisper-active');
+        whisperRight.classList.remove('vault-whisper-active');
+      }, 4200);
+    }
+
+    // Saccadic Eye Aperture Blink / Shutter
+    function triggerEyeShutter() {
+      eyeSocketsGroup.classList.add('aperture-blink');
+      later(() => eyeSocketsGroup.classList.remove('aperture-blink'), 200);
+    }
+
+    // Sudden Snap-Stare directly at the user
+    function snapStareToVisitor(force = false) {
+      if (isSpeaking && !force) return;
+      staringAtUser = true;
+      eyeLeft.setAttribute('cx', '124');
+      eyeLeft.setAttribute('cy', '177');
+      eyeRight.setAttribute('cx', '196');
+      eyeRight.setAttribute('cy', '177');
+      
+      // Dilate pupils & glow sickening crimson
+      eyeLeft.setAttribute('r', '4.4');
+      eyeRight.setAttribute('r', '4.4');
+      eyeLeft.setAttribute('fill', '#b81d00');
+      eyeRight.setAttribute('fill', '#b81d00');
+      sigilCore.setAttribute('fill', '#ff3300');
+
+      later(() => {
+        eyeLeft.setAttribute('r', '3.4');
+        eyeRight.setAttribute('r', '3.4');
+        if (!isSpeaking) {
+          eyeLeft.setAttribute('fill', damageLevel >= 3 ? '#4c1d0c' : '#2b1505');
+          eyeRight.setAttribute('fill', damageLevel >= 2 ? '#351409' : '#2b1505');
+          sigilCore.setAttribute('fill', '#e5b95c');
+        } else {
+          eyeLeft.setAttribute('fill', '#aa2200');
+          eyeRight.setAttribute('fill', '#991a00');
+        }
+        staringAtUser = false;
+      }, 2600);
+    }
+
+    // Heavy mechanical jaw movement
+    function scheduleJawClunk(delay, distance, hold = 220) {
+      later(() => {
+        if (!isSpeaking) return;
+        jawEl.style.transition = 'transform 0.22s cubic-bezier(.2,.7,.2,1)';
+        jawEl.style.transform = `translateY(${distance}px) rotate(${damageLevel >= 3 ? 1.2 : 0}deg)`;
+        soundEngine.playMechanicalClick();
+        later(() => {
+          if (!isSpeaking) return;
+          jawEl.style.transition = 'transform 0.36s ease-in';
+          jawEl.style.transform = `translateY(${damageLevel >= 4 ? 5 : 1}px) rotate(${damageLevel >= 3 ? .8 : 0}deg)`;
+        }, hold);
+      }, delay);
+    }
+
+    function startJawMovement(durationMs = 3000) {
+      clearInterval(jawInterval);
+      eyeLeft.setAttribute('fill', '#aa2200');
+      eyeRight.setAttribute('fill', '#991a00');
+      furnaceGlow.setAttribute('opacity', '0.55');
+      spawnSteamPuff();
+
+      scheduleJawClunk(160, 8, 380);
+      scheduleJawClunk(880, 15, 260);
+      scheduleJawClunk(1580, 11, 290);
+      scheduleJawClunk(2280, 17, 240);
+
+      jawInterval = setTimeout(() => stopJawMovement(), durationMs);
+    }
+
+    function stopJawMovement() {
+      clearTimeout(jawInterval);
+      jawEl.style.transition = 'transform 0.7s ease-out';
+      const restingGap = damageLevel >= 4 ? 6 : damageLevel >= 2 ? 2 : 0;
+      jawEl.style.transform = `translateY(${restingGap}px) rotate(${damageLevel >= 3 ? .8 : 0}deg)`;
+      eyeLeft.setAttribute('fill', damageLevel >= 3 ? '#4c1d0c' : '#2b1505');
+      eyeRight.setAttribute('fill', damageLevel >= 2 ? '#351409' : '#2b1505');
+      furnaceGlow.setAttribute('opacity', '0.12');
+    }
+
+    function spawnSteamPuff() {
+      const puff = document.createElement('div');
+      puff.className = 'w-6 h-6 rounded-full bg-amber-100/25 blur-[4px] smoke-puff absolute';
+      puff.style.left = Math.random() > 0.5 ? '20px' : '150px';
+      puff.style.top = '10px';
+      steamContainer.appendChild(puff);
+      later(() => puff.remove(), 1900);
+    }
+
+    // Corrupted glyphs generator for eerie reveal
+    const OCCULT_GLYPHS = "†‡§¶#%@&¥øθΨΩ01XΨᚦᚱᛉ";
+    function typewriteTextCorrupt(targetElement, fullText, callback) {
+      if (activeTypewriter) clearInterval(activeTypewriter);
+      targetElement.textContent = '';
+      let charIndex = 0;
+      const speed = 36;
+
+      activeTypewriter = setInterval(() => {
+        if (charIndex < fullText.length) {
+          // Occasional corrupted stutter
+          if (Math.random() < 0.22 && fullText.charAt(charIndex) !== ' ') {
+            targetElement.textContent = fullText.slice(0, charIndex) + OCCULT_GLYPHS[Math.floor(Math.random() * OCCULT_GLYPHS.length)];
+          } else {
+            targetElement.textContent = fullText.slice(0, charIndex + 1);
+            charIndex++;
+          }
+        } else {
+          targetElement.textContent = fullText;
+          clearInterval(activeTypewriter);
+          activeTypewriter = null;
+          if (callback) callback();
+        }
+      }, speed);
+    }
+
+    // Web Speech API invocation with resilient single-utterance ownership.
+    // Unexpected browser interruptions are retried once instead of being mistaken for completion.
+    function estimateSpeechDuration(text, rate = 0.7) {
+      const words = Math.max(1, text.trim().split(/\s+/).length);
+      const effectiveRate = Math.max(0.42, rate);
+      const ms = (words / (155 * effectiveRate)) * 60000 + 650;
+      return Math.max(1200, Math.min(12000, Math.round(ms)));
+    }
+
+    function clearSpeechTimers() {
+      if (speechRetryTimer) clearTimeout(speechRetryTimer);
+      if (speechWatchdogTimer) clearTimeout(speechWatchdogTimer);
+      speechRetryTimer = null;
+      speechWatchdogTimer = null;
+    }
+
+    function completeSpeechSession(session) {
+      if (!session || session.completed) return;
+      if (activeSpeechSession !== session) return;
+      if (session.generation !== speechGeneration) return;
+      session.completed = true;
+      clearSpeechTimers();
+      activeUtterance = null;
+      activeSpeechSession = null;
+      const callback = session.callback;
+      session.callback = null;
+      if (callback) callback();
+    }
+
+    function scheduleSpeechFallback(session, delay = null) {
+      if (!session || session.completed || activeSpeechSession !== session) return;
+      clearSpeechTimers();
+      const elapsed = session.startedAt ? Date.now() - session.startedAt : 0;
+      const remaining = delay ?? Math.max(700, session.estimatedDuration - elapsed);
+      speechRetryTimer = setTimeout(() => {
+        speechRetryTimer = null;
+        completeSpeechSession(session);
+      }, remaining);
+    }
+
+    function retrySpeechSession(session, reason = 'interrupted') {
+      if (!session || session.completed || activeSpeechSession !== session) return;
+      if (session.generation !== speechGeneration) return;
+
+      if (!soundEngine.voiceEnabled || !('speechSynthesis' in window)) {
+        scheduleSpeechFallback(session);
+        return;
+      }
+
+      if (session.attempts >= 2) {
+        console.warn('Brazen Head speech fallback after:', reason);
+        scheduleSpeechFallback(session);
+        return;
+      }
+
+      session.attempts += 1;
+      clearSpeechTimers();
+      activeUtterance = null;
+      try { window.speechSynthesis.cancel(); } catch (_) {}
+      speechRetryTimer = setTimeout(() => {
+        speechRetryTimer = null;
+        if (activeSpeechSession === session && session.generation === speechGeneration) {
+          speakSpeechAttempt(session);
+        }
+      }, 360);
+    }
+
+    function speakSpeechAttempt(session) {
+      if (!session || session.completed || activeSpeechSession !== session) return;
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(session.text);
+      activeUtterance = utterance;
+
+      // Progressive damage subtly degrades the voice rather than spawning competing voices.
+      const damagePitchDrop = Math.min(0.12, damageLevel * 0.018);
+      const damageRateDrop = Math.min(0.10, damageLevel * 0.012);
+      utterance.pitch = Math.max(0.1, session.pitch - damagePitchDrop);
+      utterance.rate = Math.max(0.42, session.rate - damageRateDrop);
+      utterance.volume = 0.95;
+
+      const voices = synth.getVoices();
+      const preferred = voices.find(v =>
+        v.lang.includes('en') &&
+        (v.name.includes('David') || v.name.includes('Daniel') ||
+         v.name.includes('George') || v.name.includes('Male'))
+      );
+      if (preferred) utterance.voice = preferred;
+
+      utterance.onstart = () => {
+        if (activeSpeechSession !== session || activeUtterance !== utterance) return;
+        session.startedAt = Date.now();
+      };
+
+      utterance.onend = () => {
+        if (activeSpeechSession !== session || activeUtterance !== utterance) return;
+        completeSpeechSession(session);
+      };
+
+      utterance.onerror = (event) => {
+        if (activeSpeechSession !== session || activeUtterance !== utterance) return;
+        if (session.generation !== speechGeneration) return;
+        activeUtterance = null;
+        const recoverable = event.error === 'interrupted' ||
+                            event.error === 'canceled' ||
+                            event.error === 'audio-busy';
+        if (recoverable) {
+          retrySpeechSession(session, event.error);
+        } else {
+          console.warn('Brazen Head speech synthesis error:', event.error);
+          scheduleSpeechFallback(session);
+        }
+      };
+
+      try {
+        synth.speak(utterance);
+      } catch (error) {
+        activeUtterance = null;
+        retrySpeechSession(session, error?.message || 'speak failed');
+        return;
+      }
+
+      clearTimeout(speechWatchdogTimer);
+      speechWatchdogTimer = setTimeout(() => {
+        speechWatchdogTimer = null;
+        if (activeSpeechSession !== session || activeUtterance !== utterance) return;
+        // Some Chromium/OS voice combinations occasionally never emit onend.
+        activeUtterance = null;
+        try { synth.cancel(); } catch (_) {}
+        retrySpeechSession(session, 'watchdog timeout');
+      }, session.estimatedDuration * 2 + 2200);
+    }
+
+    function cancelActiveSpeech(complete = false) {
+      const session = activeSpeechSession;
+      speechGeneration++;
+      clearSpeechTimers();
+      activeSpeechSession = null;
+      activeUtterance = null;
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (_) {}
+      }
+      if (session && !session.completed) {
+        session.completed = true;
+        const callback = session.callback;
+        session.callback = null;
+        if (complete && callback) setTimeout(callback, 100);
+      }
+    }
+
+    function vocalizeSpeech(text, pitch = 0.55, rate = 0.7, callback) {
+      const session = {
+        text,
+        pitch,
+        rate,
+        callback,
+        attempts: 0,
+        completed: false,
+        startedAt: 0,
+        estimatedDuration: estimateSpeechDuration(text, rate),
+        generation: ++speechGeneration
+      };
+      activeSpeechSession = session;
+
+      if (!('speechSynthesis' in window) || !soundEngine.voiceEnabled) {
+        // Preserve dramatic pacing even when voice is muted/unavailable.
+        scheduleSpeechFallback(session, session.estimatedDuration);
+        return;
+      }
+
+      speakSpeechAttempt(session);
+    }
+
+    function applyDamageBehavior() {
+      // Damage now affects behaviour as well as appearance.
+      if (damageLevel >= 2 && Math.random() < 0.35) soundEngine.playMetallicScratch();
+      if (damageLevel >= 3) sigilCore.setAttribute('fill', '#d84b16');
+      if (damageLevel >= 4 && Math.random() < 0.45) triggerEyeShutter();
+    }
+
+    function applyDamage() {
+      damageLevel = Math.min(5, damageLevel + 1);
+      applyDamageBehavior();
+
+      fracturesEl.setAttribute('opacity', Math.min(1, 0.42 + damageLevel * 0.13).toString());
+      secondaryFracturesEl.setAttribute('opacity', damageLevel >= 2 ? Math.min(1, 0.38 + damageLevel * 0.15).toString() : '0');
+      tertiaryFracturesEl.setAttribute('opacity', damageLevel >= 4 ? Math.min(1, 0.35 + damageLevel * 0.13).toString() : '0');
+
+      primaryFracturesEl.querySelectorAll('path').forEach((path, i) => {
+        const baseWidths = [4.6, 4.1, 3.8];
+        path.setAttribute('stroke-width', (baseWidths[i] + damageLevel * 0.35).toFixed(2));
+      });
+
+      fracturesEl.style.filter = `drop-shadow(0 0 ${5 + damageLevel * 1.8}px rgba(255,85,25,${0.3 + damageLevel * 0.08}))`;
+      headWrapper.classList.add('damage-glitch');
+      triggerChamberDraft();
+
+      later(() => headWrapper.classList.remove('damage-glitch'), 480);
+
+      if (damageLevel >= 2) eyeRight.setAttribute('fill', '#4a1205');
+      if (damageLevel >= 3) brazenHeadSvg.style.transform = 'rotate(-0.4deg)';
+      if (damageLevel >= 4) jawEl.style.transform = 'translateY(6px) rotate(.9deg)';
+      if (damageLevel >= 5) headWrapper.style.filter = 'drop-shadow(0 20px 36px rgba(0,0,0,0.98)) contrast(1.15) saturate(0.5)';
+    }
+
+    // Heat pulse when touching the metal
+    function pulseInternalHeat() {
+      heatVeinsEl.setAttribute('opacity', '1');
+      soundEngine.playMechanicalClick();
+      later(() => heatVeinsEl.setAttribute('opacity', '0'), 1200);
+    }
+    const STOP_WORDS = new Set(["the","a","an","and","or","but","if","then","than","to","of","in","on","at","for","from","with","without","is","are","was","were","be","been","being","it","this","that","these","those","i","me","my","mine","you","your","we","our","they","their","he","she","do","does","did","can","could","would","should","have","has","had","very","really","just","about"]);
+    const recentPhilosophicalAnswers = [];
+
+    function normalizeWords(text) {
+      return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s']/g, ' ').split(/\s+/)
+        .map(w => w.replace(/^'+|'+$/g, ''))
+        .filter(w => w.length > 1 && !STOP_WORDS.has(w));
+    }
+
+    function stemWord(word) {
+      let w = word.toLowerCase();
+      const rules = [
+        [/ies$/, 'y'], [/ing$/, ''], [/ed$/, ''], [/ness$/, ''], [/ment$/, ''],
+        [/tion$/, 't'], [/sion$/, 's'], [/ly$/, ''], [/ers$/, 'er'], [/es$/, ''], [/s$/, '']
+      ];
+      for (const [pattern, replacement] of rules) {
+        if (w.length > 5 && pattern.test(w)) {
+          w = w.replace(pattern, replacement);
+          break;
+        }
+      }
+      return w;
+    }
+
+    function editDistance(a, b) {
+      if (a === b) return 0;
+      if (!a.length) return b.length;
+      if (!b.length) return a.length;
+      const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        let diagonal = prev[0];
+        prev[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const old = prev[j];
+          prev[j] = Math.min(
+            prev[j] + 1,
+            prev[j - 1] + 1,
+            diagonal + (a[i - 1] === b[j - 1] ? 0 : 1)
+          );
+          diagonal = old;
+        }
+      }
+      return prev[b.length];
+    }
+
+    function fuzzySimilarity(a, b) {
+      const x = stemWord(a);
+      const y = stemWord(b);
+      if (x === y) return 1;
+      if (x.length >= 4 && y.length >= 4 && (x.startsWith(y) || y.startsWith(x))) return 0.88;
+      if (Math.min(x.length, y.length) < 4) return 0;
+      const distance = editDistance(x, y);
+      const similarity = 1 - distance / Math.max(x.length, y.length);
+      return similarity >= 0.72 ? similarity : 0;
+    }
+
+    function inferConcepts(query, words) {
+      const themes = new Set();
+      const raw = query.toLowerCase();
+      const wordStems = words.map(stemWord);
+
+      for (const [theme, keywords] of Object.entries(THEME_LEXICON)) {
+        for (const keyword of keywords) {
+          const keywordWords = normalizeWords(keyword);
+          if (keywordWords.length > 1 && raw.includes(keyword.toLowerCase())) {
+            themes.add(theme);
+            break;
+          }
+          if (keywordWords.some(k => wordStems.some(w => fuzzySimilarity(w, k) >= 0.8))) {
+            themes.add(theme);
+            break;
+          }
+        }
+      }
+
+      for (const group of CONCEPT_PATTERNS) {
+        if (group.patterns.some(pattern => pattern.test(query))) themes.add(group.theme);
+      }
+
+      // Vague existential prompts need a meaningful fallback rather than a random first row.
+      if (/^(why|how|what)\b/i.test(query.trim()) && words.length <= 7) {
+        themes.add('meaning');
+        themes.add('reality');
+      }
+      if (/everything|anything|all of this|all this/i.test(query)) {
+        themes.add('meaning');
+        themes.add('reality');
+      }
+
+      return themes;
+    }
+
+    function expandedResponseThemes(response) {
+      const themes = new Set(response.tags);
+      response.tags.forEach(tag => {
+        (THEME_BRIDGES[tag] || []).forEach(t => themes.add(t));
+      });
+      return themes;
+    }
+
+    function scorePhilosophicalMatch(query, response) {
+      const qWords = normalizeWords(query);
+      const qStems = qWords.map(stemWord);
+      const rWords = normalizeWords(`${response.english} ${response.note} ${response.tags.join(' ')}`);
+      const themes = inferConcepts(query, qWords);
+      const responseThemes = expandedResponseThemes(response);
+      let score = 0;
+
+      // Theme matches dominate literal wording so vague questions still land sensibly.
+      themes.forEach(theme => {
+        if (responseThemes.has(theme)) score += 9;
+        else {
+          for (const [bridge, relatives] of Object.entries(THEME_BRIDGES)) {
+            if (theme === bridge && relatives.some(r => responseThemes.has(r))) score += 3.5;
+          }
+        }
+      });
+
+      // Literal and fuzzy lexical resemblance refine the thematic result.
+      qStems.forEach(qWord => {
+        let best = 0;
+        for (const rWord of rWords) best = Math.max(best, fuzzySimilarity(qWord, rWord));
+        if (best >= 0.98) score += qWord.length > 5 ? 3.2 : 2.2;
+        else if (best >= 0.82) score += 1.7;
+        else if (best >= 0.72) score += 0.8;
+      });
+
+      // Reward responses matching more than one inferred concept.
+      const overlap = [...themes].filter(t => responseThemes.has(t)).length;
+      if (overlap >= 2) score += overlap * 2.5;
+
+      // Penalize recently used answers so repeated vague questions remain interesting.
+      const recentIndex = recentPhilosophicalAnswers.indexOf(response.english);
+      if (recentIndex !== -1) score -= 10 - recentIndex * 2;
+
+      // Tiny stable tiebreaker only; never enough to determine the theme itself.
+      score += (response.english.length % 13) * 0.001;
+      return score;
+    }
+
+    function fallbackThemes(query) {
+      const q = query.toLowerCase();
+      if (/why|meaning|point|matter/.test(q)) return ['meaning','reality','truth'];
+      if (/what if|maybe|perhaps|not sure|unknown/.test(q)) return ['uncertainty','future'];
+      if (/feel|think|mind|seem/.test(q)) return ['perception','mind','reality'];
+      return ['time','reality','uncertainty'];
+    }
+
+    function rankPhilosophicalResponses(query) {
+      const clean = query.trim();
+      if (!clean) return [];
+      let ranked = PHILOSOPHICAL_RESPONSES
+        .map(item => ({ item, score: scorePhilosophicalMatch(clean, item) }))
+        .sort((a, b) => b.score - a.score);
+
+      // If the query is extremely vague and all scores are weak, choose within a plausible conceptual cluster.
+      if (!ranked.length || ranked[0].score < 4.5) {
+        const fallback = new Set(fallbackThemes(clean));
+        ranked = PHILOSOPHICAL_RESPONSES
+          .map(item => ({
+            item,
+            score: [...expandedResponseThemes(item)].reduce((sum, tag) => sum + (fallback.has(tag) ? 4 : 0), 0)
+              - (recentPhilosophicalAnswers.includes(item.english) ? 3 : 0)
+              + (item.english.length % 11) * 0.001
+          }))
+          .sort((a, b) => b.score - a.score);
+      }
+      return ranked;
+    }
+
+    function findBestPhilosophicalResponse(query) {
+      const ranked = rankPhilosophicalResponses(query);
+      if (!ranked.length) return null;
+      const topWindow = ranked.slice(0, Math.min(3, ranked.length));
+      const bestScore = topWindow[0].score;
+      const nearBest = topWindow.filter(x => x.score >= bestScore - 1.75);
+      const chosen = nearBest[Math.floor(Math.random() * nearBest.length)].item;
+      recentPhilosophicalAnswers.unshift(chosen.english);
+      if (recentPhilosophicalAnswers.length > 4) recentPhilosophicalAnswers.pop();
+      return chosen;
+    }
+
+    function queryShape(text) {
+      return new Set(normalizeWords(text).map(stemWord));
+    }
+
+    function queryResemblance(a, b) {
+      const A = queryShape(a);
+      const B = queryShape(b);
+      if (!A.size || !B.size) return 0;
+      let overlap = 0;
+      A.forEach(word => { if (B.has(word)) overlap++; });
+      return overlap / Math.max(A.size, B.size);
+    }
+
+    function maybeRefuseConsultation(query) {
+      // Rare refusal makes the oracle feel less like an obedient search box.
+      if (Math.random() >= 0.075) return null;
+      const refusals = [
+        { latin: 'Aes tacet.', english: 'The brass gives no answer.', note: 'Not every question is granted an hour.' },
+        { latin: 'Quaere cum hora propior sit.', english: 'Ask when the hour is nearer.', note: 'The mechanism withdraws from the question.' },
+        { latin: 'Nondum.', english: 'Not yet.', note: 'The shortest answer may conceal the longest delay.' }
+      ];
+      return refusals[Math.floor(Math.random() * refusals.length)];
+    }
+
+    function triggerFalseAwakening() {
+      if (isSpeaking || document.hidden || Date.now() < falseAwakeningCooldown) return false;
+      falseAwakeningCooldown = Date.now() + 45000;
+      isSpeaking = true;
+      gazeEnabled = false;
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-950 animate-pulse"></span> Something stirs`;
+      speechTextEl.textContent = '';
+      translationTextEl.textContent = '';
+      triggerChamberDraft();
+      snapStareToVisitor(true);
+      furnaceGlow.setAttribute('opacity', '0.42');
+      soundEngine.playMetallicScratch();
+      later(() => {
+        triggerEyeShutter();
+        furnaceGlow.setAttribute('opacity', '0.12');
+        oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-stone-800"></span> Nothing`;
+        speechTextEl.textContent = '…';
+        translationTextEl.textContent = 'The chamber resumes breathing.';
+        gazeEnabled = true;
+        isSpeaking = false;
+        idleSince = Date.now();
+        scheduleNextUnbidden();
+      }, 3200);
+      return true;
+    }
+
+    function triggerMilesStillness() {
+      if (isSpeaking || document.hidden) return false;
+      isSpeaking = true;
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-amber-950"></span> The Vigil`;
+      speechTextEl.textContent = '“Miles sleeps.”';
+      translationTextEl.textContent = 'Miles dormit.';
+      triggerChamberDraft();
+      later(() => {
+        speechTextEl.textContent = '“Still.”';
+        translationTextEl.textContent = '';
+        flashPeripheralWhispers();
+      }, 2400);
+      later(() => {
+        isSpeaking = false;
+        idleSince = Date.now();
+        scheduleNextUnbidden();
+      }, 4700);
+      return true;
+    }
+
+    function maybeTriggerFourthBaconAnomaly(done) {
+      // Extremely rare: the legend appears to continue after it has already ended.
+      if (Math.random() >= 0.01) {
+        done();
+        return;
+      }
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-950"></span> The chamber should be silent`;
+      speechTextEl.textContent = '';
+      translationTextEl.textContent = '';
+      later(() => {
+        speechTextEl.textContent = '“It is again.”';
+        translationTextEl.textContent = 'Iterum est.';
+        snapStareToVisitor(true);
+        vocalizeSpeech('It is again.', 0.24, 0.46, () => {
+          later(done, 900);
+        });
+      }, 3600);
+    }
+
+    function consultHead() {
+      const query = philosophyInput.value.trim();
+      if (!query || isSpeaking) {
+        if (!query) {
+          oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-stone-600"></span> The brass waits`;
+          speechTextEl.textContent = '“Give me a thought before asking for an answer.”';
+          translationTextEl.textContent = 'An empty question casts no shadow.';
+        }
+        return;
+      }
+      markActivity();
+      soundEngine.initContext();
+      pulseInternalHeat();
+
+      const repeated = consultHistory.some(old => queryResemblance(old, query) >= 0.68);
+      const refusal = maybeRefuseConsultation(query);
+      const oracle = refusal || findBestPhilosophicalResponse(query);
+      consultHistory.unshift(query);
+      if (consultHistory.length > 8) consultHistory.pop();
+
+      isSpeaking = true;
+      oracleCategoryEl.innerHTML = repeated
+        ? `<span class="inline-block w-2 h-2 rounded-full bg-red-950 animate-ping"></span> Again? The brass remembers the shape of thy question`
+        : `<span class="inline-block w-2 h-2 rounded-full bg-teal-900 animate-ping"></span> The Head Finds a Resemblance`;
+      soundEngine.playBrassBell(refusal ? 66 : 84, 3.8);
+      startJawMovement(3600);
+
+      const spokenText = repeated && !refusal ? `Again. ${oracle.english}` : oracle.english;
+      typewriteTextCorrupt(speechTextEl, `“${spokenText}”`, () => {
+        translationTextEl.textContent = `${oracle.latin} — ${oracle.note}`;
+      });
+
+      vocalizeSpeech(spokenText, refusal ? 0.38 : 0.48, refusal ? 0.56 : 0.62, () => {
+        stopJawMovement();
+        isSpeaking = false;
+        scheduleNextUnbidden();
+      });
+    }
+
+    function triggerUnbiddenUtterance() {
+      if (!unbiddenEnabled || isSpeaking || document.hidden) return false;
+      isSpeaking = true;
+      const omen = UNBIDDEN_UTTERANCES[Math.floor(Math.random() * UNBIDDEN_UTTERANCES.length)];
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-950"></span> Unbidden Utterance`;
+      soundEngine.playBrassBell(68, 3.2);
+      startJawMovement(2800);
+      snapStareToVisitor(true);
+      flashPeripheralWhispers();
+
+      typewriteTextCorrupt(speechTextEl, `“${omen.english}”`, () => {
+        translationTextEl.textContent = omen.latin;
+      });
+
+      vocalizeSpeech(omen.english, 0.38, 0.54, () => {
+        stopJawMovement();
+        isSpeaking = false;
+        idleSince = Date.now();
+        scheduleNextUnbidden();
+      });
+      return true;
+    }
+
+    function performBaconAct(index, done) {
+      const act = BACON_TRINITY[index];
+      const roman = ['I', 'II', 'III'][index];
+
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-amber-500/80 animate-ping"></span> The Vigil: ${roman} of III`;
+
+      const speakAct = () => {
+        soundEngine.playBrassBell(act.toneFreq, 4.4);
+        startJawMovement(act.step === 3 ? 3400 : 2800);
+
+        if (act.step === 3) snapStareToVisitor(true);
+
+        typewriteTextCorrupt(speechTextEl, `“${act.english}”`, () => {
+          translationTextEl.textContent = `${act.latin} — ${act.note}`;
+        });
+
+        vocalizeSpeech(act.english, act.pitchTTS, act.rateTTS, () => {
+          stopJawMovement();
+
+          if (act.step === 3) {
+            // Let the final words die completely before the chamber breaks.
+            oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-950"></span> Silence`;
+            later(() => {
+              triggerChamberDraft();
+              document.body.classList.add('tremor');
+              applyDamage();
+              flashPeripheralWhispers();
+              soundEngine.playThunderShatter();
+              later(() => {
+                document.body.classList.remove('tremor');
+                gazeEnabled = true;
+                maybeTriggerFourthBaconAnomaly(done);
+              }, 1050);
+            }, 1150);
+          } else {
+            const pause = act.step === 1 ? 1200 : 1500;
+            later(() => performBaconAct(index + 1, done), pause);
+          }
+        });
+      };
+
+      if (act.step === 3) {
+        oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-red-950"></span> The Vigil: III of III — Dead Silence`;
+        speechTextEl.textContent = '';
+        translationTextEl.textContent = '';
+        gazeEnabled = false;
+        triggerChamberDraft();
+        later(speakAct, 1450);
+      } else {
+        speakAct();
+      }
+    }
+
+    function triggerBaconRitual() {
+      if (isSpeaking) return false;
+      isSpeaking = true;
+      gazeEnabled = true;
+      pulseInternalHeat();
+      performBaconAct(0, () => {
+        isSpeaking = false;
+        idleSince = Date.now();
+        scheduleNextUnbidden();
+      });
+      return true;
+    }
+
+    function triggerRandomOracle() {
+      if (isSpeaking) return;
+      isSpeaking = true;
+      pulseInternalHeat();
+      const oracle = MEDIEVAL_ORACLES[Math.floor(Math.random() * MEDIEVAL_ORACLES.length)];
+
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-teal-500 animate-ping"></span> Scholastic Maxim & Oracle`;
+      soundEngine.playBrassBell(125 + Math.random() * 45, 3.2);
+      startJawMovement(3000);
+
+      typewriteTextCorrupt(speechTextEl, `"${oracle.latin}"`, () => {
+        translationTextEl.textContent = `"${oracle.english}" — ${oracle.note}`;
+      });
+
+      vocalizeSpeech(oracle.english, 0.58, 0.72, () => {
+        stopJawMovement();
+        isSpeaking = false;
+        scheduleNextUnbidden();
+      });
+    }
+
+    // Direct head click action
+    headWrapper.addEventListener('click', () => {
+      idleSince = Date.now();
+      soundEngine.initContext();
+      pulseInternalHeat();
+      if (Math.random() > 0.45) {
+        triggerBaconRitual();
+      } else {
+        triggerRandomOracle();
+      }
+    });
+
+    document.getElementById('baconSequenceBtn').addEventListener('click', () => {
+      markActivity();
+      soundEngine.initContext();
+      triggerBaconRitual();
+    });
+
+    document.getElementById('randomOracleBtn').addEventListener('click', () => {
+      markActivity();
+      soundEngine.initContext();
+      triggerRandomOracle();
+    });
+
+    // Auto Cycle
+    const autoCycleBtn = document.getElementById('autoCycleBtn');
+    const cycleText = document.getElementById('cycleText');
+    const cycleIcon = document.getElementById('cycleIcon');
+
+    autoCycleBtn.addEventListener('click', () => {
+      soundEngine.initContext();
+      if (autoCycleTimer) {
+        clearInterval(autoCycleTimer);
+        autoCycleTimer = null;
+        cycleText.textContent = 'Automatic Vigil';
+        autoCycleBtn.classList.remove('border-amber-500', 'text-amber-200');
+        cycleIcon.classList.remove('animate-spin');
+      } else {
+        cycleText.textContent = 'Vigil: Active';
+        autoCycleBtn.classList.add('border-amber-500', 'text-amber-200');
+        cycleIcon.classList.add('animate-spin');
+        triggerBaconRitual();
+        autoCycleTimer = setInterval(() => {
+          if (!isSpeaking) {
+            if (Math.random() > 0.4) triggerBaconRitual();
+            else triggerRandomOracle();
+          }
+        }, 7500);
+      }
+    });
+
+    // Pupil Gaze and Torch Shading Following Cursor
+    document.addEventListener('mousemove', (e) => {
+      idleSince = Date.now();
+      
+      // Update ambient torch gradient position
+      const px = ((e.clientX / window.innerWidth) * 100).toFixed(1);
+      const py = ((e.clientY / window.innerHeight) * 100).toFixed(1);
+      document.body.style.setProperty('--torch-x', `${px}%`);
+      document.body.style.setProperty('--torch-y', `${py}%`);
+
+      if (!gazeEnabled || isSpeaking || staringAtUser) return;
+      const rect = brazenHeadSvg.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height * 0.44;
+      const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / (rect.width * 0.45)));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / (rect.height * 0.34)));
+      
+      eyeLeft.setAttribute('cx', (124 + dx * 2.3).toFixed(2));
+      eyeRight.setAttribute('cx', (196 + dx * 2.3).toFixed(2));
+      eyeLeft.setAttribute('cy', (177 + dy * 1.6).toFixed(2));
+      eyeRight.setAttribute('cy', (177 + dy * 1.6).toFixed(2));
+    });
+
+    // Idle Unbidden Timer
+    function scheduleNextUnbidden() {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = null;
+      if (!unbiddenEnabled) return;
+      const delay = 16000 + Math.floor(Math.random() * 22000);
+      idleTimer = setTimeout(() => {
+        idleTimer = null;
+        const idleFor = Date.now() - idleSince;
+        if (!unbiddenEnabled || isSpeaking || document.hidden) {
+          scheduleNextUnbidden();
+          return;
+        }
+        if (idleFor >= delay - 300) {
+          const roll = Math.random();
+          if (roll < 0.08) {
+            if (!triggerFalseAwakening()) scheduleNextUnbidden();
+          } else if (roll < 0.16) {
+            if (!triggerMilesStillness()) scheduleNextUnbidden();
+          } else {
+            if (!triggerUnbiddenUtterance()) scheduleNextUnbidden();
+          }
+        } else {
+          scheduleNextUnbidden();
+        }
+      }, delay);
+    }
+
+    function markActivity() {
+      idleSince = Date.now();
+      scheduleNextUnbidden();
+    }
+
+    function resetHead() {
+      clearPendingEffects();
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = null;
+      if (autoCycleTimer) clearInterval(autoCycleTimer);
+      autoCycleTimer = null;
+      cancelActiveSpeech();
+      clearTimeout(jawInterval);
+      jawInterval = null;
+      isSpeaking = false;
+      gazeEnabled = true;
+      staringAtUser = false;
+      damageLevel = 0;
+      consultHistory.length = 0;
+      falseAwakeningCooldown = 0;
+      document.body.classList.remove('tremor', 'draft-blackout');
+      headWrapper.classList.remove('damage-glitch');
+      headWrapper.style.filter = '';
+      brazenHeadSvg.style.transform = '';
+      fracturesEl.setAttribute('opacity', '0');
+      fracturesEl.style.filter = '';
+      secondaryFracturesEl.setAttribute('opacity', '0');
+      tertiaryFracturesEl.setAttribute('opacity', '0');
+      heatVeinsEl.setAttribute('opacity', '0');
+      primaryFracturesEl.querySelectorAll('path').forEach((path, i) => {
+        const baseWidths = [4.6, 4.1, 3.8];
+        path.setAttribute('stroke-width', baseWidths[i].toString());
+      });
+      jawEl.style.transition = 'transform .6s ease-out';
+      jawEl.style.transform = 'translateY(0px) rotate(0deg)';
+      eyeLeft.setAttribute('cx', '124');
+      eyeLeft.setAttribute('cy', '177');
+      eyeRight.setAttribute('cx', '196');
+      eyeRight.setAttribute('cy', '177');
+      eyeLeft.setAttribute('r', '3.4');
+      eyeRight.setAttribute('r', '3.4');
+      eyeLeft.setAttribute('fill', '#2b1505');
+      eyeRight.setAttribute('fill', '#2b1505');
+      sigilCore.setAttribute('fill', '#e5b95c');
+      furnaceGlow.setAttribute('opacity', '0.12');
+      steamContainer.replaceChildren();
+      cycleText.textContent = 'Automatic Vigil';
+      autoCycleBtn.classList.remove('border-amber-500', 'text-amber-200');
+      cycleIcon.classList.remove('animate-spin');
+      oracleCategoryEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-amber-900/70"></span> The brass is still`;
+      speechTextEl.textContent = '“Consult me, mortal seeker, ere the hour strikes past.”';
+      translationTextEl.textContent = 'It remembers nothing of the damage. Perhaps.';
+      markActivity();
+    }
+
+    unbiddenToggleBtn.addEventListener('click', () => {
+      unbiddenEnabled = !unbiddenEnabled;
+      unbiddenToggleBtn.setAttribute('aria-pressed', String(unbiddenEnabled));
+      unbiddenText.textContent = `Idle Whispers: ${unbiddenEnabled ? 'On' : 'Off'}`;
+      unbiddenIcon.textContent = unbiddenEnabled ? '◉' : '○';
+      unbiddenToggleBtn.classList.toggle('text-red-300/70', unbiddenEnabled);
+      unbiddenToggleBtn.classList.toggle('text-stone-500', !unbiddenEnabled);
+      markActivity();
+    });
+
+    // Drone audio toggle
+    droneToggleBtn.addEventListener('click', () => {
+      soundEngine.initContext();
+      if (soundEngine.droneActive) {
+        soundEngine.stopSubBassDrone();
+        droneStatusText.textContent = 'Muted';
+        droneToggleBtn.classList.add('opacity-60');
+      } else {
+        soundEngine.startSubBassDrone();
+        droneStatusText.textContent = 'Active';
+        droneToggleBtn.classList.remove('opacity-60');
+      }
+    });
+
+    resetHeadBtn.addEventListener('click', resetHead);
+    consultHeadBtn.addEventListener('click', consultHead);
+    philosophyInput.addEventListener('keydown', (e) => {
+      markActivity();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        consultHead();
+      }
+    });
+    philosophyInput.addEventListener('input', markActivity);
+    document.addEventListener('pointerdown', markActivity, { passive: true });
+    document.addEventListener('keydown', markActivity);
+    scheduleNextUnbidden();
+
+    // Occasional creepy autonomous twitches
+    setInterval(() => {
+      if (isSpeaking || !gazeEnabled) return;
+      const idleTime = Date.now() - idleSince;
+      
+      // If idle for more than 8s, 25% chance of sudden snap-stare
+      if (idleTime > 8000 && Math.random() < 0.25) {
+        snapStareToVisitor();
+      } else if (Math.random() < 0.2) {
+        // Saccadic jitter
+        const twitch = (Math.random() - 0.5) * 3.5;
+        eyeLeft.setAttribute('cx', (124 + twitch).toFixed(2));
+        eyeRight.setAttribute('cx', (196 - twitch * 0.4).toFixed(2));
+        if (Math.random() < 0.3) triggerEyeShutter();
+      }
+    }, 3400);
+
+    // Audio / Voice Toggle
+    const soundToggleBtn = document.getElementById('soundToggleBtn');
+    const soundIcon = document.getElementById('soundIcon');
+    let audioState = 0;
+
+    soundToggleBtn.addEventListener('click', () => {
+      audioState = (audioState + 1) % 3;
+      if (audioState === 0) {
+        soundEngine.soundEnabled = true;
+        soundEngine.voiceEnabled = true;
+        soundIcon.textContent = '🔊';
+        soundEngine.startSubBassDrone();
+      } else if (audioState === 1) {
+        soundEngine.soundEnabled = true;
+        soundEngine.voiceEnabled = false;
+        soundIcon.textContent = '🔔';
+        cancelActiveSpeech(true);
+      } else {
+        soundEngine.soundEnabled = false;
+        soundEngine.voiceEnabled = false;
+        soundIcon.textContent = '🔇';
+        soundEngine.stopSubBassDrone();
+        cancelActiveSpeech(true);
+      }
+    });
+
+    // Lore Modal Controls
+    const loreBtn = document.getElementById('loreBtn');
+    const loreModal = document.getElementById('loreModal');
+    const closeLoreBtn = document.getElementById('closeLoreBtn');
+    const closeLoreBtn2 = document.getElementById('closeLoreBtn2');
+
+    function openLore() { loreModal.classList.remove('opacity-0', 'pointer-events-none'); }
+    function closeLore() { loreModal.classList.add('opacity-0', 'pointer-events-none'); }
+
+    loreBtn.addEventListener('click', openLore);
+    closeLoreBtn.addEventListener('click', closeLore);
+    closeLoreBtn2.addEventListener('click', closeLore);
+    loreModal.addEventListener('click', (e) => { if (e.target === loreModal) closeLore(); });
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+    }
+  </script>
+</body>
+</html>

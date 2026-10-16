@@ -1509,7 +1509,7 @@ html[data-theme] #campaign-grid .topic-coverflow-open{margin-top: 0.44rem !impor
 html[data-theme] body :is(.theme-toggle-btn, .app-theme-segment, .practice-goal-choice, .editor-tab, .rstudio-output-tab, .learn-tab, .cheat-nav-pill){transition: color 0.24s, background-color 0.24s, border-color 0.24s !important;}
 html[data-theme] #campaign-modal .topic-coverflow-controls{gap: 0.9rem; margin-top: -0.1rem !important;}
 html[data-theme] #campaign-modal .topic-coverflow-status{text-align: center; min-width: 11rem !important; font-size: 0.84rem !important; color: var(--text-secondary) !important;}
-html[data-theme] #campaign-modal :is(#topic-coverflow-prev, #topic-coverflow-next){min-width: 3.25rem !important; min-height: 3.25rem !important;}
+html[data-theme] #campaign-modal :is(#topic-coverflow-prev, #topic-coverflow-next){min-width: 2.75rem !important; min-height: 2.75rem !important;}
 @media (max-width: 680px), (max-height: 600px) and (pointer: coarse) {
 html[data-theme] #campaign-modal .quiz-topic-modal {
   --topic-mobile-height: calc(100vh - .5rem);
@@ -1572,34 +1572,39 @@ html[data-theme="dark"] #campaign-modal .modal-body::after{opacity: 0.42;}html[d
 
 
 <style id="liquid-glass-single-source">
-/* One material system. Base theme colours and typography remain in the app styles. */
-:root,html[data-theme="light"] {
-  --lg-blur:blur(22px) saturate(180%) brightness(1.08);--lg-blur-sm:blur(12px) saturate(185%) brightness(1.06);
-  --lg-tint-dark:rgba(22,27,39,.64);--lg-tint-light:rgba(242,247,252,.68);
-  --lg-rim-dark:rgba(255,255,255,.22);--lg-rim-light:rgba(255,255,255,.72);
-  --lg-highlight:rgba(255,255,255,.78);
-  --lg-tint:var(--lg-tint-light);--lg-rim:var(--lg-rim-light);
-  --lg-ink:#172334;--lg-solid:#f0f3f7;--lg-card:#f8fafc;
-  --lg-rail:rgba(89,109,132,.12);--lg-pill:rgba(255,255,255,.40);
-  --lg-pill-rim:rgba(107,128,149,.38);--lg-shadow:rgba(38,49,65,.18);
-  --lg-field-a:rgba(151,185,209,.46);--lg-field-b:rgba(202,175,146,.33);
-  --lg-scene:#e4e8ec;
+/* Apple-inspired web materials. Glass belongs to navigation; reading surfaces stay opaque.
+   https://developer.apple.com/design/human-interface-guidelines/materials
+   https://developer.apple.com/design/human-interface-guidelines/color */
+:root { --font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif; }
+html[data-theme="light"] {
+  --bg-primary:#f2f2f7;--bg-secondary:#fff;--bg-tertiary:#e9e9ef;--bg-editor:#fff;--bg-console:#fff;
+  --surface-elevated:#fff;--surface-overlay:#fff;--border-subtle:rgba(60,60,67,.15);--border-default:rgba(60,60,67,.22);--border-strong:#8e8e93;
+  --text-primary:#1c1c1e;--text-secondary:#52525b;--text-muted:#63636b;--text-inverse:#fff;
+  --accent-primary:#0067d9;--accent-primary-soft:#e6f0ff;--accent-info:#0067d9;--accent-info-soft:#e6f0ff;
+  --accent-warning:#89510c;--accent-warning-soft:#fbf1e2;--color-gold:#785b1b;--accent-error:#c52d37;--accent-error-soft:#fcebee;
+  --lg-tint:rgba(255,255,255,.94);--lg-rim:rgba(60,60,67,.15);--lg-highlight:rgba(255,255,255,.96);
+  --lg-ink:var(--text-primary);--lg-solid:#fff;--lg-card:#fff;--lg-rail:#f2f2f7;--lg-pill:#fff;--lg-pill-rim:rgba(60,60,67,.17);
+  --lg-shadow:rgba(35,40,55,.1);--lg-field-a:rgba(96,140,192,.08);--lg-field-b:rgba(168,151,139,.06);--lg-scene:#f2f2f7;
+  --lg-control-fill:#f7f8fb;--lg-control-top:rgba(255,255,255,.85);--lg-edge-shade:rgba(47,57,76,.12);--lg-action-top:rgba(255,255,255,.2);
 }
 html[data-theme="dark"] {
-  --lg-tint:var(--lg-tint-dark);--lg-rim:var(--lg-rim-dark);
-  --lg-highlight:rgba(255,255,255,.34);--lg-ink:#f2f5f9;
-  --lg-solid:#202630;--lg-card:#232a35;--lg-rail:rgba(5,10,18,.28);
-  --lg-pill:rgba(222,237,251,.18);--lg-pill-rim:rgba(227,240,255,.44);
-  --lg-shadow:rgba(0,0,0,.34);--lg-field-a:rgba(74,103,133,.4);
-  --lg-field-b:rgba(131,103,80,.28);--lg-scene:#141a22;
+  --bg-primary:#101114;--bg-secondary:#1c1c1e;--bg-tertiary:#2c2c2e;--bg-editor:#171719;--bg-console:#171719;
+  --surface-elevated:#242426;--surface-overlay:#1c1c1e;--border-subtle:rgba(235,235,245,.14);--border-default:rgba(235,235,245,.22);--border-strong:#8e8e93;
+  --text-primary:#f5f5f7;--text-secondary:#c0c0c6;--text-muted:#a1a1aa;--text-inverse:#101114;
+  --accent-primary:#64b5ff;--accent-primary-soft:rgba(100,181,255,.13);--accent-info:#64b5ff;--accent-info-soft:rgba(100,181,255,.13);
+  --lg-tint:rgba(38,38,42,.92);--lg-rim:rgba(235,235,245,.17);--lg-highlight:rgba(255,255,255,.28);
+  --lg-ink:var(--text-primary);--lg-solid:#1c1c1e;--lg-card:#242426;--lg-rail:#242426;--lg-pill:#3a3a3c;--lg-pill-rim:rgba(235,235,245,.21);
+  --lg-shadow:rgba(0,0,0,.24);--lg-field-a:rgba(73,114,158,.07);--lg-field-b:rgba(136,113,94,.05);--lg-scene:#101114;
+  --lg-control-fill:#303034;--lg-control-top:rgba(255,255,255,.13);--lg-edge-shade:rgba(0,0,0,.3);--lg-action-top:rgba(255,255,255,.17);
 }
 html[data-theme="high-contrast"] {
-  --lg-blur:none;--lg-blur-sm:none;--lg-tint:#101010;--lg-rim:#a9caff;
-  --lg-highlight:transparent;--lg-ink:#fff;--lg-solid:#101010;
-  --lg-card:#101010;--lg-rail:#101010;--lg-pill:#17223c;
-  --lg-pill-rim:#a9caff;--lg-shadow:transparent;
+  --lg-tint:#101010;--lg-rim:#fff;--lg-highlight:transparent;--lg-ink:#fff;--lg-solid:#101010;--lg-card:#101010;
+  --lg-rail:#101010;--lg-pill:#17223c;--lg-pill-rim:#a9caff;--lg-shadow:transparent;
   --lg-field-a:transparent;--lg-field-b:transparent;--lg-scene:#000;
+  --lg-control-fill:#101010;--lg-control-top:transparent;--lg-edge-shade:transparent;--lg-action-top:transparent;
 }
+html[data-theme] { --lg-blur:blur(22px) saturate(125%); }
+html[data-theme="high-contrast"] { --lg-blur:none; }
 .reference-explanation{margin: 0.75rem 0px 0px; padding: 0.85rem 1rem; border-left: 2px solid var(--accent-primary); background: var(--accent-primary-soft); border-radius: 0px 0.6rem 0.6rem 0px; line-height: 1.65; font-size: 0.88rem;}
 .reference-explanation p{margin: 0px;}
 .reference-explanation p + p{margin-top: 0.55rem;}
@@ -1611,86 +1616,191 @@ html[data-theme="light"] #learn-coverflow-welcome{--text-primary: #17191e; --tex
 html[data-theme="light"] #campaign-modal .quiz-topic-modal, html[data-theme="light"] #welcome-overlay .welcome-shell{--text-primary: #17191e; --text-secondary: #50555f; --text-muted: #6a707b;}
 html[data-theme]:not([data-theme="high-contrast"]) :is(.learn-coverflow-card, #campaign-grid .campaign-card){position: absolute !important; isolation: isolate;}
 html[data-theme]:not([data-theme="high-contrast"]) :is(.learn-coverflow-card, #campaign-grid .campaign-card) > *{position: relative; z-index: 1;}
-html[data-theme] body {
-  background:radial-gradient(ellipse at 8% 14%,var(--lg-field-b),transparent 55%),radial-gradient(ellipse at 92% 80%,var(--lg-field-a),transparent 58%),var(--lg-scene);
-  background-attachment:scroll;
+
+html[data-theme] body,html[data-theme] #welcome-overlay {
+  background:radial-gradient(ellipse at 8% 12%,var(--lg-field-b),transparent 55%),radial-gradient(ellipse at 92% 82%,var(--lg-field-a),transparent 58%),var(--lg-scene);
 }
-html[data-theme] #welcome-overlay {
-  background:radial-gradient(ellipse at 5% 15%,var(--lg-field-b),transparent 58%),radial-gradient(ellipse at 90% 85%,var(--lg-field-a),transparent 60%),var(--lg-scene);
+html[data-theme] body > div[aria-hidden="true"].fixed.inset-0 {display:none;}
+html[data-theme] :is(.modal,.welcome-shell,.drawer) {
+  background:var(--lg-solid);color:var(--lg-ink);border:1px solid var(--border-subtle);
+  box-shadow:0 20px 60px var(--lg-shadow);-webkit-backdrop-filter:none;backdrop-filter:none;isolation:isolate;
 }
-:is(.app-header,.modal,.welcome-shell,.drawer) {
-  background:var(--lg-tint);border:1px solid var(--lg-rim);
-  box-shadow:inset 0 1px 0 var(--lg-highlight),inset 0 -1px 0 rgba(0,0,0,.12),0 12px 32px var(--lg-shadow);
-  -webkit-backdrop-filter:var(--lg-blur);backdrop-filter:var(--lg-blur);
-  isolation:isolate;color:var(--lg-ink);
-}
-.app-header {box-shadow:inset 0 -1px 0 var(--lg-rim),0 2px 12px var(--lg-shadow);}
 :is(.modal,.welcome-shell) {position:relative;}
-html[data-theme] .modal-backdrop {background:rgba(12,19,29,.20);}
-:is(.app-header,.modal,.welcome-shell)::before {
-  content:"";position:absolute;inset:1px;border-radius:inherit;pointer-events:none;
-  background:radial-gradient(280px 200px at var(--px,22%) var(--py,18%),rgba(255,255,255,.34),rgba(255,255,255,.12) 28%,transparent 62%),linear-gradient(105deg,rgba(255,255,255,.22),transparent 42%);
-  opacity:.9;transition:opacity .2s;
+html[data-theme] .modal-backdrop:not(#welcome-overlay) {background:rgba(12,14,20,.4);}
+html[data-theme] :is(.modal-body,.welcome-body,.drawer-body) {background:var(--lg-solid);}
+html[data-theme] :is(.app-header,.modal-header,.drawer-header,.modal>.app-return-actions,.drawer>.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls) {
+  position:relative;color:var(--lg-ink);border:1px solid var(--lg-rim);isolation:isolate;
+  background:radial-gradient(ellipse at 8% 0%,color-mix(in srgb,var(--lg-highlight) 22%,transparent),transparent 55%),var(--lg-tint);
+  box-shadow:inset 0 1px 1px var(--lg-highlight),inset 1px 0 1px color-mix(in srgb,var(--lg-highlight) 40%,transparent),inset 0 -2px 2px var(--lg-edge-shade),0 2px 4px var(--lg-shadow),0 8px 22px var(--lg-shadow);
+  -webkit-backdrop-filter:var(--lg-blur);backdrop-filter:var(--lg-blur);
 }
-html[data-theme="dark"] :is(.app-header,.modal,.welcome-shell)::before{opacity:.55;}
-html[data-theme="high-contrast"] :is(.app-header,.modal,.welcome-shell)::before{content:none;}
-:is(.modal-header,.modal-body,.modal-footer,.welcome-body,.drawer-header){background:transparent;}
-:is(.task-pane,.editor-container,.console-container,.env-container,#rstudio-output-pane){
-  background:var(--lg-solid);border:1px solid var(--border-subtle);
-  -webkit-backdrop-filter:none;backdrop-filter:none;
-  box-shadow:0 2px 8px var(--lg-shadow);
+/* Reflection is confined to the rim and never paints over text. */
+:is(.app-header,.modal,.welcome-shell)::before {content:none;}
+@supports ((mask-composite:exclude) or (-webkit-mask-composite:xor)) {
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.modal>.app-return-actions,.drawer>.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls)::before {
+    content:"";position:absolute;inset:0;padding:1.5px;border-radius:inherit;pointer-events:none;
+    background:radial-gradient(130px 90px at var(--px,15%) var(--py,0%),var(--lg-highlight),transparent 85%),linear-gradient(135deg,var(--lg-highlight),transparent 35%,var(--lg-rim) 65%,var(--lg-highlight));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;opacity:.8;transition:opacity 160ms ease;
+  }
 }
-:is(.learn-coverflow-card,.campaign-card,.welcome-primary-card,.practice-onboarding-card){
-  background:var(--lg-card);border:1px solid var(--lg-rim);
-  box-shadow:inset 0 1px 0 var(--lg-highlight),0 8px 22px var(--lg-shadow);
+html[data-theme] :is(.task-pane,.editor-container,.console-container,.env-container,#rstudio-output-pane) {
+  background:var(--lg-solid);border:1px solid var(--border-subtle);border-radius:16px;
+  -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;
+}
+html[data-theme] :is(.learn-coverflow-card,.campaign-card,.welcome-primary-card,.practice-onboarding-card,.command-flipcard-face) {
+  background:var(--lg-card);border:1px solid var(--border-subtle);box-shadow:0 4px 16px var(--lg-shadow);
 }
 :is(.learn-coverflow-card,.campaign-card)::before{content:none;}
-:is(.theme-toggle,.app-theme-segments,.practice-goal-segment,.editor-tab-bar,.rstudio-output-tabs,.learn-tab-bar){
-  background:var(--lg-rail);border:1px solid var(--lg-rim);border-radius:999px;padding:3px;
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.12);isolation:isolate;
+/* A selected segment is a quiet fill within the group, not another glass backdrop. */
+:is(.theme-toggle,.app-theme-segments,.practice-goal-segment,.editor-tab-bar,.rstudio-output-tabs,.learn-tab-bar) {
+  background:var(--lg-rail);border:1px solid var(--border-subtle);border-radius:999px;padding:3px;box-shadow:none;isolation:isolate;
 }
 :is(.theme-toggle,.editor-tab-bar,.rstudio-output-tabs,.learn-tab-bar){position:relative;}
 .glass-selection-pill {
-  position:absolute;pointer-events:none;z-index:0;border-radius:999px;
-  background:var(--lg-pill);border:1px solid var(--lg-pill-rim);
-  box-shadow:inset 0 1px 0 var(--lg-highlight),0 2px 8px var(--lg-shadow);
-  -webkit-backdrop-filter:var(--lg-blur-sm);backdrop-filter:var(--lg-blur-sm);
-  will-change:transform;
+  position:absolute;pointer-events:none;z-index:0;border-radius:999px;background:var(--lg-pill);border:1px solid var(--lg-pill-rim);
+  box-shadow:inset 0 1px 1px var(--lg-highlight),inset 0 -1px 1px var(--lg-edge-shade),0 1px 2px var(--lg-shadow),0 3px 6px var(--lg-shadow);-webkit-backdrop-filter:none;backdrop-filter:none;
   transition:transform .22s cubic-bezier(.22,1,.36,1);
 }
-.glass-selection-pill::before {
-  content:"";position:absolute;inset:1px;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.32),transparent 55%);
-}
-.glass-selection-pill::after{content:none;}
-.glass-selection-pill.tab-style{border-radius:8px;}
+.glass-selection-pill::before,.glass-selection-pill::after{content:none;}
+.glass-selection-pill.tab-style{border-radius:12px;}
 .glass-selection-pill.pill-no-transition{transition:none;}
 :is(.theme-toggle .theme-toggle-btn,.app-theme-segments .app-theme-segment,.practice-goal-segment .practice-goal-choice,.editor-tab-bar .editor-tab,.rstudio-output-tabs .rstudio-output-tab,.learn-tab-bar .learn-tab){position:relative;z-index:1;}
 html[data-theme] body :is(.app-theme-segment[aria-pressed="true"],.theme-toggle-btn.active,.practice-goal-choice[aria-pressed="true"],.learn-tab.active,.editor-tab.active,.rstudio-output-tab.active){color:var(--lg-ink);text-shadow:none;}
 html[data-theme] :is(.theme-toggle-btn.active,.app-theme-segment[aria-pressed="true"],.practice-goal-choice[aria-pressed="true"],.editor-tab.active,.rstudio-output-tab.active,.learn-tab.active){background:transparent;box-shadow:none;}
-@supports (backdrop-filter:url(#lg-lens)) or (-webkit-backdrop-filter:url(#lg-lens)) {
-  @media (prefers-reduced-transparency:no-preference) {
-    html:not([data-theme="high-contrast"]) .app-header {
-      -webkit-backdrop-filter:url(#lg-lens) var(--lg-blur);backdrop-filter:url(#lg-lens) var(--lg-blur);
-    }
-    html:not([data-theme="high-contrast"]) :is(.modal,.welcome-shell) {
-      -webkit-backdrop-filter:url(#lg-lens-strong) var(--lg-blur);backdrop-filter:url(#lg-lens-strong) var(--lg-blur);
-    }
-    html:not([data-theme="high-contrast"]) .drawer {
-      -webkit-backdrop-filter:url(#lg-lens) var(--lg-blur-sm);backdrop-filter:url(#lg-lens) var(--lg-blur-sm);
-    }
+/* Consistent geometry without changing the existing routes or pane layout. */
+html[data-theme] .app-header {padding:.5rem .75rem;gap:.5rem .75rem;}
+html[data-theme] :is(.btn,.app-theme-segment) {font-family:var(--font-ui);min-height:44px;}
+html[data-theme] .btn {border-radius:14px;font-size:.82rem;gap:.4rem;}
+html[data-theme] .btn-primary {background:var(--accent-primary);color:var(--text-inverse);border-color:transparent;box-shadow:none;border-radius:999px;}
+html[data-theme] .btn-icon {display:inline-grid;place-items:center;min-width:44px;width:44px;height:44px;padding:0;border-radius:50%;flex-shrink:0;}
+html[data-theme] :is(.btn,.app-theme-segment,.modal-title,.drawer-title) :is(svg,[data-lucide]) {display:block;width:18px;height:18px;margin:0;flex-shrink:0;}
+html[data-theme] .btn-icon :is(svg,[data-lucide]) {width:20px;height:20px;}
+html[data-theme] :is(.app-theme-segments,.app-theme-segment) {border-radius:999px;}
+html[data-theme] .app-return-actions {gap:.5rem;}
+html[data-theme] .app-return-actions .btn {padding:.45rem .7rem;}
+html[data-theme] .app-return-actions .btn-outline {background:transparent;color:var(--text-primary);border-color:var(--border-subtle);}
+html[data-theme] :is(.modal-title,.drawer-title) {font-size:1.2rem;font-weight:650;letter-spacing:-.025em;gap:.6rem;}
+#welcome-overlay #welcome-title {font-weight:700;line-height:1.12;letter-spacing:-.04em;font-size:clamp(1.8rem,4vw,2.75rem);}
+#welcome-overlay .welcome-subtitle {font-size:1rem;line-height:1.6;}
+html[data-theme] #welcome-overlay :is(.welcome-primary-card,.practice-onboarding-card) {border-radius:20px;}
+html[data-theme] #welcome-overlay .welcome-shell {border-radius:28px;}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] #welcome-overlay :is(.welcome-primary-card,.practice-onboarding-card):hover {transform:translateY(-2px);box-shadow:0 6px 18px var(--lg-shadow);border-color:var(--border-default);}
+  html[data-theme] #welcome-overlay :is(.welcome-primary-card,.practice-onboarding-card):active {transform:scale(.986);}
+}
+html[data-theme] :is(.welcome-kicker,.practice-onboarding-eyebrow,.learn-coverflow-kicker,.topic-section-chip,.command-card-topic,.reference-detail-kicker) {text-transform:none;letter-spacing:.025em;font-weight:600;}
+html[data-theme] #campaign-modal .modal-footer {background:var(--lg-solid) !important;border-color:var(--border-subtle) !important;}
+/* Stable carousel capsules shared by Learn and Topics. */
+.learn-coverflow-controls,html[data-theme] #campaign-modal .topic-coverflow-controls {
+  display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:.375rem;
+  width:min(24rem,calc(100vw - 4rem));max-width:100%;height:54px;padding:4px;box-sizing:border-box;border-radius:999px;
+  margin:.4rem auto !important;
+}
+.learn-coverflow-status,html[data-theme] #campaign-modal .topic-coverflow-status {
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+  min-width:0 !important;max-width:100%;max-height:2.8em;overflow:hidden;text-overflow:ellipsis;white-space:normal;
+  text-align:center;line-height:1.4;font-size:.78rem !important;
+}
+html[data-theme] :is(.learn-coverflow-controls,.topic-coverflow-controls) .btn {
+  display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;
+  background:transparent;border-color:transparent;border-radius:50%;box-shadow:none;
+}
+/* Convex controls: lighting stays at the edges; the label and central fill remain opaque. */
+html[data-theme] .btn-primary {--lg-button-fill:var(--accent-primary);}
+html[data-theme] .btn-success {--lg-button-fill:var(--accent-success);}
+html[data-theme] :is(.btn-primary,.btn-success):enabled:not([aria-disabled="true"]) {
+  background:linear-gradient(180deg,var(--lg-action-top),transparent 38%),linear-gradient(0deg,rgba(0,0,0,.1),transparent 24%),var(--lg-button-fill);
+  color:var(--text-inverse);border-color:color-mix(in srgb,var(--lg-button-fill) 80%,var(--lg-rim));
+  box-shadow:inset 0 1px 1px var(--lg-highlight),inset 0 -2px 2px var(--lg-edge-shade),0 1px 2px var(--lg-shadow),0 4px 10px var(--lg-shadow);
+}
+html[data-theme] :is(.app-header,.app-return-actions,.modal-header,.drawer-header,.panel-header,.command-card-controls) :is(.btn-outline,.btn-icon):enabled,
+html[data-theme] #reset-btn:enabled {
+  background:linear-gradient(180deg,var(--lg-control-top),transparent 42%),var(--lg-control-fill);
+  box-shadow:inset 0 1px 1px var(--lg-highlight),inset 1px 0 0 color-mix(in srgb,var(--lg-highlight) 35%,transparent),inset 0 -1px 2px var(--lg-edge-shade),0 1px 2px var(--lg-shadow),0 3px 8px var(--lg-shadow);
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.modal>.app-return-actions,.drawer>.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls):hover::before {opacity:1;}
+  html[data-theme] :is(.btn-primary,.btn-success):enabled:hover {
+    box-shadow:inset 0 1px 2px var(--lg-highlight),inset 0 -2px 2px var(--lg-edge-shade),0 2px 4px var(--lg-shadow),0 6px 14px var(--lg-shadow);
   }
+  html[data-theme] :is(.learn-coverflow-controls,.topic-coverflow-controls) .btn:enabled:hover {background:color-mix(in srgb,var(--lg-highlight) 14%,transparent);}
 }
-@media (max-width:760px),(pointer:coarse) {
-  html[data-theme="light"],html[data-theme="dark"] {--lg-blur:blur(16px) saturate(165%) brightness(1.06);--lg-blur-sm:blur(10px) saturate(170%);}
+html[data-theme] :is(.btn-primary,.btn-success):enabled:active,
+html[data-theme] :is(.app-header,.app-return-actions,.modal-header,.drawer-header,.panel-header,.command-card-controls) :is(.btn-outline,.btn-icon):enabled:active,
+html[data-theme] #reset-btn:enabled:active {
+  translate:0 1px;box-shadow:inset 0 1px 2px var(--lg-edge-shade),inset 0 -1px 0 var(--lg-highlight),0 1px 2px var(--lg-shadow);
 }
-@media (prefers-reduced-transparency:reduce) {
-  html[data-theme] {--lg-blur:none;--lg-blur-sm:none;--lg-tint:var(--lg-solid);--lg-pill:var(--lg-solid);}
+/* Reference text and code never sample a moving backdrop. */
+html[data-theme] #cheat-drawer :is(.reference-list,.reference-search,.reference-entry-syntax,.reference-sidebar) {
+  background:var(--bg-secondary);border-color:var(--border-subtle);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;
 }
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
-  html[data-theme] {--lg-blur:none;--lg-blur-sm:none;--lg-tint:var(--lg-solid);--lg-pill:var(--lg-solid);}
+html[data-theme] #cheat-drawer .reference-nav-item.active {background:var(--accent-primary-soft);border-color:var(--border-subtle);box-shadow:none;color:var(--text-primary);}
+html[data-theme] #cheat-drawer .reference-nav-item.active::after {box-shadow:none;}
+html[data-theme] #cheat-drawer .reference-explanation {background:var(--bg-tertiary);border-left-color:var(--accent-primary);}
+html[data-theme] #cheat-drawer .reference-mobile-picker select {min-height:44px;background:var(--bg-secondary);}
+@media (max-width:760px),(pointer:coarse) {html[data-theme]:not([data-theme="high-contrast"]) {--lg-blur:blur(14px) saturate(120%);}}
+@media (max-width:680px) {
+  html[data-theme] #welcome-overlay .welcome-shell {border-radius:24px;}
+  html[data-theme] .app-theme-control {min-width:0;}
+  html[data-theme] .app-theme-segments {flex:1;min-width:0;}
+  html[data-theme] .app-theme-segment {flex:1;min-width:0;padding:.4rem .35rem;font-size:.75rem;}
+  html[data-theme] .app-return-actions > .app-theme-control > span {flex:0 0 auto;}
+  html[data-theme] .app-return-actions .btn {font-size:.78rem;}
 }
-@media (prefers-reduced-motion:reduce) {.glass-selection-pill{transition:none;}:is(.app-header,.modal,.welcome-shell)::before{transition:none;}}
+@media (prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+  html[data-theme] {--lg-blur:none;--lg-tint:var(--lg-solid);--lg-highlight:transparent;}
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.modal>.app-return-actions,.drawer>.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls)::before {content:none;}
+}
+@media (prefers-contrast:more) {
+  html[data-theme] {--border-subtle:var(--text-secondary);--border-default:var(--text-primary);--lg-rim:var(--text-secondary);--text-muted:var(--text-primary);}
+}
+html[data-theme="high-contrast"] :is(.app-header,.modal-header,.drawer-header,.modal>.app-return-actions,.drawer>.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls)::before {content:none;}
+html[data-theme="high-contrast"] :is(.app-header,.modal-header,.drawer-header,.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls,.glass-selection-pill,.btn) {background-image:none !important;box-shadow:none !important;}
+@media (prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+  html[data-theme] {--lg-control-fill:var(--lg-solid);}
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls,.glass-selection-pill,.btn) {background-image:none !important;box-shadow:none !important;}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {html[data-theme] {--lg-blur:none;--lg-tint:var(--lg-solid);}}
+@media (prefers-reduced-motion:reduce) {
+  .glass-selection-pill{transition:none;}
+  html[data-theme] .btn {translate:none !important;scale:none !important;}
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls)::before {transition:none;}
+}
+@media (forced-colors:active) {
+  html[data-theme] {--lg-blur:none;--lg-tint:Canvas;--lg-solid:Canvas;--lg-card:Canvas;--lg-ink:CanvasText;--lg-rim:ButtonText;--lg-pill:Canvas;--lg-pill-rim:Highlight;--lg-shadow:transparent;--lg-highlight:transparent;}
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.modal>.app-return-actions,.drawer>.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls)::before {content:none;}
+  .glass-selection-pill {outline:1px solid Highlight;}
+  html[data-theme] :is(.app-header,.modal-header,.drawer-header,.app-return-actions,.learn-coverflow-controls,.topic-coverflow-controls,.glass-selection-pill,.btn) {background-image:none !important;box-shadow:none !important;}
+}
+</style>
+<style id="practice-command-cards-style">
+#campaign-modal :is(#command-card-panel, #campaign-grid, .topic-coverflow-help, .topic-coverflow-controls)[hidden]{display:none !important;}
+#command-card-panel{width:min(100%,68rem); align-self:stretch; padding:0.35rem 0 1rem;}
+.command-card-toolbar{display:grid; grid-template-columns:minmax(12rem,1fr) minmax(12rem,1fr); gap:0.7rem; width:min(100%,38rem); margin:0 auto 0.6rem;}
+.command-card-topic-filter{display:grid; gap:0.25rem; color:var(--text-secondary); font-size:0.72rem; font-weight:700;}
+.command-card-topic-filter select,.command-card-search{width:100%; min-width:0; min-height:2.65rem; padding:0.62rem 0.8rem; border:1px solid var(--border-default); border-radius:0.75rem; background:var(--bg-primary); color:var(--text-primary); font:inherit; font-size:0.82rem;}
+.command-card-search{align-self:end;}
+.command-card-topic-filter select:focus-visible,.command-card-search:focus-visible,.command-flipcard:focus-visible,.command-card-controls button:focus-visible{outline:2px solid var(--accent-primary); outline-offset:3px;}
+.command-card-count{margin:0 auto 0.7rem; color:var(--text-secondary); font-size:0.78rem; text-align:center;}
+.command-card-stage{display:flex; justify-content:center; align-items:center; min-height:18rem;}
+.command-flipcard{position:relative; display:block; width:min(100%,35rem); height:18rem; padding:0; border:0; border-radius:1.1rem; background:transparent; color:var(--text-primary); font:inherit; text-align:left; cursor:pointer; perspective:900px;}
+.command-flipcard-face{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; gap:0.55rem; padding:1rem; border:1px solid var(--border-default); border-radius:1rem; background:var(--bg-secondary); box-shadow:0 8px 22px rgba(0,0,0,0.08); backface-visibility:hidden; -webkit-backface-visibility:hidden; transition:transform 0.45s ease;}
+.command-flipcard-front{transform:rotateY(0deg);}
+.command-flipcard-back{transform:rotateY(180deg); background:var(--bg-tertiary);}
+.command-flipcard[data-flipped="true"] .command-flipcard-front{transform:rotateY(-180deg);}
+.command-flipcard[data-flipped="true"] .command-flipcard-back{transform:rotateY(0deg);}
+.command-card-topic{color:var(--text-muted); font-size:0.69rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;}
+.command-card-name{font-size:1.1rem; font-weight:750; line-height:1.2; overflow-wrap:anywhere;}
+.command-card-example{display:block; max-height:9rem; overflow:auto; color:var(--accent-info); font-family:var(--font-mono); font-size:0.92rem; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere;}
+.command-card-prompt{margin-top:auto; color:var(--text-muted); font-size:0.69rem;}
+.command-card-description{color:var(--text-primary); font-size:0.88rem; line-height:1.45; overflow:auto;}
+.command-card-controls{display:flex; align-items:center; justify-content:center; gap:0.8rem; margin-top:0.8rem;}
+.command-card-controls .btn{min-width:6rem;}
+.command-card-position{min-width:6rem; color:var(--text-secondary); font-size:0.8rem; text-align:center;}
+.command-card-empty{padding:2rem 1rem; color:var(--text-secondary); text-align:center;}
+@media (max-width:680px){.command-card-toolbar{grid-template-columns:1fr;}.command-flipcard{height:16rem;}.command-card-controls{gap:0.35rem;}.command-card-controls .btn{min-width:5rem;}}
+@media (prefers-reduced-motion:reduce){.command-flipcard-face{transition:none;}}
 </style>
 </head>
 <body>
@@ -2303,7 +2413,7 @@ html[data-theme] :is(.theme-toggle-btn.active,.app-theme-segment[aria-pressed="t
 <div class="modal quiz-topic-modal">
 <div class="modal-header">
 <div>
-<h2 class="modal-title" id="campaign-title"><i aria-hidden="true" data-lucide="book-open-check"></i>Choose Topic</h2>
+<h2 class="modal-title" id="campaign-title"><i aria-hidden="true" data-lucide="book-open-check"></i><span id="campaign-title-text">Choose Topic</span></h2>
 <p id="topic-area-description" style="font-size:.875rem;color:var(--text-muted);margin-top:.25rem;">The main undergraduate learning path. Start here.</p>
 </div>
 <button aria-label="Close campaign menu" class="btn btn-icon" id="close-campaign-btn" type="button">
@@ -2315,6 +2425,7 @@ html[data-theme] :is(.theme-toggle-btn.active,.app-theme-segment[aria-pressed="t
 <button class="btn btn-outline" id="topic-core" type="button"><i aria-hidden="true" data-lucide="graduation-cap"></i>Core curriculum</button>
 <button class="btn btn-outline" id="topic-extra" type="button"><i aria-hidden="true" data-lucide="sparkles"></i>Extra practice</button>
 <button class="btn btn-outline" id="topic-further" type="button"><i aria-hidden="true" data-lucide="rocket"></i>Further R</button>
+<button class="btn btn-outline" id="topic-commands" type="button"><i aria-hidden="true" data-lucide="layers-3"></i>Command cards</button>
 </div>
 <p class="topic-coverflow-help"><i aria-hidden="true" data-lucide="mouse-pointer-2"></i> Flick with the mouse, click a side card, or use ← → to browse.</p>
 <div aria-label="Quiz topics. Use left and right arrow keys to browse." class="topic-coverflow-stage" id="campaign-grid" tabindex="0">
@@ -2325,6 +2436,21 @@ html[data-theme] :is(.theme-toggle-btn.active,.app-theme-segment[aria-pressed="t
 <span aria-live="polite" class="topic-coverflow-status" id="topic-coverflow-status" role="status"></span>
 <button aria-label="Next topic" class="btn btn-outline btn-icon" id="topic-coverflow-next" title="Next topic" type="button"><i aria-hidden="true" data-lucide="chevron-right"></i></button>
 </div>
+<section aria-label="R command flipcards" id="command-card-panel" hidden>
+<div class="command-card-toolbar">
+<label class="command-card-topic-filter" for="command-card-topic-select">Topic
+<select id="command-card-topic-select"><option value="">All topics</option></select>
+</label>
+<input aria-label="Search command cards" class="command-card-search" id="command-card-search" placeholder="Search commands or topics" type="search" autocomplete="off" spellcheck="false" />
+</div>
+<p class="command-card-count" id="command-card-count"></p>
+<div class="command-card-stage" id="command-card-stage"></div>
+<div class="command-card-controls" aria-label="Browse command cards">
+<button class="btn btn-outline" id="command-card-prev" type="button"><i aria-hidden="true" data-lucide="chevron-left"></i>Previous</button>
+<span class="command-card-position" id="command-card-position" role="status" aria-live="polite"></span>
+<button class="btn btn-outline" id="command-card-next" type="button">Next<i aria-hidden="true" data-lucide="chevron-right"></i></button>
+</div>
+</section>
 </div>
 </div>
 </div>
@@ -7158,7 +7284,7 @@ function moveTopicCoverFlow(step, focusCard = false) {
 
 function topicCoverFlowVisible() {
   const modal = document.getElementById('campaign-modal');
-  return !!(modal && !modal.classList.contains('hidden') && modal.getAttribute('aria-hidden') !== 'true');
+  return !!(modal && window.Practice?.area !== 'commands' && !modal.classList.contains('hidden') && modal.getAttribute('aria-hidden') !== 'true');
 }
 
 function handleTopicCoverFlowArrowKeys(event) {
@@ -7225,18 +7351,204 @@ function bindTopicCoverFlowControls() {
   });
 }
 
+const commandCardDescriptions = {
+  c: 'Combines values into a vector.', print: 'Displays a value in the R console.', length: 'Counts the elements in an object.',
+  factor: 'Treats values as categories.', head: 'Shows the first rows or values.', str: 'Shows an object’s structure and variable types.',
+  names: 'Lists or changes an object’s names.', colnames: 'Lists or changes column names.', dim: 'Returns the number of rows and columns.',
+  nrow: 'Counts rows in a table.', ncol: 'Counts columns in a table.', class: 'Shows how R represents an object.',
+  levels: 'Lists the categories of a factor.', 'is.na': 'Marks values that are missing.', 'na.omit': 'Removes rows with missing values.',
+  'complete.cases': 'Marks rows with no missing values.', subset: 'Selects rows that meet a condition.',
+  order: 'Returns positions that sort values.', sort: 'Returns values in sorted order.', merge: 'Joins tables by matching columns.',
+  rbind: 'Stacks rows from compatible objects.', cbind: 'Places compatible objects side by side.',
+  tapply: 'Applies a summary separately to each group.', aggregate: 'Summarises values by group.',
+  mean: 'Calculates an average.', median: 'Finds the middle value.', sd: 'Calculates standard deviation.',
+  var: 'Calculates variance.', min: 'Finds the smallest value.', max: 'Finds the largest value.',
+  sum: 'Adds values together.', summary: 'Shows a compact summary of an object.', quantile: 'Finds values at selected percentiles.',
+  table: 'Counts values or combinations of categories.', 'prop.table': 'Turns table counts into proportions.',
+  'chisq.test': 'Tests whether categorical variables are associated.', aov: 'Fits an analysis of variance model.',
+  TukeyHSD: 'Compares group pairs after an ANOVA.', lm: 'Fits a linear regression model.',
+  confint: 'Calculates confidence intervals for model parameters.', predict: 'Uses a fitted model to make predictions.',
+  cor: 'Measures association between two numeric variables.', 'cor.test': 'Tests evidence for a correlation.',
+  't.test': 'Compares means using a t-test.', leveneTest: 'Checks whether groups have similar variances.',
+  'wilcox.test': 'Compares groups using ranks.', 'kruskal.test': 'Compares several independent groups using ranks.',
+  plot: 'Draws a plot of data.', hist: 'Draws a histogram of one numeric variable.',
+  boxplot: 'Shows a distribution and its spread, often by group.', barplot: 'Draws bars for values or category counts.',
+  'data.frame': 'Creates a table whose columns can have different types.', list: 'Collects objects in one container.',
+  matrix: 'Creates a rectangular array of one data type.', seq: 'Generates a sequence of values.',
+  unique: 'Returns distinct values.', duplicated: 'Marks values that have appeared earlier.',
+  'read.csv': 'Reads a CSV file into a data frame.', 'write.csv': 'Writes a data frame to a CSV file.',
+  ifelse: 'Chooses a value for each element based on a condition.', paste: 'Joins values into text.',
+  'group_by': 'Groups rows so later operations work within each group.',
+  summarise: 'Returns summary values, optionally for each group.', summarize: 'Returns summary values, optionally for each group.',
+  mutate: 'Creates or changes columns in a data frame.', filter: 'Keeps rows that meet a condition.',
+  select: 'Keeps chosen columns.', arrange: 'Orders rows by one or more columns.',
+  count: 'Counts rows in each category.', across: 'Applies a function to selected columns.',
+  where: 'Selects columns by a condition on each column.', 'is.numeric': 'Checks whether a value or column is numeric.',
+  scale: 'Centres and scales numeric values.', map: 'Applies a function to each element of a list.',
+  nest: 'Packs groups of rows into smaller tables.', 'str_to_lower': 'Converts text to lowercase.',
+  fct_reorder: 'Reorders factor categories using another variable.'
+};
+
+function commandCardExample(level) {
+  if (level.answer) return String(level.answer).trim();
+  const finalHint = Array.isArray(level.hintSteps) ? String(level.hintSteps.at(-1) || '') : '';
+  const answer = finalHint.match(/^(?:the (?:exact )?(?:answer|syntax) is|answer|solution):\s*([\s\S]+)/i);
+  return (answer?.[1] || level.syntax || level.workedExample || '').trim();
+}
+
+function commandCardHeading(level, code) {
+  const title = String(level.title || '').trim();
+  if (title && !/^(Recall|Fill the gap|Debugging|Analysis . R|Mini-analysis|Choose the command)$/i.test(title)) return title;
+  const call = code.match(/\b((?:[A-Za-z][\w.]*::)?[A-Za-z.][\w.]*)\s*\(/);
+  if (call) return call[1].split('::').pop() + '()';
+  if (code.includes('<-')) return 'Assignment';
+  if (code.includes('[')) return 'Indexing';
+  if (code.includes('$')) return 'Column access';
+  return 'R command';
+}
+
+function commandCardDescription(level, code, fromWorkflow) {
+  const call = code.match(/\b((?:[A-Za-z][\w.]*::)?[A-Za-z.][\w.]*)\s*\(/);
+  const functionName = call?.[1].split('::').pop();
+  const explanation = fromWorkflow && functionName && commandCardDescriptions[functionName]
+    ? commandCardDescriptions[functionName]
+    : level.analysis || referenceExplanations[level.id]?.explanation || level.successExplanation || commandCardDescriptions[functionName] || level.desc || '';
+  const firstSentence = String(explanation).replace(/\s+/g, ' ').trim().split(/\.\s+(?=[A-Z])/)[0];
+  return firstSentence.length > 180 ? firstSentence.slice(0, 177).replace(/\s+\S*$/, '') + '…' : firstSentence;
+}
+
+let commandCardCatalogCache;
+function commandCardCatalog() {
+  if (commandCardCatalogCache) return commandCardCatalogCache;
+  const cards = [];
+  const seen = new Set();
+  const areaOrder = { core: 0, extra: 1, stretch: 2, specialist: 3 };
+  const orderedCampaigns = Object.values(campaigns)
+    .filter(campaign => Array.isArray(campaign.levels) && campaign.levels.length)
+    .sort((a, b) => (areaOrder[a.area] ?? 4) - (areaOrder[b.area] ?? 4));
+  for (const campaign of orderedCampaigns) {
+    for (const level of campaign.levels || []) {
+      const example = commandCardExample(level);
+      if (!example) continue;
+      const statements = example.split(/\r?\n+/).map(part => part.trim()).filter(Boolean);
+      for (const statement of statements) {
+        const description = commandCardDescription(level, statement, statements.length > 1);
+        const key = `${campaign.id}\u0000${statement.replace(/\s+/g, ' ')}\u0000${description}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        cards.push({
+          topicId: campaign.id,
+          topic: campaign.title || 'Practice',
+          area: campaign.area,
+          title: commandCardHeading(level, statement),
+          example: statement,
+          description,
+          searchText: `${level.title || ''} ${level.desc || ''}`.toLowerCase()
+        });
+      }
+    }
+  }
+  commandCardCatalogCache = cards;
+  return commandCardCatalogCache;
+}
+
+function populateCommandCardTopics() {
+  const select = document.getElementById('command-card-topic-select');
+  if (!select || select.dataset.ready) return;
+  const dataManagement = document.createElement('option');
+  dataManagement.value = 'data-management';
+  dataManagement.textContent = 'Data management (Core + Extra)';
+  select.appendChild(dataManagement);
+  const areaNames = { core: 'Core', extra: 'Extra', stretch: 'Further', specialist: 'Further' };
+  const topics = new Map(commandCardCatalog().map(card => [card.topicId, card]));
+  for (const card of topics.values()) {
+    const option = document.createElement('option');
+    option.value = card.topicId;
+    option.textContent = `${areaNames[card.area] || 'Practice'} · ${card.topic}`;
+    select.appendChild(option);
+  }
+  select.dataset.ready = 'true';
+}
+
+let commandCardIndex = 0;
+function renderCommandCards(resetIndex = false) {
+  populateCommandCardTopics();
+  const stage = document.getElementById('command-card-stage');
+  const count = document.getElementById('command-card-count');
+  const position = document.getElementById('command-card-position');
+  const previous = document.getElementById('command-card-prev');
+  const next = document.getElementById('command-card-next');
+  if (!stage) return;
+  const query = document.getElementById('command-card-search')?.value.trim().toLowerCase() || '';
+  const topic = document.getElementById('command-card-topic-select')?.value || '';
+  const cards = commandCardCatalog().filter(card => {
+    const inTopic = !topic || (topic === 'data-management'
+      ? ['managing', 'dataManipulation'].includes(card.topicId)
+      : card.topicId === topic);
+    return inTopic && (!query || `${card.title} ${card.example} ${card.description} ${card.topic} ${card.searchText}`.toLowerCase().includes(query));
+  });
+  if (resetIndex) commandCardIndex = 0;
+  commandCardIndex = Math.max(0, Math.min(commandCardIndex, cards.length - 1));
+  if (count) count.textContent = `${cards.length} card${cards.length === 1 ? '' : 's'} · Click the current card to flip it`;
+  if (position) position.textContent = cards.length ? `${commandCardIndex + 1} of ${cards.length}` : '0 of 0';
+  if (previous) previous.disabled = commandCardIndex === 0;
+  if (next) next.disabled = !cards.length || commandCardIndex === cards.length - 1;
+  const card = cards[commandCardIndex];
+  stage.innerHTML = card ? `
+    <button class="command-flipcard" type="button" aria-pressed="false" data-flipped="false">
+      <span class="command-flipcard-face command-flipcard-front">
+        <span class="command-card-topic">${escapeHtml(card.topic)}</span>
+        <span class="command-card-name">${escapeHtml(card.title)}</span>
+        <code class="command-card-example">${escapeHtml(card.example)}</code>
+        <span class="command-card-prompt">Click to see what it does</span>
+      </span>
+      <span class="command-flipcard-face command-flipcard-back" aria-hidden="true">
+        <span class="command-card-name">${escapeHtml(card.title)}</span>
+        <span class="command-card-description">${escapeHtml(card.description)}</span>
+        <span class="command-card-prompt">Click to see the command</span>
+      </span>
+    </button>` : '<p class="command-card-empty">No command cards match this topic or search.</p>';
+  const button = stage.querySelector('.command-flipcard');
+  if (button) {
+    button.setAttribute('aria-label', `Show meaning of ${card.title}`);
+    button.addEventListener('click', () => {
+      const flipped = button.dataset.flipped !== 'true';
+      button.dataset.flipped = String(flipped);
+      button.setAttribute('aria-pressed', String(flipped));
+      button.querySelector('.command-flipcard-front').setAttribute('aria-hidden', String(flipped));
+      button.querySelector('.command-flipcard-back').setAttribute('aria-hidden', String(!flipped));
+      button.setAttribute('aria-label', `${flipped ? 'Show command for' : 'Show meaning of'} ${card.title}`);
+    });
+  }
+}
+
+function moveCommandCard(step) {
+  commandCardIndex += step;
+  renderCommandCards();
+  document.getElementById('command-card-stage')?.scrollIntoView({ block: 'nearest' });
+}
+
 function renderCampaignMenu() {
   if (!els.campaignGrid) return;
   els.campaignGrid.innerHTML = '';
 
   const area = window.Practice?.area || 'core';
+  const showingCommands = area === 'commands';
+  els.campaignGrid.hidden = showingCommands;
+  document.querySelector('#campaign-modal .topic-coverflow-help').hidden = showingCommands;
+  document.querySelector('#campaign-modal .topic-coverflow-controls').hidden = showingCommands;
+  document.getElementById('command-card-panel').hidden = !showingCommands;
+  document.getElementById('campaign-title-text').textContent = showingCommands ? 'Command cards' : 'Choose Topic';
   const description = document.getElementById('topic-area-description');
-  if (description) description.textContent = area === 'core'
+  if (description) description.textContent = showingCommands
+    ? 'Flip a card to see what an R command does. Search by command or topic.'
+    : area === 'core'
     ? 'The main undergraduate learning path. Start here.'
     : area === 'extra'
       ? 'More examples of familiar core skills, including tidyverse alternatives.'
       : 'Optional extensions beyond the core path, including broader R skills and specialist applications.';
-  ['core','extra','further'].forEach(id => document.getElementById('topic-'+id)?.setAttribute('aria-pressed', String(area === id)));
+  ['core','extra','further','commands'].forEach(id => document.getElementById('topic-'+id)?.setAttribute('aria-pressed', String(area === id)));
+  if (showingCommands) { renderCommandCards(); return; }
 
   const sectionLabels = {
     core: ['Core curriculum', 'graduation-cap'],
@@ -8263,6 +8575,10 @@ console.log('%c📦 Section 5 loaded successfully', 'color: #10b981; font-weight
       state.isModalOpen = true;
       Timer.pause();
       window.requestAnimationFrame(() => {
+        if (window.Practice?.area === 'commands') {
+          document.getElementById('command-card-search')?.focus({ preventScroll: true });
+          return;
+        }
         const activeCard = getTopicCoverFlowCards()[topicCoverFlowIndex];
         (activeCard || document.getElementById('campaign-grid'))?.focus?.({ preventScroll: true });
       });
@@ -10440,6 +10756,11 @@ els.resetAllBtn?.addEventListener('click', resetAllProgress);
       document.getElementById('topic-core').addEventListener('click',()=>{this.area='core';topicCoverFlowIndex=0;renderCampaignMenu();});
       document.getElementById('topic-extra').addEventListener('click',()=>{this.area='extra';topicCoverFlowIndex=0;renderCampaignMenu();});
       document.getElementById('topic-further').addEventListener('click',()=>{this.area='further';topicCoverFlowIndex=0;renderCampaignMenu();});
+      document.getElementById('topic-commands').addEventListener('click',()=>{this.area='commands';renderCampaignMenu();document.getElementById('command-card-search')?.focus({preventScroll:true});});
+      document.getElementById('command-card-search').addEventListener('input',()=>renderCommandCards(true));
+      document.getElementById('command-card-topic-select').addEventListener('change',()=>renderCommandCards(true));
+      document.getElementById('command-card-prev').addEventListener('click',()=>moveCommandCard(-1));
+      document.getElementById('command-card-next').addEventListener('click',()=>moveCommandCard(1));
       this.refresh();
     }
   };
